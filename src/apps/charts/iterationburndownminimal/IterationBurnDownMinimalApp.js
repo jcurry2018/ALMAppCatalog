@@ -29,6 +29,7 @@
             },
 
             launch: function () {
+                console.log("IterationBurnDownMinimalApp");
                 this.callParent(arguments);
                 this._onScopeObjectLoaded(this.getContext().getTimeboxScope().record);
             },
