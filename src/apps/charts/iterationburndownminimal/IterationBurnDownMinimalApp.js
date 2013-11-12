@@ -24,13 +24,11 @@
             scopeObject: undefined,
 
             onScopeChange: function (scope) {
-                //this._destroyChart();
                 this._onScopeObjectLoaded(scope.getRecord());
             },
 
             launch: function () {
                 this.callParent(arguments);
-                this._onScopeObjectLoaded(this.getContext().getTimeboxScope().record);
             },
 
             _onScopeObjectLoaded: function (record) {
