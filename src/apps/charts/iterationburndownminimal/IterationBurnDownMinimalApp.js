@@ -65,7 +65,7 @@
 
                 return function () {
                     self.fireEvent(event);
-                    if ('function' === typeof func) {
+                    if (_.isFunction(func)) {
                         func.apply(this);
                     }
                 };
