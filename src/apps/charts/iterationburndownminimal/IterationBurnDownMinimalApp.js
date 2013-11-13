@@ -20,6 +20,19 @@
                 }
             ],
 
+            clientMetrics: [
+            {
+                beginMethod: '_getIterationData',
+                endMethod: '_createChartDatafromXML',
+                description: 'IterationBurnDownMinimalApp - call A0 endpoint to get data'
+            },
+            {
+                beginEvent: 'updateBeforeRender',
+                endEvent: 'updateAfterRender',
+                description: 'IterationBurnDownMinimalApp - chart rendering time'
+            }
+            ],
+
             scopeType: "iteration",
             scopeObject: undefined,
 
@@ -30,7 +43,39 @@
 
             launch: function () {
                 this.callParent(arguments);
+                this._setupEvents();
+                this._setupUpdateBeforeRender();
                 this._onScopeObjectLoaded(this.getContext().getTimeboxScope().record);
+            },
+
+            _setupUpdateBeforeRender: function () {
+                this.chartComponentConfig.updateBeforeRender = this._setupDynamicHooksWithEvents(
+                    this.chartComponentConfig.updateBeforeRender,
+                    'updateBeforeRender'
+                );
+
+                this.chartComponentConfig.updateAfterRender = this._setupDynamicHooksWithEvents(
+                    this.chartComponentConfig.updateAfterRender,
+                    'updateAfterRender'
+                );
+            },
+
+            _setupDynamicHooksWithEvents: function (func, event) {
+                var self = this;
+
+                return function () {
+                    self.fireEvent(event);
+                    if ('function' === typeof func) {
+                        func.apply(this);
+                    }
+                };
+            },
+
+            _setupEvents: function () {
+                this.addEvents(
+                    'updateBeforeRender',
+                    'updateAfterRender'
+                );
             },
 
             _onScopeObjectLoaded: function (record) {
