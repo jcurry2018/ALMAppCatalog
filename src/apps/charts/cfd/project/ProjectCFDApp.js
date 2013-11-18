@@ -101,7 +101,33 @@
 
         loadChart: function() {
             this.add(this._buildChartAppConfig());
+            this.down('rallychart').on('snapshotsAggregated', this._onSnapshotDataReady, this);
             this._publishComponentReady();
+        },
+
+        _adjustFinalStateData: function (series) {
+            var stateField = this.getSetting('stateFieldName');
+            var i, j, startVal, finalStates;
+            if (stateField === 'ScheduleState') {
+                finalStates = [ 'Accepted', 'Released' ];
+            } else {
+                finalStates = [ this.getSetting('stateFieldValues').split(',').pop() ];
+            }
+            for (i=0;i<series.length; i++) {
+                if (finalStates.indexOf(series[i].name) >= 0) {
+                    startVal = series[i].data[0];
+                    for (j=0; j < series[i].data.length; j++) {
+                        series[i].data[j] -= startVal;
+                        if(series[i].data[j] < 0) {
+                           series[i].data[j] = 0;
+                        }
+                    }
+                }
+            }
+        },
+
+        _onSnapshotDataReady: function (chart) {
+            this._adjustFinalStateData(chart.chartData.series);
         },
 
         _buildChartAppConfig: function() {
@@ -178,22 +204,15 @@
             var find = {
                 '_TypeHierarchy': { '$in' : [ -51038, -51006 ] },
                 'Children': null,
-                "$or" :
+                '$or' :
                     [
-                        { '_ValidFrom': { "$gt": this._buildChartStoreConfigValidFrom() } },
+                        { '_ValidFrom': { '$gt': this._buildChartStoreConfigValidFrom() } },
                         {
-                            '_ValidTo'  : { "$gt" : this._buildChartStoreConfigValidFrom() },
-                            '_ValidFrom': { "$lt": this._buildChartStoreConfigValidFrom() }
+                            '_ValidTo'  : { '$gt' : this._buildChartStoreConfigValidFrom() },
+                            '_ValidFrom': { '$lt': this._buildChartStoreConfigValidFrom() }
                         }
                     ]
             };
-            var stateField = this.getSetting('stateFieldName');
-
-            if(stateField === 'ScheduleState') {
-                find.$or[1][stateField] = { "$lt": "Accepted" } ;
-            } else {
-                find.$or[1][stateField] = { "$ne": this.getSetting('stateFieldValues').split(',').pop() } ;
-            }
 
             if (this.projectScopeDown) {
                 find._ProjectHierarchy = this.project.ObjectID;
