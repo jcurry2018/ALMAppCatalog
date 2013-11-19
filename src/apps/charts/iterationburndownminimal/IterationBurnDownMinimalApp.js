@@ -41,16 +41,16 @@
         ],
 
         clientMetrics: [
-            {
-                beginMethod: '_getIterationData',
-                endMethod: '_createChartDatafromXML',
-                description: 'IterationBurnDownMinimalApp - call A0 endpoint to get data'
-            },
-            {
-                beginEvent: 'updateBeforeRender',
-                endEvent: 'updateAfterRender',
-                description: 'IterationBurnDownMinimalApp - chart rendering time'
-            }
+                    {
+                        beginMethod: '_getIterationData',
+                        endMethod: '_createChartDatafromXML',
+                        description: 'IterationBurnDownMinimalApp - call A0 endpoint to get data'
+                        },
+                    {
+                        beginEvent: 'updateBeforeRender',
+                        endEvent: 'updateAfterRender',
+                        description: 'IterationBurnDownMinimalApp - chart rendering time'
+                        }
         ],
 
         scopeType: "iteration",
