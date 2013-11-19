@@ -6,6 +6,7 @@
         config: {
             width: '75%',
             height: '14px',
+            isClickable: true,
             percentFullColors: {
                 blue: '#35B2E4 ',
                 green: '#8AC651',

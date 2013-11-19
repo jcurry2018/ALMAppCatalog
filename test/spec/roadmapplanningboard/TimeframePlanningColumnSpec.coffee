@@ -10,7 +10,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
   helpers
     createColumn: (config) ->
       @column = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
-        _.extend
+        Ext.merge {},
           contentCell: 'testDiv'
           headerCell: 'testDiv'
           displayValue: 'My column'
@@ -20,6 +20,10 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           planRecord: @planRecord
           ownerCardboard:
             showTheme: true
+          editPermissions:
+            capacityRanges: true
+            theme: true
+            timeframeDates: true
           columnHeaderConfig:
             editable: true
             record: @timeframeRecord
@@ -49,14 +53,13 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
     @featureStoreFixture = Deft.Injector.resolve 'featureStore'
-    @title = "Bogus Title for Test"
 
   afterEach ->
     Deft.Injector.reset()
+    @column.destroy()
 
   describe 'timeframe column', ->
     beforeEach ->
-
       @createTimeframeRecord()
       @createPlanRecord
         lowCapacity: 22
@@ -113,7 +116,6 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       expect(headerTplData['progressBarHtml']).toBeTruthy()
 
   describe '#getStoreFilter', ->
-
     beforeEach ->
       @createTimeframeRecord()
 
@@ -126,7 +128,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
       expect(this.column.getStoreFilter()).toEqual []
 
-  describe 'when rendered', ->
+  describe 'progress bar', ->
     beforeEach ->
       @createTimeframeRecord()
       @createPlanRecord()
@@ -134,6 +136,91 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
     afterEach ->
       @column.destroy()
 
-    it 'should have a themeHeader', ->
+    it 'should display a popover when clicked if editing is allowed', ->
+      @createColumn()
+      expect(!!@column.popover).toBe false
+      @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
+        expect(!!@column.popover).toBe true
+
+    it 'should not display a popover when clicked if editing is not allowed', ->
+      @createColumn
+        editPermissions:
+          capacityRanges: false
+
+      expect(@column.popover).toBeUndefined()
+      @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
+        expect(!!@column.popover).toBe false
+
+  describe 'theme header', ->
+    beforeEach ->
+      @createTimeframeRecord()
+      @createPlanRecord()
+
+    afterEach ->
+      @column.destroy()
+
+    it 'should render a single theme header', ->
       @createColumn()
       expect(@column.getColumnHeader().query('roadmapthemeheader').length).toBe 1
+
+    it 'should have an editable theme header', ->
+      @createColumn()
+      theme = @column.getColumnHeader().query('roadmapthemeheader')[0]
+      @click(theme.getEl()).then =>
+        expect(!!theme.getEl().down('textarea')).toBe true
+
+    it 'should have an uneditable theme header', ->
+      @createColumn
+        editPermissions:
+          theme: false
+      theme = @column.getColumnHeader().query('roadmapthemeheader')[0]
+      @click(theme.getEl()).then =>
+        expect(!!theme.getEl().down('textarea')).toBe false
+
+  describe 'title header', ->
+    beforeEach ->
+      @createPlanRecord()
+      @createTimeframeRecord()
+
+    afterEach ->
+      @column.destroy()
+
+    it 'should have an editable title', ->
+      @createColumn()
+
+      title = @column.getHeaderTitle().down().getEl()
+
+      @click(title).then =>
+        expect(!!title.down('input')).toBe true
+
+    it 'should have an uneditable title', ->
+      @createColumn
+        columnHeaderConfig:
+          editable: false
+
+      title = @column.getHeaderTitle().down().getEl()
+
+      @click(title).then =>
+        expect(!!title.down('input')).toBe false
+
+  describe 'timeframe dates', ->
+    beforeEach ->
+      @createPlanRecord()
+      @createTimeframeRecord()
+
+    afterEach ->
+      @column.destroy()
+
+    it 'should have an editable timeframe date', ->
+      @createColumn()
+      dateRange = @column.dateRange.getEl()
+      @click(dateRange).then =>
+        expect(!!@column.timeframePopover).toBe true
+
+    it 'should have an uneditable timeframe date', ->
+      @createColumn
+        editPermissions:
+          timeframeDates: false
+      dateRange = @column.dateRange.getEl()
+      @click(dateRange).then =>
+        expect(!!@column.timeframePopover).toBe false

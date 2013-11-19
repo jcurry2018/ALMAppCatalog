@@ -1,4 +1,4 @@
-(function() {
+(function () {
     var Ext = window.Ext4 || window.Ext;
 
     /**
@@ -43,7 +43,9 @@
             var oldValue = record.modified[fieldName];
             var newValue = record.get(fieldName);
 
-            if (newValue.length > oldValue.length) {
+            if (newValue.length === oldValue.length) {
+                Ext.Error.raise('Attempting to update a collection where nothing has changed');
+            } else if (newValue.length > oldValue.length) {
                 // make sure we're only adding 1 relationship
                 if (newValue.length - oldValue.length > 1) {
                     Ext.Error.raise('Cannot add more than one relationship at a time');

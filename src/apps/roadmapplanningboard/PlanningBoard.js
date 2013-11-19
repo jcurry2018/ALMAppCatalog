@@ -6,7 +6,7 @@
         alias: 'widget.roadmapplanningboard',
 
         inject: ['timelineStore', 'timeframeStore', 'planStore', 'roadmapStore'],
-        
+
         requires: [
             'Rally.data.util.PortfolioItemHelper',
             'Rally.ui.cardboard.plugin.FixedHeader',
@@ -14,11 +14,12 @@
             'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
             'Rally.apps.roadmapplanningboard.BacklogBoardColumn'
         ],
-        
+
         config: {
             roadmapId: null,
+            isAdmin: false,
             cardConfig: {
-                fields: ['FormattedID', 'Owner','Name', 'PreliminaryEstimate'],
+                fields: ['FormattedID', 'Owner', 'Name', 'PreliminaryEstimate'],
                 skipDefaultFields: true
             },
             ddGroup: 'planningBoard',
@@ -45,6 +46,11 @@
 
         _roadmap: null,
 
+        initComponent: function () {
+            this.callParent(arguments);
+            this._roadmap = this.roadmapStore.getById(this.roadmapId);
+        },
+
         /**
          * @cfg {Boolean}
          * Toggle whether the theme is expanded or collapsed
@@ -53,58 +59,46 @@
 
         cls: 'roadmap-board cardboard',
 
-        _retrieveModels: function (callback) {
-            if (this.columns && this.columns.length > 0) {
-                success.call(this);
-            } else {
-                this._roadmap = this.roadmapStore.getById(this.roadmapId);
+        shouldRetrieveModels: function () {
+            return !this.columns || this.columns.length === 0;
+        },
 
-                this._retrieveLowestLevelPI(function(record) {
-                    Rally.data.ModelFactory.getModels({
-                        types: [record.get('TypePath')],
-                        context: this.context,
-                        success: function(models) {
-                            this.models = _.values(models);
-                            this.timelineStore.load({
-                                callback: function (records, operation, success) {
-                                    this.timeline = this.timelineStore.first();
-                                    this.planStore.load({
-                                        callback: function(records, operation, success) {
-                                            if (success) {
-                                                this.timeframeStore.load({
-                                                    callback: function(records, operation, success) {
-                                                        if (success) {
-                                                            this.buildColumnsFromStore(this.timeframeStore);
-                                                            callback.call(this);
-                                                        }
-                                                    },
-                                                    params: {
-                                                        timeline: {
-                                                            id: this.timeline.getId()
-                                                        }
-                                                    },
-                                                    requester: this,
-                                                    scope: this
-                                                });
-                                            }
-                                        },
-                                        params: {
-                                            roadmap: {
-                                                id: this.roadmapId
-                                            }
-                                        },
-                                        reqester: this,
-                                        scope: this
-                                    });
-                                },
-                                requester: this,
-                                scope: this
-                            });
+        onModelsRetrieved: function (callback) {
+            this.timelineStore.load({
+                callback: function (records, operation, success) {
+                    this.timeline = this.timelineStore.first();
+                    this.planStore.load({
+                        callback: function (records, operation, success) {
+                            if (success) {
+                                this.timeframeStore.load({
+                                    callback: function (records, operation, success) {
+                                        if (success) {
+                                            this.buildColumnsFromStore(this.timeframeStore);
+                                            callback.call(this);
+                                        }
+                                    },
+                                    params: {
+                                        timeline: {
+                                            id: this.timeline.getId()
+                                        }
+                                    },
+                                    requester: this,
+                                    scope: this
+                                });
+                            }
                         },
+                        params: {
+                            roadmap: {
+                                id: this.roadmapId
+                            }
+                        },
+                        reqester: this,
                         scope: this
                     });
-                });
-            }
+                },
+                requester: this,
+                scope: this
+            });
         },
 
         /**
@@ -113,14 +107,6 @@
         renderColumns: function () {
             this.callParent(arguments);
             this.drawThemeToggle();
-        },
-
-        _retrieveLowestLevelPI: function(callback) {
-            Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
-                defaultToLowest: true,
-                success: callback,
-                scope: this
-            });
         },
 
         /**
@@ -251,7 +237,7 @@
             this.callParent(arguments);
         },
 
-        _destroyThemeButtons: function() {
+        _destroyThemeButtons: function () {
             if (this.themeCollapseButton && this.themeExpandButton) {
                 this.themeCollapseButton.destroy();
                 this.themeExpandButton.destroy();
@@ -259,7 +245,6 @@
         },
 
         _addColumnFromTimeframeAndPlan: function (timeframe, plan) {
-
             return {
                 xtype: 'timeframeplanningcolumn',
                 timeframeRecord: timeframe,
@@ -267,10 +252,21 @@
                 columnHeaderConfig: {
                     record: timeframe,
                     fieldToDisplay: 'name',
-                    editable: true
+                    editable: this.isAdmin
+                },
+                editPermissions: {
+                    capacityRanges: this.isAdmin,
+                    theme: this.isAdmin,
+                    // Note: Editing dates is disabled for everyone in alpha, to prevent problems with invalid date ranges
+                    timeframeDates: false
+                },
+                dropControllerConfig: {
+                    dragDropEnabled: this.isAdmin
                 },
                 isMatchingRecord: function (featureRecord) {
-                    return plan && _.find(plan.get('features'), function(feature) { return feature.id === featureRecord.getId().toString(); });
+                    return plan && _.find(plan.get('features'), function (feature) {
+                        return feature.id === featureRecord.getId().toString();
+                    });
                 }
             };
         },

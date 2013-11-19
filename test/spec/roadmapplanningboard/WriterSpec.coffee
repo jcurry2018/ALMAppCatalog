@@ -63,6 +63,14 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
 
     expect(save).toThrow 'Cannot update other fields on a record if a collection has changed'
 
+  it 'should throw an error if the collection sizes are identical', ->
+    @record.set('collectionField', [{id: 1},{id: 2}])
+
+    save = =>
+      @writer.write @createRequest [@record]
+
+    expect(save).toThrow 'Attempting to update a collection where nothing has changed'
+
   describe 'when changing data', ->
 
     beforeEach ->

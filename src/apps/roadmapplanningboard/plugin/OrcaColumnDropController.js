@@ -5,83 +5,39 @@
         extend: 'Rally.ui.cardboard.plugin.ColumnDropController',
         alias: 'plugin.orcacolumndropcontroller',
 
+        config: {
+            dragDropEnabled: true
+        },
+
         init: function (column) {
             this.callParent(arguments);
             this.cmp = column;
         },
 
-        _addDropTarget: function () {
-            var column = this.cmp;
-            this.dropTarget = Ext.create('Rally.apps.roadmapplanningboard.OrcaColumnDropTarget', this.getDndContainer(), {
-                ddGroup: column.ddGroup,
-                column: column
-            });
-            return this.dropTarget;
+        mayDrop: function (cards) {
+            return this.dragDropEnabled;
         },
 
         canDragDropCard: function (card) {
-            return true;
+            return this.mayDrop() && this.callParent(arguments);
         },
 
-        onCardDropped: function (dragData, index) {
-            var relativeRank, relativeRecord, type;
+        handleBeforeCardDroppedSave: function (options) {
+            var sourceIsBacklog = !options.sourceColumn.planRecord;
+            var destIsBacklog = !options.column.planRecord;
 
-            var card = dragData.card;
-            var record = card.getRecord();
-            var sourceColumn = dragData.column;
-            var sourceIndex = sourceColumn.findCardInfo(record).index;
-            var params = {};
-            var column = this.cmp;
-            var records = column.getRecords();
-            var backlogColumn = (!sourceColumn.planRecord && !column.planRecord);
-
-            // Do default action if this is a backlog column
-            if (backlogColumn) {
-                this.callParent(arguments);
-                return;
-            }
-
-            if (column.mayRank() && isNaN(index)) {
-                index = records.length;
-            }
-            if (records.length && column.mayRank() && (sourceColumn === column || column.enableCrossColumnRanking)) {
-                if (index === 0) {
-                    relativeRecord = records[index];
-                    relativeRank = 'rankAbove';
-                } else {
-                    relativeRecord = records[index - 1];
-                    relativeRank = 'rankBelow';
-                }
-
-                params[relativeRank] = Rally.util.Ref.getRelativeUri(relativeRecord.getUri());
-            }
-            this._addDroppedCard(sourceColumn, card, relativeRecord, relativeRank);
-            type = sourceColumn === column ? "reorder" : "move";
-
-            var options = {
-                card: card,
-                params: params,
-                record: record,
-                sourceColumn: sourceColumn,
-                sourceIndex: sourceIndex,
-                column: column,
-                records: column.getRecords(),
-                relativeRank: relativeRank,
-                relativeRecord: relativeRecord
-            };
-            if (column.fireEvent("beforecarddroppedsave", column, card, type) !== false) {
-                if (!sourceColumn.planRecord) {
-                    return this._moveOutOfBacklog(options);
-                } else if (!column.planRecord) {
-                    return this._moveIntoBacklog(options);
-                } else {
-                    return this._moveFromColumnToColumn(options);
-                }
+            if(sourceIsBacklog && destIsBacklog) {
+                return this.callParent(arguments);
+            } else if (sourceIsBacklog) {
+                return this._moveOutOfBacklog(options);
+            } else if (destIsBacklog) {
+                return this._moveIntoBacklog(options);
+            } else {
+                return this._moveFromColumnToColumn(options);
             }
         },
 
         _moveIntoBacklog: function (options) {
-
             var planRecord = options.sourceColumn.planRecord;
 
             planRecord.set('features', _.filter(planRecord.get('features'), function (feature) {
@@ -112,7 +68,6 @@
         },
 
         _moveOutOfBacklog: function (options) {
-
             var planRecord = options.column.planRecord;
 
             planRecord.set('features', planRecord.get('features').concat({
@@ -159,11 +114,8 @@
                         ref: options.record.getUri()
                     },
                     success: function () {
-                        var type;
-
-                        type = options.sourceColumn === options.column ? "reorder" : "move";
                         srcPlanRecord.dirty = false; // Make sure the record is clean
-                        return me._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, type);
+                        return me._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
                     },
                     failure: function (response, opts) {
                         return me._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
@@ -180,76 +132,6 @@
                 destinationId: destinationId,
                 roadmap: roadmap
             });
-        },
-
-        _onDropSaveSuccess: function (column, sourceColumn, card, updatedRecord, type) {
-            if (column) {
-                return column.fireEvent('aftercarddroppedsave', this, card, type);
-            }
-        },
-
-        _onDropSaveFailure: function (column, sourceColumn, record, card, sourceIndex, errorSource) {
-            if (errorSource.error && errorSource.error.errors && errorSource.error.errors.length) {
-                Rally.ui.notify.Notifier.showError({
-                    message: errorSource.error.errors[0]
-                });
-            }
-            return sourceColumn.addCard(card, sourceIndex, true);
-        },
-
-        _addDragZone: function () {
-            var column;
-
-            column = this.cmp;
-            this._dragZone = Ext.create('Ext.dd.DragZone', this.getDndContainer(), {
-                ddGroup: column.ddGroup,
-
-                onBeforeDrag: function (data, e) {
-                    var avatar;
-
-                    avatar = Ext.fly(this.dragElId);
-                    avatar.setWidth(data.targetWidth);
-                    return column.fireEvent('cardpickedup', data.card);
-                },
-                proxy: Ext.create('Ext.dd.StatusProxy', {
-                    animRepair: true,
-                    shadow: false,
-                    dropNotAllowed: "cardboard"
-                }),
-
-                getDragData: function (e) {
-                    var avatar, dragEl, sourceEl;
-
-                    dragEl = e.getTarget('.drag-handle', 10);
-                    if (dragEl) {
-                        sourceEl = e.getTarget('.rui-card', 10) || e.getTarget('.rui-card-slim', 10);
-                        avatar = sourceEl.cloneNode(true);
-                        avatar.id = Ext.id();
-                        return {
-                            targetWidth: Ext.fly(sourceEl).getWidth(),
-                            ddel: avatar,
-                            sourceEl: sourceEl,
-                            repairXY: Ext.fly(sourceEl).getXY(),
-                            card: Ext.ComponentManager.get(sourceEl.id),
-                            column: column
-                        };
-                    }
-                },
-
-                getRepairXY: function () {
-                    return this.dragData.repairXY;
-                }
-            });
-        },
-
-        destroy: function () {
-            if (this._dragZone) {
-                this._dragZone.destroy();
-                if (this._dragZone.proxy) {
-                    this._dragZone.proxy.destroy();
-                }
-            }
-            return this.callParent(arguments);
         }
     });
 

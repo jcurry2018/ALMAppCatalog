@@ -14,6 +14,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
           roadmapId: '413617ecef8623df1391fabc'
           slideDuration: 10
           renderTo: 'testDiv'
+          types: ['PortfolioItem/Feature']
         , config
 
       @waitForComponentReady(@cardboard)
@@ -40,8 +41,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
-
-    @ajax.whenQuerying('TypeDefinition').respondWith Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemFeature')
 
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith([
                         {
@@ -187,3 +186,27 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       @createCardboard(showTheme: false).then =>
         @clickExpand().then =>
           expect(@cardboard._getClickAction()).toEqual("Themes toggled from [false] to [true]")
+
+  describe 'permissions', ->
+    it 'should set editable permissions for admin', ->
+      @createCardboard(isAdmin: true).then =>
+        columns = _.where @cardboard.getColumns(), xtype: 'timeframeplanningcolumn'
+        _.each columns, (column) =>
+          expect(column.editPermissions).toEqual
+            capacityRanges: true
+            theme: true
+            timeframeDates: false
+          expect(column.dropControllerConfig.dragDropEnabled).toBe true
+          expect(column.columnHeaderConfig.editable).toBe true
+
+
+    it 'should set uneditable permissions for non-admin', ->
+      @createCardboard(isAdmin: false).then =>
+        columns = _.where @cardboard.getColumns(), xtype: 'timeframeplanningcolumn'
+        _.each columns, (column) =>
+          expect(column.editPermissions).toEqual
+            capacityRanges: false
+            theme: false
+            timeframeDates: false
+          expect(column.dropControllerConfig.dragDropEnabled).toBe false
+          expect(column.columnHeaderConfig.editable).toBe false

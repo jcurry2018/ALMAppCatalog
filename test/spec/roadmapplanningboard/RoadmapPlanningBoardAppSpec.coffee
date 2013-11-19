@@ -19,12 +19,17 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
           user: Rally.environment.getContext().getUser()
           subscription: Rally.environment.getContext().getSubscription()
 
-
       @app = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp',
         context: context
         renderTo: 'testDiv'
 
-      @waitForComponentReady @app
+      @waitForComponentReady(@app).then =>
+        @planningBoard = @app.down 'roadmapplanningboard'
+
+     createPermissionsStub: (config) ->
+       @stub Rally.environment.getContext(), 'getPermissions', ->
+         isSubscriptionAdmin: -> !!config.subAdmin
+         isWorkspaceAdmin: -> !!config.workspaceAdmin
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -38,8 +43,22 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
   it 'should render a planning board', ->
     @createApp().then =>
       roadmapId = Deft.Injector.resolve('roadmapStore').first().getId()
-      planningBoard = @app.down 'roadmapplanningboard'
-      expect(planningBoard.roadmapId).toBe roadmapId
+      expect(@planningBoard.roadmapId).toBe roadmapId
+
+  it 'should set isAdmin on planning board to true if user is a Sub Admin', ->
+    @createPermissionsStub(subAdmin: true)
+    @createApp().then =>
+      expect(@planningBoard.isAdmin).toBe true
+
+  it 'should set isAdmin on planning board to true if user is a WS Admin', ->
+    @createPermissionsStub(workspaceAdmin: true)
+    @createApp().then =>
+      expect(@planningBoard.isAdmin).toBe true
+
+  it 'should set isAdmin on planning board to false if user is not a Sub or WS Admin', ->
+    @createPermissionsStub(subAdmin: false, workspaceAdmin: false)
+    @createApp().then =>
+      expect(@planningBoard.isAdmin).toBe false
 
   describe 'Service error handling', ->
 

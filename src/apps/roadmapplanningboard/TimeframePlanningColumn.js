@@ -4,7 +4,7 @@
     Ext.define('Rally.apps.roadmapplanningboard.TimeframePlanningColumn', {
         extend: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
         alias: 'widget.timeframeplanningcolumn',
-        
+
         requires: [
             'Rally.data.QueryFilter',
             'Rally.apps.roadmapplanningboard.ThemeHeader',
@@ -12,47 +12,53 @@
             'Rally.apps.roadmapplanningboard.util.Fraction',
             'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView'
         ],
-        
+
         config: {
             startDateField: 'start',
             endDateField: 'end',
-            dateEditEnabled: false, // Note: Editing dates is disabled for alpha, to prevent problems with invalid date ranges
+            editPermissions: {
+                capacityRanges: true,
+                theme: true,
+                timeframeDates: true
+            },
             timeframeRecord: undefined,
             planRecord: undefined,
             dateFormat: 'M j',
             headerTemplate: undefined,
-            pointField: 'PreliminaryEstimate',
-            progressBarTitle: 'Edit Planned Capacity Range'
+            pointField: 'PreliminaryEstimate'
         },
-        
-        initComponent: function () {
 
+        initComponent: function () {
             this.callParent(arguments);
 
             this.on('ready', this.drawHeader, this);
             this.on('addcard', this.drawHeader, this);
             this.on('cardupdated', this.drawHeader, this);
             this.on('removecard', this.drawHeader, this);
-
             this.on('afterrender', this.onAfterRender, this);
+
             if (this.planRecord && this.planRecord.store) {
                 this.planRecord.store.on('update', function () {
-                    return this.drawHeader();
+                    this.drawHeader();
                 }, this);
             }
         },
 
         onAfterRender: function (event) {
-            this.columnHeader.getEl().on('click', this.onProgressBarClick, this, {
-                delegate: '.progress-bar-container'
-            });
-            return this.columnHeader.getEl().on('click', this.onTimeframeDatesClick, this, {
-                delegate: '.timeframeDates'
-            });
+            if (this.editPermissions.capacityRanges) {
+                this.columnHeader.getEl().on('click', this.onProgressBarClick, this, {
+                    delegate: '.progress-bar-container'
+                });
+            }
+            if (this.editPermissions.timeframeDates) {
+                this.columnHeader.getEl().on('click', this.onTimeframeDatesClick, this, {
+                    delegate: '.timeframeDates'
+                });
+            }
         },
 
         getStoreFilter: function (model) {
-            var result = _.reduce(this.planRecord.data.features, function(result, feature) {
+            var result = _.reduce(this.planRecord.data.features, function (result, feature) {
                 var filter = Ext.create('Rally.data.QueryFilter', {
                     property: 'ObjectID',
                     operator: '=',
@@ -103,18 +109,12 @@
                     }
                 }
             });
-            return this.popover;
         },
 
         onTimeframeDatesClick: function (event) {
             var _this = this;
 
-            // TODO: Remove this check or enable the flag after alpha, once we can handle changing timeframe date ranges
-            if (!this.dateEditEnabled) {
-                return;
-            }
-
-            return Ext.create('Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', {
+            this.timeframePopover = Ext.create('Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', {
                 target: Ext.get(event.target),
                 offsetFromTarget: [
                     {
@@ -139,7 +139,8 @@
                 },
                 listeners: {
                     destroy: function () {
-                        return _this._drawDateRange();
+                        _this._drawDateRange();
+                        _this.timeframePopover = null;
                     }
                 }
             });
@@ -147,11 +148,11 @@
 
         _drawDateRange: function () {
             if (this.dateRange) {
-                return this.dateRange.update(this.getDateHeaderTplData());
+                this.dateRange.update(this.getDateHeaderTplData());
             } else {
                 this.dateRange = this.getHeaderTitle().add({
                     xtype: 'component',
-                    tpl: "<div class='timeframeDates'>{formattedDate}</div>",
+                    tpl: "<div class='timeframeDates {clickableClass}' title='{titleText}'>{formattedDate}</div>",
                     data: this.getDateHeaderTplData()
                 });
             }
@@ -174,8 +175,9 @@
                 this.theme = this.getColumnHeader().add({
                     xtype: 'roadmapthemeheader',
                     record: this.planRecord,
+                    editable: this.editPermissions.theme,
                     style: {
-                        display: this.ownerCardboard.showTheme ? '': 'none' // DE18305 - using style.display instead of hidden because Ext won't render children that are hidden
+                        display: this.ownerCardboard.showTheme ? '' : 'none' // DE18305 - using style.display instead of hidden because Ext won't render children that are hidden
                     }
                 });
             }
@@ -198,13 +200,17 @@
             return {
                 progressBarHtml: this._getProgressBarHtml(fraction),
                 formattedPercent: fraction.getFormattedPercent(),
-                progressBarTitle: this.progressBarTitle
+                progressBarTitle: this._getProgressBarTitle()
             };
         },
 
         getDateHeaderTplData: function () {
+            var title = 'Date Range'
+
             return {
-                formattedDate: this._getDateRange()
+                formattedDate: this._getDateRange(),
+                titleText: this.editPermissions.timeframeDates ? 'Edit ' + title : title,
+                clickableClass: this.editPermissions.timeframeDates ? 'clickable' : ''
             };
         },
 
@@ -236,14 +242,24 @@
         },
 
         _getProgressBarHtml: function (fraction) {
-            var _ref, _ref1;
+            var progressBar = Ext.create('Rally.apps.roadmapplanningboard.PlanCapacityProgressBar', {
+                isClickable: this.editPermissions.capacityRanges
+            });
 
-            return Ext.create('Rally.apps.roadmapplanningboard.PlanCapacityProgressBar').apply({
-                low: ((_ref = this.planRecord) !== null ? _ref.get('lowCapacity') : undefined) || 0,
-                high: ((_ref1 = this.planRecord) !== null ? _ref1.get('highCapacity') : undefined) || 0,
+            var lowCapacity = this.planRecord ? this.planRecord.get('lowCapacity') : undefined;
+            var highCapacity = this.planRecord ? this.planRecord.get('highCapacity') : undefined;
+
+            return progressBar.apply({
+                low: lowCapacity || 0,
+                high: highCapacity || 0,
                 total: fraction.getNumerator(),
                 percentDone: fraction.getPercent()
             });
+        },
+
+        _getProgressBarTitle: function () {
+            var title = 'Planned Capacity Range';
+            return this.editPermissions.capacityRanges ? 'Edit ' + title : title;
         }
     });
 

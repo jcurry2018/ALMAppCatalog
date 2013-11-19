@@ -11,7 +11,7 @@
         
         requires: [
             'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController',
-            'Rally.apps.roadmapplanningboard.OrcaColumnDropTarget'
+            'Rally.ui.cardboard.ColumnDropTarget'
         ],
         
         config: {
