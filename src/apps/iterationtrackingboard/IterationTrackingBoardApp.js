@@ -99,6 +99,7 @@
             this.gridboard = this.add({
                 itemId: 'gridBoard',
                 xtype: 'rallygridboard',
+                stateId: 'iterationtracking-gridboard',
                 context: context,
                 enableToggle: context.isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE'),
                 plugins: plugins,
@@ -135,7 +136,8 @@
                         'DefectStatus',
                         'Discussion'
                     ],
-                    enableBulkEdit: context.isFeatureEnabled('EXT4_GRID_BULK_EDIT')
+                    enableBulkEdit: context.isFeatureEnabled('EXT4_GRID_BULK_EDIT'),
+                    stateEnabled: context.isFeatureEnabled('ITERATION_TRACKING_PERSISTENT_PREFERENCES')
                 },
                 addNewPluginConfig: {
                     style: {
