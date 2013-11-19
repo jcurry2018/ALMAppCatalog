@@ -31,6 +31,11 @@
             launch: function () {
                 this.callParent(arguments);
                 this._onScopeObjectLoaded(this.getContext().getTimeboxScope().record);
+                this.subscribe(this, Rally.Message.objectUpdate, this._onMessageFromObjectUpdate, this);
+            },
+
+            _onMessageFromObjectUpdate: function(message) {
+                this._onScopeObjectLoaded(this.getContext().getTimeboxScope().record);
             },
 
             _onScopeObjectLoaded: function (record) {
