@@ -75,7 +75,15 @@
                 plugins.push({
                     ptype: 'rallygridboardfiltercontrol',
                     filterControlConfig: {
-                        cls: 'secondary small button picto gridboard-filter-control'
+                        cls: 'secondary small button picto gridboard-filter-control',
+                        stateful: true,
+                        stateId: context.getScopedStateId('iteration-tracking-filter-button'),
+                        items: [
+                            {
+                                xtype: 'rallymodelfilter',
+                                models: compositeModel.models
+                            }
+                        ]
                     }
                 });
             }
@@ -99,8 +107,8 @@
 
             var gridConfig = this._getGridConfig();
             if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
-
                 _.pull(gridConfig.columnCfgs, 'FormattedID');
+
                 Ext.apply(gridConfig, {
                     xtype: 'rallytreegrid',
                     model: treeGridModel,
