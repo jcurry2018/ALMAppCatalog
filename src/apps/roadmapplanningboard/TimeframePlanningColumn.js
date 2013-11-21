@@ -205,7 +205,7 @@
         },
 
         getDateHeaderTplData: function () {
-            var title = 'Date Range'
+            var title = 'Date Range';
 
             return {
                 formattedDate: this._getDateRange(),
