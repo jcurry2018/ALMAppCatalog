@@ -135,6 +135,9 @@
 
         _moveFromColumnToColumn: function (options) {
 
+            var me = this;
+            var uuidMapper = Deft.Injector.resolve('uuidMapper');
+            var context = this.cmp.context || Rally.environment.getContext();
             var srcPlanRecord = options.sourceColumn.planRecord;
             var destPlanRecord = options.column.planRecord;
 
@@ -146,26 +149,28 @@
                 ref: options.record.getUri()
             });
 
-            return Ext.Ajax.request({
-                method: 'POST',
-                withCredentials: true,
-                url: this._constructUrl(srcPlanRecord.get('roadmap'), srcPlanRecord.getId(), destPlanRecord.getId()),
-                jsonData: {
-                    id: options.record.getId() + '',
-                    ref: options.record.getUri()
-                },
-                success: function () {
-                    var type;
+            uuidMapper.getUuid(context.getWorkspace()).then(function (uuid) {
+                Ext.Ajax.request({
+                    method: 'POST',
+                    withCredentials: true,
+                    url: me._constructUrl(srcPlanRecord.get('roadmap'), srcPlanRecord.getId(), destPlanRecord.getId()),
+                    jsonData: {
+                        id: options.record.getId() + '',
+                        ref: options.record.getUri()
+                    },
+                    success: function () {
+                        var type;
 
-                    type = options.sourceColumn === options.column ? "reorder" : "move";
-                    srcPlanRecord.dirty = false; // Make sure the record is clean
-                    return this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, type);
-                },
-                failure: function (response, opts) {
-                    return this._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
-                },
-                scope: this,
-                params: options.params
+                        type = options.sourceColumn === options.column ? "reorder" : "move";
+                        srcPlanRecord.dirty = false; // Make sure the record is clean
+                        return me._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, type);
+                    },
+                    failure: function (response, opts) {
+                        return me._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
+                    },
+                    scope: me,
+                    params: Ext.apply({ workspace: uuid }, options.params)
+                });
             });
         },
 
