@@ -9,6 +9,7 @@
             chartComponentConfig: {
                 xtype: "rallychart",
                 itemId: "iterationburndownminimalchart",
+                suppressClientMetrics: true, /* keeps rallychart::lookback query time from displaying in client metrics */
 
                 chartColors: ["#005eb8", "#666666", "#8dc63f" ],
 
