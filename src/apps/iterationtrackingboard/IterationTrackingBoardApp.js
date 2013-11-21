@@ -99,12 +99,14 @@
 
             var gridConfig = this._getGridConfig();
             if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
+
+                _.pull(gridConfig.columnCfgs, 'FormattedID');
                 Ext.apply(gridConfig, {
                     xtype: 'rallytreegrid',
                     model: treeGridModel,
                     storeConfig: {
                         nodeParam: 'Parent',
-                        parentFieldNames: ['Requirement', 'WorkProduct'],
+                        parentFieldNames: ['Requirement', 'WorkProduct', 'DefectSuite'],
                         parentTypes: ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'],
                         childTypes: ['Defect', 'Task', 'TestCase'],
                         topLevelQuery: this.context.getTimeboxScope().getQueryFilter(),
