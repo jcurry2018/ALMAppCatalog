@@ -114,7 +114,7 @@
                         ref: options.record.getUri()
                     },
                     success: function () {
-                        srcPlanRecord.dirty = false; // Make sure the record is clean
+                        srcPlanRecord.commit();
                         return me._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
                     },
                     failure: function (response, opts) {
