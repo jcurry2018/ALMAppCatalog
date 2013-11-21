@@ -52,10 +52,10 @@
                 enableBulkEdit: context.isFeatureEnabled("EXT4_GRID_BULK_EDIT"),
                 autoScroll: gridAutoScroll,
                 plugins: this._getPlugins(columns),
+                context: this.getContext(),
                 storeConfig: {
                     fetch: fetch,
                     sorters: Rally.data.util.Sorter.sorters(context.get('order')),
-                    context: context.getDataContext(),
                     listeners: {
                         load: this._updateAppContainerSize,
                         scope: this
