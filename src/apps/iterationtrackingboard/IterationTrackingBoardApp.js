@@ -106,7 +106,7 @@
                     model: treeGridModel,
                     storeConfig: {
                         nodeParam: 'Parent',
-                        parentFieldNames: ['Requirement', 'WorkProduct', 'DefectSuite'],
+                        parentFieldNames: ['Requirement', 'WorkProduct'],
                         parentTypes: ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'],
                         childTypes: ['Defect', 'Task', 'TestCase'],
                         topLevelQuery: this.context.getTimeboxScope().getQueryFilter(),
