@@ -243,24 +243,6 @@
 
         _publishContentUpdatedNoDashboardLayout: function() {
             this.fireEvent('contentupdated', {dashboardLayout: false});
-        },
-
-        _getAddNewParams: function() {
-            return this.gridboard.addNewPlugin._getAddNewParams();
-        },
-
-        _onAddNewBeforeCreate: function(addNew, record, params) {
-            this.gridboard.addNewPlugin._onAddNewBeforeCreate(addNew, record, params);
-        },
-
-        _onAddNewBeforeEditorShow: function(addNew, params) {
-            params.Iteration = this.getIterationRef() || 'u';
-            params.Release = 'u';
-            Ext.apply(params, this._getAddNewParams());
-        },
-
-        _onAddNewCreate: function(addNew, record) {
-            this.gridboard.addNewPlugin._onAddNewBeforeCreate(addNew, record);
         }
     });
 })();
