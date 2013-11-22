@@ -62,12 +62,18 @@
             ];
 
             if (!config.shouldShowColumnLevelFieldPicker) {
+                var fieldBlackList = ['DefectStatus', 'TaskStatus', 'DisplayColor', 'DragAndDropRank', 'Rank'];
+
+                if (config.isDndWorkspace === false) {
+                    _.pull(fieldBlackList, 'Rank');
+                }
+
                 items.push({
                     name: 'cardFields',
                     fieldLabel: 'Card Fields',
                     xtype: 'rallyfieldpicker',
                     modelTypes: ['userstory', 'defect'],
-                    fieldBlackList: ['DefectStatus', 'TaskStatus', 'DisplayColor', 'DragAndDropRank', 'Rank'],
+                    fieldBlackList: fieldBlackList,
                     alwaysSelectedValues: alwaysSelectedValues,
                     listeners: {
                         selectionchange: function(picker) {

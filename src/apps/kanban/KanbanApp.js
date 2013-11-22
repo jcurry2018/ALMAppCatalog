@@ -81,7 +81,8 @@
         getSettingsFields: function() {
             return Rally.apps.kanban.Settings.getFields({
                 shouldShowColumnLevelFieldPicker: this._shouldShowColumnLevelFieldPicker(),
-                defaultCardFields: this.getSetting('cardFields')
+                defaultCardFields: this.getSetting('cardFields'),
+                isDndWorkspace: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled
             });
         },
 
