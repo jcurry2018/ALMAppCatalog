@@ -21,16 +21,16 @@
         ],
 
         clientMetrics: [
-                    {
-                        beginMethod: '_getIterationData',
-                        endMethod: '_createChartDatafromXML',
-                        description: 'IterationBurnDownMinimalApp - call A0 endpoint to get data'
-                        },
-                    {
-                        beginEvent: 'updateBeforeRender',
-                        endEvent: 'updateAfterRender',
-                        description: 'IterationBurnDownMinimalApp - chart rendering time'
-                        }
+            {
+                beginMethod: '_getIterationData',
+                endMethod: '_createChartDatafromXML',
+                description: 'IterationBurnDownMinimalApp - call A0 endpoint to get data'
+            },
+            {
+                beginEvent: 'updateBeforeRender',
+                endEvent: 'updateAfterRender',
+                description: 'IterationBurnDownMinimalApp - chart rendering time'
+            }
         ],
 
         scopeType: "iteration",
@@ -44,7 +44,6 @@
             this.callParent(arguments);
             this._setupEvents();
             this._setupUpdateBeforeRender();
-            this._onScopeObjectLoaded(this.getContext().getTimeboxScope().record);
             this.subscribe(this, Rally.Message.objectUpdate, this._onMessageFromObjectUpdate, this);
         },
 
