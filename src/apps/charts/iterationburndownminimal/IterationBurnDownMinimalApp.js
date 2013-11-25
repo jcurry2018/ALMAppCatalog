@@ -17,6 +17,26 @@
                 xtype: 'container',
                 itemId: 'header',
                 cls: 'header'
+            },
+            {
+                xtype: 'rallybutton',
+                text: 'Cumulative Flow',
+                cls: 'primary small',
+                itemId: 'cfdSwapButton',
+                style: {
+                    'float': 'right'
+                },
+                scope: this,
+		        handler : function(btn) {
+                    if (btn.text == "Cumulative Flow") {
+                        btn.setText("Burndown");
+                    } else {
+                        btn.setText("Cumulative Flow");
+                    }
+
+                    var app = btn.up('rallyapp');
+                    app._cfdSwapButtonClicked();
+                }
             }
         ],
 
@@ -35,7 +55,17 @@
 
         scopeType: "iteration",
         scopeObject: undefined,
-        chartType: "cumulativeflow",
+        chartType: "burndown",
+
+        _cfdSwapButtonClicked: function () {
+//            this._onScopeObjectLoaded(this.getContext().getTimeboxScope().record);
+            if (this.chartType == "cumulativeflow") {
+                this.chartType = "burndown";
+            } else {
+                this.chartType = "cumulativeflow";
+            }
+            this._getIterationData(this.scopeObject);
+        },
 
         onScopeChange: function (scope) {
             this._onScopeObjectLoaded(scope.getRecord());
@@ -88,7 +118,7 @@
         },
 
         _setScopeFromData: function (record) {
-            this.scopeObject = record.data;
+            this.scopeObject = record;
         },
 
         _getElementValue: function (element) {
