@@ -35,6 +35,7 @@
 
         scopeType: "iteration",
         scopeObject: undefined,
+        chartType: "cumulativeflow",
 
         onScopeChange: function (scope) {
             this._onScopeObjectLoaded(scope.getRecord());
@@ -91,25 +92,28 @@
         },
 
         _getElementValue: function (element) {
-            if (element.textContent) {
+            if (element.textContent !== "undefined") {
                 return element.textContent;
             }
             return element.text;
         },
 
+        _configureYAxis: function(ticks, axis) {
+
+            var intervalY = (this.chartComponentConfig.chartConfig.yAxis[axis].max - 0) / (ticks - 1);
+            var ticksY = [];
+            for (var i = 0; i < ticks; i++) {
+                ticksY.push(i * intervalY);
+            }
+            this.chartComponentConfig.chartConfig.yAxis[axis].tickPositions = ticksY;
+        },
+
         _configureYAxisIntervals: function () {
             var ticks = 5; // not much chart space, limit to 5
-            var intervalY0 = (this.chartComponentConfig.chartConfig.yAxis[0].max - 0) / (ticks - 1);
-            var intervalY1 = (this.chartComponentConfig.chartConfig.yAxis[1].max - 0) / (ticks - 1);
-            var ticksY0 = [],
-                ticksY1 = [];
-            for (i = 0; i < ticks; i++) {
-                ticksY0.push(i * intervalY0);
-                ticksY1.push(i * intervalY1);
+            this._configureYAxis(ticks, 0);
+            if(this.chartType === "burndown") {
+                this._configureYAxis(ticks, 1);
             }
-
-            this.chartComponentConfig.chartConfig.yAxis[0].tickPositions = ticksY0;
-            this.chartComponentConfig.chartConfig.yAxis[1].tickPositions = ticksY1;
         },
 
         _getStringValues: function (elements) {
@@ -150,6 +154,55 @@
             }
             var xmlDoc = parseXml(xml);
 
+            if(this.chartType === "burndown") {
+                this._createBurndownChartDatafromXML(xmlDoc);
+            } else {
+                this._createCumulativeFlowChartDatafromXML(xmlDoc);
+            }
+        },
+
+        _createBurndownChartDatafromXML: function (xmlDoc) {
+            this.chartComponentConfig.chartData.series = [
+                                                {
+                                                    name: "To Do",
+                                                    type: "column",
+                                                    data: [  ],
+                                                    tooltip: { valueDecimals: 1, valueSuffix: ' Hours' }
+                                                },
+                                                {
+                                                    name: "Ideal",
+                                                    type: "line",
+                                                    dashStyle: "Solid",
+                                                    data: [ ],
+                                                    marker : {
+                                                        enabled : true,
+                                                        radius : 3
+                                                    },
+                                                    tooltip: { valueDecimals: 1, valueSuffix: ' Hours' }
+                                                },
+                                                {
+                                                    name: "Accepted",
+                                                    type: "column",
+                                                    data: [ ],
+                                                    yAxis: 1,
+                                                    tooltip: { valueDecimals: 1, valueSuffix: ' Points' }
+                                                }
+                                            ];
+            this.chartComponentConfig.chartColors = ["#005eb8", "#666666", "#8dc63f" ];
+            this.chartComponentConfig.chartConfig.chart.type = "undefined";
+            this.chartComponentConfig.chartConfig.yAxis = [
+                                     {
+                                         title: { text: null },
+                                         min: 0,
+                                         labels: { style: { color: "#005eb8" } }
+                                     },
+                                     {
+                                        title: { text: null },
+                                        min: 0,
+                                        labels: { style: { color: "#8dc63f" } },
+                                        opposite: true
+                                     }
+                                 ];
             var xmlChartData = xmlDoc.getElementsByTagName("chart_data")[0];
             var xmlChartValueText = xmlDoc.getElementsByTagName("chart_value_text")[0];
             var draw = xmlDoc.getElementsByTagName("draw")[0];
@@ -174,6 +227,64 @@
                 }
             }
             this._configureYAxisIntervals();
+            this.chartComponentConfig.chartConfig.plotOptions = { series: {animation: false}};
+
+            this.chartComponentConfig.chartConfig.xAxis.tickInterval = this.chartComponentConfig.chartData.series[0].data.length / 5;
+
+            this._addChart();
+        },
+
+        _createCumulativeFlowChartDatafromXML: function (xmlDoc) {
+
+            this.chartComponentConfig.chartData.series = [];
+            this.chartComponentConfig.chartConfig.chart.type = "area";
+
+            this.chartComponentConfig.chartColors = [  // RGB values obtained from here: http://ux-blog.rallydev.com/?cat=23
+                                "#C0C0C0",  // $grey4
+                                "#FF8200",  // $orange
+                                "#F6A900",  // $gold
+                                "#FAD200",  // $yellow
+                                "#8DC63F",  // $lime
+                                "#1E7C00",  // $green_dk
+                                "#337EC6",  // $blue_link
+                                "#005EB8",  // $blue
+                                "#7832A5",  // $purple
+                                "#DA1884"   // $pink
+                            ];
+            var xmlChartData = xmlDoc.getElementsByTagName("chart_data")[0];
+            //var axis_value = xmlDoc.getElementsByTagName("axis_value")[1];
+
+            var rows = xmlChartData.getElementsByTagName("row");
+            var i, j;
+            this.chartComponentConfig.chartData.categories = this._getStringValues(rows[0].getElementsByTagName("string")); // categories
+            for(j=rows.length-1, i = 0 ; j > 0; j--,i++) {
+                this.chartComponentConfig.chartData.series[i] = {};
+                this.chartComponentConfig.chartData.series[i].data = this._getNumberValues(rows[j].getElementsByTagName("number"));
+                this.chartComponentConfig.chartData.series[i].name = this._getStringValues(rows[j].getElementsByTagName("string"))[0];
+            }
+            //this.chartComponentConfig.chartConfig.yAxis[0].max = axis_value.getAttribute("max") * 1;
+
+
+            this._configureYAxisIntervals();
+            this.chartComponentConfig.chartConfig.plotOptions = {
+                                    series: {
+                                        animation: false,
+                                        marker: {
+                                            enabled: false
+                                        }
+                                    },
+                                    area: {
+                                        stacking: 'normal'
+                                    }
+                                };
+             this.chartComponentConfig.chartConfig.yAxis = [
+                                                         {
+                                                             title: { text: null },
+                                                             min: 0,
+                                                             labels: { style: { color: "#005eb8" } }
+                                                         }
+                                                     ];
+
             this.chartComponentConfig.chartConfig.xAxis.tickInterval = this.chartComponentConfig.chartData.series[0].data.length / 5;
 
             this._addChart();
@@ -181,7 +292,12 @@
 
         _getIterationData: function (iteration) {
             this.setLoading();
-            var url = "/slm/charts/itsc.sp?sid=&iterationOid=" + iteration.get('ObjectID') + "&cpoid=" + this.getContext().getProject().ObjectID;
+            var url;
+            if(this.chartType === "burndown") {
+                url = "/slm/charts/itsc.sp?sid=&iterationOid=" + iteration.get('ObjectID') + "&cpoid=" + this.getContext().getProject().ObjectID;
+            } else {
+                url = "/slm/charts/icfc.sp?sid=&iterationOid=" + iteration.get('ObjectID') + "&bigChart=true&cpoid=" + this.getContext().getProject().ObjectID;
+            }
             Ext.Ajax.request({
                 url: url,
                 method: 'GET',
