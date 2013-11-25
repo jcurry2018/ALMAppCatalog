@@ -81,7 +81,7 @@
                         items: [
                             {
                                 xtype: 'rallymodelfilter',
-                                models: compositeModel.models
+                                models: compositeModel.getArtifactComponentModels()
                             }
                         ]
                     }
