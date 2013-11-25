@@ -179,6 +179,9 @@
             var context = this.getContext();
 
             return {
+                storeConfig: {
+                    autoLoad: context.isFeatureEnabled('F4359_FILTER') ? false : true
+                },
                 columnCfgs: [
                     'FormattedID',
                     'Name',
