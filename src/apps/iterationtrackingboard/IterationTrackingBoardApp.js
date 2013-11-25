@@ -179,12 +179,15 @@
                     model: treeGridModel,
                     storeConfig: {
                         nodeParam: 'Parent',
-                        parentFieldNames: ['Requirement', 'WorkProduct'],
+                        parentFieldNames: ['Requirement', 'WorkProduct', 'DefectSuite'],
                         parentTypes: ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'],
                         childTypes: ['Defect', 'Task', 'TestCase'],
                         topLevelQuery: this.context.getTimeboxScope().getQueryFilter(),
                         sorters: ['Rank DESC'],
                         fetch: ['FormattedID', 'Tasks', 'Defects', 'TestCases']
+                    },
+                    treeColumnRenderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
+                        return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);
                     },
                     rootVisible: false,
                     stateful: true,
