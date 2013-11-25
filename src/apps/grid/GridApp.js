@@ -9,35 +9,28 @@
 
         requires: [
             'Rally.data.util.Sorter',
-            'Rally.data.QueryFilter',
+            'Rally.data.wsapi.Filter',
             'Rally.ui.grid.Grid',
+            'Rally.data.ModelFactory',
             'Rally.ui.grid.plugin.PercentDonePopoverPlugin'
         ],
+
+        config: {
+            defaultSettings: {
+                types: 'hierarchicalrequirement'
+            }
+        },
 
         autoScroll: appAutoScroll,
 
         launch: function() {
-            // TODO: need to pass dataScope here
-            Rally.data.ModelFactory.getModel({
-                type: this.getContext().get('objectType'),
-                success: this._createGrid,
-                scope: this
-            });
-        },
-
-        _getFetchOnlyFields:function(){
-            return ['LatestDiscussionAgeInMinutes'];
-        },
-
-        _createGrid: function(model) {
             var context = this.getContext(),
-                pageSize = context.get('pageSize'),
-                fetch = context.get('fetch'),
+                pageSize = this.getSetting('pageSize'),
+                fetch = this.getSetting('fetch'),
                 columns = this._getColumns(fetch);
 
-            var gridConfig = {
+            this.add({
                 xtype: 'rallygrid',
-                model: model,
                 stateEnabled: context.isFeatureEnabled("ITERATION_TRACKING_PERSISTENT_PREFERENCES"),
                 columnCfgs: columns,
                 enableColumnHide: false,
@@ -48,7 +41,10 @@
                 context: this.getContext(),
                 storeConfig: {
                     fetch: fetch,
-                    sorters: Rally.data.util.Sorter.sorters(context.get('order')),
+                    models: this.getSetting('types').split(','),
+                    filters: this._getFilters(),
+                    pageSize: pageSize,
+                    sorters: Rally.data.util.Sorter.sorters(this.getSetting('order')),
                     listeners: {
                         load: this._updateAppContainerSize,
                         scope: this
@@ -57,19 +53,42 @@
                 pagingToolbarCfg: {
                     pageSizes: [pageSize]
                 }
-            };
-            if (pageSize) {
-                pageSize = pageSize - 0;
-                if (!isNaN(pageSize)) {
-                    gridConfig.storeConfig.pageSize = pageSize;
-                }
+            });
+        },
+
+        onTimeboxScopeChange: function(newTimeboxScope) {
+            this.callParent(arguments);
+
+            this.down('rallygrid').getStore().reload({
+                filters: this._getFilters()
+            });
+        },
+
+        _getFilters: function() {
+            var filters = [],
+                query = this.getSetting('query'),
+                timeboxScope = this.getContext().getTimeboxScope();
+            if(query) {
+                try {
+                    query = new Ext.Template(query).apply({
+                        user: Rally.util.Ref.getRelativeUri(this.getContext().getUser())
+                    });
+                } catch(e) {}
+                filters.push(Rally.data.wsapi.Filter.fromQueryString(query));
             }
-            if (context.get('query')) {
-                gridConfig.storeConfig.filters = [
-                    Rally.data.QueryFilter.fromQueryString(context.get('query'))
-                ];
+
+            if(timeboxScope && _.every(this.getSetting('types').split(','), this._isSchedulableType, this)) {
+                filters.push(timeboxScope.getQueryFilter());
             }
-            this.add(gridConfig);
+            return filters;
+        },
+
+        _isSchedulableType: function(type) {
+            return _.contains(['hierarchicalrequirement', 'task', 'defect', 'defectsuite', 'testset'], type);
+        },
+
+        _getFetchOnlyFields:function(){
+            return ['LatestDiscussionAgeInMinutes'];
         },
 
         _updateAppContainerSize: function() {
@@ -90,7 +109,6 @@
                 return Ext.Array.difference(fetch.split(','), this._getFetchOnlyFields());
             }
             return [];
-
         },
 
         _getPlugins: function(columns) {
