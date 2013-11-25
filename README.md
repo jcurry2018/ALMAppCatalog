@@ -31,7 +31,7 @@ These apps are built using [App SDK 2.0rc2](https://help.rallydev.com/apps/2.0rc
 * [Recent Activity](https://help.rallydev.com/recent-activity) - [[src](src/apps/recentactivity)]
 * Release Burndown - [[src](src/apps/charts/burndown)]
 * [Story Hierarchy](https://help.rallydev.com/story-hierarchy) - [[src](src/apps/storyhierarchy)]
-* Team Board - [[src](src/apps/charts/teamboard)]
+* Team Board - [[src](src/apps/teamboard)]
 * [Tip of the Day](https://help.rallydev.com/tip-day) - [[src](src/apps/tipoftheday)]
 
 ### Legacy Apps
