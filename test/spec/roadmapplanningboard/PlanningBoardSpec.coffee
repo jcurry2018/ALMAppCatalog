@@ -41,7 +41,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
-    @ajax.whenQuerying('PortfolioItem/Feature').respondWith(Rally.environment.getContext().context.features.primary)
+    features = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.featureStoreData
+    @ajax.whenQuerying('PortfolioItem/Feature').respondWith(features)
 
   afterEach ->
     @cardboard?.destroy()

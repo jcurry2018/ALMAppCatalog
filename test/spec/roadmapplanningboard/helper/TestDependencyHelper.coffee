@@ -9,14 +9,10 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
   ]
 
   loadDependencies: ->
-
     Rally.test.mock.env.Global.setupEnvironment
       services:
         planning_service_url: 'http://localhost:9999'
         timeline_service_url: 'http://localhost:8888'
-      features:
-        primary: Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.featureStoreData
-        secondary: Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.secondFeatureStoreData
 
     Deft.Injector.configure
       appModelFactory:

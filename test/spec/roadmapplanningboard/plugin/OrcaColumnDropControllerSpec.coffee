@@ -52,7 +52,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     secondFeatureStore = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getSecondFeatureStoreFixture()
 
     plan = planStore.getById('513617ecef8623df1391fefc')
-    features = Rally.environment.getContext().context.features.primary
+    features = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.featureStoreData
     @leftColumnOptions =
       plan: plan
       timeframe: timeframeStore.getById(plan.get('timeframe').id)
