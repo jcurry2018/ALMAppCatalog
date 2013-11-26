@@ -83,7 +83,7 @@
         },
 
         _isSchedulableType: function(type) {
-            return _.contains(['hierarchicalrequirement', 'task', 'defect', 'defectsuite', 'testset'], type);
+            return _.contains(['hierarchicalrequirement', 'task', 'defect', 'defectsuite', 'testset'], type.toLowerCase());
         },
 
         _getFetchOnlyFields:function(){
