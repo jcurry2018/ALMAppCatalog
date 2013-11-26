@@ -52,12 +52,29 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     secondFeatureStore = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getSecondFeatureStoreFixture()
 
     plan = planStore.getById('513617ecef8623df1391fefc')
-    features = Rally.context.context.features.primary
     @leftColumnOptions =
       plan: plan
       timeframe: timeframeStore.getById(plan.get('timeframe').id)
       data: Rally.test.mock.ModelObjectMother.getRecords 'PortfolioItemFeature',
-        values: features.slice(0,3)
+        values: [
+          ObjectID: "1000",
+          _ref: '/portfolioitem/feature/1000',
+          Name: "Android Support",
+          PreliminaryEstimate: {"Value": 4},
+          subscriptionId: "1"
+        ,
+          ObjectID: "1001",
+          _ref: '/portfolioitem/feature/1001',
+          Name: "iOS Support",
+          PreliminaryEstimate: {"Value": 2},
+          subscriptionId: "1"
+        ,
+          ObjectID: "1002",
+          _ref: '/portfolioitem/feature/1002',
+          Name: "HTML 5 Webapp",
+          PreliminaryEstimate: {"Value": 3},
+          subscriptionId: "1"
+        ]
     @leftColumn = @_createColumn(@leftColumnOptions)
 
     plan = planStore.getById('513617f7ef8623df1391fefd')
@@ -65,7 +82,19 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       plan: plan
       timeframe: timeframeStore.getById(plan.get('timeframe').id)
       data: Rally.test.mock.ModelObjectMother.getRecords 'PortfolioItemFeature',
-        values: features.slice(5,7)
+        values: [
+          ObjectID: "1005",
+          _ref: '/portfolioitem/feature/1005',
+          Name: "Ubuntu Phone Application",
+          PreliminaryEstimate: {"Value": 4},
+          subscriptionId: "2"
+        ,
+          ObjectID: "1006",
+          _ref: '/portfolioitem/feature/1006',
+          Name: "Firefox OS Application",
+          PreliminaryEstimate: {"Value": 4},
+          subscriptionId: "2"
+        ]
     @rightColumn = @_createColumn(@rightColumnOptions)
 
     @backlogColumn = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
