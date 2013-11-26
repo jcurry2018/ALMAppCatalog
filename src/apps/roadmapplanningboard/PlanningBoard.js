@@ -19,7 +19,8 @@
             roadmapId: null,
             isAdmin: false,
             cardConfig: {
-                fields: ['FormattedID', 'Owner', 'Name', 'PreliminaryEstimate'],
+                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate'],
+                editable: true,
                 skipDefaultFields: true
             },
             ddGroup: 'planningBoard',
