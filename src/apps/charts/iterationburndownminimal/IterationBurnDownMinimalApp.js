@@ -40,10 +40,11 @@
             this._onScopeObjectLoaded(scope.getRecord());
         },
 
-        initComponent: function () {
+        launch: function () {
             this.callParent(arguments);
             this._setupEvents();
             this._setupUpdateBeforeRender();
+            this.subscribe(this, Rally.Message.objectUpdate, this._onMessageFromObjectUpdate, this);
         },
 
         _setupUpdateBeforeRender: function () {
@@ -74,6 +75,10 @@
                 'updateBeforeRender',
                 'updateAfterRender'
             );
+        },
+
+        _onMessageFromObjectUpdate: function(message) {
+            this._onScopeObjectLoaded(this.getContext().getTimeboxScope().record);
         },
 
         _onScopeObjectLoaded: function (record) {
