@@ -41,79 +41,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
+    @ajax.whenQuerying('PortfolioItem/Feature').respondWith(Rally.environment.getContext().context.features.primary)
 
-    @ajax.whenQuerying('PortfolioItem/Feature').respondWith([
-                        {
-                            "ObjectID": "1000",
-                            "_ref": '/portfolioitem/feature/1000',
-                            "name": "Android Support",
-                            "refinedEstimate": 4,
-                            "subscriptionId": "1"
-                        },
-                        {
-                            "ObjectID": "1001",
-                            "_ref": '/portfolioitem/feature/1001',
-                            "name": "iOS Support",
-                            "refinedEstimate": 2,
-                            "subscriptionId": "1"
-                        },
-                        {
-                            "ObjectID": "1002",
-                            "_ref": '/portfolioitem/feature/1002',
-                            "name": "HTML 5 Webapp",
-                            "refinedEstimate": 3,
-                            "subscriptionId": "1"
-                        },
-                        {
-                            "ObjectID": "1003",
-                            "_ref": '/portfolioitem/feature/1003',
-                            "name": "Blackberry Native App",
-                            "refinedEstimate": 1,
-                            "subscriptionId": "1"
-                        },
-                        {
-                            "ObjectID": "1004",
-                            "_ref": '/portfolioitem/feature/1004',
-                            "name": "Windows Phone Support",
-                            "refinedEstimate": 3,
-                            "subscriptionId": "2"
-                        },
-                        {
-                            "ObjectID": "1005",
-                            "_ref": '/portfolioitem/feature/1005',
-                            "name": "Ubuntu Phone Application",
-                            "refinedEstimate": 4,
-                            "subscriptionId": "2"
-                        },
-                        {
-                            "ObjectID": "1006",
-                            "_ref": '/portfolioitem/feature/1006',
-                            "name": "Tester's Large Test Card 1",
-                            "refinedEstimate": 13,
-                            "subscriptionId": "2"
-                        },
-                        {
-                            "ObjectID": "1007",
-                            "_ref": '/portfolioitem/feature/1007',
-                            "name": "Tester's Large Test Card 2",
-                            "refinedEstimate": 21,
-                            "subscriptionId": "2"
-                        },
-                        {
-                            "ObjectID": "1008",
-                            "_ref": '/portfolioitem/feature/1008',
-                            "name": "Tester's Large Test Card 3",
-                            "refinedEstimate": 13,
-                            "subscriptionId": "2"
-                        },
-                        {
-                            "ObjectID": "1009",
-                            "_ref": '/portfolioitem/feature/1009',
-                            "name": "Tester's Large Test Card 4",
-                            "refinedEstimate": 8,
-                            "subscriptionId": "2"
-                        }
-                    ])
   afterEach ->
     @cardboard?.destroy()
     Deft.Injector.reset()
@@ -130,6 +59,13 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.getColumns()[1].getColumnHeader().getHeaderValue()).toBe "Q1"
       expect(@cardboard.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
       expect(@cardboard.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
+
+  it 'should have project and preliminary estimate on the cards', ->
+      @createCardboard().then =>
+        _.each @cardboard.getColumns(), (column) =>
+          _.each column.getCards(), (card) =>
+            expect(card.getEl().down('.rui-card-content .PreliminaryEstimate .rui-field-value').dom.innerHTML).toBe "L"
+            expect(card.getEl().down('.rui-card-content .Project .rui-field-value').dom.innerHTML).toBe "My Project"
 
   it 'should have features in the appropriate columns', ->
     @createCardboard().then =>
