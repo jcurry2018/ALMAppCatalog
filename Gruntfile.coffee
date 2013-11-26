@@ -21,8 +21,9 @@ module.exports = (grunt) ->
   grunt.loadTasks 'grunt/tasks'
 
   grunt.registerTask 'default', ['build']
+  grunt.registerTask 'sanity', ['check', 'jshint']
   grunt.registerTask 'css', ['less', 'copy:images', 'replace:imagepaths']
-  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'nexus:deps', 'coffee', 'regex-check', 'jshint', 'css', 'sencha', 'assemble', 'copy:apphtml']
+  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'nexus:deps', 'coffee', 'sanity', 'css', 'sencha', 'assemble', 'copy:apphtml']
 
   grunt.registerTask 'nexus:__createartifact__', 'Internal task to create and publish the nexus artifact', ['version', 'nexus:push:publish', 'clean:target']
   grunt.registerTask 'nexus:deploy', 'Deploys to nexus', ['build', 'nexus:__createartifact__']
@@ -32,9 +33,9 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'test:__buildjasmineconf__', 'Internal task to build and alter the jasmine conf', ['jasmine:apps:build', 'replace:jasmine']
   grunt.registerTask 'test:conf', 'Fetches the deps, compiles coffee and css files, runs jshint and builds the jasmine test config', ['nexus:deps', 'clean:test', 'coffee', 'css', 'test:__buildjasmineconf__']
-  grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:apps']
-  grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome']
-  grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:firefox']
+  grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:apps']
+  grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome']
+  grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:firefox']
   grunt.registerTask 'test:server', "Starts a Jasmine server at localhost:#{serverPort}, specify a different port with --port=<port>", ['express:server', 'express-keepalive']
   grunt.registerTask 'test:ci', 'Runs the tests in both firefox and chrome', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome', 'webdriver_jasmine_runner:firefox']
 
