@@ -31,7 +31,6 @@
 
             this.add({
                 xtype: 'rallygrid',
-                stateEnabled: context.isFeatureEnabled("ITERATION_TRACKING_PERSISTENT_PREFERENCES"),
                 columnCfgs: columns,
                 enableColumnHide: false,
                 enableRanking: true,
