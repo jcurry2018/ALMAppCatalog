@@ -19,7 +19,7 @@
             roadmapId: null,
             isAdmin: false,
             cardConfig: {
-                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate'],
+                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'PercentDoneByStoryCount'],
                 editable: true,
                 skipDefaultFields: true
             },

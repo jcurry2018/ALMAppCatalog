@@ -61,12 +61,29 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
       expect(@cardboard.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
 
-  it 'should have project and preliminary estimate on the cards', ->
-      @createCardboard().then =>
-        _.each @cardboard.getColumns(), (column) =>
-          _.each column.getCards(), (card) =>
-            expect(card.getEl().down('.rui-card-content .PreliminaryEstimate .rui-field-value').dom.innerHTML).toBe "L"
-            expect(card.getEl().down('.rui-card-content .Project .rui-field-value').dom.innerHTML).toBe "My Project"
+  it 'should have parent on the cards', ->
+    @createCardboard().then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.getEl().down('.rui-card-content .Parent .rui-field-value').dom.innerHTML).toBe "I1: Who's Your Daddy"
+
+  it 'should have preliminary estimate on the cards', ->
+    @createCardboard().then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.getEl().down('.rui-card-content .PreliminaryEstimate .rui-field-value').dom.innerHTML).toBe "L"
+
+  it 'should have project on the cards', ->
+    @createCardboard().then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.getEl().down('.rui-card-content .Project .rui-field-value').dom.innerHTML).toBe "My Project"
+
+  it 'should have percent done on the cards', ->
+    @createCardboard().then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.getEl().down('.rui-card-content .progress-bar-container.field-PercentDoneByStoryCount .progress-bar-label')).toBeTruthy()
 
   it 'should have features in the appropriate columns', ->
     @createCardboard().then =>
