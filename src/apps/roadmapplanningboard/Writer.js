@@ -43,9 +43,7 @@
             var oldValue = record.modified[fieldName];
             var newValue = record.get(fieldName);
 
-            if (newValue.length === oldValue.length) {
-                Ext.Error.raise('Attempting to update a collection where nothing has changed');
-            } else if (newValue.length > oldValue.length) {
+            if (newValue.length > oldValue.length) {
                 // make sure we're only adding 1 relationship
                 if (newValue.length - oldValue.length > 1) {
                     Ext.Error.raise('Cannot add more than one relationship at a time');
@@ -56,7 +54,7 @@
                 request.jsonData = _.find(newValue, function (value) {
                     return id === value.id;
                 });
-            } else {
+            } else if (newValue.length < oldValue.length) {
                 // make sure we're only removing 1 relationship
                 if (oldValue.length - newValue.length > 1) {
                     Ext.Error.raise('Cannot delete more than one relationship at a time');
@@ -67,6 +65,8 @@
                 request.action = 'destroy';
                 request.url += '/' + deletedRelationships[0];
                 delete request.jsonData;
+            } else {
+                Ext.Error.raise('Attempting to update a collection where nothing has changed');
             }
 
             return request;

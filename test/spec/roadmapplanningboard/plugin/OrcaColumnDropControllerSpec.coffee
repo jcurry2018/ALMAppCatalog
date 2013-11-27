@@ -15,9 +15,22 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         card: options.sourceColumn.getCards()[options.sourceIndex]
         column: options.sourceColumn
 
+      sourcePlanRecord = options.sourceColumn.planRecord
+      destPlanRecord = options.destColumnDropController.cmp.planRecord
+
+      @recordSaveStub?.restore()
+      @sourcePlanRecordSaveStub?.restore()
+      @destPlanRecordSaveStub?.restore()
+
       @recordSaveStub = @stub dragData.card.getRecord(), 'save', () ->
-      if options.destColumnDropController.cmp.planRecord
-        @planRecordSaveStub = @stub options.destColumnDropController.cmp.planRecord, 'save', () ->
+
+      if sourcePlanRecord
+        @sourcePlanRecordSaveStub = @stub sourcePlanRecord, 'save', () ->
+          expect(@dirty).toBeTruthy()
+
+      if destPlanRecord and destPlanRecord isnt sourcePlanRecord
+        @destPlanRecordSaveStub = @stub destPlanRecord, 'save', () ->
+          expect(@dirty).toBeTruthy()
 
       options.destColumnDropController.onCardDropped dragData, options.destIndex
 
@@ -43,6 +56,14 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         headerCell: target
 
       Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', options
+
+    expectPlanFeaturesToMatchCards: (column) ->
+      features = column.planRecord.get('features')
+      cardRecords = column.getCards().map (card) -> card.getRecord()
+
+      expect(features.length).toBe cardRecords.length
+      for i in [0...features.length]
+        expect(features[i].id).toBe cardRecords[i].getId().toString()
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -113,116 +134,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
       expect(controller.dropTarget).toBeDefined()
 
-    it 'should allow a card to be dropped in the same column and reorder the cards', ->
-      cardCountBefore = @leftColumn.getCards().length
-      card = @leftColumn.getCards()[2]
-
-      dragData = { card: card, column: @leftColumn }
-      @leftColumnDropController.onCardDropped(dragData, 3)
-
-      targetCard = @leftColumn.getCards()[2]
-      cardName = card.getRecord().get('name')
-      targetCardName = targetCard.getRecord().get('name')
-
-      expect(targetCardName).toBe(cardName)
-      expect(cardCountBefore).toBe(@leftColumn.getCards().length)
-
-    it 'should allow a card to be dropped into another column', ->
-      leftColumnCardCountBefore = @leftColumn.getCards().length
-      rightColumnCardCountBefore = @rightColumn.getCards().length
-      card = @leftColumn.getCards()[2]
-
-      dragData = { card: card, column: @leftColumn }
-      @rightColumnDropController.onCardDropped(dragData, 0)
-
-      targetCard = @rightColumn.getCards()[0]
-      cardName = card.getRecord().get('name')
-      targetCardName = targetCard.getRecord().get('name')
-
-      expect(targetCardName).toBe(cardName)
-      expect(leftColumnCardCountBefore - 1).toBe(@leftColumn.getCards().length)
-      expect(rightColumnCardCountBefore + 1).toBe(@rightColumn.getCards().length)
-
-    it 'should allow a card to be dropped into a backlog column and persist', ->
-      saveStub = @stub @leftColumn.planRecord, 'save', (options) ->
-        expect(@dirty).toBe true
-
-      leftColumnCardCountBefore = @leftColumn.getCards().length
-      card = @leftColumn.getCards()[2]
-
-      expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-        feature.id == '1002')).toBe true
-
-      dragData = { card: card, column: @leftColumn }
-      @backlogColumnDropController.onCardDropped(dragData, 0)
-
-      expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-        feature.id == '1002')).toBe false
-      expect(saveStub.callCount).toBe 1
-      expect(@leftColumn.getCards().length).toBe leftColumnCardCountBefore - 1
-
-    it 'should allow a card to be dragged within the backlog column and persist', ->
-      [firstCard, secondCard] = @backlogColumn.getCards()
-      dragData = { card: @backlogColumn.getCards()[1], column: @backlogColumn }
-      @backlogColumnDropController.onCardDropped(dragData, 0)
-
-      expect(@backlogColumn.getCards().length).toBe 2
-      expect(@backlogColumn.getCards()[0]).toBe secondCard
-      expect(@backlogColumn.getCards()[1]).toBe firstCard
-
-    it 'should allow a card to be moved out of a backlog column and persist', ->
-      saveStub = @stub @leftColumn.planRecord, 'save', (options) ->
-        expect(@dirty).toBe true
-        options.success.call(options.scope)
-
-      leftColumnCardCountBefore = @leftColumn.getCards().length
-      card = @backlogColumn.getCards()[0]
-
-      expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-        feature.id + '' == '1010')).toBe false
-      dragData = { card: card, column: @backlogColumn }
-      @leftColumnDropController.onCardDropped(dragData, 0)
-
-      expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-        feature.id + '' == '1010')).toBe true
-      expect(saveStub.callCount).toBe 1
-      expect(@leftColumn.getCards().length).toBe leftColumnCardCountBefore + 1
-
-
-    it 'should allow a card to be dropped into another column and persist feature to plan relationship', ->
-      leftColumnCardCountBefore = @leftColumn.getCards().length
-      rightColumnCardCountBefore = @rightColumn.getCards().length
-      card = @leftColumn.getCards()[2]
-
-      expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-        feature.id + '' == '1002')).toBe true
-      expect(_.any(@rightColumn.planRecord.get('features'), (feature) ->
-        feature.id + '' == '1002')).toBe false
-
-      dragData = { card: card, column: @leftColumn }
-      @rightColumnDropController.onCardDropped(dragData, 0)
-
-      expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-        feature.id + '' == '1002')).toBe false
-      expect(_.any(@rightColumn.planRecord.get('features'), (feature) ->
-        feature.id + '' == '1002')).toBe true
-
-      expect(@ajaxRequest.callCount).toBe 1
-
-      expect(@leftColumn.getCards().length).toBe leftColumnCardCountBefore - 1
-      expect(@rightColumn.getCards().length).toBe rightColumnCardCountBefore + 1
-
-    it 'should construct correct url when dragging card from plan to plan', ->
-      card = @leftColumn.getCards()[2]
-
-      dragData = { card: card, column: @leftColumn }
-      @rightColumnDropController.onCardDropped(dragData, 0)
-
-      expect(@ajaxRequest.lastCall.args[0].url).toBe "http://localhost:9999/roadmap/413617ecef8623df1391fabc/plan/#{@leftColumn.planRecord.get('id')}/features/to/#{@rightColumn.planRecord.get('id')}"
-      
-
-  describe 'drag and drop ranking', ->
-    describe 'ranking within a backlog', ->
+  describe 'when drag and drop ranking', ->
+    describe 'within a backlog', ->
       it 'should send rankAbove when card is dragged to top of the column', ->
         @dragCard
           sourceColumn: @backlogColumn
@@ -241,78 +154,404 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
         expect(@recordSaveStub.lastCall.args[0].params.rankBelow).toContain '1011'
 
-    describe 'ranking within a plan', ->
-      it 'should send rankAbove when card is dragged to top of the column', ->
-        @dragCard
-          sourceColumn: @leftColumn
-          destColumnDropController: @leftColumnDropController
-          sourceIndex: 1
-          destIndex: 0
+    describe 'from backlog to plan', ->
 
-        expect(@ajaxRequest.lastCall.args[0].params.rankAbove).toContain '1000'
+      describe 'from top to top', ->
 
-      it 'should send rankBelow when card is dragged lower than top of the column', ->
-        @dragCard
-          sourceColumn: @leftColumn
-          destColumnDropController: @leftColumnDropController
-          sourceIndex: 0
-          destIndex: 2
+        beforeEach ->
+          @backlogCardCount = @backlogColumn.getCards().length
+          @leftCardCount = @leftColumn.getCards().length
+          @card = @backlogColumn.getCards()[0]
 
-        expect(@ajaxRequest.lastCall.args[0].params.rankBelow).toContain '1001'
+          @dragCard
+            sourceColumn: @backlogColumn
+            destColumnDropController: @leftColumnDropController
+            sourceIndex: 0
+            destIndex: 0
 
-    describe 'dragging from backlog to plan', ->
-      it 'should send rankAbove when card is dragged to top of the column', ->
-        @dragCard
-          sourceColumn: @backlogColumn
-          destColumnDropController: @leftColumnDropController
-          sourceIndex: 0
-          destIndex: 0
+        it 'should have correct card count in backlog column', ->
+          expect(@backlogColumn.getCards().length).toBe @backlogCardCount - 1
 
-        expect(@planRecordSaveStub.lastCall.args[0].params.rankAbove).toContain '1000'
+        it 'should remove the card from the backlog column', ->
+          expect(_.pluck(@backlogColumn.getCards(), 'id')).toNotContain(@card.getId())
 
-      it 'should send rankBelow when card is dragged lower than top of the column', ->
-        @dragCard
-          sourceColumn: @backlogColumn
-          destColumnDropController: @leftColumnDropController
-          sourceIndex: 0
-          destIndex: 3
+        it 'should have correct card count in left column', ->
+          expect(@leftColumn.getCards().length).toBe @leftCardCount + 1
 
-        expect(@planRecordSaveStub.lastCall.args[0].params.rankBelow).toContain '1002'
+        it 'should place the card in the correct location', ->
+          expect(@leftColumn.getCards()[0].getId()).toEqual @card.getId()
 
-    describe 'dragging from plan to plan', ->
-      it 'should send rankAbove when card is dragged to top of the column', ->
-        @dragCard
-          sourceColumn: @leftColumn
-          destColumnDropController: @rightColumnDropController
-          sourceIndex: 0
-          destIndex: 0
+        it 'should call the save method of the left column', ->
+          expect(@destPlanRecordSaveStub).toHaveBeenCalledOnce()
 
-        expect(@ajaxRequest.lastCall.args[0].params.rankAbove).toContain '1005'
+        it 'should send rankAbove', ->
+          expect(@destPlanRecordSaveStub.lastCall.args[0].params.rankAbove).toContain '1000'
 
-      it 'should send rankBelow when card is dragged lower than top of the column', ->
-        @dragCard
-          sourceColumn: @leftColumn
-          destColumnDropController: @rightColumnDropController
-          sourceIndex: 0
-          destIndex: 2
+        it 'should update plan record', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
 
-        expect(@ajaxRequest.lastCall.args[0].params.rankBelow).toContain '1006'
+      describe 'from top to bottom', ->
 
-    describe 'dragging from plan to backlog', ->
-      it 'should send rankAbove when card is dragged to top of the column', ->
-        @dragCard
-          sourceColumn: @leftColumn
-          destColumnDropController: @backlogColumnDropController
-          sourceIndex: 0
-          destIndex: 0
+        beforeEach ->
+          @backlogCardCount = @backlogColumn.getCards().length
+          @leftCardCount = @leftColumn.getCards().length
+          @card = @backlogColumn.getCards()[0]
 
-        expect(@recordSaveStub.lastCall.args[0].params.rankAbove).toContain '1010'
+          @dragCard
+            sourceColumn: @backlogColumn
+            destColumnDropController: @leftColumnDropController
+            sourceIndex: 0
+            destIndex: 3
 
-      it 'should send rankBelow when card is dragged lower than top of the column', ->
-        @dragCard
-          sourceColumn: @leftColumn
-          destColumnDropController: @backlogColumnDropController
-          sourceIndex: 0
-          destIndex: 2
+        it 'should have correct card count in backlog column', ->
+          expect(@backlogColumn.getCards().length).toBe @backlogCardCount - 1
 
-        expect(@recordSaveStub.lastCall.args[0].params.rankBelow).toContain '1011'
+        it 'should remove the card from the backlog column', ->
+          expect(_.pluck(@backlogColumn.getCards(), 'id')).toNotContain(@card.getId())
+
+        it 'should have correct card count in left column', ->
+          expect(@leftColumn.getCards().length).toBe @leftCardCount + 1
+
+        it 'should place the card in the correct location', ->
+          expect(@leftColumn.getCards()[3].getId()).toEqual @card.getId()
+
+        it 'should send rankBelow', ->
+          expect(@destPlanRecordSaveStub.lastCall.args[0].params.rankBelow).toContain '1002'
+
+        it 'should update plan record', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
+
+      describe 'from bottom to top', ->
+
+        beforeEach ->
+          @backlogCardCount = @backlogColumn.getCards().length
+          @leftCardCount = @leftColumn.getCards().length
+          @card = @backlogColumn.getCards()[1]
+
+          @dragCard
+            sourceColumn: @backlogColumn
+            destColumnDropController: @leftColumnDropController
+            sourceIndex: 1
+            destIndex: 0
+
+        it 'should have correct card count in backlog column', ->
+          expect(@backlogColumn.getCards().length).toBe @backlogCardCount - 1
+
+        it 'should remove the card from the backlog column', ->
+          expect(_.pluck(@backlogColumn.getCards(), 'id')).toNotContain(@card.getId())
+
+        it 'should have correct card count in left column', ->
+          expect(@leftColumn.getCards().length).toBe @leftCardCount + 1
+
+        it 'should place the card in the correct location', ->
+          expect(@leftColumn.getCards()[0].getId()).toEqual @card.getId()
+
+        it 'should call the save method of the left column', ->
+          expect(@destPlanRecordSaveStub).toHaveBeenCalledOnce()
+
+        it 'should send rankAbove', ->
+          expect(@destPlanRecordSaveStub.lastCall.args[0].params.rankAbove).toContain '1000'
+
+        it 'should update plan record', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
+
+    describe 'within a plan', ->
+
+      describe 'from top to bottom', ->
+
+        beforeEach ->
+          @cardLengthBefore = @leftColumn.getCards().length
+          @card = @leftColumn.getCards()[0]
+          @dragCard
+            sourceColumn: @leftColumn
+            destColumnDropController: @leftColumnDropController
+            sourceIndex: 0
+            destIndex: 3
+
+        it 'should have the correct number of cards', ->
+          expect(@leftColumn.getCards().length).toBe @cardLengthBefore
+
+        it 'should place the card in the correct location', ->
+          expect(@leftColumn.getCards()[2].getId()).toEqual @card.getId()
+
+        it 'should have correct url', ->
+          planId = @leftColumn.planRecord.getId()
+          expect(@ajaxRequest.lastCall.args[0].url).toContain "#{planId}/features/to/#{planId}"
+
+        it 'should send rankBelow', ->
+          expect(@ajaxRequest.lastCall.args[0].params.rankBelow).toContain '1002'
+
+        it 'should update plan record', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
+
+      describe 'from top to middle', ->
+
+        beforeEach ->
+          @cardLengthBefore = @leftColumn.getCards().length
+          @card = @leftColumn.getCards()[0]
+          @dragCard
+            sourceColumn: @leftColumn
+            destColumnDropController: @leftColumnDropController
+            sourceIndex: 0
+            destIndex: 2
+
+        it 'should have the correct number of cards', ->
+          expect(@leftColumn.getCards().length).toBe @cardLengthBefore
+
+        it 'should place the card in the correct location', ->
+          expect(@leftColumn.getCards()[1].getId()).toEqual @card.getId()
+
+        it 'should have correct url', ->
+          planId = @leftColumn.planRecord.getId()
+          expect(@ajaxRequest.lastCall.args[0].url).toContain "#{planId}/features/to/#{planId}"
+
+        it 'should send rankBelow', ->
+          expect(@ajaxRequest.lastCall.args[0].params.rankBelow).toContain '1001'
+
+        it 'should update plan record', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
+
+      describe 'from bottom to top', ->
+
+        beforeEach ->
+          @cardLengthBefore = @leftColumn.getCards().length
+          @card = @leftColumn.getCards()[2]
+          @dragCard
+            sourceColumn: @leftColumn
+            destColumnDropController: @leftColumnDropController
+            sourceIndex: 2
+            destIndex: 0
+
+        it 'should have the correct number of cards', ->
+          expect(@leftColumn.getCards().length).toBe @cardLengthBefore
+
+        it 'should place the card in the correct location', ->
+          expect(@leftColumn.getCards()[0].getId()).toEqual @card.getId()
+
+        it 'should call the save method of the left column', ->
+          planId = @leftColumn.planRecord.getId()
+          expect(@ajaxRequest.lastCall.args[0].url).toContain "#{planId}/features/to/#{planId}"
+
+        it 'should send rankAbove', ->
+          expect(@ajaxRequest.lastCall.args[0].params.rankAbove).toContain '1000'
+
+        it 'should update plan record', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
+
+    describe 'from plan to plan', ->
+
+      describe 'from top to top', ->
+
+        beforeEach ->
+          @leftCardCount = @leftColumn.getCards().length
+          @rightCardCount = @rightColumn.getCards().length
+          @card = @leftColumn.getCards()[0]
+
+          @dragCard
+            sourceColumn: @leftColumn
+            destColumnDropController: @rightColumnDropController
+            sourceIndex: 0
+            destIndex: 0
+
+        it 'should have correct card count in left column', ->
+          expect(@leftColumn.getCards().length).toBe @leftCardCount - 1
+
+        it 'should remove the card from the backlog column', ->
+          expect(_.pluck(@leftColumn.getCards(), 'id')).toNotContain(@card.getId())
+
+        it 'should have correct card count in right column', ->
+          expect(@rightColumn.getCards().length).toBe @rightCardCount + 1
+
+        it 'should place the card in the correct location', ->
+          expect(@rightColumn.getCards()[0].getId()).toEqual @card.getId()
+
+        it 'should have correct url', ->
+          srcPlanId = @leftColumn.planRecord.getId()
+          destPlanId = @rightColumn.planRecord.getId()
+          expect(@ajaxRequest.lastCall.args[0].url).toContain "#{srcPlanId}/features/to/#{destPlanId}"
+
+        it 'should send rankAbove', ->
+          expect(@ajaxRequest.lastCall.args[0].params.rankAbove).toContain '1005'
+
+        it 'should commit changes for both plans', ->
+          expect(@rightColumn.planRecord.dirty).toBe false
+          expect(@leftColumn.planRecord.dirty).toBe false
+
+        it 'should update plan record', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
+          @expectPlanFeaturesToMatchCards(@rightColumn)
+
+      describe 'from top to bottom', ->
+
+        beforeEach ->
+          @leftCardCount = @leftColumn.getCards().length
+          @rightCardCount = @rightColumn.getCards().length
+          @card = @leftColumn.getCards()[0]
+
+          @dragCard
+            sourceColumn: @leftColumn
+            destColumnDropController: @rightColumnDropController
+            sourceIndex: 0
+            destIndex: 2
+
+        it 'should have correct card count in left column', ->
+          expect(@leftColumn.getCards().length).toBe @leftCardCount - 1
+
+        it 'should remove the card from the backlog column', ->
+          expect(_.pluck(@leftColumn.getCards(), 'id')).toNotContain(@card.getId())
+
+        it 'should have correct card count in right column', ->
+          expect(@rightColumn.getCards().length).toBe @rightCardCount + 1
+
+        it 'should place the card in the correct location', ->
+          expect(@rightColumn.getCards()[2].getId()).toEqual @card.getId()
+
+        it 'should have correct url', ->
+          srcPlanId = @leftColumn.planRecord.getId()
+          destPlanId = @rightColumn.planRecord.getId()
+          expect(@ajaxRequest.lastCall.args[0].url).toContain "#{srcPlanId}/features/to/#{destPlanId}"
+
+        it 'should send rankBelow', ->
+          expect(@ajaxRequest.lastCall.args[0].params.rankBelow).toContain '1006'
+
+        it 'should update plan records', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
+          @expectPlanFeaturesToMatchCards(@rightColumn)
+
+      describe 'from bottom to top', ->
+
+        beforeEach ->
+          @leftCardCount = @leftColumn.getCards().length
+          @rightCardCount = @rightColumn.getCards().length
+          @card = @leftColumn.getCards()[2]
+
+          @dragCard
+            sourceColumn: @leftColumn
+            destColumnDropController: @rightColumnDropController
+            sourceIndex: 2
+            destIndex: 0
+
+        it 'should have correct card count in left column', ->
+          expect(@leftColumn.getCards().length).toBe @leftCardCount - 1
+
+        it 'should remove the card from the backlog column', ->
+          expect(_.pluck(@leftColumn.getCards(), 'id')).toNotContain(@card.getId())
+
+        it 'should have correct card count in right column', ->
+          expect(@rightColumn.getCards().length).toBe @rightCardCount + 1
+
+        it 'should place the card in the correct location', ->
+          expect(@rightColumn.getCards()[0].getId()).toEqual @card.getId()
+
+        it 'should have correct url', ->
+          srcPlanId = @leftColumn.planRecord.getId()
+          destPlanId = @rightColumn.planRecord.getId()
+          expect(@ajaxRequest.lastCall.args[0].url).toContain "#{srcPlanId}/features/to/#{destPlanId}"
+
+        it 'should send rankAbove', ->
+          expect(@ajaxRequest.lastCall.args[0].params.rankAbove).toContain '1005'
+
+        it 'update plan records', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
+          @expectPlanFeaturesToMatchCards(@rightColumn)
+
+    describe 'from plan to backlog', ->
+
+      describe 'from top to top', ->
+
+        beforeEach ->
+          @leftCardCount = @leftColumn.getCards().length
+          @backlogCardCount = @backlogColumn.getCards().length
+          @card = @leftColumn.getCards()[0]
+
+          @dragCard
+            sourceColumn: @leftColumn
+            destColumnDropController: @backlogColumnDropController
+            sourceIndex: 0
+            destIndex: 0
+
+        it 'should have correct card count in left column', ->
+          expect(@leftColumn.getCards().length).toBe @leftCardCount - 1
+
+        it 'should remove the card from the left column', ->
+          expect(_.pluck(@leftColumn.getCards(), 'id')).toNotContain(@card.getId())
+
+        it 'should have correct card count in backlog column', ->
+          expect(@backlogColumn.getCards().length).toBe @backlogCardCount + 1
+
+        it 'should place the card in the correct location', ->
+          expect(@backlogColumn.getCards()[0].getId()).toEqual @card.getId()
+
+        it 'should call the save method of the left column', ->
+          expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
+
+        it 'should send rankAbove', ->
+          expect(@recordSaveStub.lastCall.args[0].params.rankAbove).toContain '1010'
+
+        it 'should update plan record', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
+
+      describe 'from top to bottom', ->
+
+        beforeEach ->
+          @leftCardCount = @leftColumn.getCards().length
+          @backlogCardCount = @backlogColumn.getCards().length
+          @card = @leftColumn.getCards()[0]
+
+          @dragCard
+            sourceColumn: @leftColumn
+            destColumnDropController: @backlogColumnDropController
+            sourceIndex: 0
+            destIndex: 2
+
+        it 'should have correct card count in left column', ->
+          expect(@leftColumn.getCards().length).toBe @leftCardCount - 1
+
+        it 'should remove the card from the left column', ->
+          expect(_.pluck(@leftColumn.getCards(), 'id')).toNotContain(@card.getId())
+
+        it 'should have correct card count in backlog column', ->
+          expect(@backlogColumn.getCards().length).toBe @backlogCardCount + 1
+
+        it 'should place the card in the correct location', ->
+          expect(@backlogColumn.getCards()[2].getId()).toEqual @card.getId()
+
+        it 'should send rankBelow', ->
+          expect(@recordSaveStub.lastCall.args[0].params.rankBelow).toContain '1011'
+
+        it 'should update plan record', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)
+
+      describe 'from bottom to top', ->
+
+        beforeEach ->
+          @leftCardCount = @leftColumn.getCards().length
+          @backlogCardCount = @backlogColumn.getCards().length
+          @card = @leftColumn.getCards()[2]
+
+          @dragCard
+            sourceColumn: @leftColumn
+            destColumnDropController: @backlogColumnDropController
+            sourceIndex: 2
+            destIndex: 0
+
+        it 'should have correct card count in left column', ->
+          expect(@leftColumn.getCards().length).toBe @leftCardCount - 1
+
+        it 'should remove the card from the left column', ->
+          expect(_.pluck(@leftColumn.getCards(), 'id')).toNotContain(@card.getId())
+
+        it 'should have correct card count in backlog column', ->
+          expect(@backlogColumn.getCards().length).toBe @backlogCardCount + 1
+
+        it 'should place the card in the correct location', ->
+          expect(@backlogColumn.getCards()[0].getId()).toEqual @card.getId()
+
+        it 'should call the save method of the left column', ->
+          expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
+
+        it 'should send rankAbove', ->
+          expect(@recordSaveStub.lastCall.args[0].params.rankAbove).toContain '1010'
+
+        it 'should update plan record', ->
+          @expectPlanFeaturesToMatchCards(@leftColumn)

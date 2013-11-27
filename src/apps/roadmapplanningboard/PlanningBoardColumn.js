@@ -10,8 +10,7 @@
         },
         
         requires: [
-            'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController',
-            'Rally.ui.cardboard.ColumnDropTarget'
+            'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
         ],
         
         config: {

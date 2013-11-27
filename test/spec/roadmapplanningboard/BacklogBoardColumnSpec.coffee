@@ -9,7 +9,7 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
-    @target = Ext.getBody()
+    @target = 'testDiv'
     @backlogColumn = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
       renderTo: @target
       contentCell: @target
@@ -31,16 +31,16 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
     expect(@backlogColumn.getCards().length).toBe(5)
 
   it 'will filter by roadmap in addition to feature and plans', ->
-    roadMapModel = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapModel',
+    roadmapModel = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapModel',
       id: 'Foo',
       name: "bar",
       plans: []
 
     column = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
-      renderTo: Ext.getBody()
-      contentCell: Ext.getBody()
-      headerCell: Ext.getBody()
-      roadmap: roadMapModel
+      renderTo: 'testDiv'
+      contentCell: 'testDiv'
+      headerCell: 'testDiv'
+      roadmap: roadmapModel
       store: Deft.Injector.resolve('featureStore')
       lowestPIType: 'feature'
 

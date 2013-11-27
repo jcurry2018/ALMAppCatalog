@@ -9,7 +9,8 @@
     Ext.define('Rally.apps.roadmapplanningboard.Proxy', {
         extend: 'Ext.data.proxy.Rest',
         requires: [
-            'Rally.apps.roadmapplanningboard.Writer'
+            'Rally.apps.roadmapplanningboard.Writer',
+            'Rally.ui.notify.Notifier'
         ],
         alias: 'proxy.roadmap',
 
@@ -38,11 +39,13 @@
             var me = this;
             var context = operation.context || Rally.environment.getContext();
 
-            uuidMapper.getUuid(context.getWorkspace()).then(function (uuid) {
+            return uuidMapper.getUuid(context.getWorkspace()).then(function (uuid) {
                 operation.params = operation.params || {};
                 operation.params.workspace = uuid || '';
 
                 return me.doRequest(operation, callback, scope);
+            }).otherwise(function (error) {
+                Rally.ui.notify.Notifier.showError({message: error.message || error});
             });
         },
 

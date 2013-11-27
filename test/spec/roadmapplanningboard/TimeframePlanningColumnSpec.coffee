@@ -66,7 +66,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
         highCapacity: 42
 
     afterEach ->
-      @column.destroy()
+      @column?.destroy()
 
     it 'should have a timeframe added to the header template', ->
       @createColumn()

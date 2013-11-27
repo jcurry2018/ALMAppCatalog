@@ -40,9 +40,7 @@
         _moveIntoBacklog: function (options) {
             var planRecord = options.sourceColumn.planRecord;
 
-            planRecord.set('features', _.filter(planRecord.get('features'), function (feature) {
-                return feature.id !== '' + options.record.getId();
-            }));
+            this._removeFeature(planRecord, options.record);
 
             // Remove card from plan column
             planRecord.save({
@@ -70,10 +68,7 @@
         _moveOutOfBacklog: function (options) {
             var planRecord = options.column.planRecord;
 
-            planRecord.set('features', planRecord.get('features').concat({
-                id: options.record.getId().toString(),
-                ref: options.record.getUri()
-            }));
+            this._addFeature(planRecord, options.record, options.index);
 
             planRecord.save({
                 success: function () {
@@ -89,22 +84,16 @@
         },
 
         _moveFromColumnToColumn: function (options) {
-
             var me = this;
             var uuidMapper = Deft.Injector.resolve('uuidMapper');
             var context = this.cmp.context || Rally.environment.getContext();
             var srcPlanRecord = options.sourceColumn.planRecord;
             var destPlanRecord = options.column.planRecord;
 
-            srcPlanRecord.set('features', _.filter(srcPlanRecord.get('features'), function (feature) {
-                return feature.id !== '' + options.record.getId();
-            }));
-            destPlanRecord.get('features').push({
-                id: options.record.getId().toString(),
-                ref: options.record.getUri()
-            });
+            this._removeFeature(srcPlanRecord, options.record);
+            this._addFeature(destPlanRecord, options.record, options.index);
 
-            uuidMapper.getUuid(context.getWorkspace()).then(function (uuid) {
+            uuidMapper.getUuid(context.getWorkspace()).then(function (workspaceUuid) {
                 Ext.Ajax.request({
                     method: 'POST',
                     withCredentials: true,
@@ -115,15 +104,37 @@
                     },
                     success: function () {
                         srcPlanRecord.commit();
+                        if (srcPlanRecord !== destPlanRecord) {
+                            destPlanRecord.commit();
+                        }
                         return me._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
                     },
                     failure: function (response, opts) {
                         return me._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
                     },
                     scope: me,
-                    params: Ext.apply({ workspace: uuid }, options.params)
+                    params: Ext.apply({ workspace: workspaceUuid }, options.params)
                 });
             });
+        },
+
+        _removeFeature: function (planRecord, featureRecord) {
+            var featureIdToRemove =  featureRecord.getId().toString();
+
+            planRecord.set('features', _.filter(planRecord.get('features'), function (feature) {
+                return feature.id !== featureIdToRemove;
+            }));
+        },
+
+        _addFeature: function (planRecord, featureRecord, index) {
+            var features = _.clone(planRecord.get('features'));
+
+            features.splice(index, 0, {
+                id: featureRecord.getId().toString(),
+                ref: featureRecord.getUri()
+            });
+
+            planRecord.set('features', features);
         },
 
         _constructUrl: function (roadmap, sourceId, destinationId) {

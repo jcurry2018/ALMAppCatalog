@@ -28,6 +28,14 @@
             pointField: 'PreliminaryEstimate'
         },
 
+        constructor: function (config) {
+            this.mergeConfig(config);
+            this.config.storeConfig.sorters = [{
+                sorterFn: Ext.bind(this._sortPlan, this)
+            }];
+            this.callParent([this.config]);
+        },
+
         initComponent: function () {
             this.callParent(arguments);
 
@@ -42,6 +50,42 @@
                     this.drawHeader();
                 }, this);
             }
+        },
+
+        /**
+         * @private
+         * Custom sort function for the plan column. It uses the order of features within the plan record to determine
+         * the order of feature cards. WSAPI gives us the features in a different order than we want, so we must
+         * reorder
+         * @param a {Rally.data.Model} The first record to compare
+         * @param b {Rally.data.Model} The second record to compare
+         * @returns {Number}
+         */
+        _sortPlan: function (a, b) {
+            var aIndex = this._findFeatureIndex(a);
+            var bIndex = this._findFeatureIndex(b);
+
+            return aIndex > bIndex ? 1 : -1;
+        },
+
+        /**
+         * @private
+         * Return the index of the feature in the plan record. This is used to sort records returned from WSAPI
+         * @param {Rally.data.Model} record
+         * @returns {Number} This will return the index of the record in the plan features array
+         */
+        _findFeatureIndex: function (record) {
+            return _.findIndex(this.planRecord.get('features'), function (feature) {
+                return feature.id === record.getId().toString();
+            });
+        },
+
+        /**
+         * Override
+         * @returns {boolean}
+         */
+        mayRank: function () {
+            return this._getSortDirection() === 'ASC' && this.enableRanking;
         },
 
         onAfterRender: function (event) {
