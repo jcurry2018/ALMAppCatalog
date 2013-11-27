@@ -8,6 +8,8 @@ Ext.require [
 ]
 
 describe 'Rally.apps.roadmapplanningboard.Proxy', ->
+  beforeEach ->
+    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -16,7 +18,6 @@ describe 'Rally.apps.roadmapplanningboard.Proxy', ->
     Deft.Injector.reset()
 
   describe '#buildRequest', ->
-
     beforeEach ->
       @proxy = Ext.create 'Rally.apps.roadmapplanningboard.Proxy',
         url: ''
@@ -26,7 +27,6 @@ describe 'Rally.apps.roadmapplanningboard.Proxy', ->
       expect(@proxy.buildRequest(@operation).withCredentials).toBe true
 
   describe '#buildUrl', ->
-
     beforeEach ->
       @proxy = Ext.create 'Rally.apps.roadmapplanningboard.Proxy',
         url: 'foo/{fooId}/bar'
@@ -36,7 +36,6 @@ describe 'Rally.apps.roadmapplanningboard.Proxy', ->
       expect(@proxy.buildUrl(@request)).toBe 'foo/123/bar'
 
   describe '#doRequest', ->
-
     beforeEach ->
       @request = { url: '', operation: params: fooId: '123' }
       @operation = { request: @request }
@@ -51,8 +50,11 @@ describe 'Rally.apps.roadmapplanningboard.Proxy', ->
         @proxy.doRequest(@operation, Ext.emptyFn, @).then =>
           expect(@operation.params.workspace).toBe '12345678-1234-1234-1234-12345678'
 
-    describe 'with error', ->
+      it 'should set noQueryScoping on operation when issuing request', ->
+        @proxy.doRequest(@operation, Ext.emptyFn, @).then =>
+          expect(@operation.noQueryScoping).toBe true
 
+    describe 'with error', ->
       beforeEach ->
         Deft.Injector.configure
           uuidMapper: fn: ->
@@ -66,5 +68,3 @@ describe 'Rally.apps.roadmapplanningboard.Proxy', ->
 
       it 'should display an error notification', ->
         expect(@errorNotifySpy.lastCall.args[0].message).toEqual 'oh noes'
-
-

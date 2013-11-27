@@ -31,6 +31,7 @@
          */
         doRequest: function (operation, callback, scope) {
             var uuidMapper = Deft.Injector.resolve('uuidMapper');
+            operation.noQueryScoping = true;
 
             if (operation.params && operation.params.workspace !== undefined) {
                 return this.callParent(arguments);

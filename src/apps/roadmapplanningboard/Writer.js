@@ -64,6 +64,9 @@
 
                 request.action = 'destroy';
                 request.url += '/' + deletedRelationships[0];
+
+                // need to change param to urlParams as DELETE will be fired and need the params on the URL thank you Ext
+                request.urlParams = request.params;
                 delete request.jsonData;
             } else {
                 Ext.Error.raise('Attempting to update a collection where nothing has changed');
