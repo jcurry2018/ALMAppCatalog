@@ -181,6 +181,19 @@
                     chartData.series[3].data[firstTodoIndex] = ((results.slope * firstTodoIndex) + results.yintercept) + (chartData.series[3].data[lastTodoIndex] - ((results.slope * lastTodoIndex) + results.yintercept));
                     chartData.series[3].connectNulls = true;
                     this.projectionsConfig = undefined;
+                } else {
+                // DE18732, if the slope is up, truncate it at 1.25 of the max Ideal
+                    var predictionCeiling = 1.25 * chartData.series[2].data[0];
+                    if (_.max(chartData.series[3].data) > predictionCeiling) {
+                        var i;
+                        var maxVal = predictionCeiling;
+                        for(i=0;i < chartData.series[3].data.length;i++) {
+                            if(chartData.series[3].data[i] > predictionCeiling) {
+                                chartData.series[3].data[i] = maxVal;
+                                maxVal = null;
+                            }
+                        }
+                    }
                 }
 
             }
