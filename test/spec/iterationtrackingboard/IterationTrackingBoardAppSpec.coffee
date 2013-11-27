@@ -159,6 +159,18 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(@app.down('rallytreegrid')).not.toBeNull()
       expect(@app.down('rallygrid')).toBeNull()
 
+  it 'should recreate the treegrid with given columns on reconfigure event', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
+
+    @createApp().then =>
+      @toggleToGrid()
+      initialGridId = @app.down('rallytreegrid').id
+
+      @app.gridboard.getGridOrBoard().fireEvent('reconfigure', ['Name'])
+      @toggleToGrid()
+      @waitForVisible(css: '.x-tree-panel').then =>
+        expect(@app.down('rallytreegrid').id).toNotEqual initialGridId
+
   it 'should show a regular grid when treegrid toggled off', ->
     @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
 
@@ -188,3 +200,40 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
           expect(_.find(settingsFields, {settingsType: 'grid'})).toBeFalsy()
           expect(_.find(settingsFields, {settingsType: 'board'})).toBeTruthy()
+
+  describe '#_getGridColumns', ->
+    helpers
+      _getDefaultCols: ->
+        ['FormattedID', 'Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion']
+
+    describe 'with the F2903_USE_ITERATION_TREE_GRID toggle on', ->
+      beforeEach ->
+        @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
+
+      it 'returns the default columns with the FormattedID removed when given no input', ->
+        @createApp().then =>
+          cols = @app._getGridColumns()
+          expectedColumns = _.remove(@_getDefaultCols(), (col) ->
+            col != 'FormattedID'
+          )
+
+          expect(cols).toEqual expectedColumns
+
+      it 'returns the input columns with the FormattedID removed', ->
+        @createApp().then =>
+          cols = @app._getGridColumns(['used1', 'used2', 'FormattedID'])
+
+          expect(cols).toEqual ['used1', 'used2']
+
+    describe 'with the F2903_USE_ITERATION_TREE_GRID toggle off', ->
+      it 'always returns the default columns when given no input', ->
+        @createApp().then =>
+          cols = @app._getGridColumns()
+
+          expect(cols).toEqual @_getDefaultCols()
+
+      it 'always returns the default columns when given column input', ->
+        @createApp().then =>
+          cols = @app._getGridColumns(['ignored1', 'ignored2'])
+
+          expect(cols).toEqual @_getDefaultCols()

@@ -105,34 +105,12 @@
                     showAgreements: true
                 });
             }
+            this.plugins = plugins;
+            this._addGrid(this._getGridConfig(treeGridModel));
+        },
 
-            var gridConfig = this._getGridConfig();
-            if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
-                _.pull(gridConfig.columnCfgs, 'FormattedID');
-
-                Ext.apply(gridConfig, {
-                    xtype: 'rallytreegrid',
-                    model: treeGridModel,
-                    storeConfig: {
-                        nodeParam: 'Parent',
-                        parentFieldNames: ['Requirement', 'WorkProduct'],
-                        parentTypes: ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'],
-                        childTypes: ['Defect', 'Task', 'TestCase'],
-                        topLevelQuery: this.context.getTimeboxScope().getQueryFilter(),
-                        sorters: ['Rank DESC'],
-                        fetch: ['FormattedID', 'Tasks', 'Defects', 'TestCases']
-                    },
-                    rootVisible: false,
-                    isLeaf: function(record) {
-                        return  (!record.raw.Tasks || record.raw.Tasks.Count === 0) &&
-                                (!record.raw.Defects || record.raw.Defects.Count === 0) &&
-                                (!record.raw.TestCases || record.raw.TestCases.Count === 0);
-                    },
-                    getIcon: function(record) {
-                        return '';
-                    }
-                });
-            }
+        _addGrid: function(gridConfig){
+            var context = this.getContext();
 
             this.gridboard = this.add({
                 itemId: 'gridBoard',
@@ -140,8 +118,9 @@
                 stateId: 'iterationtracking-gridboard',
                 context: context,
                 enableToggle: context.isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE'),
-                plugins: plugins,
+                plugins: this.plugins,
                 modelNames: this.modelNames,
+                allModelNames: context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID') ? this.allModelNames : null,
                 cardBoardConfig: {
                     columnConfig: {
                         additionalFetchFields: ['PortfolioItem'],
@@ -176,29 +155,71 @@
             });
         },
 
-        _getGridConfig: function() {
+        _getGridConfig: function(treeGridModel, columns) {
             var context = this.getContext();
 
-            return {
+            var gridConfig = {
                 storeConfig: {
                     autoLoad: context.isFeatureEnabled('F4359_FILTER') ? false : true
                 },
-                columnCfgs: [
-                    'FormattedID',
-                    'Name',
-                    'ScheduleState',
-                    'Blocked',
-                    'PlanEstimate',
-                    'TaskStatus',
-                    'TaskEstimateTotal',
-                    'TaskRemainingTotal',
-                    'Owner',
-                    'DefectStatus',
-                    'Discussion'
-                ],
+                columnCfgs: this._getGridColumns(),
                 enableBulkEdit: context.isFeatureEnabled('EXT4_GRID_BULK_EDIT'),
                 stateful: context.isFeatureEnabled('ITERATION_TRACKING_PERSISTENT_PREFERENCES')
             };
+
+            if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
+                Ext.apply(gridConfig, {
+                    xtype: 'rallytreegrid',
+                    model: treeGridModel,
+                    storeConfig: {
+                        nodeParam: 'Parent',
+                        parentFieldNames: ['Requirement', 'WorkProduct'],
+                        parentTypes: ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'],
+                        childTypes: ['Defect', 'Task', 'TestCase'],
+                        topLevelQuery: this.context.getTimeboxScope().getQueryFilter(),
+                        sorters: ['Rank DESC'],
+                        fetch: ['FormattedID', 'Tasks', 'Defects', 'TestCases']
+                    },
+                    rootVisible: false,
+                    stateful: true,
+                    columnCfgs: columns ? this._getGridColumns(columns) : null,
+                    defaultColumnCfgs: this._getGridColumns(),
+                    isLeaf: function(record) {
+                        return  (!record.raw.Tasks || record.raw.Tasks.Count === 0) &&
+                                (!record.raw.Defects || record.raw.Defects.Count === 0) &&
+                                (!record.raw.TestCases || record.raw.TestCases.Count === 0);
+                    },
+                    getIcon: function(record) {
+                        return '';
+                    },
+                    listeners:{
+                        reconfigure: function(columns) {
+                            this._onReconfigure(columns, treeGridModel);
+                        },
+                        scope: this
+                    }
+                });
+            }
+            return gridConfig;
+        },
+
+        _onReconfigure: function(columns, treeGridModel) {
+            this.remove(this.gridboard, true);
+            this._addGrid(this._getGridConfig(treeGridModel, columns));
+        },
+
+        _getGridColumns: function(columns) {
+            var context = this.getContext(),
+                result = ['FormattedID', 'Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion'];
+
+            if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
+                if (columns) {
+                    result = columns;
+                }
+                _.pull(result, 'FormattedID');
+            }
+
+            return result;
         },
 
         _loadModels: function() {
@@ -214,6 +235,7 @@
                         compositeModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(topLevelModels, this.getContext()),
                         treeGridModel;
                     this.modelNames = topLevelTypes;
+                    this.allModelNames = allTypes;
                     if (this.getContext().isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
                         treeGridModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(_.values(models), this.getContext());
                     }
