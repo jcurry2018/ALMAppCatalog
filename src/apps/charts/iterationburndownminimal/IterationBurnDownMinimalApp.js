@@ -12,33 +12,7 @@
 
         cls: 'iterationburndownminimal-app',
 
-        items: [
-            {
-                xtype: 'container',
-                itemId: 'header',
-                cls: 'header'
-            },
-            {
-                xtype: 'rallybutton',
-                text: 'Cumulative Flow',
-                cls: 'primary small',
-                itemId: 'cfdSwapButton',
-                style: {
-                    'float': 'right'
-                },
-                scope: this,
-		        handler : function(btn) {
-                    if (btn.text == "Cumulative Flow") {
-                        btn.setText("Burndown");
-                    } else {
-                        btn.setText("Cumulative Flow");
-                    }
-
-                    var app = btn.up('rallyapp');
-                    app._cfdSwapButtonClicked();
-                }
-            }
-        ],
+        items: [],
 
         clientMetrics: [
             {
@@ -57,14 +31,23 @@
         scopeObject: undefined,
         chartType: "burndown",
 
-        _cfdSwapButtonClicked: function () {
-//            this._onScopeObjectLoaded(this.getContext().getTimeboxScope().record);
-            if (this.chartType == "cumulativeflow") {
-                this.chartType = "burndown";
-            } else {
-                this.chartType = "cumulativeflow";
+        _isCFDEnabled: function () {
+            var isFeatureEnabled = 'isFeatureEnabled';
+            if (Rally.environment.getContext()[isFeatureEnabled]('ITERATION_CFD_MINIMAL')) {
+                return true;
             }
-            this._getIterationData(this.scopeObject);
+            return false;
+        },
+
+        _cfdSwapButtonClicked: function () {
+            if (this._isCFDEnabled()) {
+                if (this.chartType === "cumulativeflow") {
+                    this.chartType = "burndown";
+                } else {
+                    this.chartType = "cumulativeflow";
+                }
+                this._getIterationData(this.scopeObject);
+            }
         },
 
         onScopeChange: function (scope) {
@@ -73,6 +56,39 @@
 
         launch: function () {
             this.callParent(arguments);
+
+            this.add({
+                xtype: 'container',
+                itemId: 'header',
+                cls: 'header'
+            });
+
+            if (this._isCFDEnabled()) {
+                // NOTE: the item being added below will be replaced by the pictofonts described in S57444
+                this.add({
+                    xtype: 'rallybutton',
+                    text: 'Cumulative Flow',
+                    cls: 'primary small',
+                    itemId: 'cfdSwapButton',
+                    style: {
+                        'float': 'right'
+                    },
+                    scope: this,
+                    handler : function(btn) {
+                        var app = btn.up('rallyapp');
+                        if (app._isCFDEnabled()) {
+                            if (btn.text === "Cumulative Flow") {
+                                btn.setText("Burndown");
+                            } else {
+                                btn.setText("Cumulative Flow");
+                            }
+                            app._cfdSwapButtonClicked();
+                        }
+                    }
+                });
+                // NOTE: the item being added above will be replaced by the pictofonts described in S57444
+            }
+
             this._setupEvents();
             this._setupUpdateBeforeRender();
             this.subscribe(this, Rally.Message.objectUpdate, this._onMessageFromObjectUpdate, this);
