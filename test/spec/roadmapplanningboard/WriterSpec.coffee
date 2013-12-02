@@ -20,7 +20,6 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
   beforeEach ->
 
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
-    @workspaceUUID = Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.uuidMapperUUID
 
     @field = Ext.create 'Rally.data.Field',
         name: 'collectionField'
@@ -99,7 +98,6 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
       @save()
       returnValue = @writeSpy.lastCall.returnValue
       expect(returnValue.action).toBe 'destroy'
-      expect(returnValue.params.workspace).toBe @workspaceUUID
       expect(returnValue.urlParams).toBe returnValue.params
 
     it 'should set the url correctly', ->

@@ -9,25 +9,43 @@ describe 'Rally.apps.roadmapplanningboard.UuidMapper', ->
 
   beforeEach ->
     @uuidMapper = Ext.create('Rally.apps.roadmapplanningboard.UuidMapper')
+    @workspaceUuid = '12345678-1234-1234-1234-12345678'
+    @projectUuid = '12345678-1234-1234-1234-12345679'
 
     # Can't do '@ajax.whenReading' since it will wrap in an array
-    @getUuidFromWsapiStub = @stub @uuidMapper, '_getUuidFromWsapi', () ->
+    @getUuidFromWsapiStub = @stub @uuidMapper, '_getUuidFromWsapi', (domainObject) =>
       deferred = Ext.create('Deft.promise.Deferred')
-      deferred.resolve('12345678-1234-1234-1234-12345678')
+      if domainObject.ObjectID is 1
+        deferred.resolve @workspaceUuid
+      else if domainObject.ObjectID is 2
+        deferred.resolve @projectUuid
+      else
+        deferred.reject 'uuid not found'
+
       deferred.promise
 
-    @mockObject = Rally.environment.getContext().getWorkspace()
+    @mockWorkspace = ObjectID: 1
+    @mockProject = ObjectID: 2
 
   describe '#getUuid', ->
 
     it 'should return a promise', ->
-      expect(@uuidMapper.getUuid(@mockObject).then).toBeDefined()
+      expect(@uuidMapper.getUuid(@mockWorkspace).then).toBeDefined()
 
     it 'should resolve with the uuid of the domainObject', ->
-      @uuidMapper.getUuid(@mockObject).then (uuid) =>
-        expect(uuid).toBe '12345678-1234-1234-1234-12345678'
+      @uuidMapper.getUuid(@mockWorkspace).then (uuid) =>
+        expect(uuid).toBe @workspaceUuid
+
+    it 'should resolve with an array of uuids if passed an array of domainObjects', ->
+      @uuidMapper.getUuid([@mockWorkspace, @mockProject]).then (uuids) =>
+        expect(uuids).toEqual [@workspaceUuid, @projectUuid]
+
+    it 'should reject with an error if a uuid cannot be found', ->
+      promise = @uuidMapper.getUuid(ObjectID: 3)
+      promise.always (value) =>
+        expect(promise).toRejectWith 'uuid not found'
 
     it 'should not make a request for the same uuid more than once', ->
-      @uuidMapper.getUuid(@mockObject).then (uuid) =>
-        @uuidMapper.getUuid(@mockObject).then (uuid) =>
+      @uuidMapper.getUuid(@mockWorkspace).then (uuid) =>
+        @uuidMapper.getUuid(@mockWorkspace).then (uuid) =>
           expect(@getUuidFromWsapiStub).toHaveBeenCalledOnce()

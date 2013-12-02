@@ -7,8 +7,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
   requires: [
     'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory'
   ]
-
-  uuidMapperUUID: '12345678-1234-1234-1234-12345678'
+  constructor: (@uuidGenerator = Ext.create('Ext.data.UuidGenerator')) ->
 
   loadDependencies: ->
     Rally.test.mock.env.Global.setupEnvironment
@@ -45,8 +44,13 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
           Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getRoadmapStoreFixture()
 
       uuidMapper:
-        fn: ->
-          getUuid: ->
-              deferred = Ext.create('Deft.promise.Deferred')
-              deferred.resolve(Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.uuidMapperUUID)
-              deferred.promise
+        fn: =>
+          getUuid: (oids) =>
+            if Ext.isArray(oids)
+              uuids = _.map oids, => @uuidGenerator.generate()
+            else
+              uuids = @uuidGenerator.generate()
+
+            deferred = Ext.create('Deft.promise.Deferred')
+            deferred.resolve(uuids)
+            deferred.promise

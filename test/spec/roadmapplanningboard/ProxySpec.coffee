@@ -1,18 +1,20 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
   'Rally.apps.roadmapplanningboard.Proxy'
   'Rally.apps.roadmapplanningboard.Model'
   'Rally.ui.notify.Notifier'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.Proxy', ->
-  beforeEach ->
-    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
   beforeEach ->
-    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
+    Deft.Injector.configure
+      uuidMapper: fn: ->
+        getUuid: ->
+          deferred = Ext.create 'Deft.promise.Deferred'
+          deferred.resolve ['12345678-1234-1234-1234-12345678', '12345678-1234-1234-1234-12345679']
+          deferred
 
   afterEach ->
     Deft.Injector.reset()
@@ -49,6 +51,10 @@ describe 'Rally.apps.roadmapplanningboard.Proxy', ->
       it 'should add workspace to operation', ->
         @proxy.doRequest(@operation, Ext.emptyFn, @).then =>
           expect(@operation.params.workspace).toBe '12345678-1234-1234-1234-12345678'
+
+      it 'should add project to operation', ->
+        @proxy.doRequest(@operation, Ext.emptyFn, @).then =>
+          expect(@operation.params.project).toBe '12345678-1234-1234-1234-12345679'
 
       it 'should set noQueryScoping on operation when issuing request', ->
         @proxy.doRequest(@operation, Ext.emptyFn, @).then =>

@@ -17,21 +17,32 @@
         },
 
         /**
+         * @param {Object|Object[]} domainObject The domain object to extract a uuid from. Use record.data for this parameter if this is a model
+         * @returns {Deft.promise.Promise}
+         */
+        getUuid: function (domainObjects) {
+            var me = this;
+
+            if (Ext.isArray(domainObjects)) {
+                return Deft.promise.Promise.all(_.map(domainObjects, function (domainObject) { return me._getUuid(domainObject); }));
+            } else {
+                return this._getUuid(domainObjects);
+            }
+
+        },
+
+        /**
+         * @private
          * @param {Object} domainObject The domain object to extract a uuid from. Use record.data for this parameter if this is a model
          * @returns {Deft.promise.Promise}
          */
-        getUuid: function (domainObject) {
+        _getUuid: function (domainObject) {
             var me = this;
             var deferred = Ext.create('Deft.promise.Deferred');
-            var type = domainObject._type.toLowerCase();
             var ObjectID = domainObject.ObjectID.toString();
 
-            if (!this.mappings[type]) {
-                this.mappings[type] = {};
-            }
-
-            if (this.mappings[type][ObjectID]) {
-                deferred.resolve(this.mappings[type][ObjectID]);
+            if (this.mappings[ObjectID]) {
+                deferred.resolve(this.mappings[ObjectID]);
             } else {
 
                 // If the ObjectID is already a UUID, just resolve with the value
@@ -39,8 +50,10 @@
                     deferred.resolve(ObjectID);
                 } else {
                     this._getUuidFromWsapi(domainObject).then(function (uuid) {
-                        me.mappings[type][ObjectID] = uuid;
+                        me.mappings[ObjectID] = uuid;
                         deferred.resolve(uuid);
+                    }).otherwise(function (error) {
+                        deferred.reject(error);
                     });
                 }
             }
@@ -63,7 +76,8 @@
                 method: 'GET',
                 success: function(response) {
                     var result = Ext.decode(response.responseText);
-                    deferred.resolve(result[domainObject._type].ObjectID);
+                    var type = _.keys(result)[0];
+                    deferred.resolve(result[type].ObjectID);
                 },
                 failure: function(error) {
                     deferred.reject(error);

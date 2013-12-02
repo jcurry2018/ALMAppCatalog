@@ -40,9 +40,10 @@
             var me = this;
             var context = operation.context || Rally.environment.getContext();
 
-            return uuidMapper.getUuid(context.getWorkspace()).then(function (uuid) {
+            return uuidMapper.getUuid([context.getWorkspace(), context.getProject()]).then(function (uuids) {
                 operation.params = operation.params || {};
-                operation.params.workspace = uuid || '';
+                operation.params.workspace = uuids[0] || '';
+                operation.params.project = uuids[1] || '';
 
                 return me.doRequest(operation, callback, scope);
             }).otherwise(function (error) {
