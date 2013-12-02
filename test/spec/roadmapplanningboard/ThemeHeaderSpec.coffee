@@ -9,8 +9,11 @@ Ext.require [
 describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
   helpers
     createCardboard: (config) ->
+      roadmapStore = Deft.Injector.resolve('roadmapStore')
+      timelineStore = Deft.Injector.resolve('timelineStore')
       @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-        roadmapId: '413617ecef8623df1391fabc'
+        roadmap: roadmapStore.first()
+        timeline: timelineStore.first()
         _retrieveLowestLevelPI: (callback) -> callback.call(@, Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
         renderTo: 'testDiv'
 

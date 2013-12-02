@@ -36,7 +36,11 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       }
 
     createCardboard: (config) ->
+      roadmapStore = Deft.Injector.resolve('roadmapStore')
+      timelineStore = Deft.Injector.resolve('timelineStore')
       config = _.extend
+        roadmap: roadmapStore.first()
+        timeline: timelineStore.first()
         timeframeColumnCount: 4
         pastColumnCount: 1
         presentColumnCount: 5
@@ -55,11 +59,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
 
       @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
         _.extend
-          buildColumnsFromStore: ->
+          buildColumns: ->
             @columns = columns
 
-          _retrieveLowestLevelPI: (callback) ->
-            callback.call(@, {get: -> 'PortfolioItem/Feature'})
           renderTo: 'testDiv'
 
           plugins: [
@@ -131,7 +133,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
 
     it 'should restrict the number of columns on the component', ->
       @createCardboard(pastColumnCount: 0, presentColumnCount: 6, timeframeColumnCount: 4).then =>
-        expect(@plugin.buildColumnsFromStore().length).toEqual 5 # 4 + 1 backlog
+        expect(@plugin.buildColumns().length).toEqual 5 # 4 + 1 backlog
 
     it 'should not show past timeframes', ->
       @createCardboard(pastColumnCount: 4, presentColumnCount: 4, timeframeColumnCount: 4).then =>

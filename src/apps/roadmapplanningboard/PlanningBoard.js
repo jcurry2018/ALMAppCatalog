@@ -5,7 +5,7 @@
         extend: 'Rally.ui.cardboard.CardBoard',
         alias: 'widget.roadmapplanningboard',
 
-        inject: ['timelineStore', 'timeframeStore', 'planStore', 'roadmapStore'],
+        inject: ['timeframeStore', 'planStore'],
 
         requires: [
             'Rally.data.util.PortfolioItemHelper',
@@ -16,7 +16,8 @@
         ],
 
         config: {
-            roadmapId: null,
+            roadmap: null,
+            timeline: null,
             isAdmin: false,
             cardConfig: {
                 fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'PercentDoneByStoryCount'],
@@ -45,11 +46,8 @@
             }
         ],
 
-        _roadmap: null,
-
         initComponent: function () {
             this.callParent(arguments);
-            this._roadmap = this.roadmapStore.getById(this.roadmapId);
         },
 
         /**
@@ -65,40 +63,40 @@
         },
 
         onModelsRetrieved: function (callback) {
-            this.timelineStore.load({
-                callback: function (records, operation, success) {
-                    this.timeline = this.timelineStore.first();
-                    this.planStore.load({
-                        callback: function (records, operation, success) {
-                            if (success) {
-                                this.timeframeStore.load({
-                                    callback: function (records, operation, success) {
-                                        if (success) {
-                                            this.buildColumnsFromStore(this.timeframeStore);
-                                            callback.call(this);
-                                        }
-                                    },
-                                    params: {
-                                        timeline: {
-                                            id: this.timeline.getId()
-                                        }
-                                    },
-                                    requester: this,
-                                    scope: this
-                                });
-                            }
-                        },
-                        params: {
-                            roadmap: {
-                                id: this.roadmapId
-                            }
-                        },
-                        reqester: this,
-                        scope: this
-                    });
+            Deft.Promise.all([this._loadTimeframeStore(), this._loadPlanStore()]).then({
+                success: function (results) {
+                    this.buildColumns();
+                    callback.call(this);
+                },
+                failure: function (operation) {
+                    var service = operation.storeServiceName || 'External';
+                    Rally.ui.notify.Notifier.showError({message: 'Failed to load: ' + service + ' service data load issue'});
+                },
+                scope: this
+            });
+        },
+
+        _loadPlanStore: function () {
+            return this.planStore.load({
+                params: {
+                    roadmap: {
+                        id: this.roadmap.getId()
+                    }
+                },
+                reqester: this,
+                storeServiceName: 'Planning'
+            });
+        },
+
+        _loadTimeframeStore: function () {
+            return this.timeframeStore.load({
+                params: {
+                    timeline: {
+                        id: this.timeline.getId()
+                    }
                 },
                 requester: this,
-                scope: this
+                storeServiceName: 'Timeline'
             });
         },
 
@@ -111,13 +109,12 @@
         },
 
         /**
-         * This method will build an array of columns built from a timeframe store
-         * @param {Ext.data.Store} timeframeStore
+         * This method will build an array of columns from timeframe and plan stores
          * @returns {Array} columns
          */
-        buildColumnsFromStore: function (timeframeStore) {
+        buildColumns: function () {
             this.columns = [this._getBacklogColumnConfig()];
-            _.each(timeframeStore.data.items, function (timeframe) {
+            _.each(this.timeframeStore.data.items, function (timeframe) {
                 this.columns.push(this._addColumnFromTimeframe(timeframe));
             }, this);
 
@@ -128,7 +125,7 @@
             return {
                 xtype: 'backlogplanningcolumn',
                 cls: 'column backlog',
-                roadmap: this._roadmap
+                roadmap: this.roadmap
             };
         },
 

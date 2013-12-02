@@ -8,16 +8,22 @@ Ext.require [
 describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   helpers
-    createCardboard: (config) ->
+    createCardboard: (config, expectError = false) ->
       @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
         _.extend
-          roadmapId: '413617ecef8623df1391fabc'
+          roadmap: @roadmapStore.first()
+          timeline: @timelineStore.first()
           slideDuration: 10
           renderTo: 'testDiv'
           types: ['PortfolioItem/Feature']
         , config
 
-      @waitForComponentReady(@cardboard)
+      if(expectError)
+        debugger
+        @once
+          condition: => @errorNotifyStub.calledOnce
+      else
+        @waitForComponentReady(@cardboard)
 
     clickCollapse: ->
       collapseStub = @stub()
@@ -42,11 +48,36 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
     features = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.featureStoreData
+    @errorNotifyStub = @stub Rally.ui.notify.Notifier, 'showError'
+    @roadmapStore = Deft.Injector.resolve('roadmapStore')
+    @timelineStore = Deft.Injector.resolve('timelineStore')
+    @timeframeStore = Deft.Injector.resolve('timeframeStore')
+    @planStore = Deft.Injector.resolve('planStore')
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith(features)
 
   afterEach ->
     @cardboard?.destroy()
     Deft.Injector.reset()
+
+  it 'should notify of error if the timeframe store fails to load', ->
+    @stub @timeframeStore, 'load', ->
+      deferred = new Deft.promise.Deferred()
+      deferred.reject({storeServiceName: 'Timeline'});
+      deferred.promise
+
+    @createCardboard({}, true).then =>
+      expect(@errorNotifyStub.lastCall.args[0]).toEqual
+        message: 'Failed to load: Timeline service data load issue'
+
+  it 'should notify of error if the paln store fails to load', ->
+    @stub @planStore, 'load', ->
+      deferred = new Deft.promise.Deferred()
+      deferred.reject({storeServiceName: 'Planning'});
+      deferred.promise
+
+    @createCardboard({}, true).then =>
+      expect(@errorNotifyStub.lastCall.args[0]).toEqual
+        message: 'Failed to load: Planning service data load issue'
 
   it 'should render with a backlog column', ->
     @createCardboard().then =>
@@ -96,6 +127,11 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     @createCardboard().then =>
       expect(@cardboard.timeframeStore).toBeTruthy()
       expect(@cardboard.planStore).toBeTruthy()
+
+  it 'should notify of error if stores fail to load', ->
+
+
+    @createCardboard().then =>
 
   it 'should have appropriate plan capacity range', ->
     @createCardboard().then =>

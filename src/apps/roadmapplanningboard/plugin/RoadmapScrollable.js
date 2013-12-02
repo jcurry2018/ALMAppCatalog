@@ -16,9 +16,9 @@
 
         init: function (cmp) {
             var pluginScope = this;
-            this.originBuildColumnsFromStore = cmp.buildColumnsFromStore;
-            cmp.buildColumnsFromStore = function (store) {
-                pluginScope.buildColumnsFromStore(store);
+            this.originBuildColumns = cmp.buildColumns;
+            cmp.buildColumns = function (store) {
+                pluginScope.buildColumns(store);
             };
             this.callParent(arguments);
         },
@@ -27,8 +27,8 @@
          *
          * @param store
          */
-        buildColumnsFromStore: function (store) {
-            var columns = this.originBuildColumnsFromStore.call(this.cmp, store);
+        buildColumns: function (store) {
+            var columns = this.originBuildColumns.call(this.cmp, store);
 
             this.backlogColumn = columns[0];
             this.scrollableColumns = columns.slice(1);
