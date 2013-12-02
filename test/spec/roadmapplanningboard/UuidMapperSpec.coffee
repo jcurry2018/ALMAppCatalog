@@ -42,8 +42,7 @@ describe 'Rally.apps.roadmapplanningboard.UuidMapper', ->
 
     it 'should reject with an error if a uuid cannot be found', ->
       promise = @uuidMapper.getUuid(ObjectID: 3)
-      promise.always (value) =>
-        expect(promise).toRejectWith 'uuid not found'
+      @waitForPromiseToRejectWith(promise, 'uuid not found')
 
     it 'should not make a request for the same uuid more than once', ->
       @uuidMapper.getUuid(@mockWorkspace).then (uuid) =>
