@@ -19,7 +19,8 @@
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
-            'Rally.ui.filter.view.ModelFilter'
+            'Rally.ui.filter.view.ModelFilter',
+            'Rally.ui.filter.view.OwnerFilter'
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
         componentCls: 'iterationtrackingboard',
@@ -80,6 +81,11 @@
                         stateful: true,
                         stateId: context.getScopedStateId('iteration-tracking-filter-button'),
                         items: [
+                            {
+                                xtype: 'rallyownerfilter',
+                                margin: '0 5',
+                                project: this.getContext().getProjectRef()
+                            },
                             {
                                 xtype: 'rallymodelfilter',
                                 models: compositeModel.getArtifactComponentModels()
