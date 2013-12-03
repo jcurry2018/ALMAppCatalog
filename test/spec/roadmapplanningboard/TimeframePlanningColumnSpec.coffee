@@ -122,11 +122,11 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
     afterEach ->
       @column.destroy()
 
-    it 'should return an array of store filters if there are no features', ->
+    it 'should return a store filter with a null id if there are no features', ->
       @createPlanRecord()
       @createColumn()
 
-      expect(this.column.getStoreFilter()).toEqual []
+      expect(this.column.getStoreFilter().toString()).toBe '(ObjectID = null)'
 
   describe 'progress bar', ->
     beforeEach ->
