@@ -20,6 +20,9 @@
             dropControllerConfig: {
                 ptype: 'orcacolumndropcontroller'
             },
+            moreItemsConfig: {
+                token: '/portfolioitems'
+            },
             cardConfig: {
                 showIconsAndHighlightBorder: true,
                 showPlusIcon: false,
