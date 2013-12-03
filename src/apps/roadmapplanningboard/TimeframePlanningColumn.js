@@ -103,18 +103,22 @@
 
         getStoreFilter: function (model) {
             var result = _.reduce(this.planRecord.data.features, function (result, feature) {
-                var filter = Ext.create('Rally.data.QueryFilter', {
-                    property: 'ObjectID',
-                    operator: '=',
-                    value: feature.id
-                });
+                var filter = this._createFeatureFilter(feature.id);
                 if (!result) {
                     return filter;
                 } else {
                     return result.or(filter);
                 }
-            }, null);
-            return result || [];
+            }, null, this);
+            return result || this._createFeatureFilter(null);
+        },
+
+        _createFeatureFilter: function (featureId) {
+            return Ext.create('Rally.data.QueryFilter', {
+                property: 'ObjectID',
+                operator: '=',
+                value: featureId
+            });
         },
 
         onProgressBarClick: function (event) {
