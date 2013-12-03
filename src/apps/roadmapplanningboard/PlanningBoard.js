@@ -20,7 +20,7 @@
             timeline: null,
             isAdmin: false,
             cardConfig: {
-                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'PercentDoneByStoryCount'],
+                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'LeafStoryCount', 'PercentDoneByStoryCount'],
                 editable: true,
                 skipDefaultFields: true
             },

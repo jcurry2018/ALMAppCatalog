@@ -19,7 +19,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
         , config
 
       if(expectError)
-        debugger
         @once
           condition: => @errorNotifyStub.calledOnce
       else
@@ -91,6 +90,12 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.getColumns()[1].getColumnHeader().getHeaderValue()).toBe "Q1"
       expect(@cardboard.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
       expect(@cardboard.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
+
+  it 'should have leaf story count on the cards', ->
+      @createCardboard().then =>
+        _.each @cardboard.getColumns(), (column) =>
+          _.each column.getCards(), (card) =>
+            expect(card.getEl().down('.rui-card-content .LeafStoryCount .rui-field-value').dom.innerHTML).toBe "42"
 
   it 'should have parent on the cards', ->
     @createCardboard().then =>

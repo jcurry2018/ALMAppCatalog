@@ -113,6 +113,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     subscriptionId: "1"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
   ,
     ObjectID: "1001"
     _ref: '/portfolioitem/feature/1001'
@@ -121,6 +122,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     subscriptionId: "1"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
   ,
     ObjectID: "1002"
     _ref: '/portfolioitem/feature/1002'
@@ -129,6 +131,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     subscriptionId: "1"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
   ,
     ObjectID: "1003"
     _ref: '/portfolioitem/feature/1003'
@@ -137,6 +140,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     subscriptionId: "1"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
   ,
     ObjectID: "1004"
     _ref: '/portfolioitem/feature/1004'
@@ -145,6 +149,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
   ,
     ObjectID: "1005"
     _ref: '/portfolioitem/feature/1005'
@@ -153,6 +158,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
   ,
     ObjectID: "1006"
     _ref: '/portfolioitem/feature/1006'
@@ -161,6 +167,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
   ,
     ObjectID: "1007"
     _ref: '/portfolioitem/feature/1007'
@@ -169,6 +176,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
   ,
     ObjectID: "1008"
     _ref: '/portfolioitem/feature/1008'
@@ -177,6 +185,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
   ,
     ObjectID: "1009"
     _ref: '/portfolioitem/feature/1009'
@@ -185,6 +194,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
   ]
 
   getFeatureStoreFixture: ->

@@ -13,7 +13,13 @@
         },
 
         getStoreFilter: function (model) {
-            return [];
+            return [
+                {
+                    property: 'ActualEndDate',
+                    operator: '=',
+                    value: 'null'
+                }
+            ];
         },
 
         isMatchingRecord: function (featureRecord) {
