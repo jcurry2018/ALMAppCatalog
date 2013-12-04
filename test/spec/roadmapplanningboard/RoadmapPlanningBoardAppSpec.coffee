@@ -115,6 +115,6 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
     it 'should display a friendly notification if any service (planning, timeline, WSAPI) is unavailable', ->
       @createApp().then =>
         Ext.Ajax.fireEvent('requestexception', null, null, { operation:
-          requester: @app })
+          requester: @app.controller })
 
         expect(@app.getEl().getHTML()).toContain 'temporarily unavailable'
