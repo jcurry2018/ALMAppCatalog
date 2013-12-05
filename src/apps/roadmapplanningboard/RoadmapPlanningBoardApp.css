@@ -817,3 +817,9 @@
     background-color: #F66349;
     font-weight: normal;
 }
+
+.roadmap-planning-container .feedbackcontainer .feedback {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    float: right;
+}

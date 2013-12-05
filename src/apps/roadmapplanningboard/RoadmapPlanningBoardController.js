@@ -7,9 +7,11 @@
             'Rally.data.util.PortfolioItemHelper',
             'Rally.apps.roadmapplanningboard.PlanningBoard',
             'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable',
-            'Rally.ui.notify.Notifier'
+            'Rally.ui.notify.Notifier',
+            'Rally.ui.feedback.Feedback'
         ],
 
+        feedback: null,
         cardboard: null,
 
         config: {
@@ -17,16 +19,27 @@
             context: null,
             containerConfig: {
                 cls: 'roadmap-planning-container',
-                minHeight: 100
+                height: '100%'
+            },
+            feedbackConfig: {
+                feedbackDialogConfig: {
+                    title: 'Feedback on Roadmap Planning Board',
+                    subject: 'Roadmap Planning Board',
+                    feedbackId: 'roadmapplanningboard'
+                }
             }
         },
 
         constructor: function (config) {
             this.initConfig(config);
+            this.context = this.context || Rally.environment.getContext();
         },
 
         createPlanningBoard: function () {
             this.container = Ext.create('Ext.container.Container', this.containerConfig);
+
+            this.feedback = Ext.create('Rally.ui.feedback.Feedback', this.feedbackConfig);
+            this.container.add(this.feedback);
 
             Rally.apps.roadmapplanningboard.DeftInjector.init();
             this.roadmapStore = Deft.Injector.resolve('roadmapStore');
@@ -115,8 +128,7 @@
 
         _onCardBoardLoad: function () {
             if (Rally.BrowserTest) {
-                this.container.fireEvent('load');
-                Rally.BrowserTest.publishComponentReady(this);
+                Rally.BrowserTest.publishComponentReady(this.container);
             }
         }
     });
