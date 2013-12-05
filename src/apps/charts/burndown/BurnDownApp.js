@@ -226,10 +226,14 @@
 
         },
 
+        _getNow: function() {
+            return new Date();
+        },
+
         _addDateBoundsToCalculator: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
             var endDate = this._getScopeObjectEndDate();
-            var now = new Date();
+            var now = this._getNow();
             calcConfig.startDate = Rally.util.DateTime.toIsoString(this._getScopeObjectStartDate(), true);
             if(now > this._getScopeObjectStartDate() && now < this._getScopeObjectEndDate()) {
                 endDate = now;
@@ -401,7 +405,6 @@
             this._updateChartConfigDateFormat();
             this._updateChartConfigWorkdays();
             var chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
-
 
             this.add(chartComponentConfig);
             this.down('rallychart').on('snapshotsAggregated', this._onSnapshotDataReady, this);
@@ -620,7 +623,7 @@
 
         _getScopeObjectStartDate: function () {
             if (!this.scopeObject) {
-                return new Date();
+                return this._getNow();
             } else if (this.scopeObject._type === 'release') {
                 return this.scopeObject.ReleaseStartDate;
             } else {
@@ -630,7 +633,7 @@
 
         _getScopeObjectEndDate: function () {
             if (!this.scopeObject) {
-                return new Date();
+                return this._getNow();
             } else if (this.scopeObject._type === 'release') {
                 return this.scopeObject.ReleaseDate;
             } else {
