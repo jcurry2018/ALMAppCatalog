@@ -170,6 +170,7 @@
                 },
                 columnCfgs: this._getGridColumns(),
                 enableBulkEdit: context.isFeatureEnabled('EXT4_GRID_BULK_EDIT'),
+                stateId: context.getScopedStateId('iteration-tracking-grid'),
                 stateful: context.isFeatureEnabled('ITERATION_TRACKING_PERSISTENT_PREFERENCES')
             };
 
@@ -183,14 +184,16 @@
                         parentTypes: ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'],
                         childTypes: ['Defect', 'Task', 'TestCase'],
                         topLevelQuery: this.context.getTimeboxScope().getQueryFilter(),
-                        sorters: ['Rank DESC'],
+                        sorters: {
+                            property: 'Rank',
+                            direction: 'DESC'
+                        },
                         fetch: ['FormattedID', 'Tasks', 'Defects', 'TestCases']
                     },
                     treeColumnRenderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
                         return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);
                     },
                     rootVisible: false,
-                    stateful: true,
                     columnCfgs: columns ? this._getGridColumns(columns) : null,
                     defaultColumnCfgs: this._getGridColumns(),
                     isLeaf: function(record) {
@@ -200,21 +203,10 @@
                     },
                     getIcon: function(record) {
                         return '';
-                    },
-                    listeners:{
-                        reconfigure: function(columns) {
-                            this._onReconfigure(columns, treeGridModel);
-                        },
-                        scope: this
                     }
                 });
             }
             return gridConfig;
-        },
-
-        _onReconfigure: function(columns, treeGridModel) {
-            this.remove(this.gridboard, true);
-            this._addGrid(this._getGridConfig(treeGridModel, columns));
         },
 
         _getGridColumns: function(columns) {
