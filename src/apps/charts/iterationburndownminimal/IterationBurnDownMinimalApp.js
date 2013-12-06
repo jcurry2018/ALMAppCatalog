@@ -10,6 +10,10 @@
             'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalChart'
         ],
 
+        requires: [
+            'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalViewToggle'
+        ],
+
         cls: 'iterationburndownminimal-app',
 
         items: [],
@@ -30,31 +34,20 @@
         scopeType: "iteration",
         scopeObject: undefined,
         chartType: "burndown",
+        buttonPadding: 15,
 
         _isCFDEnabled: function () {
-            var isFeatureEnabled = 'isFeatureEnabled';
-            if (Rally.environment.getContext()[isFeatureEnabled]('ITERATION_CFD_MINIMAL')) {
+            if (Rally.environment.getContext().isFeatureEnabled('ITERATION_CFD_MINIMAL')) {
                 return true;
             }
             return false;
-        },
-
-        _cfdSwapButtonClicked: function () {
-            if (this._isCFDEnabled()) {
-                if (this.chartType === "cumulativeflow") {
-                    this.chartType = "burndown";
-                } else {
-                    this.chartType = "cumulativeflow";
-                }
-                this._getIterationData(this.scopeObject);
-            }
         },
 
         onScopeChange: function (scope) {
             this._onScopeObjectLoaded(scope.getRecord());
         },
 
-        launch: function () {
+        initComponent: function () {
             this.callParent(arguments);
 
             this.add({
@@ -64,34 +57,37 @@
             });
 
             if (this._isCFDEnabled()) {
-                // NOTE: the item being added below will be replaced by the pictofonts described in S57444
-                this.add({
-                    xtype: 'rallybutton',
-                    text: 'Cumulative Flow',
-                    cls: 'primary small',
-                    itemId: 'cfdSwapButton',
+
+                this.buttonContainer = this.add({
+                    xtype: 'container',
+                    itemId: 'buttonContainer',
+                    padding: ''+this.buttonPadding+' '+this.buttonPadding
+                });
+
+                this.buttonContainer.add({
+                    itemId: 'toggle',
+                    xtype: 'rallyiterationburndownminimalviewtoggle',
+                    stateful: true,
                     style: {
-                        'float': 'right'
+                        'display':'block',
+                        'margin-left':'auto',
+                        'margin-right':'auto'
                     },
-                    scope: this,
-                    handler : function(btn) {
-                        var app = btn.up('rallyapp');
-                        if (app._isCFDEnabled()) {
-                            if (btn.text === "Cumulative Flow") {
-                                btn.setText("Burndown");
-                            } else {
-                                btn.setText("Cumulative Flow");
-                            }
-                            app._cfdSwapButtonClicked();
-                        }
+                    listeners: {
+                        toggle: this._onViewToggle,
+                        scope: this
                     }
                 });
-                // NOTE: the item being added above will be replaced by the pictofonts described in S57444
             }
 
             this._setupEvents();
             this._setupUpdateBeforeRender();
             this.subscribe(this, Rally.Message.objectUpdate, this._onMessageFromObjectUpdate, this);
+        },
+
+        _onViewToggle: function(toggleState) {
+            this.chartType = toggleState;
+            this._getIterationData(this.scopeObject);
         },
 
         _setupUpdateBeforeRender: function () {
@@ -337,22 +333,24 @@
         },
 
         _getIterationData: function (iteration) {
-            this.setLoading();
-            var url;
-            if(this.chartType === "burndown") {
-                url = "/slm/charts/itsc.sp?sid=&iterationOid=" + iteration.get('ObjectID') + "&cpoid=" + this.getContext().getProject().ObjectID;
-            } else {
-                url = "/slm/charts/icfc.sp?sid=&iterationOid=" + iteration.get('ObjectID') + "&bigChart=true&cpoid=" + this.getContext().getProject().ObjectID;
+            if (iteration) {
+                this.setLoading();
+                var url;
+                if(this.chartType === "burndown") {
+                    url = "/slm/charts/itsc.sp?sid=&iterationOid=" + iteration.get('ObjectID') + "&cpoid=" + this.getContext().getProject().ObjectID;
+                } else {
+                    url = "/slm/charts/icfc.sp?sid=&iterationOid=" + iteration.get('ObjectID') + "&bigChart=true&cpoid=" + this.getContext().getProject().ObjectID;
+                }
+                Ext.Ajax.request({
+                    url: url,
+                    method: 'GET',
+                    withCredentials: true,
+                    success: function (response, request) {
+                        this._createChartDatafromXML(response.responseText);
+                    },
+                    scope: this
+                });
             }
-            Ext.Ajax.request({
-                url: url,
-                method: 'GET',
-                withCredentials: true,
-                success: function (response, request) {
-                    this._createChartDatafromXML(response.responseText);
-                },
-                scope: this
-            });
         },
 
         _getHeight: function () {
@@ -365,6 +363,9 @@
         _addChart: function () {
             this.remove('iterationburndownminimalchart', false);
             this.chartComponentConfig.chartConfig.chart.height = (this.height) ? this.height : this._getHeight();
+            if (this._isCFDEnabled()) {
+                this.chartComponentConfig.chartConfig.chart.height -= (this.buttonContainer.getHeight() );
+            }
             this.chartComponentConfig.chartConfig.chart.width = (this.width) ? this.width : this._getWidth();
             var chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
             this.add(chartComponentConfig);
