@@ -31,6 +31,10 @@
                         return featureRecord.getId() === parseInt(planFeatureRecord.id, 10);
                     }));
             }, this)) === -1;
+        },
+
+        getAllFetchFields: function() {
+            return ['true'];
         }
     });
 
