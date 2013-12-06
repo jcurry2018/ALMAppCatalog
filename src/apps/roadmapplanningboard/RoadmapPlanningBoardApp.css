@@ -1,3 +1,7 @@
+.roadmap-board {
+    height: 100%;
+}
+
 .roadmap-board .no-drag-select {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -20,10 +24,6 @@
     position: absolute;
     top: 9px;
     right: 5%;
-}
-
-.roadmap-board {
-    height: 100%;
 }
 
 .roadmap-board > .rui-gridboard {

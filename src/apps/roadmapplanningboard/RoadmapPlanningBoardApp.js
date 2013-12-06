@@ -3,16 +3,23 @@
 
     Ext.define('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', {
         extend: 'Rally.app.App',
-        requires: ['Rally.apps.roadmapplanningboard.RoadmapPlanningBoardController'],
+        requires: [
+            'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer'
+        ],
         cls: 'roadmapPlanningBoardApp',
         componentCls: 'app',
 
         launch: function () {
-            this.controller = Ext.create('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardController', {
-                context: this.context
+            var container = Ext.create('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer', {
+                context: this.context,
+                cardboardPlugins: [
+                    {
+                        ptype: 'rallyfixedheadercardboard'
+                    }
+                ]
             });
 
-            this.add(this.controller.createPlanningBoard());
+            this.add(container);
         }
     });
 })();

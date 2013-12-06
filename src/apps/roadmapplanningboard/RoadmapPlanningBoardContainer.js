@@ -1,7 +1,8 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardController', {
+    Ext.define('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer', {
+        extend: 'Ext.container.Container',
         requires: [
             'Rally.apps.roadmapplanningboard.DeftInjector',
             'Rally.data.util.PortfolioItemHelper',
@@ -10,6 +11,7 @@
             'Rally.ui.notify.Notifier',
             'Rally.ui.feedback.Feedback'
         ],
+        cls: 'roadmap-planning-container',
 
         feedback: null,
         cardboard: null,
@@ -17,31 +19,30 @@
         config: {
             listeners: null,
             context: null,
-            containerConfig: {
-                cls: 'roadmap-planning-container',
-                height: '100%'
-            },
             feedbackConfig: {
                 feedbackDialogConfig: {
                     title: 'Feedback on Roadmap Planning Board',
                     subject: 'Roadmap Planning Board',
                     feedbackId: 'roadmapplanningboard'
                 }
-            }
+            },
+            /**
+             * @cfg cardboardPlugins {Array}
+             * Extra plugins that should be added to the cardboard
+             */
+            cardboardPlugins: []
         },
 
         constructor: function (config) {
+            this.callParent(arguments);
             this.initConfig(config);
             this.context = this.context || Rally.environment.getContext();
-        },
-
-        createPlanningBoard: function () {
-            this.container = Ext.create('Ext.container.Container', this.containerConfig);
 
             this.feedback = Ext.create('Rally.ui.feedback.Feedback', this.feedbackConfig);
-            this.container.add(this.feedback);
+            this.add(this.feedback);
 
             Rally.apps.roadmapplanningboard.DeftInjector.init();
+
             this.roadmapStore = Deft.Injector.resolve('roadmapStore');
             this.timelineStore = Deft.Injector.resolve('timelineStore');
 
@@ -53,7 +54,6 @@
                 var roadmapPromise = this.roadmapStore.load({requester: this, storeServiceName: "Planning"});
                 var timelinePromise = this.timelineStore.load({requester: this, storeServiceName: "Timeline"});
 
-                //should be able to get timeline and roadmap async, get some promises
                 Deft.Promise.all([roadmapPromise, timelinePromise]).then({
                     success: function (results) {
                         var roadmap = results[0].records[0];
@@ -68,12 +68,11 @@
                 });
             });
 
-            return this.container;
         },
 
         _onRequestException: function (connection, response, requestOptions) {
             var requester = requestOptions.operation && requestOptions.operation.requester;
-            var el = this.container && this.container.getEl();
+            var el = this.getEl();
 
             if (requester === this && el) {
                 el.mask('Roadmap planning is <strong>temporarily unavailable</strong>, please try again in a few minutes.', "roadmap-service-unavailable-error");
@@ -98,17 +97,14 @@
                     plugins: [
                         {
                             ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 3
-                        },
-                        {
-                            ptype: 'rallyfixedheadercardboard'
                         }
-                    ],
+                    ].concat(this.cardboardPlugins),
                     listeners: {
                         load: this._onCardBoardLoad,
                         scope: this
                     }
                 });
-                this.container.add(this.cardboard);
+                this.add(this.cardboard);
             } else if (!roadmap) {
                 Rally.ui.notify.Notifier.showError({message: 'No roadmap available'});
             } else {
@@ -128,7 +124,7 @@
 
         _onCardBoardLoad: function () {
             if (Rally.BrowserTest) {
-                Rally.BrowserTest.publishComponentReady(this.container);
+                Rally.BrowserTest.publishComponentReady(this);
             }
         }
     });

@@ -6,7 +6,7 @@
         alias: 'widget.timeframeplanningcolumn',
 
         requires: [
-            'Rally.data.QueryFilter',
+            'Rally.data.wsapi.Filter',
             'Rally.apps.roadmapplanningboard.ThemeHeader',
             'Rally.apps.roadmapplanningboard.PlanCapacityProgressBar',
             'Rally.apps.roadmapplanningboard.util.Fraction',
@@ -114,7 +114,7 @@
         },
 
         _createFeatureFilter: function (featureId) {
-            return Ext.create('Rally.data.QueryFilter', {
+            return Ext.create('Rally.data.wsapi.Filter', {
                 property: 'ObjectID',
                 operator: '=',
                 value: featureId

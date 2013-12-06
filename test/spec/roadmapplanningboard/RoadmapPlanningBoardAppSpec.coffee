@@ -6,31 +6,39 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
   helpers
-    createApp: (config) ->
-      context = Ext.create 'Rally.app.Context',
-        initialValues:
-          project:
-            ObjectID: 123456
-
-      @container = Ext.create('Ext.container.Container')
-      @createPlanningBoardStub = @stub Rally.apps.roadmapplanningboard.RoadmapPlanningBoardController::,
-        'createPlanningBoard', () => @container
+    createApp: (settings = {}, context = {}) ->
 
       @app = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp',
-        context: context
+        context: Ext.create 'Rally.app.Context',
+          initialValues:
+            Ext.merge
+              project:
+                ObjectID: 123456
+                _ref: 'project/ref'
+                Name: 'TestProject'
+              workspace:
+                WorkspaceConfiguration:
+                  DragDropRankingEnabled: true
+            , context
+
+        settings: settings
         renderTo: 'testDiv'
 
-      @once
-        condition: => @container.rendered
+      @waitForComponentReady(@app.down('container'))
 
-  it 'should create a controller', ->
-    @createApp().then =>
-      expect(!!@app.controller).toBe true
+  beforeEach ->
+    @ajax.whenQuerying('TypeDefinition').respondWith Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemFeature')
+    @ajax.whenQuerying('PortfolioItem/Feature').respondWith []
+    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
-  it 'should forward app context to controller', ->
-    @createApp().then =>
-      expect(@app.controller.getContext().getProject().ObjectID).toBe 123456
+  afterEach ->
+    @app?.destroy()
+    Deft.Injector.reset()
 
-  it 'should add a container to the app', ->
+  it 'should create a container', ->
     @createApp().then =>
-      expect(@app.down().getId()).toBe @container.getId()
+      expect(@app.down('container')).toBeDefined()
+
+  it 'should forward app context to container', ->
+    @createApp().then =>
+      expect(@app.down('container').getContext().getProject().ObjectID).toBe 123456
