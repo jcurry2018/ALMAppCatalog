@@ -183,7 +183,7 @@
                         parentFieldNames: ['Requirement', 'WorkProduct', 'DefectSuite'],
                         parentTypes: ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'],
                         childTypes: ['Defect', 'Task', 'TestCase'],
-                        topLevelQuery: this.context.getTimeboxScope().getQueryFilter(),
+                        rootNodeFilters: this.context.getTimeboxScope().getQueryFilter(),
                         sorters: {
                             property: 'Rank',
                             direction: 'DESC'
