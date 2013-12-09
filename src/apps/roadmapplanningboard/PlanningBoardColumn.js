@@ -21,6 +21,7 @@
                 ptype: 'orcacolumndropcontroller'
             },
             moreItemsConfig: {
+                hidden: true,
                 token: '/portfolioitems'
             },
             cardConfig: {
