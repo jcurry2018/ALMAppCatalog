@@ -203,48 +203,131 @@
             }
         },
 
+        _createBurndownConfig: function() {
+            return Ext.Object.merge({
+               chartColors: ["#005eb8", "#666666", "#8dc63f" ],
+
+               chartConfig: {
+                    chart: {
+                        zoomType: 'xy',
+                        alignTicks: false,
+                        animation: false
+                    },
+                    plotOptions: { series: {animation: false}},
+                    legend: { enabled: true },
+                    title: { text: null },
+                    xAxis: {
+                        tickmarkPlacement: 'on',
+                        tickInterval: 1
+                    },
+                    yAxis: [
+                        {
+                            title: { text: null },
+                            min: 0,
+                            labels: { style: { color: "#005eb8" } }
+                        },
+                        {
+                           title: { text: null },
+                           min: 0,
+                           labels: { style: { color: "#8dc63f" } },
+                           opposite: true
+                        }
+                    ]
+               },
+               chartData: {
+                   categories: [ ],
+                   series: [
+                       {
+                           name: "To Do",
+                           type: "column",
+                           data: [  ],
+                           tooltip: { valueDecimals: 1, valueSuffix: ' Hours' }
+                       },
+                       {
+                           name: "Ideal",
+                           type: "line",
+                           dashStyle: "Solid",
+                           data: [ ],
+                           marker : {
+                               enabled : true,
+                               radius : 3
+                           },
+                           tooltip: { valueDecimals: 1, valueSuffix: ' Hours' }
+                       },
+                       {
+                           name: "Accepted",
+                           type: "column",
+                           data: [ ],
+                           yAxis: 1,
+                           tooltip: { valueDecimals: 1, valueSuffix: ' Points' }
+                       }
+                   ]
+               }
+           }, Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalChart.prototype.chartComponentConfig);
+        },
+
+        _createCFDConfig: function() {
+            return Ext.Object.merge({
+               chartColors: [  // RGB values obtained from here: http://ux-blog.rallydev.com/?cat=23
+                                "#C0C0C0",  // $grey4
+                                "#FF8200",  // $orange
+                                "#F6A900",  // $gold
+                                "#FAD200",  // $yellow
+                                "#8DC63F",  // $lime
+                                "#1E7C00",  // $green_dk
+                                "#337EC6",  // $blue_link
+                                "#005EB8",  // $blue
+                                "#7832A5",  // $purple
+                                "#DA1884"   // $pink
+                            ],
+               chartConfig: {
+                    chart: {
+                        zoomType: 'xy',
+                        alignTicks: false,
+                        animation: false,
+                        type: "area"
+                    },
+                    plotOptions: {
+                                    series: {
+                                        animation: false,
+                                        marker: {
+                                            enabled: false
+                                        }
+                                    },
+                                    area: {
+                                        stacking: 'normal'
+                                    }
+                                 },
+                    legend: {
+                            enabled: true
+                            // itemStyle: { fontSize: '8px'}  // something like this to shrink the legend, maybe compute it based on available width?
+                            },
+                    title: { text: null },
+                    xAxis: {
+                        tickmarkPlacement: 'on',
+                        tickInterval: 1
+                    },
+                    yAxis: [
+                        {
+                            title: { text: null },
+                            min: 0,
+                            labels: {
+                                style: { color: "#005eb8" }
+                            }
+                        } ]
+
+               },
+               chartData: {
+                   categories: [ ],
+                   series: [ ]
+               }
+           }, Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalChart.prototype.chartComponentConfig);
+        },
+
         _createBurndownChartDatafromXML: function (xmlDoc) {
-            this.chartComponentConfig.chartData.series = [
-                                                {
-                                                    name: "To Do",
-                                                    type: "column",
-                                                    data: [  ],
-                                                    tooltip: { valueDecimals: 1, valueSuffix: ' Hours' }
-                                                },
-                                                {
-                                                    name: "Ideal",
-                                                    type: "line",
-                                                    dashStyle: "Solid",
-                                                    data: [ ],
-                                                    marker : {
-                                                        enabled : true,
-                                                        radius : 3
-                                                    },
-                                                    tooltip: { valueDecimals: 1, valueSuffix: ' Hours' }
-                                                },
-                                                {
-                                                    name: "Accepted",
-                                                    type: "column",
-                                                    data: [ ],
-                                                    yAxis: 1,
-                                                    tooltip: { valueDecimals: 1, valueSuffix: ' Points' }
-                                                }
-                                            ];
-            this.chartComponentConfig.chartColors = ["#005eb8", "#666666", "#8dc63f" ];
-            this.chartComponentConfig.chartConfig.chart.type = "undefined";
-            this.chartComponentConfig.chartConfig.yAxis = [
-                                     {
-                                         title: { text: null },
-                                         min: 0,
-                                         labels: { style: { color: "#005eb8" } }
-                                     },
-                                     {
-                                        title: { text: null },
-                                        min: 0,
-                                        labels: { style: { color: "#8dc63f" } },
-                                        opposite: true
-                                     }
-                                 ];
+
+            this.chartComponentConfig = this._createBurndownConfig();
+
             var xmlChartData = xmlDoc.getElementsByTagName("chart_data")[0];
             var xmlChartValueText = xmlDoc.getElementsByTagName("chart_value_text")[0];
             var draw = xmlDoc.getElementsByTagName("draw")[0];
@@ -269,7 +352,6 @@
                 }
             }
             this._configureYAxisIntervals();
-            this.chartComponentConfig.chartConfig.plotOptions = { series: {animation: false}};
 
             this.chartComponentConfig.chartConfig.xAxis.tickInterval = this.chartComponentConfig.chartData.series[0].data.length / 5;
 
@@ -278,23 +360,9 @@
 
         _createCumulativeFlowChartDatafromXML: function (xmlDoc) {
 
-            this.chartComponentConfig.chartData.series = [];
-            this.chartComponentConfig.chartConfig.chart.type = "area";
+            this.chartComponentConfig = this._createCFDConfig();
 
-            this.chartComponentConfig.chartColors = [  // RGB values obtained from here: http://ux-blog.rallydev.com/?cat=23
-                                "#C0C0C0",  // $grey4
-                                "#FF8200",  // $orange
-                                "#F6A900",  // $gold
-                                "#FAD200",  // $yellow
-                                "#8DC63F",  // $lime
-                                "#1E7C00",  // $green_dk
-                                "#337EC6",  // $blue_link
-                                "#005EB8",  // $blue
-                                "#7832A5",  // $purple
-                                "#DA1884"   // $pink
-                            ];
             var xmlChartData = xmlDoc.getElementsByTagName("chart_data")[0];
-            //var axis_value = xmlDoc.getElementsByTagName("axis_value")[1];
 
             var rows = xmlChartData.getElementsByTagName("row");
             var i, j;
@@ -304,28 +372,6 @@
                 this.chartComponentConfig.chartData.series[i].data = this._getNumberValues(rows[j].getElementsByTagName("number"));
                 this.chartComponentConfig.chartData.series[i].name = this._getStringValues(rows[j].getElementsByTagName("string"))[0];
             }
-            //this.chartComponentConfig.chartConfig.yAxis[0].max = axis_value.getAttribute("max") * 1;
-
-
-            this._configureYAxisIntervals();
-            this.chartComponentConfig.chartConfig.plotOptions = {
-                                    series: {
-                                        animation: false,
-                                        marker: {
-                                            enabled: false
-                                        }
-                                    },
-                                    area: {
-                                        stacking: 'normal'
-                                    }
-                                };
-             this.chartComponentConfig.chartConfig.yAxis = [
-                                                         {
-                                                             title: { text: null },
-                                                             min: 0,
-                                                             labels: { style: { color: "#005eb8" } }
-                                                         }
-                                                     ];
 
             this.chartComponentConfig.chartConfig.xAxis.tickInterval = this.chartComponentConfig.chartData.series[0].data.length / 5;
 
