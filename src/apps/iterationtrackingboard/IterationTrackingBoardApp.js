@@ -78,7 +78,7 @@
                 plugins.push({
                     ptype: 'rallygridboardfiltercontrol',
                     filterControlConfig: {
-                        cls: 'secondary small button picto gridboard-filter-control',
+                        cls: 'small gridboard-filter-control',
                         stateful: true,
                         stateId: context.getScopedStateId('iteration-tracking-filter-button'),
                         items: [

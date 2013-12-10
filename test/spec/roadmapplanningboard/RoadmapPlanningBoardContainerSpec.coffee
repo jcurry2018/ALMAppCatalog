@@ -1,7 +1,5 @@
 Ext = window.Ext4 || window.Ext
 
-Ext.define 'Rally.apps.roadmapplanningboard.DeftInjector', { singleton: true, init: Ext.emptyFn }
-
 Ext.require [
   'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
   'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer'

@@ -5,21 +5,22 @@
         extend: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
         alias: 'widget.backlogplanningcolumn',
         inject: ['planStore'],
+        require: ['Rally.data.QueryFilter'],
         config: {
+            filterable: true,
             roadmap: null,
             columnHeaderConfig: {
                 headerTpl: 'Backlog'
-            }
+            },
+            baseFilter: new Rally.data.QueryFilter({
+                property: 'ActualEndDate',
+                operator: '=',
+                value: 'null'
+            })
         },
 
-        getStoreFilter: function (model) {
-            return [
-                {
-                    property: 'ActualEndDate',
-                    operator: '=',
-                    value: 'null'
-                }
-            ];
+        getColumnIdentifier: function () {
+            return "roadmapplanningboardbacklogcolumn";
         },
 
         isMatchingRecord: function (featureRecord) {
@@ -33,7 +34,7 @@
             }, this)) === -1;
         },
 
-        getAllFetchFields: function() {
+        getAllFetchFields: function () {
             return ['true'];
         }
     });

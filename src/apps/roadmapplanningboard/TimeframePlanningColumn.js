@@ -24,7 +24,6 @@
             timeframeRecord: undefined,
             planRecord: undefined,
             dateFormat: 'M j',
-            headerTemplate: undefined,
             pointField: 'PreliminaryEstimate'
         },
 
@@ -50,6 +49,10 @@
                     this.drawHeader();
                 }, this);
             }
+        },
+
+        getColumnIdentifier: function () {
+            return "planningboardtimeframecolumn" + this.planRecord.getId();
         },
 
         /**

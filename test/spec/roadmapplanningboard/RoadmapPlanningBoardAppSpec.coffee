@@ -1,13 +1,13 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp'
+  'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp',
+  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
   helpers
     createApp: (settings = {}, context = {}) ->
-
       @app = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp',
         context: Ext.create 'Rally.app.Context',
           initialValues:
@@ -27,9 +27,9 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
       @waitForComponentReady(@app.down('container'))
 
   beforeEach ->
+    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
     @ajax.whenQuerying('TypeDefinition').respondWith Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemFeature')
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith []
-    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
   afterEach ->
     @app?.destroy()

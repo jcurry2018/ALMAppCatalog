@@ -198,7 +198,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
   ]
 
   getFeatureStoreFixture: ->
-    @featureStoreFixture = Ext.create 'Rally.data.Store',
+    @featureStoreFixture = Ext.create 'Rally.data.wsapi.Store',
       model: Rally.test.mock.data.WsapiModelFactory.getModel 'PortfolioItem/Feature'
       proxy:
         type: 'memory'
