@@ -114,6 +114,20 @@ describe 'Rally.apps.grid.GridApp', ->
         "(Owner = #{Rally.util.Ref.getRelativeUri(@app.getContext().getUser())})"
       ).toString()
 
+  it 'refreshes the grid when the timebox scope changes', ->
+    @createTimeboxScopedApp().then =>
+      newTimeboxScope = Ext.create 'Rally.app.TimeboxScope', record: @mom.getRecord 'iteration'
+      filterSpy = @spy @grid, 'filter'
+      @app.onTimeboxScopeChange newTimeboxScope
+      expect(@app.getContext().getTimeboxScope().getRecord()).toBe newTimeboxScope.getRecord()
+      expect(filterSpy).toHaveBeenCalledOnce()
+      args = filterSpy.firstCall.args
+      expect(args[0].length).toBe 1
+      expect(args[0][0].toString()).toBe newTimeboxScope.getQueryFilter().toString()
+      expect(args[1]).toBe true
+      expect(args[2]).toBe true
+
+
   describe 'build query does not execute user-entered code', ->
     beforeEach ->
       window.__hacked_by_test_buildQueryDoesNotExecuteUserEnteredCode = false

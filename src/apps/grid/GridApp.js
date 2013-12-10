@@ -58,9 +58,7 @@
         onTimeboxScopeChange: function(newTimeboxScope) {
             this.callParent(arguments);
 
-            this.down('rallygrid').getStore().reload({
-                filters: this._getFilters()
-            });
+            this.down('rallygrid').filter(this._getFilters(), true, true);
         },
 
         _getFilters: function() {
