@@ -137,7 +137,7 @@ module.exports = (grunt) ->
           vendor: (->
             if process.env.APPSDK_PATH?
               vendorPaths = [
-                "lib/ext/4.1.1a/ext-all-debug.js"
+                "lib/ext/4.2.2/ext-all-debug.js"
                 "#{appsdk_path}/builds/sdk-dependencies.js"
                 "#{appsdk_path}/src/Ext-more.js"
               ]
@@ -182,8 +182,7 @@ module.exports = (grunt) ->
           )()
           styles: [
             "#{appsdk_path}/test/support/jasmine/rally-jasmine.css"
-            "#{appsdk_path}/builds/rui/resources/css/rui.1.css"
-            "#{appsdk_path}/builds/rui/resources/css/rui.2.css"
+            "#{appsdk_path}/workspace/packages/rui/build/resources/rui-all.css"
             "#{appsdk_path}/builds/rui/resources/css/rui-fonts.css"
             "#{appsdk_path}/builds/lib/closure/closure-20130117-r2446.css"
             "#{appsdk_path}/builds/rui/resources/css/lib-closure.css"
