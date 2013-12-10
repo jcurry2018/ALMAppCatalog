@@ -145,19 +145,14 @@
     min-height: 20px;
 }
 
-.roadmap-board .planning-column .timeboxDates {
+.roadmap-board .planning-column .timeframeDates {
+    font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;
-    font-weight: bold;
-    color: #8f8f8f;
+    color: #666666;
     margin: 0 auto;
     margin-bottom: 1px;
     width: 125px;
     border: 3px solid transparent;
-}
-
-.roadmap-board .planning-column .timeboxDates:hover {
-    border: 1px solid #3197c6 !important;
-    padding: 2px 0px;
 }
 
 .roadmap-board .first-card-column {
@@ -244,7 +239,7 @@
 }
 
 .roadmap-board .column-container .column-header .column-header-title {
-    padding: 15px 8px 0 8px;
+    padding: 15px 8px 8px 8px;
 }
 
 .roadmap-board .column-container .planning-column {
@@ -385,6 +380,7 @@
 }
 
 .roadmap-planning-popover .dateField .en-calendar {
+    color: #888888;
     font-size: 27px;
 }
 
@@ -657,66 +653,36 @@
     user-select: none;
 }
 
-.roadmap-planning-popover {
-    text-align: center;
-    background-color: #424242 !important;
-    box-shadow: 2px 2px 3px #CCC;
-    border-radius: 3px;
-    padding: 20px;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    overflow: visible;
-    font-size: 14px;
-    font-weight: 400;
-}
-
 .roadmap-planning-popover td {
     vertical-align: middle;
 }
 
-.roadmap-planning-popover .popoverDateRangeText {
-    text-align: left;
-    color: #ffffff;
-    font-weight: 300;
-    font-size: 14px;
-    margin-bottom: 7px;
+.roadmap-planning-popover .popoverDateRangeText,
+.roadmap-planning-popover .popover-label {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
+    font-size: 18px;
+    font-weight: normal;
+    margin-bottom: 10px;
 }
 
 .roadmap-planning-popover .popoverToText {
-    color: #ffffff;
+    font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;
-    font-weight: 300;
     padding: 0 10px;
 }
 
 .roadmap-planning-popover .popoverDateText {
-    text-align: left;
+    font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;
-    font-weight: 300;
     padding: 10px 0;
-    color: #ffffff;
 }
 
 .roadmap-planning-popover .x4-panel {
     border-color: transparent;
 }
 
-.roadmap-planning-popover .x4-panel-body {
-    background-color: #424242 !important;
-    border-color: transparent;
-}
-
 .roadmap-planning-popover.menu {
     font-weight: 300;
-}
-
-.roadmap-planning-popover .x4-window-body {
-    background-color: #424242 !important;
-    overflow: visible;
 }
 
 .roadmap-planning-popover a {
@@ -737,23 +703,12 @@
 }
 
 .roadmap-planning-popover .x4-form-item-label {
-    color: #ffffff !important;
-    margin: 2px;
-    display: block;
     border-radius: 3px;
+    display: block;
+    font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;
     font-weight: 300;
-}
-
-.roadmap-planning-popover .popover-label {
-    color: #ffffff !important;
     margin: 2px;
-    font-size: 14px;
-    font-weight: 400;
-    text-align: center;
-    padding-bottom: 10px;
-    padding-top: 3px;
-    margin-top: -3px;
 }
 
 .roadmap-planning-popover .x4-form-field {
@@ -770,12 +725,11 @@
 }
 
 .roadmap-planning-popover .x-form-error-msg {
-    padding: 5px;
-    color: white;
     background-color: #B81B10;
+    color: white;
+    font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;
-    font-weight: 400;
-    font-family: arial, helevetica;
+    padding: 5px;
 }
 
 .roadmap-planning-popover .form-error-msg-field {
@@ -783,20 +737,8 @@
 }
 
 .roadmap-planning-popover #capacity-validation-error li {
+    font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;
-    font-weight: 400;
-    font-family: arial, helvetica;
-}
-
-.roadmap-planning-popover-chevron.popover-chevron.up {
-    background-image: url('chevron_up.png');
-}
-
-@media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmap-planning-popover.popover-chevron.up {
-        background-image: url('chevron_up@2x.png');
-        background-size: 28px 19px;
-    }
 }
 
 .roadmap-board a.themeButtonExpand:hover {
