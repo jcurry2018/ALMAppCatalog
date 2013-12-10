@@ -9,6 +9,7 @@
         extend: 'Rally.app.TimeboxScopedApp',
         requires: [
             'Rally.data.ModelFactory',
+            'Rally.data.Ranker',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.grid.TreeGrid',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
@@ -185,8 +186,8 @@
                         childTypes: ['Defect', 'Task', 'TestCase'],
                         rootNodeFilters: this.context.getTimeboxScope().getQueryFilter(),
                         sorters: {
-                            property: 'Rank',
-                            direction: 'DESC'
+                            property: Rally.data.Ranker.getRankField(treeGridModel),
+                            direction: 'ASC'
                         },
                         fetch: ['FormattedID', 'Tasks', 'Defects', 'TestCases']
                     },
