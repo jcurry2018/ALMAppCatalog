@@ -161,7 +161,7 @@
                                 itemId: 'stats'
                             },
                             {
-                                xtype: 'container',
+                                xtype: 'component',
                                 cls: 'edit',
                                 renderTpl: new Ext.XTemplate('<a class="editLink" href="#">Edit iteration...</a>'),
                                 renderSelectors: { editLink: '.editLink' },
