@@ -216,7 +216,8 @@
                     plotOptions: {
                         series: {
                             animation: false,
-                            shadow: false // at the request of the UI team
+                            shadow: false, // at the request of the UI team
+                            borderWidth: 0
                         }
                     },
                     legend: { enabled: true },
@@ -359,7 +360,7 @@
             }
             this._configureYAxisIntervals();
 
-            this.chartComponentConfig.chartConfig.xAxis.tickInterval = this.chartComponentConfig.chartData.series[0].data.length / 5;
+            this.chartComponentConfig.chartConfig.xAxis.tickInterval = Math.floor(this.chartComponentConfig.chartData.series[0].data.length / 4);
 
             this._addChart();
         },
@@ -404,6 +405,7 @@
 
             this._configureYAxisIntervals();
 
+
             // Use number of ScheduleState values to show as a surrogate for with of the legend text.
             if(this.chartComponentConfig.chartData.series.length === 6) {
                 this.chartComponentConfig.chartConfig.legend.itemStyle = { fontSize: '8px'};
@@ -411,7 +413,7 @@
                 this.chartComponentConfig.chartConfig.legend.itemStyle = { fontSize: '10px'};
             } // else it will default to 12px
 
-            this.chartComponentConfig.chartConfig.xAxis.tickInterval = this.chartComponentConfig.chartData.series[0].data.length / 5;
+            this.chartComponentConfig.chartConfig.xAxis.tickInterval = Math.floor(this.chartComponentConfig.chartData.series[0].data.length / 4);
 
             this._addChart();
         },
