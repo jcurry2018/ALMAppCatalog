@@ -12,6 +12,7 @@ describe 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp
           user: globalContext.getUser()
           timebox: @_createIterationRecord()
           subscription: globalContext.getSubscription()
+          appID: 1
         , initialValues)
 
     _createIterationRecord: (data={}) ->
@@ -281,9 +282,12 @@ describe 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp
     app = Ext.create 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp',
       context: @getContext()
       renderTo: 'testDiv'
-      chartType: 'cumulativeflow'
       listeners:
         add: addSpy
+
+    cfdButton = app.down('#cumulativeflow')
+    expect(cfdButton).not.toBeNull();
+    Rally.test.fireEvent(cfdButton, 'click');
 
     @waitForCallback(icfcReadRequest).then =>
       chart = _.where(_.map(addSpy.args, (arg) -> arg[1]), xtype: 'rallychart')[0]
