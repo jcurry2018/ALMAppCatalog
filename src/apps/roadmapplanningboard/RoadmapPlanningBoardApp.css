@@ -351,6 +351,10 @@
     user-select: none;
 }
 
+.roadmap-planning-popover .x4-panel-body {
+    color: white;
+}
+
 .roadmap-planning-popover .month-triangles {
     background-image: none;
     color: #424242 !important;
