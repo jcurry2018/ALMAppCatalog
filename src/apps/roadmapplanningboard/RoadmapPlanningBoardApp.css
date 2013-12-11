@@ -87,7 +87,7 @@
 }
 
 .roadmap-board .planning-column {
-    background-color: #f5f5f5;
+    background-color: white;
 }
 
 .roadmap-board .planning-column .search {
@@ -134,6 +134,10 @@
 
 .roadmap-board .planning-column .columnTitle > table input {
     line-height: 20px;
+}
+
+.roadmap-board .column-headers {
+    border-bottom: 1px dotted #C6C6C6;
 }
 
 .roadmap-board .planning-column .column-header {
