@@ -171,7 +171,12 @@
             var i;
             var numbers = [];
             for (i = 0; i < elements.length; i++) {
-                numbers.push(this._getElementValue(elements[i]).split(' ')[0] * 1);
+                if(this._getElementValue(elements[i])) {
+                    numbers.push(this._getElementValue(elements[i]).split(' ')[0] * 1);
+                } else {
+                    numbers.push(0);
+                }
+
             }
             return numbers;
         },
