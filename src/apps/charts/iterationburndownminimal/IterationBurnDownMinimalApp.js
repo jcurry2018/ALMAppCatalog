@@ -134,7 +134,7 @@
         },
 
         _getElementValue: function (element) {
-            if (element.textContent !== "undefined") {
+            if (element.textContent !== undefined) {
                 return element.textContent;
             }
             return element.text;
