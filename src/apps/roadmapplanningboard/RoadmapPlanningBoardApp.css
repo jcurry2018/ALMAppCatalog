@@ -671,6 +671,7 @@
     font-size: 15px;
     font-weight: normal;
     margin-bottom: 10px;
+    text-align: center;
 }
 
 .roadmap-planning-popover .popoverToText {
