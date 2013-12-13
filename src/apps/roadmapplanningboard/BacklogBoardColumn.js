@@ -5,18 +5,17 @@
         extend: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
         alias: 'widget.backlogplanningcolumn',
         inject: ['planStore'],
-        require: ['Rally.data.QueryFilter'],
         config: {
             filterable: true,
             roadmap: null,
             columnHeaderConfig: {
                 headerTpl: 'Backlog'
             },
-            baseFilter: new Rally.data.QueryFilter({
+            baseFilter: {
                 property: 'ActualEndDate',
                 operator: '=',
                 value: 'null'
-            })
+            }
         },
 
         getColumnIdentifier: function () {
