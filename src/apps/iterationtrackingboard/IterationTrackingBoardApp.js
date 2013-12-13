@@ -200,7 +200,7 @@
                     isLeaf: function(record) {
                         return  (!record.raw.Tasks || record.raw.Tasks.Count === 0) &&
                                 (!record.raw.Defects || record.raw.Defects.Count === 0) &&
-                                (!record.raw.TestCases || record.raw.TestCases.Count === 0);
+                                (record.raw._type === 'TestSet' || !record.raw.TestCases || record.raw.TestCases.Count === 0); //remove the type check once TestCases under TestSets can be queried through the artifact endpoint
                     },
                     getIcon: function(record) {
                         return '';
