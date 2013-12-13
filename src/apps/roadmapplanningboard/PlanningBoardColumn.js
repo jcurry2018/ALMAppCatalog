@@ -39,7 +39,9 @@
                 showEditMenuItem: true,
                 showCopyMenuItem: false,
                 showSplitMenuItem: false,
-                showDeleteMenuItem: true
+                showDeleteMenuItem: true,
+                showAddChildMenuItem: false,
+                showRankMenuItems: false
             }
         },
 

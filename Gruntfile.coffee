@@ -274,7 +274,7 @@ module.exports = (grunt) ->
           publish: [{ id: 'com.rallydev.js:app-catalog:tgz', version: '<%= buildVersion %>', path: 'target/' }]
 
     sencha:
-      cmd: "bin/sencha/#{if process.platform is 'darwin' then 'mac' else 'linux'}/sencha"
+      cmd: "./bin/sencha/#{if process.platform is 'darwin' then 'mac' else 'linux'}/sencha"
       args: [
         if debug then '-d' else ''
         '-s lib/ext/4.1.1a'
