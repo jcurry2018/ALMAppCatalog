@@ -86,8 +86,14 @@
     border-right: none;
 }
 
+.roadmap-board .column-header .column-header-title .columnfilter {
+    position: absolute;
+    left: 10px;
+    top: 11px;
+}
+
 .roadmap-board .planning-column {
-    background-color: #f5f5f5;
+    background-color: white;
 }
 
 .roadmap-board .planning-column .search {
@@ -134,6 +140,10 @@
 
 .roadmap-board .planning-column .columnTitle > table input {
     line-height: 20px;
+}
+
+.roadmap-board .column-headers {
+    border-bottom: 1px dotted #C6C6C6;
 }
 
 .roadmap-board .planning-column .column-header {
@@ -208,7 +218,7 @@
     font-size: 10pt;
 }
 
-.roadmap-board .column-container .column-header .columnTpl{
+.roadmap-board .column-container .column-header .columnTpl {
     font-size: 18px;
     font-weight: bold;
     color: rgb(0, 0, 0);
@@ -349,6 +359,10 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.roadmap-planning-popover .x4-panel-body {
+    color: white;
 }
 
 .roadmap-planning-popover .month-triangles {
@@ -660,9 +674,10 @@
 .roadmap-planning-popover .popoverDateRangeText,
 .roadmap-planning-popover .popover-label {
     font-family: ProximaNovaSemiBold, Helvetica, Arial;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: normal;
     margin-bottom: 10px;
+    text-align: center;
 }
 
 .roadmap-planning-popover .popoverToText {
@@ -717,7 +732,7 @@
     width: 37px;
 }
 
-.roadmap-planning-popover .x-form-invalid-field {
+.roadmap-planning-popover .x-form-invalid-field, .x4-form-invalid-field {
     background-color: #F2D3D0;
     border-color: #B81B10;
     border-width: 1px;

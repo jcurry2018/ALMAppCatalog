@@ -90,6 +90,7 @@
         _buildCardBoard: function (roadmap, timeline) {
             if (roadmap && timeline) {
                 this.cardboard = Ext.create('Rally.apps.roadmapplanningboard.PlanningBoard', {
+                    context: this.context,
                     roadmap: roadmap,
                     timeline: timeline,
                     isAdmin: this._isUserAdmin(),

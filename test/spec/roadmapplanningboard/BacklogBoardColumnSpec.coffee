@@ -49,9 +49,7 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
     column.destroy()
 
   it 'should have a null filter for actual end date', ->
-    filters = @backlogColumn.getStoreFilter()
-    expect(filters.length).toBe 1
-    filter = filters[0]
+    filter = @backlogColumn.getStoreFilter()
     expect(filter.operator).toBe '='
     expect(filter.property).toBe 'ActualEndDate'
     expect(filter.value).toBe 'null'

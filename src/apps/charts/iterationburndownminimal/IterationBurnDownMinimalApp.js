@@ -125,7 +125,7 @@
         },
 
         _getElementValue: function (element) {
-            if (element.textContent !== "undefined") {
+            if (element.textContent !== undefined) {
                 return element.textContent;
             }
             return element.text;
@@ -144,7 +144,7 @@
         _configureYAxisIntervals: function () {
             var ticks = 5; // not much chart space, limit to 5
             this._configureYAxis(ticks, 0);
-            if(this.chartType === "burndown") {
+            if(this.chartType === "burndown") { // cumulative flow only has y axis 0
                 this._configureYAxis(ticks, 1);
             }
         },
@@ -162,7 +162,12 @@
             var i;
             var numbers = [];
             for (i = 0; i < elements.length; i++) {
-                numbers.push(this._getElementValue(elements[i]).split(' ')[0] * 1);
+                if(this._getElementValue(elements[i])) {
+                    numbers.push(this._getElementValue(elements[i]).split(' ')[0] * 1);
+                } else {
+                    numbers.push(0);
+                }
+
             }
             return numbers;
         },
@@ -204,7 +209,13 @@
                         alignTicks: false,
                         animation: false
                     },
-                    plotOptions: { series: {animation: false}},
+                    plotOptions: {
+                        series: {
+                            animation: false,
+                            shadow: false, // at the request of the UI team
+                            borderWidth: 0
+                        }
+                    },
                     legend: { enabled: true },
                     title: { text: null },
                     xAxis: {
@@ -291,8 +302,7 @@
                                  },
                     legend: {
                             enabled: true
-                            // itemStyle: { fontSize: '8px'}  // something like this to shrink the legend, maybe compute it based on available width?
-                            },
+                    },
                     title: { text: null },
                     xAxis: {
                         tickmarkPlacement: 'on',
@@ -300,7 +310,9 @@
                     },
                     yAxis: [
                         {
-                            title: { text: null },
+                            title: {
+                                text: "Plan Estimate"
+                            },
                             min: 0,
                             labels: {
                                 style: { color: "#005eb8" }
@@ -344,9 +356,29 @@
             }
             this._configureYAxisIntervals();
 
-            this.chartComponentConfig.chartConfig.xAxis.tickInterval = this.chartComponentConfig.chartData.series[0].data.length / 5;
+            this.chartComponentConfig.chartConfig.xAxis.tickInterval = Math.floor(this.chartComponentConfig.chartData.series[0].data.length / 4);
 
             this._addChart();
+        },
+
+        _computeMaxYAxisValue: function(series) {
+            var i, j, max = 0.0;
+            // sum each day's values and find the largest sum
+            for(i=0; i < series[0].data.length; i++) {
+                var val = 0.0;
+                for(j=0; j < series.length; j++) {
+                    // if is for insurance, _should_ always be true
+                    if(series[j].data.length === series[0].data.length) {
+                        val += series[j].data[i];
+                    }
+                }
+                if(val > max) {
+                    max = val;
+                }
+            }
+            max = Math.ceil(max / 4) * 4;  // round up to multiple of 4 so we will create 5 integral tick marks
+
+            return (max === 0) ? 4 : max;
         },
 
         _createCumulativeFlowChartDatafromXML: function (xmlDoc) {
@@ -364,7 +396,20 @@
                 this.chartComponentConfig.chartData.series[i].name = this._getStringValues(rows[j].getElementsByTagName("string"))[0];
             }
 
-            this.chartComponentConfig.chartConfig.xAxis.tickInterval = this.chartComponentConfig.chartData.series[0].data.length / 5;
+            // the 'max' y axis value in the xml isn't correct, so we'll calculate it ourselves...
+            this.chartComponentConfig.chartConfig.yAxis[0].max = this._computeMaxYAxisValue(this.chartComponentConfig.chartData.series);
+
+            this._configureYAxisIntervals();
+
+
+            // Use number of ScheduleState values to show as a surrogate for with of the legend text.
+            if(this.chartComponentConfig.chartData.series.length === 6) {
+                this.chartComponentConfig.chartConfig.legend.itemStyle = { fontSize: '8px'};
+            } else if(this.chartComponentConfig.chartData.series.length === 5) {
+                this.chartComponentConfig.chartConfig.legend.itemStyle = { fontSize: '10px'};
+            } // else it will default to 12px
+
+            this.chartComponentConfig.chartConfig.xAxis.tickInterval = Math.floor(this.chartComponentConfig.chartData.series[0].data.length / 4);
 
             this._addChart();
         },

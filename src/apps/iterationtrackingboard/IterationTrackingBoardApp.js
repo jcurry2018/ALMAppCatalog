@@ -9,6 +9,7 @@
         extend: 'Rally.app.TimeboxScopedApp',
         requires: [
             'Rally.data.ModelFactory',
+            'Rally.data.Ranker',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.grid.TreeGrid',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
@@ -77,7 +78,7 @@
                 plugins.push({
                     ptype: 'rallygridboardfiltercontrol',
                     filterControlConfig: {
-                        cls: 'secondary small button picto gridboard-filter-control',
+                        cls: 'small gridboard-filter-control',
                         stateful: true,
                         stateId: context.getScopedStateId('iteration-tracking-filter-button'),
                         items: [
@@ -185,8 +186,8 @@
                         childTypes: ['Defect', 'Task', 'TestCase'],
                         rootNodeFilters: this.context.getTimeboxScope().getQueryFilter(),
                         sorters: {
-                            property: 'Rank',
-                            direction: 'DESC'
+                            property: Rally.data.Ranker.getRankField(treeGridModel),
+                            direction: 'ASC'
                         },
                         fetch: ['FormattedID', 'Tasks', 'Defects', 'TestCases']
                     },
@@ -199,7 +200,7 @@
                     isLeaf: function(record) {
                         return  (!record.raw.Tasks || record.raw.Tasks.Count === 0) &&
                                 (!record.raw.Defects || record.raw.Defects.Count === 0) &&
-                                (!record.raw.TestCases || record.raw.TestCases.Count === 0);
+                                (record.raw._type === 'TestSet' || !record.raw.TestCases || record.raw.TestCases.Count === 0); //remove the type check once TestCases under TestSets can be queried through the artifact endpoint
                     },
                     getIcon: function(record) {
                         return '';

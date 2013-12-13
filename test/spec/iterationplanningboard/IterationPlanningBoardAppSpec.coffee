@@ -53,15 +53,11 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @app.cardboard
 
     createUserStoryRecord: (options = {}) ->
-      Model = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
-      options._type = 'hierarchicalrequirement'
-      new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 10000)}, options))
+      @mom.getRecord 'userstory', emptyCollections: true, values: Ext.apply({ DirectChildrenCount: 0, Blocked: false, Ready: false, BlockedReason: '' }, options)
 
     createDefectRecord: (options = {}) ->
-      Model = Rally.test.mock.data.WsapiModelFactory.getDefectModel()
-      options._type = 'defect'
-      new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 10000)}, options))
-
+      @mom.getRecord 'defect', emptyCollections: true, values: Ext.apply({ Requirement: null, Blocked: false, Ready: false, BlockedReason: '' }, options)
+      
     getVisibleCards: (type) ->
       additionalClass = if type? then ".#{type}" else ''
       cards = Ext.query "#{@cardSelector}#{additionalClass}"
@@ -75,7 +71,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @click(css: ".#{type}-type-checkbox input").then =>
         once(
           condition: => @getVisibleCards(type).length is expectedVisibleCards
-          description: 'filter to be applied'
+          description: "filter to be applied"
         )
 
     filterByBacklogCustomSearchQuery: (query) ->
@@ -417,6 +413,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       columns = @getColumns()
 
       @filterByType('defect').then =>
+        @ajax.whenQuerying('artifact').respondWith [columns[0].getCards()[0].getRecord().data]
         @filterByBacklogCustomSearchQuery('Story').then =>
           @filterByType('defect').then =>
             expect(columns[0].getCards().length).toBe 1

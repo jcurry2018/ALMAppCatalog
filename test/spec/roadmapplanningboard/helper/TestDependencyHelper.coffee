@@ -1,5 +1,7 @@
 Ext = window.Ext4 || window.Ext
 
+#Need to override injector so not replaced with actual that does not have data
+Ext.define 'Rally.apps.roadmapplanningboard.DeftInjector', singleton: true, init: Ext.emptyFn
 Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
 
   singleton: true
