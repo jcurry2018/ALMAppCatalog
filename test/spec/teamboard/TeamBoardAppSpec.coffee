@@ -15,11 +15,6 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
       for fieldName in fieldNames
         expect(cardEl.down('.field-content.' + fieldName)).not.toBeNull()
 
-    assertFilter: (filter, property, operator, value) ->
-      expect(filter.property).toBe property
-      expect(filter.operator).toBe operator
-      expect(filter.value).toBe value
-
     cardboard: ->
       @app.down('.rallycardboard')
 
@@ -66,10 +61,10 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
       appConfig:
         renderTo: 'testDiv'
     ).then =>
-      filters = @cardboard().getColumns()[0].store.filters
-      expect(filters.getCount()).toBe 2
-      @assertFilter filters.getAt(0), 'TeamMemberships', 'contains', @projectRecords[0].get('_ref')
-      @assertFilter filters.getAt(1), 'Disabled', '=', 'false'
+      expect(@cardboard().getColumns()[0].store).toOnlyHaveFilters [
+        ['TeamMemberships', 'contains', @projectRecords[0].get('_ref')]
+        ['Disabled', '=', 'false']
+      ]
 
   it 'should create a readOnly board when current user is not an admin', ->
     @createApp(

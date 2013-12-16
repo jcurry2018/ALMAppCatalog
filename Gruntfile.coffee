@@ -133,6 +133,7 @@ module.exports = (grunt) ->
           ]
           helpers: [
             "#{appsdk_path}/test/javascripts/helpers/**/*.js"
+            'test/gen/helpers/**/*.js'
           ]
           vendor: (->
             if process.env.APPSDK_PATH?

@@ -53,7 +53,6 @@
 
         launch: function () {
             if (Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
-
                 Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
                     typeRef: this.getSetting('type'),
                     defaultToLowest: true,
@@ -74,6 +73,35 @@
 
                 this._publishContentUpdated();
             }
+        },
+
+        getSettingsFields: function() {
+            return [
+                {
+                    type: 'project'
+                },
+                {
+                    type: 'type'
+                },
+                {
+                    type: 'fields',
+                    config: {
+                        shouldRespondToScopeChange: false  //optimization because need to wait for type picker to re-load on scope change before reloading fields
+                    }
+                },
+                {
+                    type: 'query',
+                    config: {
+                        plugins: [
+                            {
+                                ptype: 'rallyhelpfield',
+                                helpId: 271
+                            },
+                            'rallyfieldvalidationui'
+                        ]
+                    }
+                }
+            ];
         },
 
         onDestroy: function() {
