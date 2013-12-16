@@ -124,8 +124,8 @@
         _getBacklogColumnConfig: function () {
             return {
                 xtype: 'backlogplanningcolumn',
-                cls: 'column backlog',
-                roadmap: this.roadmap
+                planStore: this.planStore,
+                cls: 'column backlog'
             };
         },
 

@@ -59,7 +59,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
     expectPlanFeaturesToMatchCards: (column) ->
       features = column.planRecord.get('features')
-      cardRecords = column.getCards().map (card) -> card.getRecord()
+      cardRecords = _.map column.getCards(), (card) -> card.getRecord()
 
       expect(features.length).toBe cardRecords.length
       for i in [0...features.length]
@@ -91,6 +91,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
     @backlogColumn = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
       store: secondFeatureStore
+      planStore: planStore
       lowestPIType: 'PortfolioItem/Feature'
       enableCrossColumnRanking: true
       ownerCardboard: {}

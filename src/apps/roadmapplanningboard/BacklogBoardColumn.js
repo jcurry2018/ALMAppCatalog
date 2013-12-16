@@ -4,10 +4,15 @@
     Ext.define('Rally.apps.roadmapplanningboard.BacklogBoardColumn', {
         extend: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
         alias: 'widget.backlogplanningcolumn',
-        inject: ['planStore'],
+
         config: {
+            /**
+             * @cfg {Rally.data.Store}
+             * A store that contains all plans for this app - it is used to filter out features found in plans
+             */
+            planStore: null,
+
             filterable: true,
-            roadmap: null,
             columnHeaderConfig: {
                 headerTpl: 'Backlog'
             },
@@ -15,22 +20,25 @@
                 property: 'ActualEndDate',
                 operator: '=',
                 value: 'null'
-            }
+            },
+            enableAutoPaging: true
         },
 
         getColumnIdentifier: function () {
             return "roadmapplanningboardbacklogcolumn";
         },
 
-        isMatchingRecord: function (featureRecord) {
-            var _this = this;
+        _getAllPlanFeatures: function () {
+            return _.reduce (this.planStore.data.items, function (result, plan) {
+                return result.concat(plan.get('features'));
+            }, []);
+        },
 
-            return !this.roadmap || (this.planStore.findBy(function (planRecord) {
-                return _this.roadmap.plans().getById(planRecord.getId()) &&
-                    (_.find(planRecord.get('features'), function (planFeatureRecord) {
-                        return featureRecord.getId() === parseInt(planFeatureRecord.id, 10);
-                    }));
-            }, this)) === -1;
+        isMatchingRecord: function (featureRecord) {
+            var found = _.find(this._getAllPlanFeatures(), function (feature) {
+                return featureRecord.getId().toString() === feature.id;
+            }, this);
+            return !found;
         },
 
         getAllFetchFields: function () {

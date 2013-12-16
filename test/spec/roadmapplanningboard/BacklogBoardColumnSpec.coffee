@@ -2,6 +2,7 @@ Ext = window.Ext4 || window.Ext
 
 Ext.require [
   'Rally.apps.roadmapplanningboard.BacklogBoardColumn'
+  'Rally.apps.roadmapplanningboard.AppModelFactory'
   'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
 ]
 
@@ -15,6 +16,7 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
       contentCell: @target
       headerCell: @target
       store: Deft.Injector.resolve('featureStore')
+      planStore: Deft.Injector.resolve('planStore')
       lowestPIType: 'PortfolioItem/Feature'
       roadmap: Deft.Injector.resolve('roadmapStore').getById('413617ecef8623df1391fabc')
 
@@ -24,24 +26,22 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
     Deft.Injector.reset()
     @backlogColumn?.destroy()
 
-  it 'is using injected stores', ->
-    expect(@backlogColumn.planStore).toBeTruthy()
-
   it 'has a backlog filter', ->
     expect(@backlogColumn.getCards().length).toBe(5)
 
   it 'will filter by roadmap in addition to feature and plans', ->
-    roadmapModel = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapModel',
-      id: 'Foo',
-      name: "bar",
-      plans: []
+    planStore = Ext.create 'Rally.data.Store',
+      model: Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel()
+      proxy:
+        type: 'memory'
+      data: []
 
     column = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
       renderTo: 'testDiv'
       contentCell: 'testDiv'
       headerCell: 'testDiv'
-      roadmap: roadmapModel
       store: Deft.Injector.resolve('featureStore')
+      planStore: planStore
       lowestPIType: 'feature'
 
     expect(column.getCards().length).toBe(10)
