@@ -21,7 +21,8 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.filter.view.ModelFilter',
-            'Rally.ui.filter.view.OwnerFilter'
+            'Rally.ui.filter.view.OwnerFilter',
+            'Rally.app.Message'
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
         componentCls: 'iterationtrackingboard',
@@ -198,6 +199,7 @@
                     rootVisible: false,
                     columnCfgs: columns ? this._getGridColumns(columns) : null,
                     defaultColumnCfgs: this._getGridColumns(),
+                    pageResetMessages: [Rally.app.Message.timeboxScopeChange],
                     isLeaf: function(record) {
                         return  (!record.raw.Tasks || record.raw.Tasks.Count === 0) &&
                                 (!record.raw.Defects || record.raw.Defects.Count === 0) &&
