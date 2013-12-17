@@ -36,13 +36,6 @@
         chartType: "burndown",
         buttonPadding: 15,
 
-        _isCFDEnabled: function () {
-            if (Rally.environment.getContext().isFeatureEnabled('ITERATION_CFD_MINIMAL')) {
-                return true;
-            }
-            return false;
-        },
-
         onScopeChange: function (scope) {
             this._onScopeObjectLoaded(scope.getRecord());
         },
@@ -56,29 +49,27 @@
                 cls: 'header'
             });
 
-            if (this._isCFDEnabled()) {
+            this.buttonContainer = this.add({
+                xtype: 'container',
+                itemId: 'buttonContainer',
+                padding: ''+this.buttonPadding+' '+this.buttonPadding
+            });
 
-                this.buttonContainer = this.add({
-                    xtype: 'container',
-                    itemId: 'buttonContainer',
-                    padding: ''+this.buttonPadding+' '+this.buttonPadding
-                });
+            this.buttonContainer.add({
+                itemId: 'toggle',
+                xtype: 'rallyiterationburndownminimalviewtoggle',
+                stateful: true,
+                style: {
+                    'display':'block',
+                    'margin-left':'auto',
+                    'margin-right':'auto'
+                },
+                listeners: {
+                    toggle: this._onViewToggle,
+                    scope: this
+                }
+            });
 
-                this.buttonContainer.add({
-                    itemId: 'toggle',
-                    xtype: 'rallyiterationburndownminimalviewtoggle',
-                    stateful: true,
-                    style: {
-                        'display':'block',
-                        'margin-left':'auto',
-                        'margin-right':'auto'
-                    },
-                    listeners: {
-                        toggle: this._onViewToggle,
-                        scope: this
-                    }
-                });
-            }
 
             this._setupEvents();
             this._setupUpdateBeforeRender();
@@ -454,9 +445,7 @@
         _addChart: function () {
             this.remove('iterationburndownminimalchart', false);
             this.chartComponentConfig.chartConfig.chart.height = (this.height) ? this.height : this._getHeight();
-            if (this._isCFDEnabled()) {
-                this.chartComponentConfig.chartConfig.chart.height -= (this.buttonContainer.getHeight() );
-            }
+            this.chartComponentConfig.chartConfig.chart.height -= (this.buttonContainer.getHeight() );
             this.chartComponentConfig.chartConfig.chart.width = (this.width) ? this.width : this._getWidth();
             var chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
             this.add(chartComponentConfig);
