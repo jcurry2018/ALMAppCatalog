@@ -129,6 +129,7 @@
                 modelNames: this.modelNames,
                 allModelNames: context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID') ? this.allModelNames : null,
                 cardBoardConfig: {
+                    serverSideFiltering: context.isFeatureEnabled('F4359_FILTER'),
                     columnConfig: {
                         additionalFetchFields: ['PortfolioItem'],
                         plugins: [{
