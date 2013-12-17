@@ -136,20 +136,38 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
     afterEach ->
       @column.destroy()
 
-    it 'should display a popover when clicked if editing is allowed', ->
-      @createColumn()
-      expect(!!@column.popover).toBe false
-      @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
-        expect(!!@column.popover).toBe true
-
-    it 'should not display a popover when clicked if editing is not allowed', ->
-      @createColumn
-        editPermissions:
-          capacityRanges: false
-
-      expect(@column.popover).toBeUndefined()
-      @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
+    describe 'with no capacity', ->
+      it 'should display a popover when clicked if editing is allowed', ->
+        @createColumn()
         expect(!!@column.popover).toBe false
+        @click(this.column.getColumnHeader().getEl().down('.add-capacity span')).then =>
+          expect(!!@column.popover).toBe true
+
+      it 'should not display a set capacity button if editing is not allowed', ->
+        @createColumn
+          editPermissions:
+            capacityRanges: false
+
+        expect(Ext.query('.add-capacity span')).toEqual []
+
+    describe 'with capacity', ->
+      beforeEach ->
+        @planRecord.set('highCapacity', 10)
+
+      it 'should display a popover when clicked if editing is allowed', ->
+        @createColumn()
+        expect(!!@column.popover).toBe false
+        @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
+          expect(!!@column.popover).toBe true
+
+      it 'should not display a popover when clicked if editing is not allowed', ->
+        @createColumn
+          editPermissions:
+            capacityRanges: false
+
+        expect(@column.popover).toBeUndefined()
+        @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
+          expect(!!@column.popover).toBe false
 
   describe 'theme header', ->
     beforeEach ->

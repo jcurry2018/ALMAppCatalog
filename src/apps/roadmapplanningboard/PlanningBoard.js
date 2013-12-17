@@ -30,6 +30,11 @@
             attribute: '',
 
             /**
+             * @cfg {String} The name of the artifact this board represents (ex: Feature)
+             */
+            typeName: '',
+
+            /**
              * @cfg {Number} The duration of the theme slide animation in milliseconds
              */
             slideDuration: 500
@@ -247,6 +252,7 @@
                 xtype: 'timeframeplanningcolumn',
                 timeframeRecord: timeframe,
                 planRecord: plan,
+                typeName: this.typeName,
                 columnHeaderConfig: {
                     record: timeframe,
                     fieldToDisplay: 'name',

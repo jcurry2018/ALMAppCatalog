@@ -24,7 +24,12 @@
             timeframeRecord: undefined,
             planRecord: undefined,
             dateFormat: 'M j',
-            pointField: 'PreliminaryEstimate'
+            pointField: 'PreliminaryEstimate',
+
+            /**
+             * @cfg {String} The name of the artifact this board represents (ex: Feature)
+             */
+            typeName: ''
         },
 
         constructor: function (config) {
@@ -127,11 +132,13 @@
         onProgressBarClick: function (event) {
             var _this = this;
 
+            var target = Ext.get(Ext.query('.progress-bar-background', this.getColumnHeader().getEl().dom)[0]);
+
             if (this.popover) {
                 return;
             }
             this.popover = Ext.create('Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView', {
-                target: Ext.get(event.target),
+                target: target,
                 owner: this,
                 offsetFromTarget: [
                     {
@@ -144,7 +151,7 @@
                     },
                     {
                         x: 0,
-                        y: 16
+                        y: 5
                     },
                     {
                         x: 0,
@@ -211,12 +218,41 @@
 
         _drawProgressBar: function () {
             if (this.progressBar) {
-                return this.progressBar.update(this.getHeaderTplData());
+                this.progressBar.update(this.getHeaderTplData());
+                this._addCapacityButton();
             } else {
                 this.progressBar = this.getColumnHeader().add({
                     xtype: 'container',
-                    tpl: "<div class='progress-bar-background'>\n    <div title='{progressBarTitle}'>{progressBarHtml}</div>\n    <div class='progress-bar-percent-done'>{formattedPercent}</div>\n</div>",
-                    data: this.getHeaderTplData()
+                    tpl: [
+                        '<div class="progress-bar-background">',
+                            '<tpl if="highCapacity">',
+                                '<div title="{progressBarTitle}">{progressBarHtml}</div>',
+                                '<div class="progress-bar-percent-done">{formattedPercent}</div>',
+                            '<tpl else>',
+                                '<div>',
+                                    '<span>{pointTotal}</span> <span class="no-capacity-label">{itemType} {pointText}</span>',
+                                    '<div class="add-capacity"></div>',
+                                '</div>',
+                            '</tpl>',
+                        '</div>'
+                    ],
+                    data: this.getHeaderTplData(),
+                    listeners: {
+                        afterrender: this._addCapacityButton,
+                        scope: this
+                    }
+                });
+            }
+        },
+
+        _addCapacityButton: function () {
+            if(this.editPermissions.capacityRanges && this.rendered) {
+                Ext.create('Rally.ui.Button', {
+                    text: 'Set Capacity',
+                    cls: 'secondary dark',
+                    renderTo: Ext.query('.add-capacity', this.getColumnHeader().getEl().dom)[0],
+                    handler: this.onProgressBarClick,
+                    scope: this
                 });
             }
         },
@@ -235,20 +271,29 @@
         },
 
         getHeaderTplData: function () {
-            var fraction, _ref,
-                _this = this;
+            var pointField = this.pointField;
+            var highCapacity = (this.planRecord && this.planRecord.get('highCapacity')) || 0;
+            var lowCapacity = (this.planRecord && this.planRecord.get('lowCapacity')) || 0;
 
-            fraction = Ext.create('Rally.apps.roadmapplanningboard.util.Fraction', {
-                denominator: ((_ref = this.planRecord) !== null ? _ref.get('highCapacity') : undefined) || 0,
+            var fraction = Ext.create('Rally.apps.roadmapplanningboard.util.Fraction', {
+                denominator: highCapacity,
                 numeratorItems: this.getCards(true),
                 numeratorItemValueFunction: function (card) {
-                    if (card.getRecord().get(_this.pointField)) {
-                        return card.getRecord().get(_this.pointField).Value || 0;
+                    if (card.getRecord().get(pointField)) {
+                        return card.getRecord().get(pointField).Value || 0;
                     }
                     return 0;
                 }
             });
+
+            var pointTotal = fraction.getNumerator();
+
             return {
+                highCapacity: highCapacity,
+                lowCapacity: lowCapacity,
+                pointTotal: pointTotal,
+                pointText: 'pt' + (pointTotal !== 1 ? 's' : ''),
+                itemType: this.typeName.toLowerCase(),
                 progressBarHtml: this._getProgressBarHtml(fraction),
                 formattedPercent: fraction.getFormattedPercent(),
                 progressBarTitle: this._getProgressBarTitle()

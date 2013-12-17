@@ -50,6 +50,7 @@
 
             this._retrieveLowestLevelPI(function (record) {
                 this.types = [record.get('TypePath')];
+                this.typeName = record.get('Name');
 
                 var roadmapPromise = this.roadmapStore.load({requester: this, storeServiceName: "Planning"});
                 var timelinePromise = this.timelineStore.load({requester: this, storeServiceName: "Timeline"});
@@ -95,6 +96,7 @@
                     timeline: timeline,
                     isAdmin: this._isUserAdmin(),
                     types: this.types,
+                    typeName: this.typeName,
                     plugins: [
                         {
                             ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 3

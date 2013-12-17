@@ -18,7 +18,6 @@
 }
 
 .roadmap-board .progress-bar-percent-done {
-    color: white;
     vertical-align: middle;
     display: inline-block;
     position: absolute;
@@ -170,6 +169,7 @@
 }
 
 .roadmap-board .progress-bar-background {
+    color: white;
     background-color: #424242;
     left: 0;
     right: 0;
@@ -177,6 +177,16 @@
     padding: 10px 5px;
     height: 36px;
     position: relative;
+}
+
+.roadmap-board .progress-bar-background .no-capacity-label {
+    font-family: ProximaNova,Helvetica,Arial;
+}
+
+.roadmap-board .progress-bar-background .x4-btn {
+    position: absolute;
+    right: 0;
+    top: 5px;
 }
 
 .roadmap-board {
