@@ -107,11 +107,7 @@ describe 'Rally.apps.board.BoardApp', ->
         Ext.create('Rally.app.TimeboxScope', record: newTimebox))
 
       @once(condition: -> refreshSpy.calledOnce).then =>
-
-        filters = refreshSpy.getCall(0).args[0].storeConfig.filters
-        expect(filters.length).toBe 1
-        expect(filters[0].toString())
-          .toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
+        expect(refreshSpy.getCall(0).args[0].storeConfig).toOnlyHaveFilterStrings [@app.getContext().getTimeboxScope().getQueryFilter().toString()]
 
   it 'returns settings fields with correct context', ->
     @createApp().then =>

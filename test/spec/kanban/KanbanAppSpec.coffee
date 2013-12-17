@@ -209,16 +209,14 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       columns = @app.down('rallycardboard').getColumns()
       lastColumn = columns[columns.length-1]
 
-      expect(lastColumn.storeConfig.filters.length).toBe 1
-      expect(lastColumn.storeConfig.filters[0].property).toBe 'Release'
-      expect(lastColumn.storeConfig.filters[0].value).toBeNull()
+      expect(lastColumn.storeConfig).toOnlyHaveFilters [['Release', '=', null]]
 
   it 'should not exclude items with a release set in the last column', ->
     @createApp(hideReleasedCards: false).then =>
       columns = @app.down('rallycardboard').getColumns()
       lastColumn = columns[columns.length-1]
 
-      expect(lastColumn.storeConfig.filters.length).toBe 0
+      expect(lastColumn.storeConfig).toHaveNoFilters()
 
   it 'should show filter info when following global project', ->
     @createApp().then =>

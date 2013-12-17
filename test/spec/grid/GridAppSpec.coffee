@@ -67,52 +67,44 @@ describe 'Rally.apps.grid.GridApp', ->
       settings:
         query: '(Name contains foo)'
     ).then =>
-      filters = @grid.storeConfig.filters
-      expect(filters.length).toBe 1
-      expect(filters[0].toString()).toBe Rally.data.wsapi.Filter.fromQueryString(@app.settings.query).toString()
+      expect(@grid.storeConfig).toOnlyHaveFilterStrings [Rally.data.wsapi.Filter.fromQueryString(@app.settings.query).toString()]
 
   it 'passes the user query to the grid on a timebox filtered dashboard', ->
     @createTimeboxScopedApp(
       settings:
         query: '(Name contains foo)'
     ).then =>
-      filters = @grid.storeConfig.filters
-      expect(filters.length).toBe 2
-      expect(filters[0].toString()).toBe Rally.data.wsapi.Filter.fromQueryString(@app.settings.query).toString()
-      expect(filters[1].toString()).toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
+      expect(@grid.storeConfig).toOnlyHaveFilterStrings [
+        Rally.data.wsapi.Filter.fromQueryString(@app.settings.query).toString()
+        @app.getContext().getTimeboxScope().getQueryFilter().toString()
+      ]
 
   it 'passes the query to the grid on a timebox filtered dashboard with no user query', ->
     @createTimeboxScopedApp().then =>
-      filters = @grid.storeConfig.filters
-      expect(filters.length).toBe 1
-      expect(filters[0].toString()).toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
+      expect(@grid.storeConfig).toOnlyHaveFilterStrings [@app.getContext().getTimeboxScope().getQueryFilter().toString()]
 
   it 'passes the timebox query when all types are schedulable', ->
     @createTimeboxScopedApp(
       settings:
         types: 'hierarchicalrequirement,task,defect,defectsuite,testset'
     ).then =>
-      filters = @grid.storeConfig.filters
-      expect(filters.length).toBe 1
-      expect(filters[0].toString()).toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
+      expect(@grid.storeConfig).toOnlyHaveFilterStrings [@app.getContext().getTimeboxScope().getQueryFilter().toString()]
 
   it 'does not pass the timebox query when all types are not schedulable', ->
     @createTimeboxScopedApp(
       settings:
         types: 'user'
     ).then =>
-      expect(@grid.storeConfig.filters.length).toBe 0
+      expect(@grid.storeConfig).toHaveNoFilters()
 
   it 'should interpolate context variables into the query', ->
     @createApp(
       settings:
         query: '(Owner = {user})'
     ).then =>
-      filters = @grid.storeConfig.filters
-      expect(filters.length).toBe 1
-      expect(filters[0].toString()).toBe Rally.data.wsapi.Filter.fromQueryString(
-        "(Owner = #{Rally.util.Ref.getRelativeUri(@app.getContext().getUser())})"
-      ).toString()
+      expect(@grid.storeConfig).toOnlyHaveFilterStrings [
+        Rally.data.wsapi.Filter.fromQueryString("(Owner = #{Rally.util.Ref.getRelativeUri(@app.getContext().getUser())})").toString()
+      ]
 
   it 'refreshes the grid when the timebox scope changes', ->
     @createTimeboxScopedApp().then =>
