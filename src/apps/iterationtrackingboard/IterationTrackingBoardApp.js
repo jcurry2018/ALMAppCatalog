@@ -22,6 +22,7 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
+            'Rally.ui.filter.view.TagFilter',
             'Rally.app.Message'
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
@@ -87,6 +88,10 @@
                                 xtype: 'rallyownerfilter',
                                 margin: '0 5',
                                 project: this.getContext().getProjectRef()
+                            },
+                            {
+                                xtype: 'rallytagfilter',
+                                margin: '0 5'
                             },
                             {
                                 xtype: 'rallymodelfilter',
