@@ -107,7 +107,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     @createCardboard().then =>
       _.each @cardboard.getColumns(), (column) =>
         _.each column.getCards(), (card) =>
-          expect(card.getEl().down('.rui-card-right-side .PreliminaryEstimate .rui-field-value').dom.innerHTML).toBe "L"
+          expect(card.getEl().down('.rui-card-content .PreliminaryEstimate .rui-field-value').dom.innerHTML).toBe "L"
 
   it 'should have project on the cards', ->
     @createCardboard().then =>
