@@ -277,7 +277,7 @@ module.exports = (grunt) ->
       cmd: "./bin/sencha/#{if process.platform is 'darwin' then 'mac' else 'linux'}/sencha"
       args: [
         if debug then '-d' else ''
-        '-s lib/ext/4.1.1a'
+        '-s lib/ext/4.2.2'
         'compile'
         '-classpath=lib/sdk/builds/sdk-dependencies-debug.js,lib/sdk/src,src/apps'
         'exclude -all and'
