@@ -27,7 +27,7 @@
 
         initComponent: function() {
             this.callParent(arguments);
-            this.mon(this, 'render', function() {
+            this.mon(this, 'afterrender', function() {
                 this.setLoading(true);
             }, this );
 

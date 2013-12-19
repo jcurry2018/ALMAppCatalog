@@ -110,7 +110,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
       @createAppAndWaitForGrid().then =>
         once
           condition: =>
-            @getPriorityNameForRow(@prioritiesLength + 2) == 'Total'
+            @getPriorityNameForRow(@prioritiesLength + 1) == 'Total'
           description: 'The table contains a total row'
 
     it 'adds the total column to the table', ->
@@ -122,7 +122,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
 
     it 'updates the data in the table when the release is changed', ->
       @createAppAndWaitForGrid().then =>
-        oldTotal = @getCountForCellInMatrixGrid(@prioritiesLength + 2, @statesLength + 2)
+        oldTotal = @getCountForCellInMatrixGrid(@prioritiesLength + 1, @statesLength + 2)
         @createCustomDefectResponse()
         @app.getEl().down('.combobox-left-arrow').dom.click()
         once
@@ -131,7 +131,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
             grid &&
               grid.getStore() &&
               grid.getStore().getCount() > 0 &&
-              @getCountForCellInMatrixGrid(@prioritiesLength + 2, @statesLength + 2) != oldTotal
+              @getCountForCellInMatrixGrid(@prioritiesLength + 1, @statesLength + 2) != oldTotal
           description: 'The data in the table has changed'
 
     it 'loads proper counts for all cells', ->
@@ -139,14 +139,14 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
       @createAppAndWaitForGrid().then =>
         once
           condition: =>
-            @getCountForCellInMatrixGrid(2, 2) == "2" &&
-              @getCountForCellInMatrixGrid(3, 2) == "1" &&
-              @getCountForCellInMatrixGrid(2, 3) == "1" &&
-              @getCountForCellInMatrixGrid(2, @statesLength + 2) == "3" &&
-              @getCountForCellInMatrixGrid(3, @statesLength + 2) == "1" &&
-              @getCountForCellInMatrixGrid(@prioritiesLength + 2, 2) == "3" &&
-              @getCountForCellInMatrixGrid(@prioritiesLength + 2, 3) == "1" &&
-              @getCountForCellInMatrixGrid(@prioritiesLength + 2, @statesLength + 2) == "4"
+            @getCountForCellInMatrixGrid(1, 2) == "2" &&
+              @getCountForCellInMatrixGrid(2, 2) == "1" &&
+              @getCountForCellInMatrixGrid(1, 3) == "1" &&
+              @getCountForCellInMatrixGrid(1, @statesLength + 2) == "3" &&
+              @getCountForCellInMatrixGrid(2, @statesLength + 2) == "1" &&
+              @getCountForCellInMatrixGrid(@prioritiesLength + 1, 2) == "3" &&
+              @getCountForCellInMatrixGrid(@prioritiesLength + 1, 3) == "1" &&
+              @getCountForCellInMatrixGrid(@prioritiesLength + 1, @statesLength + 2) == "4"
           description: 'all the cell counts are as expected'
 
     it 'shows a message and no grid when there are no releases', ->
