@@ -29,11 +29,6 @@
     margin-top: 4px;
 }
 
-.planning-board .type-checkbox label {
-    position: relative;
-    top: 1px;
-}
-
 .planning-board .add-new label {
     padding-top: 0;
 }
