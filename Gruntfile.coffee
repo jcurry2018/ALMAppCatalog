@@ -33,6 +33,7 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'test:__buildjasmineconf__', 'Internal task to build and alter the jasmine conf', ['jasmine:apps:build', 'replace:jasmine']
   grunt.registerTask 'test:conf', 'Fetches the deps, compiles coffee and css files, runs jshint and builds the jasmine test config', ['nexus:deps', 'clean:test', 'coffee', 'css', 'test:__buildjasmineconf__']
+  grunt.registerTask 'test:fastconf', 'Just builds the jasmine test config', ['test:__buildjasmineconf__']
   grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:apps']
   grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome']
   grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:firefox']
