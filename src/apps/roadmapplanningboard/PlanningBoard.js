@@ -27,7 +27,6 @@
             ddGroup: 'planningBoard',
             dropAllowed: "planningBoard",
             dropNotAllowed: "planningBoard",
-            attribute: '',
 
             /**
              * @cfg {String} The name of the artifact this board represents (ex: Feature)

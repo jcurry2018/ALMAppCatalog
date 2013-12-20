@@ -4,17 +4,12 @@
     Ext.define('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer', {
         extend: 'Ext.container.Container',
         requires: [
-            'Rally.apps.roadmapplanningboard.DeftInjector',
             'Rally.data.util.PortfolioItemHelper',
-            'Rally.apps.roadmapplanningboard.PlanningBoard',
-            'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable',
             'Rally.ui.notify.Notifier',
-            'Rally.ui.feedback.Feedback'
+            'Rally.apps.roadmapplanningboard.DeftInjector',
+            'Rally.apps.roadmapplanningboard.PlanningGridBoard'
         ],
         cls: 'roadmap-planning-container',
-
-        feedback: null,
-        cardboard: null,
 
         config: {
             listeners: null,
@@ -26,6 +21,9 @@
                     feedbackId: 'roadmapplanningboard'
                 }
             },
+            addNewConfig: {
+                ignoredRequiredFields: ['Name', 'Project', 'ScheduleState', 'State']
+            },
             /**
              * @cfg cardboardPlugins {Array}
              * Extra plugins that should be added to the cardboard
@@ -33,13 +31,17 @@
             cardboardPlugins: []
         },
 
+        items: [
+            {
+                xtype: 'container',
+                itemId: 'gridboard'
+            }
+        ],
+
         constructor: function (config) {
             this.callParent(arguments);
             this.initConfig(config);
             this.context = this.context || Rally.environment.getContext();
-
-            this.feedback = Ext.create('Rally.ui.feedback.Feedback', this.feedbackConfig);
-            this.add(this.feedback);
 
             Rally.apps.roadmapplanningboard.DeftInjector.init();
 
@@ -59,7 +61,12 @@
                     success: function (results) {
                         var roadmap = results[0].records[0];
                         var timeline = results[1].records[0];
-                        this._buildCardBoard.call(this, roadmap, timeline);
+
+                        this.gridboard = this._buildGridBoard(roadmap, timeline);
+
+                        if (Rally.BrowserTest) {
+                            Rally.BrowserTest.publishComponentReady(this);
+                        }
                     },
                     failure: function (operation) {
                         var service = operation.storeServiceName || 'External';
@@ -69,6 +76,24 @@
                 });
             });
 
+        },
+
+        _buildGridBoard: function (roadmap, timeline) {
+            if (roadmap && timeline) {
+                return this.down('#gridboard').add({
+                    xtype: 'roadmapplanninggridboard',
+                    context: this.getContext(),
+                    timeline: timeline,
+                    roadmap: roadmap,
+                    typeName: this.typeName,
+                    modelNames: this.types,
+                    cardboardPlugins: this.cardboardPlugins
+                });
+            } else if (!roadmap) {
+                Rally.ui.notify.Notifier.showError({message: 'No roadmap available'});
+            } else {
+                Rally.ui.notify.Notifier.showError({message: 'No timeline available'});
+            }
         },
 
         _onRequestException: function (connection, response, requestOptions) {
@@ -88,47 +113,12 @@
             });
         },
 
-        _buildCardBoard: function (roadmap, timeline) {
-            if (roadmap && timeline) {
-                this.cardboard = Ext.create('Rally.apps.roadmapplanningboard.PlanningBoard', {
-                    context: this.context,
-                    roadmap: roadmap,
-                    timeline: timeline,
-                    isAdmin: this._isUserAdmin(),
-                    types: this.types,
-                    typeName: this.typeName,
-                    plugins: [
-                        {
-                            ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 3
-                        }
-                    ].concat(this.cardboardPlugins),
-                    listeners: {
-                        load: this._onCardBoardLoad,
-                        scope: this
-                    }
-                });
-                this.add(this.cardboard);
-            } else if (!roadmap) {
-                Rally.ui.notify.Notifier.showError({message: 'No roadmap available'});
-            } else {
-                Rally.ui.notify.Notifier.showError({message: 'No timeline available'});
+        destroy: function () {
+            if(this.gridboard) {
+                this.gridboard.destroy();
             }
-        },
 
-        _isUserAdmin: function () {
-            var permissions = Rally.environment.getContext().getPermissions();
-            var isAdmin = permissions.isSubscriptionAdmin();
-            if (!isAdmin) {
-                var workspace = this.getContext().getWorkspace();
-                isAdmin = permissions.isWorkspaceAdmin(workspace._ref);
-            }
-            return isAdmin;
-        },
-
-        _onCardBoardLoad: function () {
-            if (Rally.BrowserTest) {
-                Rally.BrowserTest.publishComponentReady(this);
-            }
+            this.callParent(arguments);
         }
     });
 })();

@@ -68,7 +68,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@errorNotifyStub.lastCall.args[0]).toEqual
         message: 'Failed to load: Timeline service data load issue'
 
-  it 'should notify of error if the paln store fails to load', ->
+  it 'should notify of error if the plan store fails to load', ->
     @stub @planStore, 'load', ->
       deferred = new Deft.promise.Deferred()
       deferred.reject({storeServiceName: 'Planning'});
@@ -107,7 +107,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     @createCardboard().then =>
       _.each @cardboard.getColumns(), (column) =>
         _.each column.getCards(), (card) =>
-          expect(card.getEl().down('.rui-card-content .PreliminaryEstimate .rui-field-value').dom.innerHTML).toBe "L"
+          expect(card.getEl().down('.rui-card-right-side .PreliminaryEstimate .rui-field-value').dom.innerHTML).toBe "L"
 
   it 'should have project on the cards', ->
     @createCardboard().then =>
@@ -133,11 +133,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.timeframeStore).toBeTruthy()
       expect(@cardboard.planStore).toBeTruthy()
 
-  it 'should notify of error if stores fail to load', ->
-
-
-    @createCardboard().then =>
-
   it 'should have appropriate plan capacity range', ->
     @createCardboard().then =>
       expect(@cardboard.getColumns()[1].getPlanRecord().get('lowCapacity')).toBe 2
@@ -146,10 +141,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.getColumns()[2].getPlanRecord().get('highCapacity')).toBe 30
       expect(@cardboard.getColumns()[3].getPlanRecord().get('lowCapacity')).toBe 15
       expect(@cardboard.getColumns()[3].getPlanRecord().get('highCapacity')).toBe 25
-
-  it 'attribute should be set to empty', ->
-    @createCardboard().then =>
-      expect(@cardboard.attribute == '').toBeTruthy()
 
   describe 'theme container interactions', ->
 

@@ -18,14 +18,8 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer', ->
           condition: => @errorNotifyStub.calledOnce
       else
         @waitForComponentReady(@container).then =>
-          @planningBoard = @container.down 'roadmapplanningboard'
-
-    createPermissionsStub: (config) ->
-      @stub Rally.environment.getContext(), 'getPermissions', ->
-        isSubscriptionAdmin: ->
-          !!config.subAdmin
-        isWorkspaceAdmin: ->
-          !!config.workspaceAdmin
+          @waitForComponentReady(@container.gridboard).then =>
+            @planningBoard = @container.down 'roadmapplanningboard'
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -55,18 +49,13 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer', ->
       expect(@container.getContext()).toNotBe Rally.environment.getContext()
       expect(@container.getContext()).toBe context
 
-  it 'should render feedback', ->
+  it 'should render a gridboard board with a timeline', ->
     @createContainer().then =>
-      expect(!!@container.feedback).toBe true
-      expect(!!@container.getEl().down('.feedbackcontainer')).toBe true
+      expect(@container.gridboard.timeline.getId()).toBe @timelineStore.first().getId()
 
-  it 'should render a planning board with a timeline', ->
+  it 'should render a gridboard board with a roadmap', ->
     @createContainer().then =>
-      expect(@planningBoard.timeline.getId()).toBe @timelineStore.first().getId()
-
-  it 'should render a planning board with a roadmap', ->
-    @createContainer().then =>
-      expect(@planningBoard.roadmap.getId()).toBe @roadmapStore.first().getId()
+      expect(@container.gridboard.timeline.getId()).toBe @timelineStore.first().getId()
 
   it 'should notify of error if the timeline store fails to load', ->
     @stub @timelineStore, 'load', ->
@@ -107,21 +96,6 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer', ->
     @createContainer(true).then =>
       expect(@errorNotifyStub.lastCall.args[0]).toEqual
         message: 'No timeline available'
-
-  it 'should set isAdmin on planning board to true if user is a Sub Admin', ->
-    @createPermissionsStub(subAdmin: true)
-    @createContainer().then =>
-      expect(@planningBoard.isAdmin).toBe true
-
-  it 'should set isAdmin on planning board to true if user is a WS Admin', ->
-    @createPermissionsStub(workspaceAdmin: true)
-    @createContainer().then =>
-      expect(@planningBoard.isAdmin).toBe true
-
-  it 'should set isAdmin on planning board to false if user is not a Sub or WS Admin', ->
-    @createPermissionsStub(subAdmin: false, workspaceAdmin: false)
-    @createContainer().then =>
-      expect(@planningBoard.isAdmin).toBe false
 
   describe 'Service error handling', ->
     it 'should display a friendly notification if any service (planning, timeline, WSAPI) is unavailable', ->
