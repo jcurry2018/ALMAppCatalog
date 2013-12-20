@@ -204,14 +204,7 @@
             var find = {
                 '_TypeHierarchy': { '$in' : [ -51038, -51006 ] },
                 'Children': null,
-                '$or' :
-                    [
-                        { '_ValidFrom': { '$gt': this._buildChartStoreConfigValidFrom() } },
-                        {
-                            '_ValidTo'  : { '$gt' : this._buildChartStoreConfigValidFrom() },
-                            '_ValidFrom': { '$lt': this._buildChartStoreConfigValidFrom() }
-                        }
-                    ]
+                '_ValidTo'  : { '$gt' : this._buildChartStoreConfigValidFrom() }
             };
 
             if (this.projectScopeDown) {
