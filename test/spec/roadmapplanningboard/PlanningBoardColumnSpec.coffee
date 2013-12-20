@@ -7,7 +7,7 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
   helpers
-    createColumn: () ->
+    createColumn: ->
       target = 'testDiv'
 
       config = Ext.merge {},
