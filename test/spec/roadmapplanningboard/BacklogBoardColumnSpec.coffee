@@ -37,10 +37,10 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
       data: []
 
     column = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
-      renderTo: 'testDiv'
-      contentCell: 'testDiv'
-      headerCell: 'testDiv'
-      store: Deft.Injector.resolve('featureStore')
+      renderTo: @target
+      contentCell: @target
+      headerCell: @target
+      store: Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getFeatureStoreFixture()
       planStore: planStore
       lowestPIType: 'feature'
 

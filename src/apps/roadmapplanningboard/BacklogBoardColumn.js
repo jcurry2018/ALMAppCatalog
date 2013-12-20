@@ -35,9 +35,8 @@
         },
 
         isMatchingRecord: function (featureRecord) {
-            var found = _.find(this._getAllPlanFeatures(), function (feature) {
-                return featureRecord.getId().toString() === feature.id;
-            }, this);
+            var recordId = featureRecord.getId().toString(),
+                found = _.find(this._getAllPlanFeatures(), { id: recordId });
             return !found;
         },
 
