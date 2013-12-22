@@ -404,7 +404,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @filterByType('hierarchicalrequirement').then =>
         @filterByType('defect').then =>
           @filterByBacklogCustomSearchQuery('A').then =>
-            expect(clearCardsSpy).toHaveBeenCalledOnce()
+            expect(clearCardsSpy).toHaveBeenCalled()
             expect(backlogColumn.getCards(true).length).toBe 2
             expect(backlogColumn.getCards().length).toBe 0
 

@@ -100,6 +100,8 @@
                         ]
                     }
                 });
+            } else {
+                plugins.push('rallygridboardownerfilter');
             }
 
             plugins = plugins.concat([{
@@ -107,11 +109,10 @@
                     isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
                     stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
                 },
-                'rallygridboardownerfilter',
                 'rallygridboardfieldpicker'
             ]);
 
-            if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS')) {
+            if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS') && !context.isFeatureEnabled('F4359_FILTER')) {
                 plugins.push({
                     ptype: 'rallygridboardartifacttypechooser',
                     artifactTypePreferenceKey: 'artifact-types',

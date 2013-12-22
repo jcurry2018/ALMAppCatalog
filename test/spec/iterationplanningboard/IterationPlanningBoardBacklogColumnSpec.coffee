@@ -1,10 +1,15 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn',
+  'Rally.data.filter.FilterCollection'
+]
+
 describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn', ->
   beforeEach ->
     @storyModel = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
     @defectModel = Rally.test.mock.data.WsapiModelFactory.getDefectModel()
-    @ajax.whenQuerying('HierarchicalRequirement').respondWith()
+    @ajaxStub = @ajax.whenQuerying('HierarchicalRequirement').respondWith()
 
   afterEach ->
     @column?.destroy()
@@ -78,7 +83,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
     expect(filter.length).toBe 1
 
   it 'should refresh column on enter in search box', ->
-    searchText = 'foo'
+    searchText = 'foo1'
     @createColumn()
     refreshStub = @stub(@column, 'refresh')
 
@@ -87,13 +92,12 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
         @assertSearch(refreshStub, searchText)
 
   it 'should refresh column when clicking search button', ->
-    searchText = 'foo'
+    searchText = 'foo2'
     @createColumn()
     refreshStub = @stub(@column, 'refresh')
 
-    @enterSearchText(searchText).then =>
-      @click(className: 'search-button').then =>
-        @assertSearch(refreshStub, searchText)
+    @search(searchText).then =>
+      @assertSearch(refreshStub, searchText)
 
   it 'should clear search filter on enter in empty search box', ->
     @createColumn()
@@ -103,6 +107,18 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
       expect(refreshStub).toHaveBeenCalledOnce()
       refreshConfig = refreshStub.getCall(0).args[0]
       expect(refreshConfig.storeConfig.search).toBe ""
+
+  it 'searching multiple times should not create duplicate filters', ->
+    @createColumn()
+    @column.filterCollection = Ext.create('Rally.data.filter.FilterCollection')
+
+    @waitForCallback(@ajaxStub, 1).then =>
+      @search('1').then =>
+        @waitForCallback(@ajaxStub, 2).then =>
+          expect(@column.filterCollection.toString()).toBe '((Iteration = "null") AND (DirectChildrenCount = 0))'
+          @search('2').then =>
+            @waitForCallback(@ajaxStub, 3).then =>
+              expect(@column.filterCollection.toString()).toBe '((Iteration = "null") AND (DirectChildrenCount = 0))'
 
   helpers
     createColumn: (options={}) ->
@@ -147,5 +163,9 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
 
       expect(refreshConfig.storeConfig.search).not.toBeNull()
       expect(refreshConfig.storeConfig.search).toEqual searchText
+
+    search: (searchText) ->
+      @enterSearchText(searchText).then =>
+        @enterSearchText(webdriver.Key.RETURN)
 
 

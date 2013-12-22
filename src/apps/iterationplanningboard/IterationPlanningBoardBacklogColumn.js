@@ -92,6 +92,8 @@
                 return;
             }
 
+            this._clearFilters();
+
             this.searching = true;
             var searchValue = this.getColumnHeader().down('#searchText').getValue();
             this.setMaskTarget(this.getContentCell());
@@ -118,6 +120,7 @@
                 if (this.context.getSubscription().StoryHierarchyEnabled) {
                     filters.push({
                         property: 'DirectChildrenCount',
+                        operator: '=',
                         value: 0
                     });
                 }
@@ -125,6 +128,7 @@
                 Ext.Array.push(filters,
                     {
                         property: 'Requirement',
+                        operator: '=',
                         value: null
                     },
                     {
@@ -145,6 +149,12 @@
                 isMatching = isMatching && (!record.hasField('Requirement') || !record.get('Requirement'));
             }
             return isMatching;
+        },
+
+        _clearFilters: function() {
+            if (this.filterCollection) {
+                this.filterCollection.clearAllFilters();
+            }
         }
     });
 })();
