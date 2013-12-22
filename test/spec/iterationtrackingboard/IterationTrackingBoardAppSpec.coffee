@@ -127,7 +127,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     @createApp().then =>
       expect(@app.getSetting('cardFields')).toBe 'Parent,Tasks,Defects,Discussion,PlanEstimate'
 
-  it 'should filter the grid to the currently selected iteration', ->
+  it 'should enable bulk edit when toggled on', ->
     @stubFeatureToggle ['EXT4_GRID_BULK_EDIT', 'ITERATION_TRACKING_BOARD_GRID_TOGGLE']
     @createApp().then =>
       @toggleToGrid()
