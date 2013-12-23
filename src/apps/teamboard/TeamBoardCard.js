@@ -17,7 +17,7 @@
         },
 
         setupPlugins: function(){
-            this.plugins.push({
+            return [{
                 ptype: 'rallycardcontentleft',
                 getCardHeader: function(){
                     var record = this.card.getRecord();
@@ -38,7 +38,7 @@
                             '</tr>' +
                             '</table>';
                 }
-            });
+            }];
         }
     });
 
