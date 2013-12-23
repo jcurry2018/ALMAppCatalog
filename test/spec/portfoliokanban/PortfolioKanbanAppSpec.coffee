@@ -84,7 +84,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   it 'shows help component', ->
     @_createApp().then =>
-      expect(@app.down('#header').getEl().down('.rally-help-icon').dom.innerHTML).toContain 'Help &amp; Training'
+      expect(@app).toHaveHelpComponent()
 
   it 'shows ShowPolicies checkbox', ->
     @_createApp().then =>

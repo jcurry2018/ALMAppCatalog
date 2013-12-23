@@ -103,10 +103,7 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
     @ajax.whenQuerying('PortfolioItem/Strategy').respondWith()
 
     @_createApp().then =>
-
-      expect(@app.down('#header').getEl().down('.rally-help-icon').dom.innerHTML).toContain 'Help &amp; Training'
-
-    
+      expect(@app).toHaveHelpComponent()
 
   it 'test empty query string does not create a filter', ->
     @_createApp(

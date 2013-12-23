@@ -78,8 +78,7 @@ describe 'Rally.apps.storyhierarchy.StoryHierarchyApp', ->
     @ajax.whenQuerying('userstory').respondWith()
 
     @_createApp().then =>
-
-      expect(@app.down('#header').getEl().down('.rally-help-icon').dom.innerHTML.indexOf('Help &amp; Training') >= 0).toBe true
+      expect(@app).toHaveHelpComponent()
 
   it 'should not add to PI user story query if PortfolioItem field is not available on the model', ->
     @ajax.whenQuerying('userstory').respondWith()
