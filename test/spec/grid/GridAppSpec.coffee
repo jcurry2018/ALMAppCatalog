@@ -57,10 +57,7 @@ describe 'Rally.apps.grid.GridApp', ->
       settings:
         order: 'Name ASC'
     ).then =>
-      sorters = @grid.storeConfig.sorters
-      expect(sorters.length).toBe 1
-      expect(sorters[0].property).toBe 'Name'
-      expect(sorters[0].direction).toBe 'ASC'
+      expect(@grid.storeConfig).toHaveSorters [['Name', 'ASC']]
 
   it 'passes the query to the grid', ->
     @createApp(
