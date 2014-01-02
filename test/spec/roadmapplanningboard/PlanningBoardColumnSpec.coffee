@@ -13,7 +13,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
       config = Ext.merge {},
         store: Deft.Injector.resolve('featureStore')
         context:
-          getScopedStateId: (stateId) -> return stateId
+          getWorkspace: () -> return {ObjectID: 1234}
+          getUser: () -> return {ObjectID: 5678}
         listeners:
           ready: ->
             Rally.BrowserTest.publishComponentReady @
@@ -117,17 +118,20 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
   describe 'filterable column', ->
     beforeEach ->
+      @filterKey = 'page.roadmap.queryfilter.gotmeanid.1234'
       @columnConfig =
         filterable: true
         baseFilter:
           property: 'ActualEndDate',
           operator: '=',
           value: 'null'
-        getColumnIdentifier: => "gotmeanid"
+        getColumnIdentifier: =>
+          "gotmeanid"
 
     it 'should throw error if getColumnIdentifier is not overridden', ->
       delete @columnConfig.getColumnIdentifier
-      createColumn = => @createColumn()
+      createColumn = =>
+        @createColumn()
       expect(createColumn).toThrow 'Need to override this to ensure unique identifier for persistence'
 
     it 'should render filterable control', ->
@@ -152,13 +156,3 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
           popover.down('#customqueryfilter').setValue(@nameFilter.toString())
           @click(popover.down('#filterDone').getEl()).then =>
             expect(@column.getStoreFilter().toString()).toBe '((ActualEndDate = "null") AND (Name = "Android Support"))'
-
-    it 'should apply queryFilter at initial load', ->
-      @stub Rally.ui.filter.view.FilterButton::, 'getFilter', -> [
-        property: 'Name',
-        operator: '=',
-        value: 'Some name'
-      ]
-
-      @createColumn().then =>
-        expect(@column.getStoreFilter().toString()).toBe '((ActualEndDate = "null") AND (Name = "Some name"))'

@@ -25,7 +25,7 @@
         },
 
         getColumnIdentifier: function () {
-            return "roadmapplanningboardbacklogcolumn";
+            return "roadmapplanningboard.backlog.column";
         },
 
         _getAllPlanFeatures: function () {

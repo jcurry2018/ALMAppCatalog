@@ -12,6 +12,7 @@
         launch: function () {
             var container = Ext.create('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer', {
                 context: this.context,
+                height: '100%',
                 cardboardPlugins: [
                     {
                         ptype: 'rallyfixedheadercardboard'
