@@ -134,7 +134,39 @@
         },
 
         /**
-         * @public
+         * Return the backlog column if it exists
+         * @returns {Rally.apps.roadmapplanningboard.BacklogBoardColumn} column The backlog column of the cardboard
+         */
+        getBacklogColumn: function () {
+            var columns = this.getColumns();
+
+            if (!Ext.isEmpty(columns)) {
+                return columns[0];
+            } else {
+                return null;
+            }
+        },
+
+        /**
+         * Get the first record of the cardboard
+         * @returns {Rally.data.Record}
+         */
+        getFirstRecord: function () {
+            var cards;
+            var record = null;
+            var column = this.getBacklogColumn();
+
+            if (column) {
+                cards = column.getCards();
+                if (!Ext.isEmpty(cards)) {
+                    record = cards[0].getRecord();
+                }
+            }
+
+            return record;
+        },
+
+        /**
          * Draws the theme toggle buttons to show/hide the themes
          */
         drawThemeToggle: function () {

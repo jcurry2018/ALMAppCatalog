@@ -80,7 +80,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   it 'should render with a backlog column', ->
     @createCardboard().then =>
-      backlogColumn = @cardboard.getColumns()[0]
+      backlogColumn = @cardboard.getBacklogColumn()
 
       expect(backlogColumn.getColumnHeader().getHeaderValue()).toBe "Backlog"
 
@@ -196,3 +196,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
             timeframeDates: false
           expect(column.dropControllerConfig.dragDropEnabled).toBe false
           expect(column.columnHeaderConfig.editable).toBe false
+
+  describe '#getFirstRecord', ->
+    it 'should get the first record in the backlog column', ->
+      @createCardboard().then =>
+        expect(@cardboard.getFirstRecord().get('Name')).toBe 'Blackberry Native App'

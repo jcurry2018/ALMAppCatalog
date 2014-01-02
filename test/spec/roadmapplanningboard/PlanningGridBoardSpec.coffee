@@ -27,12 +27,17 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
 
       @waitForComponentReady(@gridboard)
 
+    addArtifact: (name) ->
+      @click(css: '.add-new button')
+      @click(css: '.add-new .rally-textfield-component input').sendKeys name
+      @click(css: '.add-new .add button')
+
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
     @timelineStore = Deft.Injector.resolve('timelineStore')
     @roadmapStore = Deft.Injector.resolve('roadmapStore')
     @ajax.whenQuerying('TypeDefinition').respondWith Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemFeature')
-    @ajax.whenQuerying('PortfolioItem/Feature').respondWith []
+    @ajax.whenQuerying('PortfolioItem/Feature').respondWith [ Name: 'Feature 1', _ref: '/foobar/123' ]
 
   afterEach ->
     @gridboard.destroy()
@@ -65,3 +70,13 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
     @createPermissionsStub(subAdmin: false, workspaceAdmin: false)
     @createGridboard().then =>
       expect(@gridboard.getGridOrBoard().isAdmin).toBe false
+
+  describe 'integration', ->
+    beforeEach ->
+      @createRequest = @ajax.whenCreating('PortfolioItem/Feature').respondWith Name: 'Feature 2'
+
+    it 'should send rankAbove when adding a new feature', ->
+      @createGridboard().then =>
+        @addArtifact('New Feature').then =>
+          expect(@createRequest).toBeWsapiRequestWith
+            params: { rankAbove: '/foobar/123' }
