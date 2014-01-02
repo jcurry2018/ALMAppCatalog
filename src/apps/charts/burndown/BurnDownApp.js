@@ -281,7 +281,7 @@
 
         _fetchIterations: function () {
             var store = Ext.create('Rally.data.wsapi.Store', {
-                model: 'Iteration',
+                model: Ext.identityFn('Iteration'),
                 filters: [
                     {
                         property: 'StartDate',

@@ -181,7 +181,7 @@
                     url: Rally.environment.getContext().context.services.timeline_service_url + '/timeline/{timeline.id}/timeframe/{id}'
                 },
                 belongsTo: {
-                    model: 'Rally.apps.roadmapplanningboard.TimelineModel',
+                    model: Ext.identityFn('Rally.apps.roadmapplanningboard.TimelineModel'),
                     foreignKey: 'timelineId'
                 }
             });

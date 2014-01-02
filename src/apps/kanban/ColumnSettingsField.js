@@ -126,7 +126,7 @@
                     flex: 2,
                     editor: {
                         xtype: 'rallyfieldvaluecombobox',
-                        model: 'HierarchicalRequirement',
+                        model: Ext.identityFn('HierarchicalRequirement'),
                         field: 'ScheduleState',
                         listeners: {
                             ready: function (combo) {

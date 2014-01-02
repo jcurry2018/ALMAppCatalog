@@ -126,7 +126,7 @@
 
             var portfolioItemRef = this.getSetting(this.PI_SETTING);
             var store = Ext.create("Rally.data.wsapi.Store", {
-                model: "Portfolio Item",
+                model: Ext.identityFn("Portfolio Item"),
                 filters: [
                     {
                         property: "ObjectID",

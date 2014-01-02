@@ -280,7 +280,7 @@ module.exports = (grunt) ->
         if debug then '-d' else ''
         '-s lib/ext/4.2.2'
         'compile'
-        '-classpath=lib/sdk/builds/sdk-dependencies-debug.js,lib/sdk/src,src/apps'
+        "-classpath=#{appsdk_path}/builds/sdk-dependencies-debug.js,#{appsdk_path}/src,src/apps"
         'exclude -all and'
         'include -file src/apps and'
         'concat build/catalog-all-debug.js and'

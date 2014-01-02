@@ -23,7 +23,7 @@
                     shouldRespondToScopeChange: true,
                     context: context,
                     storeConfig: {
-                        model: 'TypeDefinition',
+                        model: Ext.identityFn('TypeDefinition'),
                         sorters: [
                             {
                                 property: 'Name'

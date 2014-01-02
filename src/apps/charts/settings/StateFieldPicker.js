@@ -120,7 +120,7 @@
             this.add({
                 name: 'stateFieldName',
                 xtype: 'rallyfieldcombobox',
-                model: 'UserStory',
+                model: Ext.identityFn('UserStory'),
                 margin: '10px 0 0 0',
                 width: 180,
                 fieldLabel: 'Field',
@@ -145,7 +145,7 @@
         _addStateValuesPicker: function(fieldName) {
             this.add({
                 xtype: 'rallyfieldvaluecombobox',
-                model: 'UserStory',
+                model: Ext.identityFn('UserStory'),
                 field: fieldName,
                 name: 'stateFieldValues',
                 valueField: "StringValue",

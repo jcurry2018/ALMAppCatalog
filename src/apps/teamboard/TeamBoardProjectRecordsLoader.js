@@ -10,7 +10,7 @@
 
         load: function(teamOids, callback, scope){
             var config = {
-                model: 'Project',
+                model: Ext.identityFn('Project'),
                 sorters: ['Name']
             };
 

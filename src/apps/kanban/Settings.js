@@ -20,7 +20,7 @@
                 {
                     name: 'groupByField',
                     xtype: 'rallyfieldcombobox',
-                    model: 'UserStory',
+                    model: Ext.identityFn('UserStory'),
                     margin: '10px 0 0 0',
                     fieldLabel: 'Group By',
                     listeners: {
