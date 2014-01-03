@@ -1,6 +1,7 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
+  'Rally.nav.Manager'
   'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
   'Rally.apps.roadmapplanningboard.PlanningGridBoard'
 ]
@@ -27,10 +28,17 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
 
       @waitForComponentReady(@gridboard)
 
-    addArtifact: (name) ->
+    typeName: (name) ->
       @click(css: '.add-new button')
       @click(css: '.add-new .rally-textfield-component input').sendKeys name
+
+    addArtifact: (name) ->
+      @typeName name
       @click(css: '.add-new .add button')
+
+    openCreateEditor: (name) ->
+      @typeName name
+      @click(css: '.add-new .add-with-details button')
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -73,10 +81,15 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
 
   describe 'integration', ->
     beforeEach ->
+      @editorStub = @stub(Rally.nav.Manager, 'create')
       @createRequest = @ajax.whenCreating('PortfolioItem/Feature').respondWith Name: 'Feature 2'
 
     it 'should send rankAbove when adding a new feature', ->
       @createGridboard().then =>
-        @addArtifact('New Feature').then =>
-          expect(@createRequest).toBeWsapiRequestWith
-            params: { rankAbove: '/foobar/123' }
+        @addArtifact('foo').then =>
+          expect(@createRequest).toBeWsapiRequestWith params: { rankAbove: '/foobar/123' }
+
+    it 'should send rankAbove when adding a new feature with details', ->
+      @createGridboard().then =>
+        @openCreateEditor('foo').then =>
+          expect(@editorStub.lastCall.args[1].rankAbove).toBe '/foobar/123'

@@ -42,7 +42,7 @@
             this.addNewPluginConfig = {
                 listeners: {
                     beforecreate: this._onBeforeCreate,
-                    beforeeditorshow: Ext.emptyFn
+                    beforeeditorshow: this._onBeforeCreate
                 },
                 fieldLabel: 'New ' + this.typeName
             };
@@ -112,6 +112,10 @@
          * @private
          */
         _onBeforeCreate: function (addNew, record, params) {
+            // the order of arguments is different between beforecreate and beforeeditorshow
+            if (!record.isModel) {
+                params = record;
+            }
             var rankRecord = this.gridboard.getGridOrBoard().getFirstRecord();
             if (rankRecord) {
                 params.rankAbove = rankRecord.getUri();
