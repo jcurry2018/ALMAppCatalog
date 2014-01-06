@@ -117,7 +117,9 @@
         _drawHeader: function () {
             var header = this.down('#header');
 
-            header.getLeft().add(this._buildAddNewComponent());
+            if (Rally.environment.getContext().getPermissions().isProjectEditor(this.getContext().getProject()._ref)) {
+                header.getLeft().add(this._buildAddNewComponent());
+            }
             header.getRight().add([
                 this._buildHelpComponent(),
                 this._buildShowPolicies(),
