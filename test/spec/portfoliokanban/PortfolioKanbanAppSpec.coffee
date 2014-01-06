@@ -86,6 +86,10 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp().then =>
       expect(@app).toHaveHelpComponent()
 
+  it 'should show an Add New button', ->
+    @_createApp().then =>
+      expect(Ext.query('.add-new button').length).toBe 1
+
   it 'shows ShowPolicies checkbox', ->
     @_createApp().then =>
       expect(@app.down('#header').el.down('input[type="button"]')).toHaveCls 'showPoliciesCheckbox'

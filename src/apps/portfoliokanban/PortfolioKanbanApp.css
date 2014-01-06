@@ -6,7 +6,7 @@
     float: right;
 }
 
-.portfolio-kanban .header {
+.portfolio-kanban .rui-leftright {
     border-bottom: 1px dotted #c6c6c6;
     padding-right: 10px;
 }
@@ -43,14 +43,6 @@
     padding-right: 5px;
 }
 
-.portfolio-kanban .filterInfo {
-    float: right;
-    padding-right: 1px;
-    border-right: 1px solid #CCC;
-    margin-right: 5px;
-    margin-top: 3px;
-}
-
-.portfolio-kanban .rally-help-icon {
+.portfolio-kanban .help-field {
     float: right;
 }
