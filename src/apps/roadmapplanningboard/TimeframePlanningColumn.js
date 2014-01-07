@@ -14,8 +14,8 @@
         ],
 
         config: {
-            startDateField: 'start',
-            endDateField: 'end',
+            startDateField: 'startDate',
+            endDateField: 'endDate',
             editPermissions: {
                 capacityRanges: true,
                 theme: true,

@@ -43,6 +43,7 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
         url: 'someurl'
 
     @record = new @Model
+      id: 'foo'
       ref: 'myRef'
       collectionField: [{id: 1}, {id :2}]
     @record.phantom = false # pretend the record is persisted
@@ -81,7 +82,7 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
       expect(@writeSpy.lastCall.returnValue.action).toBe 'update'
 
     it 'should send the correct data', ->
-      expect(@writeSpy.lastCall.returnValue.jsonData).toEqual { somefield: 'newValue' }
+      expect(@writeSpy.lastCall.returnValue.jsonData).toEqual { id: 'foo', somefield: 'newValue' }
 
   describe 'when removing from collection relationship', ->
 
