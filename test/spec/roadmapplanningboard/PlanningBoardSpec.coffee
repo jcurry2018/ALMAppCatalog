@@ -52,6 +52,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     @timelineStore = Deft.Injector.resolve('timelineStore')
     @timeframeStore = Deft.Injector.resolve('timeframeStore')
     @planStore = Deft.Injector.resolve('planStore')
+    @preliminaryEstimateStore = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getPreliminaryEstimateStoreFixture()
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith(features)
 
   afterEach ->
@@ -132,6 +133,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     @createCardboard().then =>
       expect(@cardboard.timeframeStore).toBeTruthy()
       expect(@cardboard.planStore).toBeTruthy()
+      expect(@cardboard.preliminaryEstimateStore).toBeTruthy()
 
   it 'should have appropriate plan capacity range', ->
     @createCardboard().then =>

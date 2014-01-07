@@ -213,13 +213,13 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     ObjectID: "1010"
     _ref: '/portfolioitem/feature/1010'
     Name: "Battlestar Gallactica"
-    PreliminaryEstimate: {Value: 6}
+    PreliminaryEstimate: {Value: 6,_refObjectName: "L"}
     subscriptionId: "1"
   ,
     ObjectID: "1011"
     _ref: '/portfolioitem/feature/1011'
     Name: "Firefly"
-    PreliminaryEstimate: {Value: 3}
+    PreliminaryEstimate: {Value: 3,_refObjectName: "L"}
     subscriptionId: "1"
   ]
 
@@ -233,6 +233,18 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
 
     @secondFeatureStoreFixture.model.setProxy 'memory'
     @secondFeatureStoreFixture
+
+  getPreliminaryEstimateStoreFixture: ->
+    @preliminaryEstimateStoreFixture = Ext.create 'Rally.data.wsapi.Store',
+      model: Rally.test.mock.data.WsapiModelFactory.getModel 'PreliminaryEstimate'
+      proxy:
+        type: 'memory'
+      data: [
+        {Value: 8, _refObjectName: 'L', Name: 'L', Description: 'Large'}
+      ]
+
+    @preliminaryEstimateStoreFixture.model.setProxy 'memory'
+    @preliminaryEstimateStoreFixture
 
   getTimelineStoreFixture: ->
     @timelineStoreFixture = Ext.create 'Rally.data.Store',

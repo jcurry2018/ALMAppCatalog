@@ -5,7 +5,7 @@
         extend: 'Rally.ui.cardboard.CardBoard',
         alias: 'widget.roadmapplanningboard',
 
-        inject: ['timeframeStore', 'planStore'],
+        inject: ['timeframeStore', 'planStore', 'preliminaryEstimateStore'],
 
         requires: [
             'Rally.data.util.PortfolioItemHelper',
@@ -67,7 +67,7 @@
         },
 
         onModelsRetrieved: function (callback) {
-            Deft.Promise.all([this._loadTimeframeStore(), this._loadPlanStore()]).then({
+            Deft.Promise.all([this._loadTimeframeStore(), this._loadPlanStore(), this._loadPreliminaryStore()]).then({
                 success: function (results) {
                     this.buildColumns();
                     callback.call(this);
@@ -104,6 +104,10 @@
             });
         },
 
+        _loadPreliminaryStore: function() {
+            return this.preliminaryEstimateStore.load();
+        },
+
         /**
          * @inheritDoc
          */
@@ -129,7 +133,10 @@
             return {
                 xtype: 'backlogplanningcolumn',
                 planStore: this.planStore,
-                cls: 'column backlog'
+                cls: 'column backlog',
+                cardConfig: {
+                    preliminaryEstimateStore: this.preliminaryEstimateStore
+                }
             };
         },
 
@@ -162,7 +169,6 @@
                     record = cards[0].getRecord();
                 }
             }
-
             return record;
         },
 
@@ -288,6 +294,9 @@
                     record: timeframe,
                     fieldToDisplay: 'name',
                     editable: this.isAdmin
+                },
+                cardConfig: {
+                    preliminaryEstimateStore: this.preliminaryEstimateStore
                 },
                 editPermissions: {
                     capacityRanges: this.isAdmin,

@@ -45,6 +45,10 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
         fn: ->
           Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getRoadmapStoreFixture()
 
+      preliminaryEstimateStore:
+        fn: ->
+          Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getPreliminaryEstimateStoreFixture()
+
       uuidMapper:
         fn: =>
           getUuid: (oids) =>

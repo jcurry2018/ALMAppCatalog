@@ -45,7 +45,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
     @timelineStore = Deft.Injector.resolve('timelineStore')
     @roadmapStore = Deft.Injector.resolve('roadmapStore')
     @ajax.whenQuerying('TypeDefinition').respondWith Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemFeature')
-    @ajax.whenQuerying('PortfolioItem/Feature').respondWith [ Name: 'Feature 1', _ref: '/foobar/123' ]
+    @ajax.whenQuerying('PortfolioItem/Feature').respondWith [ Name: 'Feature 1', _ref: '/foobar/123', PreliminaryEstimate : {_refObjectName: 'L'} ]
 
   afterEach ->
     @gridboard.destroy()
