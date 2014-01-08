@@ -95,12 +95,12 @@
         _addPickerClasses: function (picker) {
             var datePickerMonthButton, datePickerNext, datePickerPrev;
 
-            datePickerPrev = picker.getEl().down( '.' + Ext.baseCSSPrefix + 'datepicker-prev a');
-            datePickerPrev.addCls('en-triangle-left');
-            datePickerNext = picker.getEl().down('.' + Ext.baseCSSPrefix + 'datepicker-next a');
-            datePickerNext.addCls('en-triangle-right');
-            datePickerMonthButton = picker.getEl().down('.' + Ext.baseCSSPrefix + 'datepicker-month ' +  '.' + Ext.baseCSSPrefix + 'btn-icon');
-            return datePickerMonthButton.addCls('en-triangle-down');
+            // datePickerPrev = picker.getEl().down( '.' + Ext.baseCSSPrefix + 'datepicker-prev');
+            // datePickerPrev.addCls('en-triangle-left');
+            // datePickerNext = picker.getEl().down('.' + Ext.baseCSSPrefix + 'datepicker-next');
+            // datePickerNext.addCls('en-triangle-right');
+            // datePickerMonthButton = picker.getEl().down('.' + Ext.baseCSSPrefix + 'datepicker-month ' +  '.' + Ext.baseCSSPrefix + 'btn-icon');
+            // return datePickerMonthButton.addCls('en-triangle-down');
         }
     });
 

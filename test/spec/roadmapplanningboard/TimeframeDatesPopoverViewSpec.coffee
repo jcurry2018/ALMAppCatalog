@@ -36,7 +36,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
       end: new Date()
 
     @view = Ext.create 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView',
-      target: Ext.getBody()
+      target: Ext.get 'testDiv'
       waitTimeForDateFieldValidation: 0
       controllerConfig:
         model: @record
