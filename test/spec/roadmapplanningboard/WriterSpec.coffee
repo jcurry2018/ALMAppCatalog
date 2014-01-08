@@ -47,7 +47,7 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
       collectionField: [{id: 1}, {id :2}]
     @record.phantom = false # pretend the record is persisted
 
-    @writeSpy = @spy @record.proxy.writer, 'write'
+    @writeSpy = @spy @record.getProxy().getWriter(), 'write'
     @ajax.whenCreating('collectionField', false).respondWith({})
     @ajax.whenDeleting('collectionField', '1', false).respondWith({})
 
