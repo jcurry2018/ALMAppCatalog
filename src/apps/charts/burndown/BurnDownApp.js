@@ -9,6 +9,7 @@
         requires: [
             'Rally.apps.charts.burndown.BurnDownSettings',
             'Rally.data.wsapi.Store',
+            'Rally.util.Help',
             'Rally.ui.combobox.IterationComboBox',
             'Rally.ui.combobox.ReleaseComboBox'
         ],
