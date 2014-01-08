@@ -17,6 +17,8 @@
             'Rally.ui.cardboard.Card',
             'Rally.data.QueryFilter',
             'Rally.ui.notify.Notifier',
+            'Rally.ui.AddNew',
+            'Rally.ui.LeftRight',
             'Rally.util.Help',
             'Rally.util.Test'
         ],
@@ -40,9 +42,8 @@
 
         items: [
             {
-                xtype: 'container',
-                itemId: 'header',
-                cls: 'header'
+                xtype: 'rallyleftright',
+                itemId: 'header'
             },
             {
                 xtype: 'container',
@@ -116,7 +117,10 @@
         _drawHeader: function () {
             var header = this.down('#header');
 
-            header.add([
+            if (Rally.environment.getContext().getPermissions().isProjectEditor(this.getContext().getProject()._ref)) {
+                header.getLeft().add(this._buildAddNewComponent());
+            }
+            header.getRight().add([
                 this._buildHelpComponent(),
                 this._buildShowPolicies(),
                 this._buildFilterInfo()
@@ -398,9 +402,17 @@
 
         },
 
+        _buildAddNewComponent: function () {
+            return Ext.create('Rally.ui.AddNew', {
+                context: this.getContext().getDataContext(),
+                recordTypes: [this.currentType.get('TypePath')],
+                fieldLabel: 'New ' + this.currentType.get('Name')
+            });
+        },
+
         _buildHelpComponent: function (config) {
             return Ext.create('Ext.Component', Ext.apply({
-                cls: Rally.util.Test.toBrowserTestCssClass('portfolio-kanban-help-container'),
+                cls: 'help-field ' + Rally.util.Test.toBrowserTestCssClass('portfolio-kanban-help-container'),
                 renderTpl: Rally.util.Help.getIcon({
                     id: 265
                 })

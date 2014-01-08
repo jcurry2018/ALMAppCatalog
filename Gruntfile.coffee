@@ -44,6 +44,7 @@ module.exports = (grunt) ->
   spec = (grunt.option('spec') || grunt.option('jsspec') || '*').replace(/(Spec|Test)$/, '')
   debug = grunt.option 'verbose' || false
   version = grunt.option 'version' || 'dev'
+  maps = grunt.option 'maps' || false
 
   appsdk_path = 'lib/sdk'
   served_paths = [path.resolve(__dirname)]
@@ -236,6 +237,8 @@ module.exports = (grunt) ->
         src: ['**/*.coffee']
         dest: 'test/gen'
         ext: '.js'
+        options:
+          sourceMap: maps
 
     watch:
       test:

@@ -105,8 +105,13 @@
             return !Ext.isDate(dateField.getValue());
         },
         _saveDates: function () {
+            this.model.set('startDate', this.getStartDate().getValue());
+            this.model.set('endDate', this.getEndDate().getValue());
+
+            // Remove these 2 lines once we switch over to use Oracle and the new startDate/endDate
             this.model.set('start', this.getStartDate().getValue());
             this.model.set('end', this.getEndDate().getValue());
+
             if (this.model.dirty) {
                 return this._saveModel();
             }

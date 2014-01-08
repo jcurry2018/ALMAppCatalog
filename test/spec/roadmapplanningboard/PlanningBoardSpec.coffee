@@ -52,6 +52,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     @timelineStore = Deft.Injector.resolve('timelineStore')
     @timeframeStore = Deft.Injector.resolve('timeframeStore')
     @planStore = Deft.Injector.resolve('planStore')
+    @preliminaryEstimateStore = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getPreliminaryEstimateStoreFixture()
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith(features)
 
   afterEach ->
@@ -80,7 +81,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   it 'should render with a backlog column', ->
     @createCardboard().then =>
-      backlogColumn = @cardboard.getColumns()[0]
+      backlogColumn = @cardboard.getBacklogColumn()
 
       expect(backlogColumn.getColumnHeader().getHeaderValue()).toBe "Backlog"
 
@@ -132,6 +133,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     @createCardboard().then =>
       expect(@cardboard.timeframeStore).toBeTruthy()
       expect(@cardboard.planStore).toBeTruthy()
+      expect(@cardboard.preliminaryEstimateStore).toBeTruthy()
 
   it 'should have appropriate plan capacity range', ->
     @createCardboard().then =>
@@ -196,3 +198,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
             timeframeDates: false
           expect(column.dropControllerConfig.dragDropEnabled).toBe false
           expect(column.columnHeaderConfig.editable).toBe false
+
+  describe '#getFirstRecord', ->
+    it 'should get the first record in the backlog column', ->
+      @createCardboard().then =>
+        expect(@cardboard.getFirstRecord().get('Name')).toBe 'Blackberry Native App'

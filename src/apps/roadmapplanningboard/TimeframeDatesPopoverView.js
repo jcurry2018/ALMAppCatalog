@@ -93,7 +93,7 @@
             return dateField.addCls('triggerSelected');
         },
         _addPickerClasses: function (picker) {
-            var datePickerMonthButton, datePickerNext, datePickerPrev;
+            // var datePickerMonthButton, datePickerNext, datePickerPrev;
 
             // datePickerPrev = picker.getEl().down( '.' + Ext.baseCSSPrefix + 'datepicker-prev');
             // datePickerPrev.addCls('en-triangle-left');

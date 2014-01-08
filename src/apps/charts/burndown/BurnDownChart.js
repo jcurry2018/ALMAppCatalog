@@ -23,7 +23,8 @@
                 sort: {
                     "_ValidFrom": 1
                 },
-                compress: true
+                compress: true,
+                useHttpPost: true
             },
 
             calculatorType: "Rally.apps.charts.burndown.BurnDownCalculator",

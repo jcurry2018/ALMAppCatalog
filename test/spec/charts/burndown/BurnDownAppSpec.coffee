@@ -68,7 +68,7 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
           prefRequest = @ajax.whenQuerying('preference').respondWith @mom.getData('preference', values: prefNameValues)
 
           lookbackquery = @ajax.whenReadingEndpoint("/snapshot/query").respondWithHtml snapshots,
-          		{ url: "/analytics/v2.0/service/rally/workspace/"+@getContext().getWorkspace().ObjectID+"/artifact/snapshot/query.js", method: 'GET' }
+          		{ url: "/analytics/v2.0/service/rally/workspace/"+@getContext().getWorkspace().ObjectID+"/artifact/snapshot/query.js", method: 'POST' }
 
           addSpy = @spy()
           app = Ext.create 'Rally.apps.charts.burndown.BurnDownApp',

@@ -5,7 +5,7 @@
         extend: 'Rally.ui.cardboard.CardBoard',
         alias: 'widget.roadmapplanningboard',
 
-        inject: ['timeframeStore', 'planStore'],
+        inject: ['timeframeStore', 'planStore', 'preliminaryEstimateStore'],
 
         requires: [
             'Rally.data.util.PortfolioItemHelper',
@@ -67,7 +67,7 @@
         },
 
         onModelsRetrieved: function (callback) {
-            Deft.Promise.all([this._loadTimeframeStore(), this._loadPlanStore()]).then({
+            Deft.Promise.all([this._loadTimeframeStore(), this._loadPlanStore(), this._loadPreliminaryStore()]).then({
                 success: function (results) {
                     this.buildColumns();
                     callback.call(this);
@@ -104,6 +104,10 @@
             });
         },
 
+        _loadPreliminaryStore: function() {
+            return this.preliminaryEstimateStore.load();
+        },
+
         /**
          * @inheritDoc
          */
@@ -129,12 +133,46 @@
             return {
                 xtype: 'backlogplanningcolumn',
                 planStore: this.planStore,
-                cls: 'column backlog'
+                cls: 'column backlog',
+                cardConfig: {
+                    preliminaryEstimateStore: this.preliminaryEstimateStore
+                }
             };
         },
 
         /**
-         * @public
+         * Return the backlog column if it exists
+         * @returns {Rally.apps.roadmapplanningboard.BacklogBoardColumn} column The backlog column of the cardboard
+         */
+        getBacklogColumn: function () {
+            var columns = this.getColumns();
+
+            if (!Ext.isEmpty(columns)) {
+                return columns[0];
+            } else {
+                return null;
+            }
+        },
+
+        /**
+         * Get the first record of the cardboard
+         * @returns {Rally.data.Record}
+         */
+        getFirstRecord: function () {
+            var cards;
+            var record = null;
+            var column = this.getBacklogColumn();
+
+            if (column) {
+                cards = column.getCards();
+                if (!Ext.isEmpty(cards)) {
+                    record = cards[0].getRecord();
+                }
+            }
+            return record;
+        },
+
+        /**
          * Draws the theme toggle buttons to show/hide the themes
          */
         drawThemeToggle: function () {
@@ -256,6 +294,9 @@
                     record: timeframe,
                     fieldToDisplay: 'name',
                     editable: this.isAdmin
+                },
+                cardConfig: {
+                    preliminaryEstimateStore: this.preliminaryEstimateStore
                 },
                 editPermissions: {
                     capacityRanges: this.isAdmin,

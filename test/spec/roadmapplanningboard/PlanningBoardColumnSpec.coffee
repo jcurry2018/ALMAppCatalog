@@ -12,6 +12,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
       config = Ext.merge {},
         store: Deft.Injector.resolve('featureStore')
+        cardConfig:
+          preliminaryEstimateStore: Deft.Injector.resolve('preliminaryEstimateStore')
         context:
           getWorkspace: () -> return {ObjectID: 1234}
           getUser: () -> return {ObjectID: 5678}

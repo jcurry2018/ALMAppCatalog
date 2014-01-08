@@ -73,15 +73,6 @@
             }
 
             return request;
-        },
-
-        /**
-         * Return only changes without the id
-         * @param {Rally.data.Model} record The record to save
-         * @returns {Object} what to save
-         */
-        getRecordData: function (record) {
-            return record.getChanges();
         }
     });
 })();

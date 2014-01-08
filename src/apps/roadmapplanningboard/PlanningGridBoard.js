@@ -35,18 +35,17 @@
              */
             typeName: '',
 
-            cardboardPlugins: [],
-
-            addNewPluginConfig: {
-                listeners: {
-                    beforecreate: Ext.emptyFn,
-                    beforeeditorshow: Ext.emptyFn
-                }
-            }
+            cardboardPlugins: []
         },
 
         initComponent: function () {
-            this.addNewPluginConfig.fieldLabel = 'New ' + this.typeName;
+            this.addNewPluginConfig = {
+                listeners: {
+                    beforecreate: this._onBeforeCreate,
+                    beforeeditorshow: this._onBeforeCreate
+                },
+                fieldLabel: 'New ' + this.typeName
+            };
             this.plugins = [
                 'rallygridboardaddnew',
                 {
@@ -104,6 +103,22 @@
             } else {
                 this.filterButton.removeCls('primary');
                 this.filterButton.addCls('secondary');
+            }
+        },
+
+        /**
+         * This method is fired by AddNew and will run before the artifact is created.
+         * Scoping will be the GridBoardAddNew plugin (because of issues with deep merging of the listener config and the scope)
+         * @private
+         */
+        _onBeforeCreate: function (addNew, record, params) {
+            // the order of arguments is different between beforecreate and beforeeditorshow
+            if (!record.isModel) {
+                params = record;
+            }
+            var rankRecord = this.gridboard.getGridOrBoard().getFirstRecord();
+            if (rankRecord) {
+                params.rankAbove = rankRecord.getUri();
             }
         },
 

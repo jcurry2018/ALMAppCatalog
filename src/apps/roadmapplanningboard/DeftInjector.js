@@ -38,6 +38,12 @@
                             model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
                         }]
                     },
+                    preliminaryEstimateStore: {
+                      className: 'Rally.data.wsapi.Store',
+                      parameters: [{
+                            model: 'PreliminaryEstimate'
+                      }]
+                    },
                     uuidMapper: {
                         className: 'Rally.apps.roadmapplanningboard.UuidMapper'
                     }
