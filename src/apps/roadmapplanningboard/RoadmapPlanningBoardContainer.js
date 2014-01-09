@@ -87,13 +87,25 @@
                     roadmap: roadmap,
                     typeName: this.typeName,
                     modelNames: this.types,
-                    cardboardPlugins: this.cardboardPlugins
+                    cardboardPlugins: this.cardboardPlugins,
+                    height: this._getGridboardHeight()
                 });
             } else if (!roadmap) {
                 Rally.ui.notify.Notifier.showError({message: 'No roadmap available'});
             } else {
                 Rally.ui.notify.Notifier.showError({message: 'No timeline available'});
             }
+        },
+
+        _getGridboardHeight: function () {
+            if (this.getEl().getHeight()) {
+                return this.getEl().getHeight();
+            }
+            var content = Ext.getBody().down('#content');
+            if (!content && Rally.BrowserTest) {
+                return Ext.getBody().down('#testDiv').getHeight();
+            }
+            return content.getHeight() - content.down('.page').getHeight();
         },
 
         _onRequestException: function (connection, response, requestOptions) {
@@ -114,7 +126,7 @@
         },
 
         destroy: function () {
-            if(this.gridboard) {
+            if (this.gridboard) {
                 this.gridboard.destroy();
             }
 

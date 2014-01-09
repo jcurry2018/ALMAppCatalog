@@ -15,8 +15,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
         cardConfig:
           preliminaryEstimateStore: Deft.Injector.resolve('preliminaryEstimateStore')
         context:
-          getWorkspace: () -> return {ObjectID: 1234}
-          getUser: () -> return {ObjectID: 5678}
+          getScopedStateId: (stateId) -> return stateId
         listeners:
           ready: ->
             Rally.BrowserTest.publishComponentReady @
@@ -120,7 +119,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
   describe 'filterable column', ->
     beforeEach ->
-      @filterKey = 'page.roadmap.queryfilter.gotmeanid.1234'
       @columnConfig =
         filterable: true
         baseFilter:
@@ -158,3 +156,13 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
           popover.down('#customqueryfilter').setValue(@nameFilter.toString())
           @click(popover.down('#filterDone').getEl()).then =>
             expect(@column.getStoreFilter().toString()).toBe '((ActualEndDate = "null") AND (Name = "Android Support"))'
+
+    it 'should apply queryFilter at initial load', ->
+      @stub Rally.ui.filter.view.FilterButton::, 'getFilter', -> [
+        property: 'Name',
+        operator: '=',
+        value: 'Some name'
+      ]
+
+      @createColumn().then =>
+        expect(@column.getStoreFilter().toString()).toBe '((ActualEndDate = "null") AND (Name = "Some name"))'
