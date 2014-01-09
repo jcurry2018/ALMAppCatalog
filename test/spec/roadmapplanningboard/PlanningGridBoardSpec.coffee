@@ -29,16 +29,16 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
       @waitForComponentReady(@gridboard)
 
     typeName: (name) ->
-      @click(css: '.add-new button')
+      @click(css: '.add-new a')
       @click(css: '.add-new .rally-textfield-component input').sendKeys name
 
     addArtifact: (name) ->
       @typeName name
-      @click(css: '.add-new .add button')
+      @click(css: '.add-new .add')
 
     openCreateEditor: (name) ->
       @typeName name
-      @click(css: '.add-new .add-with-details button')
+      @click(css: '.add-new .add-with-details')
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
