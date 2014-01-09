@@ -15,7 +15,6 @@
         ],
 
         queryFilter: null,
-        queryFilterKey: 'page.roadmap.queryfilter.',
 
         config: {
             filterable: false,
@@ -44,10 +43,6 @@
 
         constructor: function (config) {
             this.mergeConfig(config);
-            this.context = this.context || Rally.environment.getContext();
-            if(!this.config.context) {
-                this.config.context = this.context;
-            }
             this.config.storeConfig.autoLoad = !this.filterable;
             if (this.config.baseFilter && !this.config.baseFilter._createQueryString) {
                 this.config.baseFilter = this._createBaseFilter(this.config.baseFilter);
@@ -73,22 +68,14 @@
 
         initComponent: function () {
             if (this.filterable) {
-                this.queryFilterKey = this.queryFilterKey + this.getColumnIdentifier() + '.' + this.context.getWorkspace().ObjectID;
                 this.filterButton = this._createFilterButton();
-                Rally.data.ModelFactory.getModel({
-                    type: 'Preference',
-                    success: function (model) {
-                        this.queryFilterModel = model;
-                        this._initialFilter();
-                    },
-                    scope: this
-                });
             }
 
             this.callParent(arguments);
 
             return this.on('beforerender', function () {
                 var cls;
+
                 cls = 'planning-column';
                 this.getContentCell().addCls(cls);
                 return this.getColumnHeaderCell().addCls(cls);
@@ -98,21 +85,19 @@
         },
 
         _createFilterButton: function () {
+            var context = this.context || Rally.environment.getContext();
             return Ext.create('Rally.ui.filter.view.FilterButton', {
                 cls: 'medium columnfilter',
-                items: [
-                    {
-                        xtype: 'rallycustomqueryfilter',
-                        filterHelpId: 194,
-                        listeners: {
-                            beforerender: {
-                                fn: this._setQueryFilterValue,
+                stateful: true,
+                stateId: context.getScopedStateId('filter' + this.getColumnIdentifier()),
+                listeners: {
+                    filter: {
+                        fn: this._initialFilter,
                                 single: true,
                                 scope: this
                             }
-                        }
-                    }
-                ]
+                },
+                items: this._getFilterItems()
             });
         },
 
@@ -167,6 +152,15 @@
             Ext.Error.raise('Need to override this to ensure unique identifier for persistence');
         },
 
+        _getFilterItems: function () {
+            return [
+                {
+                    xtype: 'rallycustomqueryfilter',
+                    filterHelpId: 194
+                }
+            ];
+        },
+
         getStoreFilter: function (model) {
             var filter = this.baseFilter;
 
@@ -181,39 +175,21 @@
             return filter;
         },
 
-        _initialFilter: function () {
-            this.filterButton.on('filter', this._onFilter, this);
-
-            //get the preference and convert to a filter
-            this._findPreference(function (preference) {
-                if (preference && preference.get('Value')) {
-                    this.queryFilter = Rally.data.QueryFilter.fromQueryString(preference.get('Value'));
-                    //need to set value on the custom query filter this.queryFilter
-                    this._applyFilter();
-                } else {
-                    this.queryFilter = null;
-                }
-                this.config.storeConfig.autoLoad = true;
-                this.loadStore();
-            });
+        _initialFilter: function (component, filters) {
+            component.on('filter', this._onFilter, this);
+            this._applyFilter(filters);
+            this.config.storeConfig.autoLoad = true;
+            this.loadStore();
         },
 
         _onFilter: function (component, filters) {
-            this.queryFilter = filters[0];
-            this._saveQueryFilter();
-            this._applyFilter();
+            this._applyFilter(filters);
             this.refresh(this.config);
         },
 
-        _setQueryFilterValue: function (component, options) {
-            if (this.queryFilter) {
-                component.setValue(this.queryFilter.toString());
-            } else {
-                component.setValue('');
-            }
-        },
+        _applyFilter: function (filters) {
+            this.queryFilter = filters[0];
 
-        _applyFilter: function () {
             if (this.queryFilter) {
                 this.filterButton.removeCls('secondary');
                 this.filterButton.addCls('primary');
@@ -221,42 +197,7 @@
                 this.filterButton.removeCls('primary');
                 this.filterButton.addCls('secondary');
             }
-        },
-
-        _saveQueryFilter: function () {
-            if (this.filterable) {
-                this._findPreference(function (preference) {
-                    var value = this.queryFilter ? this.queryFilter.toString() : '';
-                    if (preference) {
-                        preference.set('Value', value);
-                    } else {
-                        preference = Ext.create(this.queryFilterModel, {
-                            Name: this.queryFilterKey,
-                            User: '/user/' + this.context.getUser().ObjectID,
-                            Project: 'null',
-                            Workspace: '/workspace/' + this.context.getWorkspace().ObjectID,
-                            Value: value
-                        });
-                    }
-                    preference.save({
-                        success: function (preference) {
-                            this.publish(Rally.Message.preferenceUpdated, preference);
-                        },
-                        scope: this
-                    });
-                });
-            }
-        },
-
-        _findPreference: function (callback) {
-            this.queryFilterModel.find({
-                filters: [
-                    { property: 'Name', value: this.queryFilterKey },
-                    { property: 'User', value: '/user/' + this.context.getUser().ObjectID }
-                ],
-                callback: callback,
-                scope: this
-            });
         }
     });
+
 })();

@@ -8,10 +8,11 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer', ->
   helpers
-    createContainer: (expectError = false, context = Rally.environment.getContext()) ->
+    createContainer: (expectError = false, config = {}, context = Rally.environment.getContext()) ->
       @container = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer',
-        renderTo: 'testDiv'
-        context: context
+        Ext.merge config,
+          renderTo: 'testDiv'
+          context: context
 
       if expectError
         @once
@@ -45,7 +46,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer', ->
         user: Rally.environment.getContext().getUser()
         subscription: Rally.environment.getContext().getSubscription()
 
-    @createContainer(false, context).then =>
+    @createContainer(false, {}, context).then =>
       expect(@container.getContext()).toNotBe Rally.environment.getContext()
       expect(@container.getContext()).toBe context
 
@@ -56,6 +57,15 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardContainer', ->
   it 'should render a gridboard board with a roadmap', ->
     @createContainer().then =>
       expect(@container.gridboard.timeline.getId()).toBe @timelineStore.first().getId()
+
+  it 'should define height for gridboard based on content window', ->
+    Ext.DomHelper.append Ext.getBody(), '<div id="content" style="height: 100px;"><div class="page" style="height: 20px;"></div></div>'
+    @createContainer().then =>
+      expect(@container.gridboard.getHeight()).toBe 80
+
+  it 'should define height for gridboard based on container height', ->
+    @createContainer(false, {height: 200}).then =>
+      expect(@container.gridboard.getHeight()).toBe 200
 
   it 'should notify of error if the timeline store fails to load', ->
     @stub @timelineStore, 'load', ->
