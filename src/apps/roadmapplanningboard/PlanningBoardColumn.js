@@ -11,14 +11,20 @@
         requires: [
             'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController',
             'Rally.ui.filter.view.FilterButton',
-            'Rally.ui.filter.view.CustomQueryFilter'
+            'Rally.ui.filter.view.CustomQueryFilter',
+            'Rally.ui.filter.view.ParentFilter'
         ],
 
+        parentFilter: null,
         queryFilter: null,
 
         config: {
             filterable: false,
             baseQueryFilter: null,
+            /**
+             * @cfg {Object} Object containing Names and TypePaths of the lowest level portfolio item (eg: 'Feature') and optionally its parent (eg: 'Initiative')
+             */
+            typeNames: {},
             storeConfig: {
                 fetch: ['Value', 'FormattedID', 'Owner', 'Name', 'PreliminaryEstimate', 'DisplayColor']
             },
@@ -43,6 +49,10 @@
 
         constructor: function (config) {
             this.mergeConfig(config);
+            this.context = this.context || Rally.environment.getContext();
+            if(!this.config.context) {
+                this.config.context = this.context;
+            }
             this.config.storeConfig.autoLoad = !this.filterable;
             if (this.config.baseFilter && !this.config.baseFilter._createQueryString) {
                 this.config.baseFilter = this._createBaseFilter(this.config.baseFilter);
@@ -53,13 +63,10 @@
         _createBaseFilter: function (bf) {
             var baseFilter;
             if (Ext.isArray(bf)) {
-                _.each(bf, function (filter) {
-                    if (baseFilter) {
-                        baseFilter = baseFilter.and(new Rally.data.QueryFilter.fromExtFilter(filter));
-                    } else {
-                        baseFilter = new Rally.data.QueryFilter.fromExtFilter(filter);
-                    }
-                }, this);
+                baseFilter = _.reduce(bf, function(result, extFilter) {
+                    var filter = new Rally.data.QueryFilter.fromExtFilter(extFilter);
+                    return result ? result.and(filter) : filter;
+                }, undefined);
             } else {
                 baseFilter = new Rally.data.QueryFilter(bf);
             }
@@ -67,6 +74,10 @@
         },
 
         initComponent: function () {
+            if(!this.typeNames.child || !this.typeNames.child.name) {
+                throw 'typeNames must have a child property with a name';
+            }
+
             if (this.filterable) {
                 this.filterButton = this._createFilterButton();
             }
@@ -75,7 +86,6 @@
 
             return this.on('beforerender', function () {
                 var cls;
-
                 cls = 'planning-column';
                 this.getContentCell().addCls(cls);
                 return this.getColumnHeaderCell().addCls(cls);
@@ -85,20 +95,43 @@
         },
 
         _createFilterButton: function () {
-            var context = this.context || Rally.environment.getContext();
             return Ext.create('Rally.ui.filter.view.FilterButton', {
                 cls: 'medium columnfilter',
                 stateful: true,
-                stateId: context.getScopedStateId('filter' + this.getColumnIdentifier()),
+                stateId: this.context.getScopedStateId('filter' + this.getColumnIdentifier()),
+                items: this._getFilterItems(),
                 listeners: {
                     filter: {
                         fn: this._initialFilter,
-                                single: true,
-                                scope: this
-                            }
-                },
-                items: this._getFilterItems()
+                        single: true,
+                        scope: this
+                    }
+                }
             });
+        },
+
+        _getFilterItems: function () {
+            var filterItems = [];
+
+            if(this.typeNames.parent) {
+                filterItems.push({
+                    xtype: 'rallyparentfilter',
+                    modelType: this.typeNames.parent.typePath,
+                    modelName: this.typeNames.parent.name,
+                    storeConfig: {
+                        context: {
+                            project: null
+                        }
+                    }
+                });
+            }
+
+            filterItems.push({
+                xtype: 'rallycustomqueryfilter',
+                filterHelpId: 194
+            });
+
+            return filterItems;
         },
 
         isMatchingRecord: function () {
@@ -152,52 +185,40 @@
             Ext.Error.raise('Need to override this to ensure unique identifier for persistence');
         },
 
-        _getFilterItems: function () {
-            return [
-                {
-                    xtype: 'rallycustomqueryfilter',
-                    filterHelpId: 194
-                }
-            ];
-        },
-
         getStoreFilter: function (model) {
-            var filter = this.baseFilter;
+            var storeFilter = this.baseFilter;
 
-            if (this.filterable && this.queryFilter && this.queryFilter !== []) {
-                if (filter) {
-                    filter = filter.and(this.queryFilter);
-                } else {
-                    filter = this.queryFilter;
-                }
+            if(this.filterable && this.filters) {
+                storeFilter = _.reduce(this.filters, function (result, filter){
+                    return result ? result.and(filter) : filter;
+                }, storeFilter);
             }
 
-            return filter;
+            return storeFilter;
         },
 
         _initialFilter: function (component, filters) {
-            component.on('filter', this._onFilter, this);
-            this._applyFilter(filters);
+            this.filterButton.on('filter', this._onFilter, this);
+            this._applyFilters(filters);
             this.config.storeConfig.autoLoad = true;
             this.loadStore();
         },
 
         _onFilter: function (component, filters) {
-            this._applyFilter(filters);
+            this._applyFilters(filters);
             this.refresh(this.config);
         },
 
-        _applyFilter: function (filters) {
-            this.queryFilter = filters[0];
+        _applyFilters: function (filters) {
+            this.filters = filters;
 
-            if (this.queryFilter) {
-                this.filterButton.removeCls('secondary');
-                this.filterButton.addCls('primary');
-            } else {
+            if (Ext.isEmpty(this.filters)) {
                 this.filterButton.removeCls('primary');
                 this.filterButton.addCls('secondary');
+            } else {
+                this.filterButton.removeCls('secondary');
+                this.filterButton.addCls('primary');
             }
         }
     });
-
 })();

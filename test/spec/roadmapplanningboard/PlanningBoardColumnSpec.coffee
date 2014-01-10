@@ -15,7 +15,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
         cardConfig:
           preliminaryEstimateStore: Deft.Injector.resolve('preliminaryEstimateStore')
         context:
-          getScopedStateId: (stateId) -> return stateId
+          getScopedStateId: (stateId) -> stateId
         listeners:
           ready: ->
             Rally.BrowserTest.publishComponentReady @
@@ -28,15 +28,30 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
-    @columnConfig = {}
+    @columnConfig =
+      typeNames:
+        child:
+          name: 'Feature'
     @nameFilter = new Rally.data.QueryFilter
       property: 'Name',
       operator: '=',
       value: 'Android Support'
+    @parentFilter = new Rally.data.QueryFilter
+      property: 'Parent'
+      operator: '='
+      value: 'SomeInitiative'
 
   afterEach ->
     Deft.Injector.reset()
     @column?.destroy()
+
+  it 'should throw an error if typeNames does not include a child property with a name', ->
+    delete @columnConfig.typeNames
+
+    createColumn = =>
+      @createColumn()
+
+    expect(createColumn).toThrow('typeNames must have a child property with a name')
 
   it 'should have a column existing', ->
     @createColumn().then =>
@@ -119,7 +134,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
   describe 'filterable column', ->
     beforeEach ->
-      @columnConfig =
+      @columnConfig = Ext.merge {}, @columnConfig,
         filterable: true
         baseFilter:
           property: 'ActualEndDate',
@@ -128,28 +143,51 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
         getColumnIdentifier: =>
           "gotmeanid"
 
+    it 'should render filterable control', ->
+      @createColumn().then =>
+        expect(!!@column.filterButton).toBe true
+
     it 'should throw error if getColumnIdentifier is not overridden', ->
       delete @columnConfig.getColumnIdentifier
       createColumn = =>
         @createColumn()
       expect(createColumn).toThrow 'Need to override this to ensure unique identifier for persistence'
 
-    it 'should render filterable control', ->
+    it 'should add a parent filter if typeNames includes a parent', ->
+      @columnConfig.typeNames.parent =
+        name: 'Initiative'
+        typePath: 'PortfolioItems/Initiative'
       @createColumn().then =>
-        expect(!!@column.filterButton).toBe true
+        parentFilter = _.find(@column.filterButton.items, (item) -> item.xtype is 'rallyparentfilter')
+        expect(!!parentFilter).toBe true
 
-    it 'should apply queryFilter on top of baseFilter', ->
+    it 'should not add a parent filter if typeNames does not include a parent', ->
+      @createColumn().then =>
+        parentFilter = _.find(@column.filterButton.items, (item) -> item.xtype is 'rallyparentfilter')
+        expect(!!parentFilter).toBe false
+
+    it 'should add a custom query filter control', ->
+      @createColumn().then =>
+        queryFilter = _.find(@column.filterButton.items, (item) -> item.xtype is 'rallycustomqueryfilter')
+        expect(!!queryFilter).toBe true
+
+    it 'should apply custom query filters on top of empty baseFilter', ->
       @columnConfig.baseFilter = []
       @createColumn().then =>
-        @column.queryFilter = @nameFilter
+        @column.filters = [@nameFilter]
         expect(@column.getStoreFilter().toString()).toBe '(Name = "Android Support")'
 
-    it 'should apply queryFilter on top of baseFilter', ->
+    it 'should apply custom query filters on top of baseFilter', ->
       @createColumn().then =>
-        @column.queryFilter = @nameFilter
+        @column.filters = [@nameFilter]
         expect(@column.getStoreFilter().toString()).toBe '((ActualEndDate = "null") AND (Name = "Android Support"))'
 
-    it 'should apply queryFilter at Done on popover', ->
+    it 'should handle multiple custom filters on top of baseFilter', ->
+      @createColumn().then =>
+        @column.filters = [@parentFilter, @nameFilter]
+        expect(@column.getStoreFilter().toString()).toBe '(((ActualEndDate = "null") AND (Parent = "SomeInitiative")) AND (Name = "Android Support"))'
+
+    it 'should apply custom filters when Done is clicked on popover', ->
       @createColumn().then =>
         @click(@column.filterButton.getEl()).then =>
           popover = @column.filterButton.getController().popover

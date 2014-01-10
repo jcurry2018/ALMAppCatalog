@@ -19,6 +19,9 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
       planStore: Deft.Injector.resolve('planStore')
       lowestPIType: 'PortfolioItem/Feature'
       roadmap: Deft.Injector.resolve('roadmapStore').getById('413617ecef8623df1391fabc')
+      typeNames:
+        child:
+          name: 'Feature'
 
     return @backlogColumn
 
@@ -43,6 +46,9 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
       store: Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getFeatureStoreFixture()
       planStore: planStore
       lowestPIType: 'feature'
+      typeNames:
+        child:
+          name: 'Feature'
 
     expect(column.getCards().length).toBe(10)
 

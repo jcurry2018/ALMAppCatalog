@@ -50,9 +50,21 @@
 
             Ext.Ajax.on('requestexception', this._onRequestException, this);
 
-            this._retrieveLowestLevelPI(function (record) {
-                this.types = [record.get('TypePath')];
-                this.typeName = record.get('Name');
+            this._retrievePITypes(function (records) {
+                this.types = [records[0].get('TypePath')];
+                this.typeNames = {
+                    child: {
+                        typePath: records[0].get('TypePath'),
+                        name: records[0].get('Name')
+                    }
+                };
+
+                if(records.length > 1) {
+                    this.typeNames.parent = {
+                        typePath: records[1].get('TypePath'),
+                        name: records[1].get('Name')
+                    };
+                }
 
                 var roadmapPromise = this.roadmapStore.load({requester: this, storeServiceName: "Planning"});
                 var timelinePromise = this.timelineStore.load({requester: this, storeServiceName: "Timeline"});
@@ -85,7 +97,7 @@
                     context: this.getContext(),
                     timeline: timeline,
                     roadmap: roadmap,
-                    typeName: this.typeName,
+                    typeNames: this.typeNames,
                     modelNames: this.types,
                     cardboardPlugins: this.cardboardPlugins,
                     height: this._getGridboardHeight()
@@ -117,9 +129,10 @@
             }
         },
 
-        _retrieveLowestLevelPI: function (callback) {
+        _retrievePITypes: function (callback) {
             Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
                 defaultToLowest: true,
+                loadAllTypes: true,
                 success: callback,
                 scope: this
             });

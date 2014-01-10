@@ -17,15 +17,20 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
         isProjectEditor: ->
           !!config.projectEditor
 
-    createGridboard: (expectError = false, context = Rally.environment.getContext()) ->
-      @gridboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningGridBoard',
+    createGridboard: (includeTypeNames = true) ->
+      config =
         roadmap: @roadmapStore.first()
         timeline: @timelineStore.first()
-        context: context
-        typeName: 'Feature'
+        context: Rally.environment.getContext()
         modelNames: ['PortfolioItem/Feature']
         renderTo: 'testDiv'
 
+      if includeTypeNames
+        config.typeNames =
+          child:
+            name: 'Feature'
+
+      @gridboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningGridBoard', config
       @waitForComponentReady(@gridboard)
 
     typeName: (name) ->
@@ -48,8 +53,14 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith [ Name: 'Feature 1', _ref: '/foobar/123', PreliminaryEstimate : {_refObjectName: 'L'} ]
 
   afterEach ->
-    @gridboard.destroy()
+    @gridboard?.destroy()
     Deft.Injector.reset()
+
+  it 'should throw an error if typeNames does not include a child property with a name', ->
+    createGridboard = =>
+      @createGridboard(false)
+
+    expect(createGridboard).toThrow('typeNames must have a child property with a name')
 
   it 'should wrap a roadmap planning board', ->
     @createGridboard().then =>
