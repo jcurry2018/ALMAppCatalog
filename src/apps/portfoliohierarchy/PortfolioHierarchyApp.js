@@ -10,7 +10,7 @@
         requires: [
             'Rally.data.util.PortfolioItemHelper',
             'Rally.ui.notify.Notifier',
-            'Rally.data.QueryFilter',
+            'Rally.data.wsapi.Filter',
             'Rally.util.Help',
             'Rally.util.Test'
         ],

@@ -3,7 +3,7 @@
 
     Ext.define('Rally.apps.teamboard.TeamBoardProjectRecordsLoader', {
         requires: [
-            'Rally.data.QueryFilter',
+            'Rally.data.wsapi.Filter',
             'Rally.data.wsapi.Store'
         ],
         singleton: true,
