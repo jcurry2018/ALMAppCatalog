@@ -16,6 +16,9 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
         timeline: timelineStore.first()
         _retrieveLowestLevelPI: (callback) -> callback.call(@, Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
         renderTo: 'testDiv'
+        typeNames:
+          child:
+            name: 'Feature'
 
       @waitForComponentReady @cardboard
 

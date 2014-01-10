@@ -11,7 +11,11 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
 
   helpers
     createBacklogColumn: (id) ->
-      xtype: 'backlogplanningcolumn', testId: "#{id}"
+      xtype: 'backlogplanningcolumn'
+      testId: "#{id}"
+      typeNames:
+        child:
+          name: 'Feature'
 
     createColumn: (id, date = new Date(), offset = 0) ->
       timeframeRecord = Ext.create Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel(),
@@ -28,6 +32,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         testId: "#{id}"
         timeframeRecord: timeframeRecord
         planRecord: planRecord
+        typeNames:
+          child:
+            name: 'Feature'
         columnHeaderConfig:
           record: timeframeRecord
           fieldToDisplay: 'name'
@@ -44,6 +51,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         timeframeColumnCount: 4
         pastColumnCount: 1
         presentColumnCount: 5
+        typeNames:
+          child:
+            name: 'Feature'
       , config
 
       id = 0

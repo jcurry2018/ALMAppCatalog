@@ -8,17 +8,23 @@ Ext.require [
 describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   helpers
-    createCardboard: (config, expectError = false) ->
-      @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-        _.extend
-          roadmap: @roadmapStore.first()
-          timeline: @timelineStore.first()
-          slideDuration: 10
-          renderTo: 'testDiv'
-          types: ['PortfolioItem/Feature']
-        , config
+    createCardboard: (config = {}, expectAsyncError = false, includeTypeNames = true) ->
+      config = _.extend
+        roadmap: @roadmapStore.first()
+        timeline: @timelineStore.first()
+        slideDuration: 10
+        renderTo: 'testDiv'
+        types: ['PortfolioItem/Feature']
+      , config
 
-      if(expectError)
+      if includeTypeNames
+       config.typeNames =
+         child:
+           name: 'Feature'
+
+      @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard', config
+
+      if(expectAsyncError)
         @once
           condition: => @errorNotifyStub.calledOnce
       else
@@ -58,6 +64,13 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
   afterEach ->
     @cardboard?.destroy()
     Deft.Injector.reset()
+
+
+  it 'should throw an error if typeNames does not include a child property with a name', ->
+    createCardboard = =>
+      @createCardboard({}, false, false)
+
+    expect(createCardboard).toThrow('typeNames must have a child property with a name')
 
   it 'should notify of error if the timeframe store fails to load', ->
     @stub @timeframeStore, 'load', ->

@@ -24,12 +24,7 @@
             timeframeRecord: undefined,
             planRecord: undefined,
             dateFormat: 'M j',
-            pointField: 'PreliminaryEstimate',
-
-            /**
-             * @cfg {String} The name of the artifact this board represents (ex: Feature)
-             */
-            typeName: ''
+            pointField: 'PreliminaryEstimate'
         },
 
         constructor: function (config) {
@@ -293,7 +288,7 @@
                 lowCapacity: lowCapacity,
                 pointTotal: pointTotal,
                 pointText: 'pt' + (pointTotal !== 1 ? 's' : ''),
-                itemType: this.typeName.toLowerCase(),
+                itemType: this.typeNames.child.name.toLowerCase(),
                 progressBarHtml: this._getProgressBarHtml(fraction),
                 formattedPercent: fraction.getFormattedPercent(),
                 progressBarTitle: this._getProgressBarTitle()

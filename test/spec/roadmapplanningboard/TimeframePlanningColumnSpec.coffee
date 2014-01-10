@@ -29,6 +29,9 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
             record: @timeframeRecord
             fieldToDisplay: 'name'
           renderTo: 'testDiv'
+          typeNames:
+            child:
+              name: 'Feature'
         , config
 
     createPlanRecord: (config) ->

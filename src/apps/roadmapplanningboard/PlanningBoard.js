@@ -29,9 +29,9 @@
             dropNotAllowed: "planningBoard",
 
             /**
-             * @cfg {String} The name of the artifact this board represents (ex: Feature)
+             * @cfg {Object} Object containing Names and TypePaths of the lowest level portfolio item (eg: 'Feature') and optionally its parent (eg: 'Initiative')
              */
-            typeName: '',
+            typeNames: {},
 
             /**
              * @cfg {Number} The duration of the theme slide animation in milliseconds
@@ -51,6 +51,10 @@
         ],
 
         initComponent: function () {
+            if(!this.typeNames.child || !this.typeNames.child.name) {
+                throw 'typeNames must have a child property with a name';
+            }
+
             this.callParent(arguments);
         },
 
@@ -132,6 +136,8 @@
         _getBacklogColumnConfig: function () {
             return {
                 xtype: 'backlogplanningcolumn',
+                types: this.types,
+                typeNames: this.typeNames,
                 planStore: this.planStore,
                 cls: 'column backlog',
                 cardConfig: {
@@ -289,7 +295,8 @@
                 xtype: 'timeframeplanningcolumn',
                 timeframeRecord: timeframe,
                 planRecord: plan,
-                typeName: this.typeName,
+                types: this.types,
+                typeNames: this.typeNames,
                 columnHeaderConfig: {
                     record: timeframe,
                     fieldToDisplay: 'name',

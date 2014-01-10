@@ -31,20 +31,24 @@
             context: null,
 
             /**
-             * @cfg {String} The name of the portfolio item (ex: 'Feature')
+             * @cfg {Object} Object containing Names and TypePaths of the lowest level portfolio item (eg: 'Feature') and optionally its parent (eg: 'Initiative')
              */
-            typeName: '',
+            typeNames: {},
 
             cardboardPlugins: []
         },
 
         initComponent: function () {
+            if(!this.typeNames.child || !this.typeNames.child.name) {
+                throw 'typeNames must have a child property with a name';
+            }
+
             this.addNewPluginConfig = {
                 listeners: {
                     beforecreate: this._onBeforeCreate,
                     beforeeditorshow: this._onBeforeCreate
                 },
-                fieldLabel: 'New ' + this.typeName
+                fieldLabel: 'New ' + this.typeNames.child.name
             };
             this.plugins = [
                 'rallygridboardaddnew',
@@ -65,7 +69,7 @@
                 timeline: this.timeline,
                 isAdmin: this._isUserAdmin(),
                 types: this.modelNames,
-                typeName: this.typeName,
+                typeNames: this.typeNames,
                 attribute: 'Name',
                 plugins: [
                     {

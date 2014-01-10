@@ -54,6 +54,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         renderTo: target
         contentCell: target
         headerCell: target
+        typeNames:
+          child:
+            name: 'Feature'
 
       Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', options
 
@@ -95,6 +98,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       lowestPIType: 'PortfolioItem/Feature'
       enableCrossColumnRanking: true
       ownerCardboard: {}
+      typeNames:
+        child:
+          name: 'Feature'
 
     @leftColumnDropController = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
     @leftColumnDropController.init(@leftColumn)
