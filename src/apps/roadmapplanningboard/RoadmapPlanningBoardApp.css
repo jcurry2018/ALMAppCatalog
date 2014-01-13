@@ -260,6 +260,7 @@
 
 .roadmap-board .column-container .column-header .column-header-title {
     padding: 15px 8px 8px 8px;
+    min-height: 82px;
 }
 
 .roadmap-board .column-container .planning-column {

@@ -85,8 +85,7 @@
             this.callParent(arguments);
 
             return this.on('beforerender', function () {
-                var cls;
-                cls = 'planning-column';
+                var cls = 'planning-column';
                 this.getContentCell().addCls(cls);
                 return this.getColumnHeaderCell().addCls(cls);
             }, this, {
