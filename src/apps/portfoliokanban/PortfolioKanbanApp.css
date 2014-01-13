@@ -31,6 +31,13 @@
 .portfolio-kanban .showPolicies  label {
     position: relative;
     top: 1px;
+    margin-top: 0;
+    padding-left: 4px;
+}
+
+.portfolio-kanban .showPolicies .showPoliciesCheckbox {
+    position: relative;
+    margin-top: 0;
 }
 
 .portfolio-kanban .settingsHeader {
