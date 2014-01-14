@@ -28,15 +28,25 @@ describe 'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverController', ->
 
   beforeEach ->
     @controller = Ext.create 'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverController'
+    this.addMatchers
+      toBeValid: (expected = true) ->
+        this.actual == expected
 
   afterEach ->
     delete @controller
 
   it 'validates that the value in the low field is lower than the value in the high field', ->
-    @expectRangeValidation(3, 4).toBe(true)
-    @expectRangeValidation(6, 5).not.toBe(true)
-    @expectRangeValidation(null, 5).toBe(true)
-    @expectRangeValidation(5, 0).not.toBe(true)
+    @expectRangeValidation(10, 20).toBeValid()
+    @expectRangeValidation(20, 10).not.toBeValid()
+
+  it 'validates that zeroes are acceptable values for both low and high fields', ->
+    @expectRangeValidation(0, 10).toBeValid()
+    @expectRangeValidation(10, 0).not.toBeValid()
+
+  it 'validates null values', ->
+    @expectRangeValidation(null, null).toBeValid()
+    @expectRangeValidation(null, 10).toBeValid()
+    @expectRangeValidation(10, null).not.toBeValid()
 
   it 'does not persist if validation fails', ->
     persistStub = @stub @controller, 'persistIfStoreAvailable'

@@ -170,6 +170,14 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 4, timeframeColumnCount: 4).then =>
         expect(@getForwardsButton().hidden).toBe true
 
+    it 'should fill in extra columns if not enough columns are provided', ->
+      @createCardboard(timeframeColumnCount: 2, presentColumnCount: 1).then =>
+        expect(@plugin.getScrollableColumns().length).toBe 2
+
+    it 'should not show a forward button when not enough columns are provided', ->
+      @createCardboard(timeframeColumnCount: 2, presentColumnCount: 1).then =>
+        expect(@getForwardsButton().hidden).toBe true
+
   describe 'when back scroll button is clicked', ->
     it 'should scroll backward', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 4, timeframeColumnCount: 4).then =>
@@ -220,6 +228,11 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         @scrollBackwards().then =>
           expect(@plugin.getFirstVisibleScrollableColumn().timeframeRecord.getId()).toEqual '1'
 
+    it 'should scroll with placeholder columns', ->
+      @createCardboard(pastColumnCount: 1, presentColumnCount: 1, timeframeColumnCount: 4).then =>
+        @scrollBackwards().then =>
+          expect(@getColumnContentCells().length).toBe 5 # 2 + 1 backlog
+
   describe 'when forward scroll button is clicked', ->
     it 'should scroll forward', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
@@ -269,6 +282,12 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(pastColumnCount: 0, presentColumnCount: 2, timeframeColumnCount: 1).then =>
         @scrollForwards().then =>
           expect(@plugin.getFirstVisibleScrollableColumn().timeframeRecord.getId()).toEqual '2'
+
+    it 'should scroll back and forward again with placeholder columns', ->
+      @createCardboard(pastColumnCount: 2, presentColumnCount: 1, timeframeColumnCount: 3).then =>
+        @scrollBackwards().then =>
+          @scrollForwards().then =>
+            expect(@getColumnContentCells().length).toBe 4 # 2 + 1 backlog
 
   describe 'theme container interactions', ->
 

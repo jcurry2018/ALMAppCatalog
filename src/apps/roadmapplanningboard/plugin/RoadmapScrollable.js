@@ -9,10 +9,21 @@
         alias: 'plugin.rallytimeframescrollablecardboard',
         extend: 'Rally.ui.cardboard.plugin.Scrollable',
 
+        requires: [
+            'Rally.apps.roadmapplanningboard.PlaceholderColumn'
+        ],
+
         /**
-         * @cfg {Number} The number of timeframe columns
+         * @cfg {Number} timeframeColumnCount The number of timeframe columns
          */
         timeframeColumnCount: 4,
+
+        /**
+         * @cfg {String} columnConfig The xtype of the columns created if the available columns is less than {Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable#timeframeColumnCount}
+         */
+        columnConfig: {
+            xtype: 'cardboardplaceholdercolumn'
+        },
 
         init: function (cmp) {
             var pluginScope = this;
@@ -32,6 +43,11 @@
 
             this.backlogColumn = columns[0];
             this.scrollableColumns = columns.slice(1);
+            // add an index to each column for tracking
+            _.map(this.scrollableColumns, function (column, index) {
+                column.index = index;
+                return column;
+            });
 
             this.cmp.columns = [this.backlogColumn].concat(this._getVisibleColumns(this._getPresentColumns(this.scrollableColumns)));
             return this.cmp.columns;
@@ -49,21 +65,29 @@
         },
 
         _getVisibleColumns: function (presentColumns) {
-            return _.first(presentColumns, this.timeframeColumnCount);
+            if (presentColumns.length < this.timeframeColumnCount) {
+                var placeholderColumns = _.map(_.range(this.timeframeColumnCount - presentColumns.length), function (index) {
+                    return _.extend({ index: index + this.scrollableColumns.length}, this.columnConfig);
+                }, this);
+
+                this.scrollableColumns = this.scrollableColumns.concat(placeholderColumns);
+                return presentColumns.concat(placeholderColumns);
+            } else {
+                return _.first(presentColumns, this.timeframeColumnCount);
+            }
         },
 
         _isBackwardsButtonHidden: function () {
-            return this.scrollableColumns[0].timeframeRecord === this.getFirstVisibleScrollableColumn().timeframeRecord;
+            return this.getFirstVisibleScrollableColumn().index === 0;
         },
 
         _isForwardsButtonHidden: function () {
-            return _.last(this.scrollableColumns).timeframeRecord === this.getLastVisibleScrollableColumn().timeframeRecord;
+            return this.getLastVisibleScrollableColumn().index === this.scrollableColumns.length - 1;
         },
 
         _scroll: function (forwards) {
             var insertNextToColumn = this._getInsertNextToColumn(forwards);
-            var scrollableColumnRecords = _.pluck(this.scrollableColumns, 'timeframeRecord');
-            var newlyVisibleColumn = this.scrollableColumns[_.indexOf(scrollableColumnRecords, insertNextToColumn.timeframeRecord) + (forwards ? 1 : -1)];
+            var newlyVisibleColumn = this.scrollableColumns[insertNextToColumn.index + (forwards ? 1 : -1)];
 
             var indexOfNewColumn = _.indexOf(this.cmp.getColumns(), insertNextToColumn);
             var columnEls = this.cmp.createColumnElements(forwards ? 'after' : 'before', insertNextToColumn);

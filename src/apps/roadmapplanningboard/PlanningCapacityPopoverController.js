@@ -8,59 +8,53 @@
         control: {
             view: {
                 blur: function () {
-                    return this.persistIfChangedAndValid();
+                    this.persistIfChangedAndValid();
                 },
                 validitychange: function () {
-                    return this.onValidityChange();
+                    this.onValidityChange();
                 }
             }
         },
+
         clientMetrics: {
             descriptionProperty: 'getClickAction',
             method: 'onBeforeDestroy'
         },
-        init: function () {
-            var highCapacity, lowCapacity;
 
+        init: function () {
             this.callParent(arguments);
             if (!this.model) {
                 throw "Model is required";
             }
-            lowCapacity = this.model.get('lowCapacity') || 0;
+            var lowCapacity = this.model.get('lowCapacity') || 0;
             this.getView().getLowCapacityField().setValue(lowCapacity).resetOriginalValue();
-            highCapacity = this.model.get('highCapacity') || 0;
-            return this.getView().getHighCapacityField().setValue(highCapacity).resetOriginalValue();
+            var highCapacity = this.model.get('highCapacity') || 0;
+            this.getView().getHighCapacityField().setValue(highCapacity).resetOriginalValue();
         },
+
         validateRange: function () {
-            var highValue, lowValue;
+            var lowValue = this.getView().getLowCapacityField().getValue();
+            var highValue = this.getView().getHighCapacityField().getValue();
 
-            lowValue = this.getView().getLowCapacityField().getValue();
-            highValue = this.getView().getHighCapacityField().getValue();
-            if ((lowValue === null) || (highValue === null)) {
-                return true;
-            }
-            if (lowValue > highValue) {
-                return "Low estimate should not exceed the high estimate";
-            } else {
-                return true;
-            }
+            return highValue >= lowValue || "Low estimate should not exceed the high estimate";
         },
-        persistIfChangedAndValid: function () {
-            var highField, highValue, lowField, lowValue;
 
-            lowField = this.getView().getLowCapacityField();
-            highField = this.getView().getHighCapacityField();
+        persistIfChangedAndValid: function () {
+            var lowField = this.getView().getLowCapacityField();
+            var highField = this.getView().getHighCapacityField();
+
             if (lowField.isDirty() || highField.isDirty()) {
-                lowValue = lowField.getValue() || 0;
-                highValue = highField.getValue() || 0;
-                if ((lowValue !== null) && (highValue !== null) && lowField.validate() && highField.validate()) {
+                var lowValue = lowField.getValue() || 0;
+                var highValue = highField.getValue() || 0;
+
+                if (lowField.validate() && highField.validate()) {
                     lowField.resetOriginalValue();
                     highField.resetOriginalValue();
                     this.persistIfStoreAvailable(lowValue, highValue);
                 }
             }
-            return true;
         },
+
         persistIfStoreAvailable: function (lowValue, highValue) {
             var requester;
             this.model.beginEdit();
@@ -75,14 +69,13 @@
                 requester: requester
             });
         },
-        onValidityChange: function () {
-            var highField, lowField;
 
-            lowField = this.getView().getLowCapacityField();
-            highField = this.getView().getHighCapacityField();
+        onValidityChange: function () {
+            var lowField = this.getView().getLowCapacityField();
+            var highField = this.getView().getHighCapacityField();
+
             lowField.isValid();
             highField.isValid();
-            return true;
         }
     });
 

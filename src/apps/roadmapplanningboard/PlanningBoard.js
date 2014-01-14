@@ -243,6 +243,7 @@
                 duration: this.getSlideDuration(),
                 listeners: {
                     afteranimate: function () {
+                        el.setStyle('display', 'none'); // OMG Ext. Y U SUCK?
                         this.themeExpandButton.show(true);
                         this.fireEvent('headersizechanged');
                     },
