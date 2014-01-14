@@ -12,3 +12,4 @@ target/
 .idea
 _SpecRunner.html
 appcatalog.version
+*.sublime-workspace
