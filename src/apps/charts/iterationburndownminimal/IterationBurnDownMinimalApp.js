@@ -430,6 +430,7 @@
                     success: function (response, request) {
                         this._createChartDatafromXML(response.responseText);
                     },
+                    requester: this,
                     scope: this
                 });
             }
