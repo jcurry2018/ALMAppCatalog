@@ -58,7 +58,7 @@
             var format = 'Y-m-d';
 
             this.presentColumns = this.presentColumns || _.filter(columns, function (column) {
-                return Ext.Date.format(column.timeframeRecord.get('end'), format) >= Ext.Date.format(now, format);
+                return Ext.Date.format(column.timeframeRecord.get('endDate'), format) >= Ext.Date.format(now, format);
             }, this);
 
             return this.presentColumns;
