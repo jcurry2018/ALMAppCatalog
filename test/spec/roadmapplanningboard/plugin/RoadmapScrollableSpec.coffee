@@ -21,8 +21,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       timeframeRecord = Ext.create Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel(),
         id: "#{id}"
         name: "#{id}"
-        start: Ext.Date.add(date, Ext.Date.MONTH, offset-1)
-        end: Ext.Date.add(Ext.Date.add(date, Ext.Date.MONTH, offset), Ext.Date.DAY, -1)
+        startDate: Ext.Date.add(date, Ext.Date.MONTH, offset-1)
+        endDate: Ext.Date.add(Ext.Date.add(date, Ext.Date.MONTH, offset), Ext.Date.DAY, -1)
       planRecord = Ext.create Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel(),
         id: "#{id}"
         name: "#{id}"
