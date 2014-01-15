@@ -288,6 +288,13 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         end: null
         timeline:
           id: '1'
+      ,
+        id: '8'
+        name: 'Timeframe not linked to a plan'
+        start: new Date('7/01/2014')
+        end: new Date('10/31/2014')
+        timeline:
+          id: '1'
       ]
 
     @timeframeStoreFixture.model.setProxy 'memory'

@@ -10,7 +10,8 @@
             'Rally.apps.roadmapplanningboard.ThemeHeader',
             'Rally.apps.roadmapplanningboard.PlanCapacityProgressBar',
             'Rally.apps.roadmapplanningboard.util.Fraction',
-            'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView'
+            'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView',
+            'Rally.apps.roadmapplanningboard.util.TimelineViewModel'
         ],
 
         config: {
@@ -21,6 +22,7 @@
                 theme: true,
                 timeframeDates: true
             },
+            timeframePlanStoreWrapper: undefined,
             timeframeRecord: undefined,
             planRecord: undefined,
             dateFormat: 'M j',
@@ -187,13 +189,14 @@
                         y: 0
                     }
                 ],
-                controllerConfig: {
-                    model: this.timeframeRecord
-                },
+                timelineViewModel: Rally.apps.roadmapplanningboard.util.TimelineViewModel.createFromStores(this.timeframePlanStoreWrapper, this.timeframeRecord),
                 listeners: {
                     destroy: function () {
                         _this._drawDateRange();
                         _this.timeframePopover = null;
+                    },
+                    save: function (options) {
+                        _this._saveTimeframeDates(options);
                     }
                 }
             });
@@ -205,10 +208,28 @@
             } else {
                 this.dateRange = this.getHeaderTitle().add({
                     xtype: 'component',
-                    tpl: "<div class='timeframeDates {clickableClass}' title='{titleText}'>{formattedDate}</div>",
-                    data: this.getDateHeaderTplData()
+                    cls: 'timeframeDatesContainer',
+                    tpl: "<div class='timeframeDates {clickableClass}'>{formattedDate}</div>",
+                    data: this.getDateHeaderTplData(),
+                    listeners: {
+                        afterrender: this._createDateRangeTooltip,
+                        scope: this
+                    }
                 });
             }
+        },
+
+        _createDateRangeTooltip: function () {
+            if (this.dateRangeTooltip) {
+                this.dateRangeTooltip.destroy();
+            }
+
+            this.dateRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
+                target : this.dateRange.getEl(),
+                hideDelay: 100,
+                anchor: 'left',
+                html: this.getDateHeaderTplData().titleText
+            });
         },
 
         _drawProgressBar: function () {
@@ -309,7 +330,7 @@
             this.callParent(arguments);
             this._drawDateRange();
             this._drawProgressBar();
-            return this._drawTheme();
+            this._drawTheme();
         },
 
         _getDateRange: function () {
@@ -351,6 +372,23 @@
         _getProgressBarTitle: function () {
             var title = 'Planned Capacity Range';
             return this.editPermissions.capacityRanges ? 'Edit ' + title : title;
+        },
+
+        _saveTimeframeDates: function (options) {
+            this.timeframeRecord.set('startDate', options.startDate);
+            this.timeframeRecord.set('endDate', options.endDate);
+
+            // Remove these 2 lines once we switch over to use Oracle and the new startDate/endDate
+            this.timeframeRecord.set('start', options.startDate);
+            this.timeframeRecord.set('end', options.endDate);
+
+            if (this.timeframeRecord.dirty) {
+                this.timeframeRecord.save({
+                     requester: this.view
+                });
+            }
+
+            return true;
         }
     });
 
