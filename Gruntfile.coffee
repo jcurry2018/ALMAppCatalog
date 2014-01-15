@@ -188,7 +188,7 @@ module.exports = (grunt) ->
           )()
           styles: [
             "#{appsdk_path}/test/support/jasmine/rally-jasmine.css"
-            "#{appsdk_path}/workspace/packages/rui/build/resources/rui-all.css"
+            "#{appsdk_path}/builds/rui/resources/css/rui-all.css"
             "#{appsdk_path}/builds/rui/resources/css/rui-fonts.css"
             "#{appsdk_path}/builds/lib/closure/closure-20130117-r2446.css"
             "#{appsdk_path}/builds/rui/resources/css/lib-closure.css"
