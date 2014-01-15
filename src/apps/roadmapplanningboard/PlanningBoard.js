@@ -12,7 +12,8 @@
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
             'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
-            'Rally.apps.roadmapplanningboard.BacklogBoardColumn'
+            'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
+            'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper'
         ],
 
         config: {
@@ -125,10 +126,16 @@
          * @returns {Array} columns
          */
         buildColumns: function () {
-            this.columns = [this._getBacklogColumnConfig()];
-            _.each(this.timeframeStore.data.items, function (timeframe) {
-                this.columns.push(this._addColumnFromTimeframe(timeframe));
+            this.timeframePlanStoreWrapper = Ext.create('Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', {
+                timeframeStore: this.timeframeStore,
+                planStore: this.planStore
+            });
+
+            var planColumns = _.map(this.timeframePlanStoreWrapper.getTimeframeAndPlanRecords(), function (record) {
+                return this._addColumnFromTimeframeAndPlan(record.timeframe, record.plan);
             }, this);
+
+            this.columns = [this._getBacklogColumnConfig()].concat(planColumns);
 
             return this.columns;
         },
@@ -264,21 +271,6 @@
             });
         },
 
-        _addColumnFromTimeframe: function (timeframe) {
-            var planForTimeframe = this._getPlanForTimeframe(timeframe);
-
-            if (!planForTimeframe) {
-                return null;
-            }
-            return this._addColumnFromTimeframeAndPlan(timeframe, planForTimeframe);
-        },
-
-        _getPlanForTimeframe: function (timeframe) {
-            return this.planStore.getAt(this.planStore.findBy(function (record) {
-                return record.get('timeframe').id === timeframe.getId();
-            }));
-        },
-
         destroy: function () {
             this._destroyThemeButtons();
             this.callParent(arguments);
@@ -296,6 +288,7 @@
                 xtype: 'timeframeplanningcolumn',
                 timeframeRecord: timeframe,
                 planRecord: plan,
+                timeframePlanStoreWrapper: this.timeframePlanStoreWrapper,
                 types: this.types,
                 typeNames: this.typeNames,
                 columnHeaderConfig: {
@@ -309,8 +302,7 @@
                 editPermissions: {
                     capacityRanges: this.isAdmin,
                     theme: this.isAdmin,
-                    // Note: Editing dates is disabled for everyone in alpha, to prevent problems with invalid date ranges
-                    timeframeDates: false
+                    timeframeDates: this.isAdmin
                 },
                 dropControllerConfig: {
                     dragDropEnabled: this.isAdmin

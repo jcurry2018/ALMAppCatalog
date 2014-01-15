@@ -3,6 +3,7 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
   'Rally.apps.roadmapplanningboard.TimeframePlanningColumn'
+  'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
@@ -17,7 +18,8 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           headerTemplate: Ext.create 'Ext.XTemplate'
           timeframeRecord: @timeframeRecord
           store: @featureStoreFixture
-          planRecord: @planRecord
+          planRecord: @planRecord,
+          timeframePlanStoreWrapper: @createTimeframePlanWrapper()
           ownerCardboard:
             showTheme: true
           editPermissions:
@@ -52,6 +54,11 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           start: new Date('04/01/2013')
           end: new Date('06/30/2013')
         , config
+
+    createTimeframePlanWrapper: ->
+      Ext.create 'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper',
+        timeframeStore: Deft.Injector.resolve 'timeframeStore'
+        planStore: Deft.Injector.resolve 'planStore'
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -247,3 +254,12 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       dateRange = @column.dateRange.getEl()
       @click(dateRange).then =>
         expect(!!@column.timeframePopover).toBe false
+
+    it 'should update timeframeRecord when timeframe date popover fires the save event', ->
+      saveSpy = @spy @timeframeRecord, 'save'
+      @createColumn()
+      dateRange = @column.dateRange.getEl()
+      if !Ext.isGecko
+        @click(dateRange).then =>
+          @column.timeframePopover.fireEvent('save')
+          expect(saveSpy).toHaveBeenCalledOnce()

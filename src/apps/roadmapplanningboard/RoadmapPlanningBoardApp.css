@@ -158,10 +158,16 @@
     font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;
     color: #666666;
-    margin: 0 auto;
-    margin-bottom: 1px;
+    border: 1px solid transparent;
+}
+
+.roadmap-board .planning-column .timeframeDates:hover {
+   border-color: #D6D6D6;
+}
+
+.roadmap-board .planning-column .timeframeDatesContainer {
+    margin: 0 auto 1px auto;
     width: 125px;
-    border: 3px solid transparent;
 }
 
 .roadmap-board .first-card-column {
@@ -397,21 +403,37 @@
 }
 
 .roadmap-planning-popover .dateField .x4-trigger-cell {
-    width: 20px;
     height: 30px;
     background-color: #ffffff;
     border-radius: 0 3px 3px 0;
     border-left: none;
 }
 
-.roadmap-planning-popover .dateField .en-calendar {
+.roadmap-planning-popover .dateField .icon-calendar {
     color: #888888;
-    font-size: 27px;
+    font-size: 18px;
 }
 
-.roadmap-planning-popover .dateField.triggerSelected input,
+.roadmap-planning-popover .dateField.triggerSelected .icon-calendar,
+.roadmap-planning-popover .dateField:hover .icon-calendar {
+    color: #00A9E0;
+}
+
+.roadmap-planning-popover .dateField .icon-calendar:before {
+    position: relative;
+    top: 3px;
+}
+
+.roadmap-planning-popover .dateField:hover input,
+.roadmap-planning-popover .dateField.triggerSelected input {
+    border-color: #00A9E0;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.roadmap-planning-popover .dateField:hover .x4-form-trigger,
 .roadmap-planning-popover .dateField.triggerSelected .x4-form-trigger {
-    background-color: #cceef9;
+    border-color: #00A9E0;
 }
 
 .roadmap-planning-popover .dateField.transition-bg-color input,
@@ -433,10 +455,12 @@
 
 .roadmap-planning-popover .dateField .x4-form-trigger {
     height: 30px;
+    width: 26px;
     border-left: none;
     border-radius: 0 3px 3px 0;
     background-position: 2px 8.5px;
     background-image: none;
+    display: block;
 }
 
 .roadmap-planning-popover .x4-datepicker-month .x4-btn-split-right {
@@ -444,16 +468,26 @@
 }
 
 .roadmap-planning-popover .x4-datepicker {
-    width: 211px !important;
+    width: 222px !important;
     font-size: 12px;
     font-weight: 300;
     font-color: black !important;
     font-family: san-serif;
 }
 
-.roadmap-planning-popover .x4-datepicker .x4-datepicker-month {
-    padding: 3px 0;
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-month .x4-btn {
+    padding: 3px 0 5px 0;
 }
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-month .x4-btn * {
+    padding: 0 !important;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-month .x4-btn,
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-month .x4-btn * {
+    cursor: default !important;
+}
+
 
 .roadmap-planning-popover .x4-datepicker .x4-datepicker-month .x4-btn-center {
     overflow: visible;
@@ -464,19 +498,6 @@
     font-size: 12px;
 }
 
-.roadmap-planning-popover .x4-datepicker .x4-datepicker-month .en-triangle-down {
-    color: #424242 !important;
-    font-size: 27px;
-    line-height: 7px;
-    margin-bottom: 3px;
-    margin-top: -1px;
-    padding: 0px;
-    width: 5px;
-    position: absolute;
-    top: 3px;
-    right: -6px;
-}
-
 .roadmap-planning-popover .x4-datepicker .x4-datepicker-header {
     background-color: #c0c0c0;
     padding: 0;
@@ -485,64 +506,76 @@
     font-size: 11px;
 }
 
-.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev {
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-    width: 28px;
-    height: 28px;
-    border-bottom: 1px solid #c0c0c0;
-    background-color: #e6e6e6;
-    left: 0;
-    padding: 3px 0px 0px 2px;
-}
-
-.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev .en-triangle-left {
-    background-image: none;
-    color: #424242 !important;
-    font-size: 48px;
-    line-height: 23px;
-    margin-bottom: 3px;
-    margin-top: -1px;
-    padding: 0px;
-}
-
-.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev .en-triangle-left:hover {
-    background-color: transparent;
-}
-
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev,
 .roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-next {
     overflow: hidden;
     position: absolute;
     top: 0;
     width: 28px;
     height: 28px;
-    border-bottom: 1px solid #c0c0c0;
-    background-color: #e6e6e6;
+    padding-top: 0;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev {
+    left: 0;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-next {
     right: 0;
-    padding: 3px 0px 0px 4px;
 }
 
-.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-next .en-triangle-right {
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev a,
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-next a {
     background-image: none;
-    color: #424242 !important;
-    font-size: 48px;
-    line-height: 23px;
-    margin-bottom: 3px;
-    margin-top: -1px;
-    padding: 0px;
+    color: #e0e0e0;
 }
 
-.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-next .en-triangle-right:hover {
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev .icon-chevron-left,
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-next .icon-chevron-right {
+    background-image: none;
+    font-size: 22px;
+    padding: 0 2px
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev .icon-chevron-left:hover,
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-next .icon-chevron-right:hover {
     background-color: transparent;
+    color: #666666 !important;
 }
 
-.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr:first-child td {
-    padding-top: 10px;
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner td {
+    border: 0;
 }
 
 .roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr:last-child td {
     padding-bottom: 5px;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td.x4-datepicker-disabled a {
+    background-color: #929292;
+    border-color: #929292;
+    color: #eeeeee !important;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td.rally-datepicker-in-range a {
+    background-color: #CCEEF9;
+    border-color: #CCEEF9;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td.rally-datepicker-current-value a {
+    background-color: #35B2E4;
+    border-color: #35B2E4;
+    color: #ffffff !important;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td.rally-datepicker-highlighted-value a {
+    border-color: #35B2E4;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td a.x4-datepicker-date:hover {
+    background-color: #d6d6d6;
+    border-color: #d6d6d6;
+    color: #ffffff !important;
 }
 
 .roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td.x4-datepicker-disabled a span,
@@ -557,17 +590,10 @@
 
 .roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td .x4-datepicker-date {
     font-size: 10px;
-    padding: 0;
-}
-
-.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner .x4-datepicker-selected a {
-    background-color: #929292;
-    border: none;
-    color: #ffffff !important;
-}
-
-.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner .x4-datepicker-today a {
-    border: none;
+    padding-left: 0;
+    padding-right: 0;
+    margin: 0;
+    border: 1px solid white;
 }
 
 .roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner .x4-datepicker-today a span {
@@ -580,12 +606,6 @@
     color: black !important;
     text-align: center;
     padding: 4px;
-}
-
-.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner a:hover {
-    background-color: #35B2E4;
-    border: none;
-    color: #ffffff !important;
 }
 
 .roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner th {
@@ -611,10 +631,17 @@
 }
 
 .roadmap-planning-popover .x4-datepicker .x4-datepicker-footer {
-    border-top: 1px solid #e6e6e6;
+    border-top: 1px solid #d6d6d6;
+    background-color: #ffffff;
 }
 
-.roadmap-planning-popover .x4-datepicker .x4-datepicker-footer .x4-btn,
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-footer .x4-btn {
+    float: none;
+    width: 210px;
+    margin: 3px 5px;
+    padding: 0;
+}
+
 .roadmap-planning-popover .x4-datepicker .x4-datepicker-footer .x4-monthpicker-buttons .x4-btn {
     background-color: #35B2E4;
     border: transparent;
@@ -644,15 +671,15 @@
     border: none;
 }
 
-.roadmap-planning-popover .x4-ie .dateField .en-calendar {
+.roadmap-planning-popover .x4-ie .dateField .icon-calendar {
     line-height: 15px;
 }
 
-.roadmap-planning-popover .x4-ie .x4-datepicker .x4-datepicker-header .x4-datepicker-prev .en-triangle-left {
+.roadmap-planning-popover .x4-ie .x4-datepicker .x4-datepicker-header .x4-datepicker-prev .icon-chevron-left {
     line-height: 1px;
 }
 
-.roadmap-planning-popover .x4-ie .x4-datepicker .x4-datepicker-header .x4-datepicker-next .en-triangle-right {
+.roadmap-planning-popover .x4-ie .x4-datepicker .x4-datepicker-header .x4-datepicker-next .icon-chevron-right {
     line-height: 1px;
 }
 
@@ -682,12 +709,30 @@
     vertical-align: middle;
 }
 
+.roadmap-planning-popover td.date-buttons {
+    vertical-align: top;
+    text-align: right;
+}
+
+.roadmap-planning-popover td.date-buttons .x4-btn.primary,
+.roadmap-planning-popover td.date-buttons .x4-btn.secondary {
+    float: none;
+    margin: 0 0 0 4px;
+}
+
 .roadmap-planning-popover .popoverDateRangeText,
 .roadmap-planning-popover .popover-label {
     font-family: ProximaNovaSemiBold, Helvetica, Arial;
-    font-size: 15px;
     font-weight: normal;
     margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.roadmap-planning-popover .popoverDateRangeText {
+    margin-top: 2px;
+}
+
+.roadmap-planning-popover .popover-label {
     text-align: center;
 }
 
@@ -698,6 +743,7 @@
 }
 
 .roadmap-planning-popover .popoverDateText {
+    text-transform: uppercase;
     font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;
     padding: 10px 0;
@@ -715,7 +761,7 @@
     color: #ffffff !important;
     margin: 2px;
     display: block;
-    border-radius: 3px;
+    /*border-radius: 3px;*/
     font-size: 14px;
     padding: 4px 8px;
 }
@@ -743,25 +789,25 @@
     width: 37px;
 }
 
-.roadmap-planning-popover .x-form-invalid-field, .x4-form-invalid-field {
-    background-color: #F2D3D0;
+.roadmap-planning-popover .dateField.x4-form-invalid input {
     border-color: #B81B10;
     border-width: 1px;
     border-style: solid;
 }
 
-.roadmap-planning-popover .x-form-error-msg {
+.roadmap-planning-popover .dateField.x4-form-invalid .x4-form-trigger {
+    border-color: #B81B10;
+}
+
+.roadmap-planning-popover .x4-form-error-msg {
     background-color: #B81B10;
     color: white;
     font-family: NotoSans, Helvetica, Arial;
-    font-size: 12px;
+    font-size: 10px;
     padding: 5px;
+    width: 222px;
+    margin: 5px 2px 0 1px;
 }
-
-.roadmap-planning-popover .form-error-msg-field {
-    left: 40px;
-}
-
 .roadmap-planning-popover #capacity-validation-error li {
     font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;

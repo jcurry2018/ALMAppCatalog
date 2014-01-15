@@ -196,7 +196,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
           expect(column.editPermissions).toEqual
             capacityRanges: true
             theme: true
-            timeframeDates: false
+            timeframeDates: true
           expect(column.dropControllerConfig.dragDropEnabled).toBe true
           expect(column.columnHeaderConfig.editable).toBe true
 
