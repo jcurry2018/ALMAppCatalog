@@ -23,7 +23,8 @@
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
             'Rally.ui.filter.view.TagFilter',
-            'Rally.app.Message'
+            'Rally.app.Message',
+            'Rally.apps.iterationtrackingboard.IsLeafHelper'
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
         componentCls: 'iterationtrackingboard',
@@ -208,11 +209,7 @@
                     columnCfgs: columns ? this._getGridColumns(columns) : null,
                     defaultColumnCfgs: this._getGridColumns(),
                     pageResetMessages: [Rally.app.Message.timeboxScopeChange],
-                    isLeaf: function(record) {
-                        return  (!record.raw.Tasks || record.raw.Tasks.Count === 0) &&
-                                (!record.raw.Defects || record.raw.Defects.Count === 0) &&
-                                (record.raw._type === 'TestSet' || !record.raw.TestCases || record.raw.TestCases.Count === 0); //remove the type check once TestCases under TestSets can be queried through the artifact endpoint
-                    },
+                    isLeaf: Rally.apps.iterationtrackingboard.IsLeafHelper.isLeaf,
                     getIcon: function(record) {
                         return '';
                     }
