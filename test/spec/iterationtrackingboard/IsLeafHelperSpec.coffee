@@ -11,9 +11,6 @@ describe 'Rally.apps.iterationtrackingboard.IsLeafHelper', ->
       record.parentNode = {}
       record
 
-  it 'should return is not a leaf for a root node for TreeGrid', ->
-    expect(Rally.apps.iterationtrackingboard.IsLeafHelper.isLeaf({})).toBe(false)
-
   it 'should return is a leaf for a user story with no sub items', ->
     record = @createRecord('userstory', false)
     expect(Rally.apps.iterationtrackingboard.IsLeafHelper.isLeaf(record)).toBe(true)
