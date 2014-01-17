@@ -9,7 +9,7 @@
 
         stateEvents: ['toggle'],
 
-        componentCls: 'rui-iterationburndownminimalview-toggle',
+        componentCls: 'toggle-button-group',
         layout: 'hbox',
         border: 1,
         activeButtonCls: 'active hide-tooltip',
@@ -18,7 +18,8 @@
         items: [
             {
                 itemId: 'burndown',
-                cls: 'toggle burndown icon-bars',
+                cls: 'toggle left burndown',
+                iconCls: 'icon-bars',
                 frame: false,
                 toolTipConfig: {
                     html: 'Burndown',
@@ -29,7 +30,8 @@
             },
             {
                 itemId: 'cumulativeflow',
-                cls: 'toggle cumulativeflow icon-graph',
+                cls: 'toggle right cumulativeflow',
+                iconCls: 'icon-graph',
                 frame: false,
                 toolTipConfig: {
                     html: 'Cumulative Flow',
