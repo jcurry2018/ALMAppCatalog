@@ -10,12 +10,17 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
+    store = Deft.Injector.resolve('featureStore')
+    _.each(store.data.getRange(), (record) ->
+      record.set('ActualEndDate', null)
+    )
+
     @target = 'testDiv'
     @backlogColumn = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
       renderTo: @target
       contentCell: @target
       headerCell: @target
-      store: Deft.Injector.resolve('featureStore')
+      store: store
       planStore: Deft.Injector.resolve('planStore')
       lowestPIType: 'PortfolioItem/Feature'
       roadmap: Deft.Injector.resolve('roadmapStore').getById('413617ecef8623df1391fabc')
@@ -39,11 +44,16 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
         type: 'memory'
       data: []
 
+    store = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getFeatureStoreFixture()
+    _.each(store.data.getRange(), (record) ->
+      record.set('ActualEndDate', null)
+    )
+
     column = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
       renderTo: @target
       contentCell: @target
       headerCell: @target
-      store: Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getFeatureStoreFixture()
+      store: store
       planStore: planStore
       lowestPIType: 'feature'
       typeNames:
