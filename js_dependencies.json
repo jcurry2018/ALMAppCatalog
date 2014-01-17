@@ -2,5 +2,5 @@
     { "id": "com.rallydev.sencha:sencha-cmd:tgz:4.0.1.45", "path": "bin/sencha" },
     { "id": "com.rallydev.js:ext:tgz:4.2.2", "path": "lib/ext/4.2.2" },
     { "id": "com.rallydev.js:webdriver:tgz:2.35.0-rally", "path": "lib/webdriver" },
-    { "id": "com.rallydev.js:appsdk-src:tgz:89-ccd5d8a", "path": "lib/sdk" }
+    { "id": "com.rallydev.js:appsdk-src:tgz:90-0cc653a", "path": "lib/sdk" }
 ]
