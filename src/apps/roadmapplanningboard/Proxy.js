@@ -24,31 +24,25 @@
             writeAllFields: false
         },
 
-        /**
-         * Attach a workspace uuid to the request. This would naturally go into the buildRequest
-         * method, but that is a sync call. We need to delay the actual request until we have
-         * a uuid. Note this will be deprecated when v3.0 rolls out.
-         */
         doRequest: function (operation, callback, scope) {
-            var uuidMapper = Deft.Injector.resolve('uuidMapper');
             operation.noQueryScoping = true;
+            operation = this._decorateWithWorkspaceAndProject(operation);
+            return this.callParent(arguments);
+        },
 
-            if (operation.params && operation.params.workspace !== undefined) {
-                return this.callParent(arguments);
-            }
-
-            var me = this;
+        /**
+         * Decorate each request operation with params for workspace and project UUIDs.
+         * @param {Object} operation
+         * @returns {Object} operation
+         */
+        _decorateWithWorkspaceAndProject: function(operation) {
             var context = operation.context || Rally.environment.getContext();
 
-            return uuidMapper.getUuid([context.getWorkspace(), context.getProject()]).then(function (uuids) {
-                operation.params = operation.params || {};
-                operation.params.workspace = uuids[0] || '';
-                operation.params.project = uuids[1] || '';
+            operation.params = operation.params || {};
+            operation.params.workspace = context.getWorkspace()._refObjectUUID || '';
+            operation.params.project = context.getProject()._refObjectUUID || '';
 
-                return me.doRequest(operation, callback, scope);
-            }).otherwise(function (error) {
-                Rally.ui.notify.Notifier.showError({message: error.message || error});
-            });
+            return operation;
         },
 
         /**

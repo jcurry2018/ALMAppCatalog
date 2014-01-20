@@ -48,15 +48,3 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
       preliminaryEstimateStore:
         fn: ->
           Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getPreliminaryEstimateStoreFixture()
-
-      uuidMapper:
-        fn: =>
-          getUuid: (oids) =>
-            if Ext.isArray(oids)
-              uuids = _.map oids, => @uuidGenerator.generate()
-            else
-              uuids = @uuidGenerator.generate()
-
-            deferred = Ext.create('Deft.promise.Deferred')
-            deferred.resolve(uuids)
-            deferred.promise

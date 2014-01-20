@@ -84,8 +84,6 @@
         },
 
         _moveFromColumnToColumn: function (options) {
-            var me = this;
-            var uuidMapper = Deft.Injector.resolve('uuidMapper');
             var context = this.cmp.context || Rally.environment.getContext();
             var srcPlanRecord = options.sourceColumn.planRecord;
             var destPlanRecord = options.column.planRecord;
@@ -93,28 +91,26 @@
             this._removeFeature(srcPlanRecord, options.record);
             this._addFeature(destPlanRecord, options.record, options.index);
 
-            uuidMapper.getUuid(context.getWorkspace()).then(function (workspaceUuid) {
-                Ext.Ajax.request({
-                    method: 'POST',
-                    withCredentials: true,
-                    url: me._constructUrl(srcPlanRecord.get('roadmap'), srcPlanRecord.getId(), destPlanRecord.getId()),
-                    jsonData: {
-                        id: options.record.getId() + '',
-                        ref: options.record.getUri()
-                    },
-                    success: function () {
-                        srcPlanRecord.commit();
-                        if (srcPlanRecord !== destPlanRecord) {
-                            destPlanRecord.commit();
-                        }
-                        return me._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
-                    },
-                    failure: function (response, opts) {
-                        return me._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
-                    },
-                    scope: me,
-                    params: Ext.apply({ workspace: workspaceUuid }, options.params)
-                });
+            Ext.Ajax.request({
+                method: 'POST',
+                withCredentials: true,
+                url: this._constructUrl(srcPlanRecord.get('roadmap'), srcPlanRecord.getId(), destPlanRecord.getId()),
+                jsonData: {
+                    id: options.record.getId() + '',
+                    ref: options.record.getUri()
+                },
+                success: function () {
+                    srcPlanRecord.commit();
+                    if (srcPlanRecord !== destPlanRecord) {
+                        destPlanRecord.commit();
+                    }
+                    return this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
+                },
+                failure: function (response, opts) {
+                    return this._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
+                },
+                scope: this,
+                params: Ext.apply({ workspace: context.getWorkspace()._refObjectUUID}, options.params)
             });
         },
 
