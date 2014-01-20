@@ -52,7 +52,7 @@
             if (!this.isShowingBlankSlate()) {
                 this.appendCardFieldPickerSetting(fields);
                 if (this.showGridSettings) {
-                    fields.push({settingsType: 'grid', html: 'no grid settings'});
+                    fields.push({xtype: 'component', settingsType: 'grid', html: 'There are currently no grid settings', cls: 'settings-no-grid'});
                 }
             }
 
