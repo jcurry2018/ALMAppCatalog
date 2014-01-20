@@ -1,12 +1,14 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
+    var palette = Ext.create("Rally.apps.charts.Colors");
 
     Ext.define("Rally.apps.charts.rpm.burn.BurnChartApp", {
         extend: "Rally.apps.charts.rpm.PortfolioChartAppBase",
         cls: "portfolio-burnup-app",
         
         requires: [
-            'Rally.ui.chart.Chart'
+            'Rally.ui.chart.Chart',
+            'Rally.apps.charts.Colors'
         ],
 
         help: {
@@ -48,7 +50,7 @@
                 completedScheduleStateNames: ["Accepted"]
             },
 
-            chartColors: ['#000000'],
+            chartColors: [], // reset so we can define our own palette
 
             chartConfig: {
                 chart: {
@@ -89,17 +91,11 @@
                         groupPadding: 0.01
                     },
                     line: {
-                        color: "#000"
+                        color: palette.burnLineColor()
                     },
                     column: {
                         stacking: null,
-                        color: "#6AB17D",
-                        lineColor: "#666666",
-                        lineWidth: 1,
-                        marker: {
-                            lineWidth: 1,
-                            lineColor: "#666666"
-                        },
+                        color: palette.burnColumnColor(),
                         shadow: false
                     }
                 }
