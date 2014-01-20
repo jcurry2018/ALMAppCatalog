@@ -54,7 +54,7 @@
                 this.config.context = this.context;
             }
             this.config.storeConfig.autoLoad = !this.filterable;
-            if (this.config.baseFilter && !this.config.baseFilter._createQueryString) {
+            if (this.config.baseFilter) {
                 this.config.baseFilter = this._createBaseFilter(this.config.baseFilter);
             }
             this.callParent([this.config]);
@@ -97,7 +97,7 @@
             return Ext.create('Rally.ui.filter.view.FilterButton', {
                 cls: 'medium columnfilter',
                 stateful: true,
-                stateId: this.context.getScopedStateId('filter' + this.getColumnIdentifier()),
+                stateId: this.context.getScopedStateId('filter.' + this.getColumnIdentifier() + '.' + this.context.getWorkspace()._refObjectUUID),
                 items: this._getFilterItems(),
                 listeners: {
                     filter: {
@@ -205,6 +205,7 @@
 
         _onFilter: function (component, filters) {
             this._applyFilters(filters);
+            this.config.filterCollection = undefined;
             this.refresh(this.config);
         },
 

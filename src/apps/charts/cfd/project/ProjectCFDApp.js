@@ -13,7 +13,8 @@
             'Rally.apps.charts.cfd.project.ProjectCFDSettings',
             'Rally.apps.charts.cfd.project.ProjectCFDCalculator',
             'Rally.util.Help',
-            'Rally.util.Test'
+            'Rally.util.Test',
+            'Rally.apps.charts.Colors'
         ],
 
         config: {
@@ -137,18 +138,7 @@
                 calculatorType: 'Rally.apps.charts.cfd.project.ProjectCFDCalculator',
                 calculatorConfig: this._buildChartCalculatorConfig(),
 
-                chartColors: [  // RGB values obtained from here: http://ux-blog.rallydev.com/?cat=23
-                    "#C0C0C0",  // $grey4
-                    "#FF8200",  // $orange
-                    "#F6A900",  // $gold
-                    "#FAD200",  // $yellow
-                    "#8DC63F",  // $lime
-                    "#1E7C00",  // $green_dk
-                    "#337EC6",  // $blue_link
-                    "#005EB8",  // $blue
-                    "#7832A5",  // $purple
-                    "#DA1884"   // $pink
-                ],
+                chartColors: Ext.create("Rally.apps.charts.Colors").cumulativeFlowColors(),
 
                 listeners: {
                     chartRendered: this._publishComponentReady,

@@ -16,6 +16,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
           preliminaryEstimateStore: Deft.Injector.resolve('preliminaryEstimateStore')
         context:
           getScopedStateId: (stateId) -> stateId
+          getWorkspace: () ->
+            _refObjectUUID: '84f98b22-69a3-441b-a70a-96679aeccc20'
         listeners:
           ready: ->
             Rally.BrowserTest.publishComponentReady @
@@ -146,6 +148,10 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
     it 'should render filterable control', ->
       @createColumn().then =>
         expect(!!@column.filterButton).toBe true
+
+    it 'should append workspace uuid to the preference name structure', ->
+      @createColumn().then =>
+        expect(@column.filterButton.stateId).toBe 'filter.gotmeanid.84f98b22-69a3-441b-a70a-96679aeccc20'
 
     it 'should throw error if getColumnIdentifier is not overridden', ->
       delete @columnConfig.getColumnIdentifier
