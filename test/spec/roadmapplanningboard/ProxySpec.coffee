@@ -8,17 +8,6 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.Proxy', ->
 
-  beforeEach ->
-    Deft.Injector.configure
-      uuidMapper: fn: ->
-        getUuid: ->
-          deferred = Ext.create 'Deft.promise.Deferred'
-          deferred.resolve ['12345678-1234-1234-1234-12345678', '12345678-1234-1234-1234-12345679']
-          deferred
-
-  afterEach ->
-    Deft.Injector.reset()
-
   describe '#buildRequest', ->
     beforeEach ->
       @proxy = Ext.create 'Rally.apps.roadmapplanningboard.Proxy',
@@ -32,45 +21,35 @@ describe 'Rally.apps.roadmapplanningboard.Proxy', ->
     beforeEach ->
       @proxy = Ext.create 'Rally.apps.roadmapplanningboard.Proxy',
         url: 'foo/{fooId}/bar'
-      @request = { url: '', operation: params: fooId: '123' }
+      @request = { url: '', operation:
+        params:
+          fooId: '123' }
 
     it 'should build the url and replace template items with operation parameters', ->
       expect(@proxy.buildUrl(@request)).toBe 'foo/123/bar'
 
   describe '#doRequest', ->
     beforeEach ->
-      @request = { url: '', operation: params: fooId: '123' }
-      @operation = { request: @request }
-      @errorNotifySpy = @spy Rally.ui.notify.Notifier, 'showError'
+      @stub Rally.environment, 'getContext', () ->
+        getWorkspace: () ->
+          _refObjectUUID: '12345678-1234-1234-1234-12345678'
+        getProject: () ->
+          _refObjectUUID: '12345678-1234-1234-1234-12345679'
+      @operation =
+        allowWrite: -> false
+      @proxy = Ext.create 'Rally.apps.roadmapplanningboard.Proxy',
+        url: 'foo/123/bar'
 
-    describe 'without error', ->
-      beforeEach ->
-        @proxy = Ext.create 'Rally.apps.roadmapplanningboard.Proxy',
-          url: 'foo/{fooId}/bar'
+    it 'should add workspace to operation', ->
+      request = @proxy.doRequest(@operation, Ext.emptyFn, @)
+      expect(request.operation.params.workspace).toBe '12345678-1234-1234-1234-12345678'
 
-      it 'should add workspace to operation', ->
-        @proxy.doRequest(@operation, Ext.emptyFn, @).then =>
-          expect(@operation.params.workspace).toBe '12345678-1234-1234-1234-12345678'
+    it 'should add project to operation', ->
+      request = @proxy.doRequest(@operation, Ext.emptyFn, @)
+      expect(request.operation.params.project).toBe '12345678-1234-1234-1234-12345679'
 
-      it 'should add project to operation', ->
-        @proxy.doRequest(@operation, Ext.emptyFn, @).then =>
-          expect(@operation.params.project).toBe '12345678-1234-1234-1234-12345679'
+    it 'should set noQueryScoping on operation when issuing request', ->
+      request = @proxy.doRequest(@operation, Ext.emptyFn, @)
+      expect(request.operation.noQueryScoping).toBe true
 
-      it 'should set noQueryScoping on operation when issuing request', ->
-        @proxy.doRequest(@operation, Ext.emptyFn, @).then =>
-          expect(@operation.noQueryScoping).toBe true
 
-    describe 'with error', ->
-      beforeEach ->
-        Deft.Injector.configure
-          uuidMapper: fn: ->
-            getUuid: ->
-              deferred = Ext.create 'Deft.promise.Deferred'
-              deferred.reject('oh noes')
-              deferred
-        @proxy = Ext.create 'Rally.apps.roadmapplanningboard.Proxy',
-          url: 'foo/{fooId}/bar'
-        @proxy.doRequest @operation, Ext.emptyFn, @
-
-      it 'should display an error notification', ->
-        expect(@errorNotifySpy.lastCall.args[0].message).toEqual 'oh noes'

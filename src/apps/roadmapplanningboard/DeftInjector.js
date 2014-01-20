@@ -6,8 +6,7 @@
         singleton: true,
         requires: [
             'Rally.data.Store',
-            'Rally.apps.roadmapplanningboard.AppModelFactory',
-            'Rally.apps.roadmapplanningboard.UuidMapper'
+            'Rally.apps.roadmapplanningboard.AppModelFactory'
         ],
         loaded: false,
 
@@ -43,9 +42,6 @@
                       parameters: [{
                             model: 'PreliminaryEstimate'
                       }]
-                    },
-                    uuidMapper: {
-                        className: 'Rally.apps.roadmapplanningboard.UuidMapper'
                     }
                 });
             }
