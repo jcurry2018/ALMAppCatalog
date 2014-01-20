@@ -163,7 +163,7 @@
                     columnHeaderConfig: {
                         headerTpl: column || 'None'
                     },
-                    cardLimit: 100,
+                    cardLimit: this.getSetting('pageSize'),
                     listeners: {
                         invalidfilter: {
                             fn: this._onInvalidFilter,

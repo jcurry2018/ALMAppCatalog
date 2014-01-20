@@ -78,7 +78,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         expect(editorOpenedStub.getCall(0).args[1][groupByField]).toBe @app.cardboard.getColumns()[0].getValue()
 
   it 'should show correct fields on cards', ->
-    @createApp({cardFields: 'Name,Defects,Project'}).then =>
+    @createApp(cardFields: 'Name,Defects,Project').then =>
 
       expect(@app.down('rallycardboard').cardConfig.fields).toContain 'Name'
       expect(@app.down('rallycardboard').cardConfig.fields).toContain 'Defects'
@@ -143,6 +143,12 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(columns.length).toBe 2
       expect(columns[0].fields).toEqual @app.getSetting('cardFields').split(',')
       expect(columns[1].fields).toEqual @app.getSetting('cardFields').split(',')
+
+  it 'should show correct number of cards in columns', ->
+    @createApp(pageSize: 2).then =>
+      expect(@app.down('rallycardboard').storeConfig.pageSize).toBe 2
+      _.each @app.down('rallycardboard').getColumns(), (column) ->
+        expect(column.cardLimit).toBe 2
 
   it 'should filter the board when a type checkbox is clicked', ->
     @createApp().then =>

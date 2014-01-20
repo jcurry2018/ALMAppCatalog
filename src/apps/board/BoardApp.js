@@ -36,6 +36,9 @@
                     showIconMenus: true,
                     fields: this.getSetting('fields').split(',')
                 },
+                columnConfig: {
+                    cardLimit: this.getSetting('pageSize')
+                },
                 loadMask: true
             });
         },
