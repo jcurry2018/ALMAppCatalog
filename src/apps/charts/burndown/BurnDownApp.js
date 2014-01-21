@@ -36,6 +36,12 @@
         
         customScheduleStates: ['Accepted'],	// a reasonable default
 
+        config: {
+            defaultSettings: {
+                showLabels: true
+            }
+        },
+
         getSettingsFields: function () {
             this.chartSettings = this.chartSettings || Ext.create('Rally.apps.charts.burndown.BurnDownSettings', {
                 app: this
@@ -344,21 +350,36 @@
                 axis.plotLines.push(this._getPlotLine(categories, uniqueIterations[uniqueIterations.length - 1], true));
             }
         },
+        _buildLabelText: function(iteration) {
+            var labelSetting = this.getSetting("showLabels");
 
+            var text = '';
+            if (labelSetting) {
+                text = iteration.Name || '';
+            }
+            return text;
+        },
         _getPlotBand: function (categories, iteration, shouldColorize) {
             var startDate = this.dateStringToObject(iteration.StartDate);
             var endDate = this.dateStringToObject(iteration.EndDate);
+
+
+
+            var label =   {
+                    text: this._buildLabelText( iteration ),
+                    align: 'center',
+                    rotation: 0,
+                    y: -7
+            };
+
+
 
             return {
                 color: shouldColorize ? '#F2FAFF' : '#FFFFFF',
                 from: this._getNearestWorkday(categories, startDate),
                 to: this._getNearestWorkday(categories, endDate),
-                label: {
-                    text: iteration.Name,
-                    align: 'center',
-                    rotation: 0,
-                    y: -7
-                }
+
+                label: label
             };
         },
 
