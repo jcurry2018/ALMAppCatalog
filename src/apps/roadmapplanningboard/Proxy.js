@@ -25,8 +25,7 @@
         },
 
         doRequest: function (operation, callback, scope) {
-            operation.noQueryScoping = true;
-            operation = this._decorateWithWorkspaceAndProject(operation);
+            operation = this._decorateOperation(operation);
             return this.callParent(arguments);
         },
 
@@ -35,9 +34,10 @@
          * @param {Object} operation
          * @returns {Object} operation
          */
-        _decorateWithWorkspaceAndProject: function(operation) {
+        _decorateOperation: function(operation) {
             var context = operation.context || Rally.environment.getContext();
 
+            operation.noQueryScoping = true;
             operation.params = operation.params || {};
             operation.params.workspace = context.getWorkspace()._refObjectUUID || '';
             operation.params.project = context.getProject()._refObjectUUID || '';
