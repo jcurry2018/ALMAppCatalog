@@ -86,7 +86,41 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
             rallychartAdds = _.where(_.map(addSpy.args, (arg) -> arg[1]), xtype: 'rallychart').length
             expect(rallychartAdds).toBe 1
             rallychart = _.where(_.map(addSpy.args, (arg) -> arg[1]), xtype: 'rallychart')[0]
+
             expect(_.max(rallychart.chartData.series[3].data)).toBe (1.25 * rallychart.chartData.series[2].data[0])
 
 
-  describe 'dashboard-scoped', ->
+  describe 'show label config option', ->
+    beforeEach ->
+      @settings =
+        chartAggregationType: 'planestimate'
+        chartDisplayType: 'line'
+        chartTimebox: 'iteration'
+        customScheduleStates: ['Accepted']
+
+      addSpy = @spy()
+      @app = Ext.create 'Rally.apps.charts.burndown.BurnDownApp',
+        context: @getContext()
+        scopeType: 'iteration'
+        settings: @settings
+        renderTo: 'testDiv'
+        listeners:
+          add: addSpy
+
+
+      @iteration =
+        Name : "Awesome Iteration"
+    it 'should show labels when the checkbox is selected', ->
+
+      @settings.showLabels = true
+      @app.settings = @settings
+      value = @app._buildLabelText( @iteration )
+      expect(value).toBe @iteration.Name
+    it 'should not show labels when the checkbox is deselected', ->
+
+      @settings.showLabels = false
+      @app.settings = @settings
+      value = @app._buildLabelText( @iteration )
+      expect(value).toBe ""
+
+
