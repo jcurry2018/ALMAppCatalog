@@ -205,7 +205,7 @@
                 hidden: false,
                 focusOnShow: false,
                 focusOnToFront: false,
-                enableMonthPicker: true,
+                enableMonthPicker: false,
                 colspan: 3,
                 dateFieldId: dateField.itemId,
                 handler: function (picker, date) {
