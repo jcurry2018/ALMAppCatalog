@@ -799,7 +799,7 @@
     border-color: #B81B10;
 }
 
-.roadmap-planning-popover .x4-form-error-msg {
+.roadmap-planning-popover .form-error-msg-field {
     background-color: #B81B10;
     color: white;
     font-family: NotoSans, Helvetica, Arial;
