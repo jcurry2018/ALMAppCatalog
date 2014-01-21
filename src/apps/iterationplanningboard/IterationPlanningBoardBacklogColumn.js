@@ -92,8 +92,6 @@
                 return;
             }
 
-            this._clearFilters();
-
             this.searching = true;
             var searchValue = this.getColumnHeader().down('#searchText').getValue();
             this.setMaskTarget(this.getContentCell());
@@ -149,12 +147,6 @@
                 isMatching = isMatching && (!record.hasField('Requirement') || !record.get('Requirement'));
             }
             return isMatching;
-        },
-
-        _clearFilters: function() {
-            if (this.filterCollection) {
-                this.filterCollection.clearAllFilters();
-            }
         }
     });
 })();
