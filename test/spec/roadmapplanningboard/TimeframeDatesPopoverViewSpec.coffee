@@ -54,7 +54,8 @@ describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
 
   it 'should reflect dates in picker based on whichever field has current focus', ->
     @click(@view.startDate.triggerEl.first()).then =>
-      @click(@view.endDate.getEl()).then =>
+      # be extra specific about the element we click to make Firefox happy
+      @click(@view.endDate.getEl().down('input').dom).then =>
         @validPicker(@view.endDate)
 
   it 'should call custom validator when a date field value is changed', ->
