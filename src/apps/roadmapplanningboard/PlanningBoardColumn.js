@@ -205,7 +205,6 @@
 
         _onFilter: function (component, filters) {
             this._applyFilters(filters);
-            this.config.filterCollection = undefined;
             this.refresh(this.config);
         },
 

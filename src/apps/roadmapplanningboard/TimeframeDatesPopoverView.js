@@ -286,10 +286,10 @@
         },
 
         _addPickerClasses: function () {
-            var datePickerPrev = this.picker.getEl().down( '.' + Ext.baseCSSPrefix + 'datepicker-prev');
+            var datePickerPrev = this.picker.getEl().down( '.' + Ext.baseCSSPrefix + 'datepicker-prev a');
             datePickerPrev.addCls('icon-chevron-left');
 
-            var datePickerNext = this.picker.getEl().down('.' + Ext.baseCSSPrefix + 'datepicker-next');
+            var datePickerNext = this.picker.getEl().down('.' + Ext.baseCSSPrefix + 'datepicker-next a');
             datePickerNext.addCls('icon-chevron-right');
 
             var todayButton = this.picker.getEl().down('.' + Ext.baseCSSPrefix + 'datepicker-footer .' + Ext.baseCSSPrefix + 'btn');
