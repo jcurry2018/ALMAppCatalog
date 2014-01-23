@@ -55,23 +55,6 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
     @writer = Ext.create('Rally.apps.roadmapplanningboard.Writer')
     @stub @writer, 'writeRecords', (request) -> request
 
-  it 'should throw an error if a collection and other fields are changed', ->
-    @record.set('collectionField', [])
-    @record.set('somefield', 'changedValue')
-
-    save = =>
-      @writer.write @createRequest [@record]
-
-    expect(save).toThrow 'Cannot update other fields on a record if a collection has changed'
-
-  it 'should throw an error if the collection sizes are identical', ->
-    @record.set('collectionField', [{id: 1},{id: 2}])
-
-    save = =>
-      @writer.write @createRequest [@record]
-
-    expect(save).toThrow 'Attempting to update a collection where nothing has changed'
-
   describe 'when changing data', ->
 
     beforeEach ->
@@ -95,23 +78,14 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
       @save()
       expect(@writeSpy).toHaveBeenCalledOnce()
 
-    it 'should set the action to delete and set params to urlParams', ->
+    it 'should set urlParams on request', ->
       @save()
       returnValue = @writeSpy.lastCall.returnValue
-      expect(returnValue.action).toBe 'destroy'
-      expect(returnValue.urlParams).toBe returnValue.params
+      expect(returnValue.urlParams).toEqual returnValue.params
 
     it 'should set the url correctly', ->
       @save()
       expect(@writeSpy.lastCall.returnValue.url).toBe 'someurl/collectionField/2'
-
-    it 'should throw an error if more than relationship is removed', ->
-      @record.set 'collectionField', []
-
-      save = =>
-        @writer.write @createRequest [@record]
-
-      expect(save).toThrow 'Cannot delete more than one relationship at a time'
 
   describe 'when adding to collection relationship', ->
 
@@ -122,9 +96,6 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
 
     it 'should call the write method', ->
       expect(@writeSpy).toHaveBeenCalledOnce()
-
-    it 'should set the action to create', ->
-      expect(@writeSpy.lastCall.returnValue.action).toBe 'create'
 
     it 'should set the url correctly', ->
       expect(@writeSpy.lastCall.returnValue.url).toBe 'someurl/collectionField'
