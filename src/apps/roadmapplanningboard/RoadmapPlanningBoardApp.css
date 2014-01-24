@@ -351,6 +351,18 @@
     background-image: url('smChev_down.png');
 }
 
+.roadmap-board .scroll-button.right {
+    right: 0;
+}
+
+.roadmap-board .scroll-button span {
+    color: #a9a9a9;
+}
+
+.roadmap-board .scroll-button:hover span {
+    color: #666;
+}
+
 @media all and (-webkit-min-device-pixel-ratio: 1.5) {
     .roadmap-board a.themeButtonExpand {
         background-image: url('smChev_down@2x.png');
