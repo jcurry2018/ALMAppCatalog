@@ -178,11 +178,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(timeframeColumnCount: 2, presentColumnCount: 1).then =>
         expect(@getForwardsButton().hidden).toBe true
 
-    it 'should fill in all columns if none are provided', ->
-      @createCardboard(timeframeColumnCount: 3, presentColumnCount: 0, pastColumnCount: 0).then =>
-        debugger
-        expect(@plugin.getScrollableColumns().length).toBe 3
-
   describe 'when back scroll button is clicked', ->
     it 'should scroll backward', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 4, timeframeColumnCount: 4).then =>
