@@ -6,8 +6,7 @@
         singleton: true,
         requires: [
             'Rally.data.Store',
-            'Rally.apps.roadmapplanningboard.AppModelFactory',
-            'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
+            'Rally.apps.roadmapplanningboard.AppModelFactory'
         ],
         loaded: false,
 
@@ -43,9 +42,6 @@
                       parameters: [{
                             model: 'PreliminaryEstimate'
                       }]
-                    },
-                    nextDateRangeGenerator: {
-                        className: 'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
                     }
                 });
             }

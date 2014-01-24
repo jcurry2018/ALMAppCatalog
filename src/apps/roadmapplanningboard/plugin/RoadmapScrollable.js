@@ -26,21 +26,12 @@
         },
 
         init: function (cmp) {
+            var pluginScope = this;
             this.originBuildColumns = cmp.buildColumns;
-            cmp.buildColumns = Ext.bind(this.buildColumns, this);
-
-            this.originDrawAddNewColumnButton = cmp.drawAddNewColumnButton;
-            cmp.drawAddNewColumnButton = Ext.bind(this.drawAddNewColumnButton, this);
-
-            cmp.addNewColumn = Ext.bind(this.addNewColumn, this);
-
+            cmp.buildColumns = function (store) {
+                pluginScope.buildColumns(store);
+            };
             this.callParent(arguments);
-        },
-
-        drawAddNewColumnButton: function () {
-            if (this._isForwardsButtonHidden()) {
-                this.originDrawAddNewColumnButton.call(this.cmp);
-            }
         },
 
         /**
@@ -112,16 +103,6 @@
             this.cmp.fireEvent('scroll', this.cmp);
 
             this._afterScroll(forwards);
-
-            this.drawAddNewColumnButton();
-
-            return column;
-        },
-
-        addNewColumn: function (columnConfig) {
-            columnConfig.index = this.scrollableColumns.length;
-            this.scrollableColumns.push(columnConfig);
-            return this._scroll(true);
         },
 
         _onNewlyAddedColumnReady: function () {

@@ -5,7 +5,7 @@
         extend: 'Rally.ui.cardboard.CardBoard',
         alias: 'widget.roadmapplanningboard',
 
-        inject: ['timeframeStore', 'planStore', 'preliminaryEstimateStore', 'nextDateRangeGenerator'],
+        inject: ['timeframeStore', 'planStore', 'preliminaryEstimateStore'],
 
         requires: [
             'Rally.data.util.PortfolioItemHelper',
@@ -85,31 +85,6 @@
             });
         },
 
-        drawAddNewColumnButton: function () {
-            var column = this.getRightmostColumn();
-            if (column.rendered) {
-                if (this.addNewColumnButton) {
-                    this.addNewColumnButton.destroy();
-                }
-                this.addNewColumnButton = Ext.create('Rally.ui.Button', {
-                    border: 1,
-                    text: '<i class="icon-add"></i>',
-                    elTooltip: 'Add Timeframe',
-                    cls: 'scroll-button right',
-                    height: column.getHeaderTitle().getHeight(),
-                    frame: false,
-                    handler: this._addNewColumn,
-                    renderTo: column.getHeaderTitle().getEl(),
-                    scope: this,
-                    userAction: 'rpb add timeframe'
-                });
-            }
-        },
-
-        getRightmostColumn: function () {
-            return _.last(this.getColumns());
-        },
-
         _loadPlanStore: function () {
             return this.planStore.load({
                 params: {
@@ -144,7 +119,6 @@
         renderColumns: function () {
             this.callParent(arguments);
             this.drawThemeToggle();
-            this.drawAddNewColumnButton();
         },
 
         /**
@@ -254,77 +228,6 @@
                 },
                 renderTo: _.last(this.getEl().query('.column-header'))
             });
-        },
-
-        _addNewColumn: function () {
-
-            var oldtimeframeRecord = _.last(this.timeframeStore.data.items);
-
-            Deft.promise.Chain.pipeline([this._createTimeframe, this._createPlan], this, oldtimeframeRecord).then({
-                success: function (records) {
-                    var column = this.addNewColumn(this._addColumnFromTimeframeAndPlan(records.timeframeRecord, records.planRecord));
-                    column.columnHeader.down('rallyclicktoeditfieldcontainer').goToEditMode();
-                },
-                failure: function (error) {
-                    Rally.ui.notify.Notifier.showError({message: 'Failed to create new column: ' + error});
-                },
-                scope: this
-            });
-        },
-
-        _createTimeframe: function (oldTimeframeRecord) {
-
-            var deferred = Ext.create('Deft.Deferred');
-            _.first(this.timeframeStore.add({
-                name: "New Timeframe",
-                startDate: this.nextDateRangeGenerator.getNextStartDate(oldTimeframeRecord.get('endDate')),
-                endDate: this.nextDateRangeGenerator.getNextEndDate(oldTimeframeRecord.get('startDate'), oldTimeframeRecord.get('endDate')),
-                timeline: oldTimeframeRecord.data.timeline
-            })).save({
-
-                success: function(record, operation) {
-                    deferred.resolve(record);
-                },
-
-                failure: function(record, operation) {
-                    deferred.reject(operation.error.status + ' ' + operation.error.statusText);
-                }
-            });
-            return deferred;
-        },
-
-        _createPlan: function (timeframeRecord) {
-            var deferred = Ext.create('Deft.Deferred');
-
-            _.first(this.planStore.add({
-                name: 'New Plan',
-                theme: '',
-                roadmap: {id: this.roadmap.getId()},
-                timeframe: timeframeRecord.data,
-                lowCapacity: 0,
-                highCapacity: 0
-            })).save({
-                success: function (record, operation) {
-                    deferred.resolve({planRecord: record, timeframeRecord: timeframeRecord});
-                },
-                failure: function (record, operation) {
-                    deferred.reject(operation.error.status + ' ' + operation.error.statusText);
-                },
-                scope: this
-            });
-
-            return deferred;
-        },
-
-        addNewColumn: function (columnConfig) {
-            var columnEls = this.createColumnElements('after', _.last(this.getColumns()));
-            var column = this.addColumn(columnConfig, this.getColumns().length);
-            this.renderColumn(column, columnEls);
-
-            this.drawThemeToggle();
-            this.drawAddNewColumnButton();
-
-            return column;
         },
 
         _clickCollapseButton: function () {
