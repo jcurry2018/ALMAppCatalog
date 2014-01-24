@@ -8,6 +8,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
 
   requires: [
     'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory'
+    'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
   ]
   constructor: (@uuidGenerator = Ext.create('Ext.data.UuidGenerator')) ->
 
@@ -48,3 +49,6 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
       preliminaryEstimateStore:
         fn: ->
           Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getPreliminaryEstimateStoreFixture()
+
+      nextDateRangeGenerator:
+        className: 'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'

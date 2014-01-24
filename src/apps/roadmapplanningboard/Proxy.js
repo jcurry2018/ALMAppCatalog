@@ -10,13 +10,14 @@
         extend: 'Ext.data.proxy.Rest',
         requires: [
             'Rally.apps.roadmapplanningboard.Writer',
-            'Rally.ui.notify.Notifier'
+            'Rally.apps.roadmapplanningboard.Reader',
+            'Rally.ui.notify.Notifier',
+            'Rally.apps.roadmapplanningboard.util.RequestCollectionHelper'
         ],
         alias: 'proxy.roadmap',
 
         reader: {
-            type: 'json',
-            root: 'results'
+            type: 'roadmap'
         },
 
         writer: {
@@ -57,9 +58,19 @@
         },
 
         buildRequest: function(operation) {
-            var request = this.callParent(arguments);
+            var request = Rally.apps.roadmapplanningboard.util.RequestCollectionHelper.updateRequestIfCollection(this.callParent(arguments),
+                this._onItemAdded, this._onItemRemoved);
             request.withCredentials = true;
+
             return request;
+        },
+
+        _onItemAdded: function (field, oldValue, newValue, record, request) {
+            request.action = 'create';
+        },
+
+        _onItemRemoved: function (field, oldValue, newValue, record, request) {
+            request.action = 'destroy';
         }
     });
 

@@ -8,14 +8,50 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.Proxy', ->
 
+  helpers
+    createRecords: ({oldValues, newValues}) ->
+      field =
+        name: 'field'
+
+      model =
+        getDirtyFields: -> [field]
+        getDirtyCollectionFields: -> [field]
+
+        modified:
+          field: oldValues
+        get: (name) ->
+          newValues
+
+      return [model]
+
   describe '#buildRequest', ->
     beforeEach ->
       @proxy = Ext.create 'Rally.apps.roadmapplanningboard.Proxy',
         url: ''
-      @operation = { params: {} }
+      @operation = params: {}
 
     it 'should add withCredentials to the request', ->
       expect(@proxy.buildRequest(@operation).withCredentials).toBe true
+
+    describe 'when adding an item to collection', ->
+      beforeEach ->
+        @operation.records = @createRecords
+          oldValues: [{id:1},{id:2},{id:3}]
+          newValues: [{id:1},{id:2},{id:3},{id:4}]
+
+      it 'should set request action to create', ->
+        expect(@proxy.buildRequest(@operation).action).toBe 'create'
+
+
+    describe 'when removing an item from a collection', ->
+      beforeEach ->
+        @operation.records = @createRecords
+          oldValues: [{id:1},{id:2},{id:3}]
+          newValues: [{id:1},{id:2}]
+
+      it 'should set request action to destroy', ->
+        expect(@proxy.buildRequest(@operation).action).toBe 'destroy'
+
 
   describe '#buildUrl', ->
     beforeEach ->
