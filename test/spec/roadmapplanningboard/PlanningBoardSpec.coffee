@@ -157,6 +157,38 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.getColumns()[3].getPlanRecord().get('lowCapacity')).toBe 15
       expect(@cardboard.getColumns()[3].getPlanRecord().get('highCapacity')).toBe 25
 
+  describe 'add new column button', ->
+
+    helpers
+      clickAddNewButton: ->
+        @click(css: '.icon-add')
+
+    beforeEach ->
+      @createCardboard()
+
+    it 'should render', ->
+        expect(@cardboard.addNewColumnButton.rendered).toBeTruthy()
+
+    describe 'when clicked', ->
+
+      beforeEach ->
+        @clickAddNewButton()
+
+      it 'should add a new column', ->
+        expect(@cardboard.getColumns().length).toBe 6
+
+      it 'should make the new column be the last column', ->
+        expect(_.last(@cardboard.getColumns()).columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
+
+      it 'should put the field in edit mode', ->
+        expect(_.last(@cardboard.getColumns()).columnHeader.down('rallyclicktoeditfieldcontainer').getEditMode()).toBeTruthy()
+
+      it 'should update the timeframe store', ->
+        expect(_.last(@timeframeStore.data.items).get('name')).toBe 'New Timeframe'
+
+      it 'should update the plan store', ->
+        expect(_.last(@planStore.data.items).get('name')).toBe 'New Plan'
+
   describe 'theme container interactions', ->
 
     it 'should show expanded themes when the board is created', ->

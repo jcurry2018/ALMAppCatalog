@@ -10,14 +10,14 @@
         extend: 'Ext.data.proxy.Rest',
         requires: [
             'Rally.apps.roadmapplanningboard.Writer',
+            'Rally.apps.roadmapplanningboard.Reader',
             'Rally.ui.notify.Notifier',
             'Rally.apps.roadmapplanningboard.util.RequestCollectionHelper'
         ],
         alias: 'proxy.roadmap',
 
         reader: {
-            type: 'json',
-            root: 'results'
+            type: 'roadmap'
         },
 
         writer: {
