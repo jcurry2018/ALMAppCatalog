@@ -183,7 +183,7 @@
                 columnCfgs: this._getGridColumns(),
                 enableBulkEdit: context.isFeatureEnabled('EXT4_GRID_BULK_EDIT'),
                 stateId: stateId,
-                stateful: context.isFeatureEnabled('ITERATION_TRACKING_PERSISTENT_PREFERENCES')
+                stateful: true
             };
 
             if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
