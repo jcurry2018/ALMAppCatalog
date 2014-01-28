@@ -191,7 +191,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     describe 'add new column button', ->
 
       beforeEach ->
-        @createCardboard(timeframeColumnCount: 3, presentColumnCount: 0, pastColumnCount: 0)
+        @createCardboard(timeframeColumnCount: 3, presentColumnCount: 0, pastColumnCount: 1)
 
       it 'should render', ->
           expect(@cardboard.addNewColumnButton.rendered).toBeTruthy()
@@ -204,11 +204,11 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         it 'should add a new column', ->
           expect(@cardboard.getColumns().length).toBe 4
 
-        it 'should make the new column be the last column', ->
-          expect(_.last(@cardboard.getColumns()).columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
+        it 'should make the new column be the first column', ->
+          expect(@cardboard.getColumns()[1].columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
 
         it 'should put the field in edit mode', ->
-          expect(_.last(@cardboard.getColumns()).columnHeader.down('rallyclicktoeditfieldcontainer').getEditMode()).toBeTruthy()
+          expect(@cardboard.getColumns()[1].columnHeader.down('rallyclicktoeditfieldcontainer').getEditMode()).toBeTruthy()
 
         it 'should update the timeframe store', ->
           expect(_.last(@timeframeStore.data.items).get('name')).toBe 'New Timeframe'
@@ -216,6 +216,12 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         it 'should update the plan store', ->
           expect(_.last(@planStore.data.items).get('name')).toBe 'New Plan'
 
+        describe 'when scrolling backwards', ->
+          beforeEach ->
+            @scrollBackwards()
+
+          it 'should scroll correctly', ->
+            expect(@cardboard.getColumns()[2].columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
 
   describe 'when back scroll button is clicked', ->
     it 'should scroll backward', ->

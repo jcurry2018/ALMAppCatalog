@@ -96,32 +96,50 @@
 
         _scroll: function (forwards) {
             var insertNextToColumn = this._getInsertNextToColumn(forwards);
+            var newIndex = _.indexOf(this.cmp.getColumns(), insertNextToColumn);
             var newlyVisibleColumn = this.scrollableColumns[insertNextToColumn.index + (forwards ? 1 : -1)];
 
-            var indexOfNewColumn = _.indexOf(this.cmp.getColumns(), insertNextToColumn);
-            var columnEls = this.cmp.createColumnElements(forwards ? 'after' : 'before', insertNextToColumn);
-            this.cmp.destroyColumn(this._getColumnToRemove(forwards));
-
-            var column = this.cmp.addColumn(newlyVisibleColumn, indexOfNewColumn);
-            column.on('ready', this._onNewlyAddedColumnReady, this, {single: true});
-
-            this.cmp.renderColumn(column, columnEls);
-
-            this.cmp.drawThemeToggle();
+            var column = this._drawColumn(this._getColumnToRemove(forwards), newlyVisibleColumn, insertNextToColumn, newIndex, forwards);
 
             this.cmp.fireEvent('scroll', this.cmp);
-
-            this._afterScroll(forwards);
-
-            this.drawAddNewColumnButton();
 
             return column;
         },
 
+        _drawColumn: function (removingColumn, newColumn, nextToColumn, index, forwards) {
+
+            var columnEls = this.cmp.createColumnElements(forwards ? 'after' : 'before', nextToColumn);
+            this.cmp.destroyColumn(removingColumn);
+            var column = this.cmp.addColumn(newColumn, index);
+            this.cmp.renderColumn(column, columnEls);
+            column.on('ready', this._onNewlyAddedColumnReady, this, {single: true});
+            this.cmp.drawThemeToggle();
+            this.drawAddNewColumnButton();
+            this._afterScroll();
+
+            return column;
+        },
+
+
         addNewColumn: function (columnConfig) {
-            columnConfig.index = this.scrollableColumns.length;
-            this.scrollableColumns.push(columnConfig);
-            return this._scroll(true);
+            var placeHolderColumn = this._getFirstPlaceholderColumn();
+            if (placeHolderColumn) {
+                columnConfig.index = placeHolderColumn.index;
+                this.scrollableColumns[columnConfig.index] = columnConfig;
+
+                return this._drawColumn(placeHolderColumn, columnConfig, placeHolderColumn, columnConfig.index, false);
+
+            } else {
+                columnConfig.index = this.scrollableColumns.length;
+                this.scrollableColumns.push(columnConfig);
+                return this._scroll(true);
+            }
+        },
+
+        _getFirstPlaceholderColumn: function () {
+            return _.find(this.getScrollableColumns(), function (column) {
+                return column.xtype === 'cardboardplaceholdercolumn';
+            });
         },
 
         _onNewlyAddedColumnReady: function () {
