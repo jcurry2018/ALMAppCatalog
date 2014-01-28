@@ -92,7 +92,7 @@
          * @returns {number} The days between 2 dates
          */
         getDaysBetween: function(startDate, endDate) {
-            return (endDate  - startDate) / 86400000; // milliseconds in a day
+            return Math.round((endDate  - startDate) / 86400000); // milliseconds in a day - round for DST
         },
 
         /**

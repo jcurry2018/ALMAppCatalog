@@ -76,6 +76,8 @@ describe 'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator', ->
       { startDate: '2014-04-01', endDate: '2014-06-30', nextStartDate: '2014-07-01', nextEndDate: '2014-09-30T23:59:59Z-00:00' }
       { startDate: '2014-04-01', endDate: '2014-06-27', nextStartDate: '2014-06-28', nextEndDate: '2014-06-30T23:59:59Z-00:00' }
       { startDate: '2014-10-01', endDate: '2014-12-31', nextStartDate: '2015-01-01', nextEndDate: '2015-03-31T23:59:59Z-00:00' }
+      { startDate: '2014-03-05', endDate: '2014-03-11', nextStartDate: '2014-03-12', nextEndDate: '2014-03-18T23:59:59Z-00:00' }
+      { startDate: '2014-11-01', endDate: '2014-11-07', nextStartDate: '2014-11-08', nextEndDate: '2014-11-14T23:59:59Z-00:00' }
     ]
 
     beforeEach ->

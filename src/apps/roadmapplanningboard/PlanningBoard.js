@@ -259,6 +259,7 @@
         _addNewColumn: function () {
 
             var oldtimeframeRecord = _.last(this.timeframeStore.data.items);
+            this.addNewColumnButton.setDisabled(true);
 
             Deft.promise.Chain.pipeline([this._createTimeframe, this._createPlan], this, oldtimeframeRecord).then({
                 success: function (records) {
@@ -266,6 +267,7 @@
                     column.columnHeader.down('rallyclicktoeditfieldcontainer').goToEditMode();
                 },
                 failure: function (error) {
+                    this.addNewColumnButton.setDisabled(false);
                     Rally.ui.notify.Notifier.showError({message: 'Failed to create new column: ' + error});
                 },
                 scope: this
