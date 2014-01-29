@@ -60,6 +60,9 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
         timeframeStore: Deft.Injector.resolve 'timeframeStore'
         planStore: Deft.Injector.resolve 'planStore'
 
+#    mouseOver: (element) ->
+#      Rally.test.fireEvent(element, 'mouseover')
+
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
     @featureStoreFixture = Deft.Injector.resolve 'featureStore'
@@ -153,12 +156,27 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
         @click(this.column.getColumnHeader().getEl().down('.add-capacity span')).then =>
           expect(!!@column.popover).toBe true
 
+      it 'should not enable the planned capacity tooltip when destroying the capacity popover', ->
+        @createColumn()
+        expect(!!@column.popover).toBe false
+        expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe true
+        @click(this.column.getColumnHeader().getEl().down('.add-capacity span')).then =>
+          expect(!!@column.popover).toBe true
+          expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe true
+          @column.popover.destroy()
+          expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe true
+
       it 'should not display a set capacity button if editing is not allowed', ->
         @createColumn
           editPermissions:
             capacityRanges: false
 
         expect(Ext.query('.add-capacity span')).toEqual []
+
+      it 'should disable the planned capacity tooltip on mouseover', ->
+        @createColumn()
+        expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe true
+        expect(@column.plannedCapacityRangeTooltip.isVisible()).toBe false
 
     describe 'with capacity', ->
       beforeEach ->
@@ -170,6 +188,23 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
         @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
           expect(!!@column.popover).toBe true
 
+      it 'should disable the planned capacity tooltip when clicking the progress bar', ->
+        @createColumn()
+        expect(!!@column.popover).toBe false
+        expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe false
+        @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
+          expect(!!@column.popover).toBe true
+          expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe true
+
+      it 'should enable the planned capacity tooltip when destroying the capacity popover', ->
+        @createColumn()
+        expect(!!@column.popover).toBe false
+        expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe false
+        @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
+          expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe true
+          @column.popover.destroy()
+          expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe false
+
       it 'should not display a popover when clicked if editing is not allowed', ->
         @createColumn
           editPermissions:
@@ -178,6 +213,15 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
         expect(@column.popover).toBeUndefined()
         @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
           expect(!!@column.popover).toBe false
+
+      it 'should show the planned capacity tooltip on mouseover', ->
+        @createColumn()
+        expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe false
+        expect(@column.plannedCapacityRangeTooltip.isVisible()).toBe false
+        @mouseOver(id: @column.progressBar.getId(), {x: 10, y: -5}).then =>
+          validate = ->
+            expect(@column.plannedCapacityRangeTooltip.isVisible()).toBe true
+          setTimeout(validate, 1000)
 
   describe 'theme header', ->
     beforeEach ->

@@ -31,9 +31,11 @@
 
         constructor: function (config) {
             this.mergeConfig(config);
-            this.config.storeConfig.sorters = [{
-                sorterFn: Ext.bind(this._sortPlan, this)
-            }];
+            this.config.storeConfig.sorters = [
+                {
+                    sorterFn: Ext.bind(this._sortPlan, this)
+                }
+            ];
             this.callParent([this.config]);
         },
 
@@ -51,6 +53,20 @@
                     this.drawHeader();
                 }, this);
             }
+            this._createDummyPlannedCapacityRangeTooltipForSizeCalculations();
+        },
+
+        _createDummyPlannedCapacityRangeTooltipForSizeCalculations: function () {
+            this.dummyPlannedCapacityRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
+                target: Ext.getBody(),
+                html: this._getPlannedCapacityRangeTooltipTitle(),
+                listeners: {
+                    beforeshow: function () {
+                        this.hide();
+                    }
+                }
+            });
+            this.dummyPlannedCapacityRangeTooltip.show();
         },
 
         getColumnIdentifier: function () {
@@ -127,9 +143,9 @@
         },
 
         onProgressBarClick: function (event) {
-            var _this = this;
-
             var target = Ext.get(Ext.query('.progress-bar-background', this.getColumnHeader().getEl().dom)[0]);
+
+            this.plannedCapacityRangeTooltip.disable();
 
             if (this.popover) {
                 return;
@@ -160,8 +176,12 @@
                 },
                 listeners: {
                     beforedestroy: function () {
-                        _this.popover = null;
-                    }
+                        this.popover = null;
+                        if (this._getHighCapacity()) {
+                            this.plannedCapacityRangeTooltip.enable();
+                        }
+                    },
+                    scope: this
                 }
             });
         },
@@ -225,7 +245,7 @@
             }
 
             this.dateRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
-                target : this.dateRange.getEl(),
+                target: this.dateRange.getEl(),
                 hideDelay: 100,
                 anchor: 'left',
                 html: this.getDateHeaderTplData().titleText
@@ -235,7 +255,7 @@
         _drawProgressBar: function () {
             if (this.progressBar) {
                 this.progressBar.update(this.getHeaderTplData());
-                this._addCapacityButton();
+                this._afterProgressBarRender();
             } else {
                 this.progressBar = this.getColumnHeader().add({
                     xtype: 'container',
@@ -254,15 +274,25 @@
                     ],
                     data: this.getHeaderTplData(),
                     listeners: {
-                        afterrender: this._addCapacityButton,
+                        afterrender: this._afterProgressBarRender,
                         scope: this
                     }
                 });
             }
         },
 
+        _afterProgressBarRender: function () {
+            this._addCapacityButton();
+            this._createPlannedCapacityRangeTooltip();
+            if (this._getHighCapacity()) {
+                this.plannedCapacityRangeTooltip.enable();
+            } else {
+                this.plannedCapacityRangeTooltip.disable();
+            }
+        },
+
         _addCapacityButton: function () {
-            if(this.editPermissions.capacityRanges && this.rendered) {
+            if (this.editPermissions.capacityRanges && this.rendered) {
                 Ext.create('Rally.ui.Button', {
                     text: 'Set Capacity',
                     cls: 'secondary dark',
@@ -271,6 +301,33 @@
                     scope: this
                 });
             }
+        },
+
+        _createPlannedCapacityRangeTooltip: function () {
+            if (this.plannedCapacityRangeTooltip) {
+                return;
+            }
+
+            var anchorOffset = 0;
+            var mouseXOffset = 0;
+
+            if (this.dummyPlannedCapacityRangeTooltip) {
+                var tooltipWidth = this.dummyPlannedCapacityRangeTooltip.getWidth();
+                var anchorWidth = this.dummyPlannedCapacityRangeTooltip.getEl().down('.' + Ext.baseCSSPrefix + 'tip-anchor').getWidth();
+                anchorOffset = tooltipWidth / 2 - anchorWidth;
+                var width = this.rendered ? this.getWidth() : 0;
+                mouseXOffset = (width - tooltipWidth) / 2;
+                this.dummyPlannedCapacityRangeTooltip.destroy();
+            }
+
+            this.plannedCapacityRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
+                target: this.progressBar.getEl(),
+                anchor: 'top',
+                anchorOffset: anchorOffset,
+                mouseOffset: [ mouseXOffset, 0],
+                hideDelay: 100,
+                html: this._getPlannedCapacityRangeTooltipTitle()
+            });
         },
 
         _drawTheme: function () {
@@ -288,7 +345,7 @@
 
         getHeaderTplData: function () {
             var pointField = this.pointField;
-            var highCapacity = (this.planRecord && this.planRecord.get('highCapacity')) || 0;
+            var highCapacity = this._getHighCapacity();
             var lowCapacity = (this.planRecord && this.planRecord.get('lowCapacity')) || 0;
 
             var fraction = Ext.create('Rally.apps.roadmapplanningboard.util.Fraction', {
@@ -312,8 +369,12 @@
                 itemType: this.typeNames.child.name.toLowerCase(),
                 progressBarHtml: this._getProgressBarHtml(fraction),
                 formattedPercent: fraction.getFormattedPercent(),
-                progressBarTitle: this._getProgressBarTitle()
+                progressBarTitle: this._getPlannedCapacityRangeTooltipTitle()
             };
+        },
+
+        _getHighCapacity: function () {
+            return (this.planRecord && this.planRecord.get('highCapacity')) || 0;
         },
 
         getDateHeaderTplData: function () {
@@ -369,7 +430,7 @@
             });
         },
 
-        _getProgressBarTitle: function () {
+        _getPlannedCapacityRangeTooltipTitle: function () {
             var title = 'Planned Capacity Range';
             return this.editPermissions.capacityRanges ? 'Edit ' + title : title;
         },
@@ -384,7 +445,7 @@
 
             if (this.timeframeRecord.dirty) {
                 this.timeframeRecord.save({
-                     requester: this.view
+                    requester: this.view
                 });
             }
 
