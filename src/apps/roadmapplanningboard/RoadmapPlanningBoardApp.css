@@ -12,9 +12,10 @@
 }
 
 .roadmap-board .progress-bar-container .progress-bar-label {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
     color: #262626;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: normal;
 }
 
 .roadmap-board .progress-bar-percent-done {
@@ -113,32 +114,47 @@
 }
 
 .roadmap-board .planning-column .columnTitle {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
     font-size: 18px;
-    font-weight: bold;
+    font-weight: normal;
     color: #262626;
 }
 
 .roadmap-board .planning-column .columnTitle .fieldContainerView {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
     font-size: 18px;
-    font-weight: bold;
+    font-weight: normal;
+    line-height: 23px;
     white-space: nowrap;
     width: 95%;
     overflow: hidden;
     margin: 0 auto;
     text-overflow: ellipsis;
+    padding: 0px 0px;
 }
 
 .roadmap-board .planning-column .columnTitle input {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
     font-size: 18px;
-    font-weight: bold;
+    font-weight: normal;
+    padding: 0px 0px;
 }
 
-.roadmap-board .planning-column .columnTitle > table {
+/* Modifications to accommodate differences in Firefox */
+
+@-moz-document url-prefix() {
+
+    .roadmap-board .planning-column .columnTitle .fieldContainerView {
+        padding: 1px 1px;
+    }
+
+    .roadmap-board .planning-column .columnTitle input {
+        padding: 0px 0px;
+    }
+}
+
+.roadmap-board .planning-column .columnTitle table {
     margin: 0;
-}
-
-.roadmap-board .planning-column .columnTitle > table input {
-    line-height: 20px;
 }
 
 .roadmap-board .column-headers {
@@ -222,7 +238,7 @@
     border-bottom: 1px dotted #c0c0c0;
 }
 
-.roadmap-board .fixed-header-card-board-body-container > table {
+.roadmap-board .fixed-header-card-board-body-container table {
     height: 100%;
 }
 
@@ -235,8 +251,9 @@
 }
 
 .roadmap-board .column-container .column-header .columnTpl {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
     font-size: 18px;
-    font-weight: bold;
+    font-weight: normal;
     color: rgb(0, 0, 0);
 }
 
@@ -253,7 +270,6 @@
     color: #262626;
     padding: 0;
     border-width: 0;
-    line-height: normal;
 }
 
 .yes-harmonized .roadmap-board .theme_container {
