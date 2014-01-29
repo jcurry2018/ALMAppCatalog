@@ -88,6 +88,7 @@
                             {
                                 xtype: 'rallyownerfilter',
                                 margin: '0 5',
+                                filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
                                 project: this.getContext().getProjectRef()
                             },
                             {
