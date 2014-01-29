@@ -19,7 +19,8 @@
          * @returns {Object} The data from
          */
         readRecords: function(data) {
-            data = data[this.root] ? data : {results: [data]};
+            // Check if the data is an array to handle nested objects
+            data = data[this.root] || Ext.isArray(data) ? data : {results: [data]};
 
             return this.callParent([data]);
         }

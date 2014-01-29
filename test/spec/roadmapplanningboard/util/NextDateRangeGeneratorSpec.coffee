@@ -81,7 +81,7 @@ describe 'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator', ->
     ]
 
     beforeEach ->
-      @stub Ext.Date, 'now', -> Ext.Date.parse '2014-10-16', 'Y-m-d'
+      @stub Ext.Date, 'now', => Ext.Date.parse('2014-10-16', @format).getTime()
 
     describe '#getStartDate', ->
       _.each timeFrameData, ({startDate, endDate, nextStartDate, nextEndDate}) =>

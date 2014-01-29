@@ -25,7 +25,7 @@
          */
         getNextStartDate: function (endDate) {
             if (!endDate) {
-                return Ext.Date.parse(this.getQuarter(Ext.Date.now()).start, this.format);
+                return Ext.Date.parse(this.getQuarter(new Date(Ext.Date.now())).start, this.format);
             }
             return Ext.Date.add(endDate, Ext.Date.DAY, 1);
         },
@@ -42,7 +42,7 @@
             var nextStartDate = this.getNextStartDate(endDate);
 
             if (!endDate) {
-                var now = Ext.Date.now();
+                var now = new Date(Ext.Date.now());
                 nextEndDate = Ext.Date.parse(this.getQuarter(now).end, this.format);
             } else {
                 var days = this.getDaysBetween(startDate, endDate);

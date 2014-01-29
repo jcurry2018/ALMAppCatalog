@@ -5,7 +5,7 @@
         extend: 'Rally.ui.cardboard.CardBoard',
         alias: 'widget.roadmapplanningboard',
 
-        inject: ['timeframeStore', 'planStore', 'preliminaryEstimateStore', 'nextDateRangeGenerator'],
+        inject: ['timeframeStore', 'planStore', 'preliminaryEstimateStore'],
 
         requires: [
             'Rally.data.util.PortfolioItemHelper',
@@ -13,7 +13,8 @@
             'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
             'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
             'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
-            'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper'
+            'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper',
+            'Rally.apps.roadmapplanningboard.util.PlanGenerator'
         ],
 
         config: {
@@ -52,6 +53,11 @@
         ],
 
         initComponent: function () {
+            this.timeframePlanStoreWrapper = Ext.create('Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', {
+                timeframeStore: this.timeframeStore,
+                planStore: this.planStore
+            });
+
             if(!this.typeNames.child || !this.typeNames.child.name) {
                 throw 'typeNames must have a child property with a name';
             }
@@ -152,11 +158,6 @@
          * @returns {Array} columns
          */
         buildColumns: function () {
-            this.timeframePlanStoreWrapper = Ext.create('Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', {
-                timeframeStore: this.timeframeStore,
-                planStore: this.planStore
-            });
-
             var planColumns = _.map(this.timeframePlanStoreWrapper.getTimeframeAndPlanRecords(), function (record) {
                 return this._addColumnFromTimeframeAndPlan(record.timeframe, record.plan);
             }, this);
@@ -257,11 +258,14 @@
         },
 
         _addNewColumn: function () {
-
-            var oldtimeframeRecord = _.last(this.timeframeStore.data.items);
+            var generator = Ext.create('Rally.apps.roadmapplanningboard.util.PlanGenerator', {
+                timeframePlanStoreWrapper: this.timeframePlanStoreWrapper,
+                roadmap: this.roadmap
+            });
+            
             this.addNewColumnButton.setDisabled(true);
-
-            Deft.promise.Chain.pipeline([this._createTimeframe, this._createPlan], this, oldtimeframeRecord).then({
+            
+            generator.createPlanWithTimeframe().then({
                 success: function (records) {
                     var column = this.addNewColumn(this._addColumnFromTimeframeAndPlan(records.timeframeRecord, records.planRecord));
                     column.columnHeader.down('rallyclicktoeditfieldcontainer').goToEditMode();
@@ -272,50 +276,6 @@
                 },
                 scope: this
             });
-        },
-
-        _createTimeframe: function (oldTimeframeRecord) {
-
-            var deferred = Ext.create('Deft.Deferred');
-            _.first(this.timeframeStore.add({
-                name: "New Timeframe",
-                startDate: this.nextDateRangeGenerator.getNextStartDate(oldTimeframeRecord.get('endDate')),
-                endDate: this.nextDateRangeGenerator.getNextEndDate(oldTimeframeRecord.get('startDate'), oldTimeframeRecord.get('endDate')),
-                timeline: oldTimeframeRecord.data.timeline
-            })).save({
-
-                success: function(record, operation) {
-                    deferred.resolve(record);
-                },
-
-                failure: function(record, operation) {
-                    deferred.reject(operation.error.status + ' ' + operation.error.statusText);
-                }
-            });
-            return deferred;
-        },
-
-        _createPlan: function (timeframeRecord) {
-            var deferred = Ext.create('Deft.Deferred');
-
-            _.first(this.planStore.add({
-                name: 'New Plan',
-                theme: '',
-                roadmap: {id: this.roadmap.getId()},
-                timeframe: timeframeRecord.data,
-                lowCapacity: 0,
-                highCapacity: 0
-            })).save({
-                success: function (record, operation) {
-                    deferred.resolve({planRecord: record, timeframeRecord: timeframeRecord});
-                },
-                failure: function (record, operation) {
-                    deferred.reject(operation.error.status + ' ' + operation.error.statusText);
-                },
-                scope: this
-            });
-
-            return deferred;
         },
 
         addNewColumn: function (columnConfig) {

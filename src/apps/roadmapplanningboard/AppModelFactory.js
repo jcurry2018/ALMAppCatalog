@@ -21,7 +21,8 @@
         modelTypes: [
             'plan',
             'roadmap',
-            'timeframe'
+            'timeframe',
+            'timeline'
         ],
 
         getPlanModel: function () {
@@ -58,7 +59,8 @@
                         type: 'int'
                     },
                     {
-                        name: 'timeframe'
+                        name: 'timeframe',
+                        serialize: this._serializeModel
                     },
                     {
                         name: 'roadmap'
@@ -72,10 +74,6 @@
                         defaultValue: true
                     }
                 ],
-                hasOne: {
-                    name: 'timeframe',
-                    model: this.getTimeframeModel().$className
-                },
                 proxy: {
                     type: 'roadmap',
                     url: Rally.environment.getContext().context.services.planning_service_url + '/roadmap/{roadmap.id}/plan/{id}'
@@ -106,13 +104,10 @@
                         type: 'string'
                     },
                     {
-                        name: 'plans'
+                        name: 'plans',
+                        serialize: this._getModelCollectionSerializer()
                     }
                 ],
-                hasMany: {
-                    name: 'plans',
-                    model: this.getPlanModel().$className
-                },
                 proxy: {
                     type: 'roadmap',
                     url: Rally.environment.getContext().context.services.planning_service_url + '/roadmap'
@@ -209,10 +204,6 @@
                 proxy: {
                     type: 'roadmap',
                     url: Rally.environment.getContext().context.services.timeline_service_url + '/timeline/{timeline.id}/timeframe/{id}'
-                },
-                belongsTo: {
-                    model: Ext.identityFn('Rally.apps.roadmapplanningboard.TimelineModel'),
-                    foreignKey: 'timelineId'
                 }
             });
             return this.timeframeModel;
@@ -241,7 +232,8 @@
                     },
                     {
                         name: 'timeframes',
-                        type: 'collection'
+                        type: 'collection',
+                        serialize: this._getModelCollectionSerializer()
                     }
                 ],
                 proxy: {
@@ -250,6 +242,26 @@
                 }
             });
             return this.timelineModel;
+        },
+
+        _serializeModelCollection: function (values, record) {
+            var _this = this;
+
+            return _.map(values, function(model) {
+                return _this._serializeModel(model);
+            });
+        },
+
+        _serializeModel: function (model) {
+            return model.data || model;
+        },
+
+        _getModelCollectionSerializer: function () {
+            var _this = this;
+
+            return function() {
+                return _this._serializeModelCollection.apply(_this, arguments);
+            };
         }
     }, function () {
         Rally.data.ModelFactory.registerTypes(this.modelTypes, this);

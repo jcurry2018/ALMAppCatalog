@@ -26,6 +26,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       planRecord = Ext.create Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel(),
         id: "#{id}"
         name: "#{id}"
+        timeframe: timeframeRecord.data
 
       return {
         xtype: 'timeframeplanningcolumn'

@@ -253,7 +253,13 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         type: 'memory'
       data: [
         id: '1'
+        timeframes: [
+          id: 1
+        ]
       ]
+
+    @timelineStoreFixture.model.setProxy 'memory'
+    @timelineStoreFixture
 
   getTimeframeStoreFixture: ->
     @timeframeStoreFixture = Ext.create 'Rally.data.Store',
