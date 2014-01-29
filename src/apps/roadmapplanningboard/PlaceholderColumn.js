@@ -33,6 +33,10 @@
             });
         },
 
+        getColumnHeader: function() {
+            return this.columnHeader;
+        },
+
         getColumnHeaderCell: function () {
             return Ext.get(this.headerCell);
         },

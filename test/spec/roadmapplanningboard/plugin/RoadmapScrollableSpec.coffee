@@ -103,21 +103,13 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     getColumnContentCells: ->
       @cardboard.getEl().query('td.card-column')
 
-    clickCollapse: ->
+    clickTheme: ->
       collapseStub = @stub()
       @cardboard.on 'headersizechanged', collapseStub
-      @click(css: '.themeButtonCollapse').then =>
+      @click(css: '.theme-button').then =>
         @once
           condition: ->
             collapseStub.called
-
-    clickExpand: ->
-      expandStub = @stub()
-      @cardboard.on 'headersizechanged', expandStub
-      @click(css: '.themeButtonExpand').then =>
-        @once
-          condition: ->
-            expandStub.called
 
     clickAddNewButton: ->
       @click(css: '.scroll-button.right')
@@ -384,14 +376,14 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       it 'should collapse themes when the theme collapse button is clicked', ->
         @createCardboard().then =>
           @scrollBackwards().then =>
-            @clickCollapse().then =>
+            @clickTheme().then =>
               _.each @getThemeElements(), (element) =>
                 expect(element.isVisible()).toBe false
 
       it 'should expand themes when the theme expand button is clicked', ->
         @createCardboard(showTheme: false).then =>
           @scrollBackwards().then =>
-            @clickExpand().then =>
+            @clickTheme().then =>
               _.each @getThemeElements(), (element) =>
                 expect(element.isVisible()).toBe true
                 expect(element.query('.field_container').length).toBe 1
@@ -408,14 +400,14 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       it 'should collapse themes when the theme collapse button is clicked', ->
         @createCardboard().then =>
           @scrollForwards().then =>
-            @clickCollapse().then =>
+            @clickTheme().then =>
               _.each @getThemeElements(), (element) =>
                 expect(element.isVisible()).toBe false
 
       it 'should expand themes when the theme expand button is clicked', ->
         @createCardboard(showTheme: false).then =>
           @scrollForwards().then =>
-            @clickExpand().then =>
+            @clickTheme().then =>
               _.each @getThemeElements(), (element) =>
                 expect(element.isVisible()).toBe true
                 expect(element.query('.field_container').length).toBe 1

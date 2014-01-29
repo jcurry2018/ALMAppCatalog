@@ -33,7 +33,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     clickCollapse: ->
       collapseStub = @stub()
       @cardboard.on 'headersizechanged', collapseStub
-      @click(css: '.themeButtonCollapse').then =>
+      @click(css: '.theme-button-collapse').then =>
         @once
           condition: ->
             collapseStub.called
@@ -41,7 +41,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     clickExpand: ->
       expandStub = @stub()
       @cardboard.on 'headersizechanged', expandStub
-      @click(css: '.themeButtonExpand').then =>
+      @click(css: '.theme-button-expand').then =>
         @once
           condition: ->
             expandStub.called

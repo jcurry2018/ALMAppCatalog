@@ -14,8 +14,11 @@
             'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
             'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
             'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper',
-            'Rally.apps.roadmapplanningboard.util.PlanGenerator'
+            'Rally.apps.roadmapplanningboard.util.PlanGenerator',
+            'Rally.ui.Button'
         ],
+
+        cls: 'roadmap-board cardboard',
 
         config: {
             roadmap: null,
@@ -31,6 +34,12 @@
             dropNotAllowed: "planningBoard",
 
             /**
+             * @cfg {Boolean}
+             * Toggle whether the theme is expanded or collapsed
+             */
+            showTheme: true,
+
+            /**
              * @cfg {Object} Object containing Names and TypePaths of the lowest level portfolio item (eg: 'Feature') and optionally its parent (eg: 'Initiative')
              */
             typeNames: {},
@@ -38,16 +47,12 @@
             /**
              * @cfg {Number} The duration of the theme slide animation in milliseconds
              */
-            slideDuration: 500
+            slideDuration: 250
         },
 
         clientMetrics: [
             {
-                method: '_clickCollapseButton',
-                descriptionProperty: '_getClickAction'
-            },
-            {
-                method: '_clickExpandButton',
+                method: '_toggleThemes',
                 descriptionProperty: '_getClickAction'
             }
         ],
@@ -64,14 +69,6 @@
 
             this.callParent(arguments);
         },
-
-        /**
-         * @cfg {Boolean}
-         * Toggle whether the theme is expanded or collapsed
-         */
-        showTheme: true,
-
-        cls: 'roadmap-board cardboard',
 
         shouldRetrieveModels: function () {
             return !this.columns || this.columns.length === 0;
@@ -216,45 +213,45 @@
          * Draws the theme toggle buttons to show/hide the themes
          */
         drawThemeToggle: function () {
-            this._destroyThemeButtons();
+            this._destroyThemeButton();
 
-            this.themeCollapseButton = Ext.create('Ext.Component', {
-                cls: ['themeButton', 'themeButtonCollapse'],
-                autoEl: {
-                    tag: 'a',
-                    href: '#',
-                    title: 'Hide themes'
-                },
+            this.themeToggleButton = Ext.create('Rally.ui.Button', {
+                cls: 'theme-button',
                 listeners: {
-                    click: {
-                        element: 'el',
-                        fn: this._clickCollapseButton,
-                        scope: this
-                    }
+                    click: this._toggleThemes,
+                    scope: this
                 }
             });
-            var themeContainer = _.last(this.getEl().query('.theme_container'));
-            if (themeContainer) {
-                this.themeCollapseButton.render(themeContainer, 0);
+
+            _.last(this.getColumns()).getColumnHeader().insert(2, this.themeToggleButton);
+
+            this._updateThemeButton();
+        },
+
+        _toggleThemes: function () {
+            this.showTheme = !this.showTheme;
+            this.themeToggleButton.hide();
+            this._updateThemeButton();
+            this._updateThemeContainers().then({
+                success: function () {
+                    this.fireEvent('headersizechanged');
+                },
+                scope: this
+            });
+        },
+
+        _updateThemeButton: function () {
+            this.themeToggleButton.removeCls(['theme-button-collapse', 'theme-button-expand']);
+
+            if(this.showTheme) {
+                this.themeToggleButton.setIconCls('icon-chevron-up');
+                this.themeToggleButton.addCls('theme-button-collapse');
+            } else {
+                this.themeToggleButton.setIconCls('icon-chevron-down');
+                this.themeToggleButton.addCls('theme-button-expand');
             }
 
-            this.themeExpandButton = Ext.create('Ext.Component', {
-                cls: ['themeButton', 'themeButtonExpand'],
-                hidden: this.showTheme,
-                autoEl: {
-                    tag: 'a',
-                    href: '#',
-                    title: 'Show themes'
-                },
-                listeners: {
-                    click: {
-                        element: 'el',
-                        fn: this._clickExpandButton,
-                        scope: this
-                    }
-                },
-                renderTo: _.last(this.getEl().query('.column-header'))
-            });
+            this.themeToggleButton.show();
         },
 
         _addNewColumn: function () {
@@ -289,56 +286,47 @@
             return column;
         },
 
-        _clickCollapseButton: function () {
-            this.showTheme = false;
-            _.map(this._getThemeContainerElements(), this._collapseThemeContainers, this);
+        _updateThemeContainers: function () {
+            var themeContainers = _.map(this.getEl().query('.theme_container'), Ext.get);
+            var promises = _.map(themeContainers, this._toggleThemeContainer, this);
+
+            return Deft.Promise.all(promises);
         },
 
-        _clickExpandButton: function () {
-            this.showTheme = true;
-            this.themeExpandButton.hide();
-            _.map(this._getThemeContainerElements(), this._expandThemeContainers, this);
-        },
+        _toggleThemeContainer: function (el) {
+            var deferred = new Deft.Deferred();
 
-        _getThemeContainerElements: function () {
-            return _.map(this.getEl().query('.theme_container'), Ext.get);
-        },
+            el.addCls('theme-transitioning');
 
-        _collapseThemeContainers: function (el) {
-            el.slideOut('t', {
-                duration: this.getSlideDuration(),
+            var slide = this.showTheme ? el.slideIn : el.slideOut;
+
+            slide.call(el, 't', {
+                duration: this.slideDuration,
                 listeners: {
                     afteranimate: function () {
-                        el.setStyle('display', 'none'); // OMG Ext. Y U SUCK?
-                        this.themeExpandButton.show(true);
-                        this.fireEvent('headersizechanged');
+                        el.removeCls('theme-transitioning');
+
+                        if(!this.showTheme) {
+                            el.setStyle('display', 'none'); // OMG Ext. Y U SUCK?
+                        }
+
+                        deferred.resolve();
                     },
                     scope: this
                 }
             });
-        },
 
-        _expandThemeContainers: function (el) {
-            el.slideIn('t', {
-                duration: this.getSlideDuration(),
-                listeners: {
-                    afteranimate: function () {
-                        this.fireEvent('headersizechanged');
-                    },
-                    scope: this
-                }
-            });
+            return deferred.promise;
         },
 
         destroy: function () {
-            this._destroyThemeButtons();
+            this._destroyThemeButton();
             this.callParent(arguments);
         },
 
-        _destroyThemeButtons: function () {
-            if (this.themeCollapseButton && this.themeExpandButton) {
-                this.themeCollapseButton.destroy();
-                this.themeExpandButton.destroy();
+        _destroyThemeButton: function () {
+            if(this.themeToggleButton) {
+                this.themeToggleButton.destroy();
             }
         },
 
@@ -375,9 +363,7 @@
         },
 
         _getClickAction: function () {
-            var themesVisible = this.showTheme;
-            var message = "Themes toggled from [" + !themesVisible + "] to [" + themesVisible + "]";
-            return message;
+            return 'Themes toggled from [' + !this.showTheme + '] to [' + this.showTheme + ']';
         }
     });
 

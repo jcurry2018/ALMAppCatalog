@@ -316,55 +316,46 @@
     padding: 8px;
 }
 
+.roadmap-board .theme-transitioning * {
+    visibility: hidden !important;
+}
+
 .roadmap-board .theme_container .fieldContainerView {
     white-space: pre-wrap;
     max-height: 205px;
     overflow: auto;
 }
 
-.roadmap-board a.themeButton {
-    background-repeat: no-repeat;
-    display: inline-block;
-    float: right;
-    z-index: 100;
-}
-
-.roadmap-board a.themeButtonCollapse {
-    height: 25px;
-    padding-right: 25px;
-    margin-right: -9px;
-    background-position: center;
-    background-image: url('smChev_up.png');
-}
-
-@media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmap-board a.themeButtonCollapse {
-        background-image: url('smChev_up@2x.png');
-        background-size: 12px 8px;
-    }
-}
-
-.roadmap-board a.themeButtonCollapse:hover {
-    background-image: url('smChev_up_over.png');
-}
-
-@media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmap-board a.themeButtonCollapse:hover {
-        background-image: url('smChev_up_over@2x.png');
-        background-size: 12px 8px;
-    }
-}
-
-.roadmap-board a.themeButtonExpand {
+.roadmap-board .theme-button {
+    color: #C0C0C0;
+    font-size: 20px;
     position: absolute;
-    bottom: -12px;
-    right: 0px;
+    right: 0;
+    z-index: 100;
+    padding: 3px 7px 0px 3px;
+}
+
+.roadmap-board .theme-button-collapse {
+    border: none;
+    background-color: transparent;
+}
+
+.roadmap-board .theme-button-collapse:hover {
+    color: #444;
+}
+
+.roadmap-board .theme-button-expand {
     background-color: #424242;
-    height: 12px;
-    width: 30px;
-    background-position: 9px 2px;
     border-radius: 0 0 0 5px;
-    background-image: url('smChev_down.png');
+}
+
+.roadmap-board .theme-button .x4-btn-icon-el{
+    position: absolute;
+    top: -4px;
+}
+
+.roadmap-board .theme-button-expand:hover {
+    color: #FFFFFF;
 }
 
 .roadmap-board .scroll-button.right {
@@ -377,24 +368,6 @@
 
 .roadmap-board .scroll-button:hover span {
     color: #666;
-}
-
-@media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmap-board a.themeButtonExpand {
-        background-image: url('smChev_down@2x.png');
-        background-size: 12px 8px;
-    }
-}
-
-.roadmap-board a.themeButtonExpand:hover {
-    background-image: url('smChev_down_over.png');
-}
-
-@media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmap-board a.themeButtonExpand:hover {
-        background-image: url('smChev_down_over@2x.png');
-        background-size: 12px 8px;
-    }
 }
 
 .roadmap-board .no-drag-select {
@@ -860,17 +833,6 @@
 .roadmap-planning-popover #capacity-validation-error li {
     font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;
-}
-
-.roadmap-board a.themeButtonExpand:hover {
-    background-image: url('smChev_down_over.png');
-}
-
-@media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmap-board a.themeButtonExpand:hover {
-        background-image: url('smChev_down_over@2x.png');
-        background-size: 12px 8px;
-    }
 }
 
 .roadmap-service-unavailable-error div {
