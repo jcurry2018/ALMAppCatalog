@@ -18,12 +18,17 @@
     font-weight: normal;
 }
 
+.roadmap-board .progress-bar-display {
+    margin: 0 45px;
+}
+
 .roadmap-board .progress-bar-percent-done {
-    vertical-align: middle;
-    display: inline-block;
-    position: absolute;
-    top: 9px;
-    right: 5%;
+    width: 40px;
+    padding: 0 0 0 1px;
+    margin: 0;
+    height: 14px;
+    float: right;
+    vertical-align: top;
 }
 
 .roadmap-board > .rui-gridboard {
@@ -803,6 +808,7 @@
     font-size: 12px;
     font-weight: 300;
     margin: 2px;
+    color: #FFFFFF;
 }
 
 .roadmap-planning-popover .x4-form-field {

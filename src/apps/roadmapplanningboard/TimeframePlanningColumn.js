@@ -242,8 +242,8 @@
                     tpl: [
                         '<div class="progress-bar-background">',
                             '<tpl if="highCapacity">',
-                                '<div title="{progressBarTitle}">{progressBarHtml}</div>',
                                 '<div class="progress-bar-percent-done">{formattedPercent}</div>',
+                                '<div class="progress-bar-display">{progressBarHtml}</div>',
                             '<tpl else>',
                                 '<div>',
                                     '<span>{pointTotal}</span> <span class="no-capacity-label">{itemType} {pointText}</span>',
