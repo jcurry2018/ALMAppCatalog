@@ -262,29 +262,6 @@
     color: rgb(0, 0, 0);
 }
 
-.roadmap-board .column-container .column-header .editableField {
-    padding: 0px;
-}
-
-.roadmap-board .column-container .column-header .editableField:hover {
-    border: 1px solid #3197c6 !important;
-}
-
-.roadmap-board .column-container .column-header .editableField textarea {
-    font-size: 9pt;
-    color: #262626;
-    padding: 0;
-    border-width: 0;
-}
-
-.yes-harmonized .roadmap-board .theme_container {
-    font-family: NotoSans, Helvetica, Arial;
-}
-
-.roadmap-board .editableField .setTheme {
-    color: #262626;
-}
-
 .roadmap-board .column-container .column-header .column-header-title {
     padding: 15px 8px 8px 8px;
     min-height: 82px;
@@ -313,6 +290,14 @@
     width: 90%;
 }
 
+.roadmap-board .field_container .x4-form-item {
+    margin-bottom: 0;
+}
+
+.yes-harmonized .roadmap-board .theme_container {
+    font-family: NotoSans, Helvetica, Arial;
+}
+
 .roadmap-board .theme_container {
     text-align: left;
     font-weight: 300;
@@ -321,14 +306,44 @@
     padding: 8px;
 }
 
-.roadmap-board .theme-transitioning * {
-    visibility: hidden !important;
+.roadmap-board .theme_container .field_container.editMode {
+    border-color: #C6C6C6;
 }
 
 .roadmap-board .theme_container .fieldContainerView {
     white-space: pre-wrap;
     max-height: 205px;
     overflow: auto;
+}
+
+.roadmap-board .column-container .column-header .editableField {
+    padding: 0px;
+}
+
+.roadmap-board .column-container .column-header .editableField:hover {
+    border: 1px solid #3197c6 !important;
+}
+
+.roadmap-board .column-container .column-header .editableField textarea {
+    font-size: 12px;
+    color: #262626;
+    padding: 0;
+    border-width: 0;
+    line-height: normal;
+    margin: 0px;
+    display: block;
+}
+
+.roadmap-board .editableField .setTheme {
+    color: #262626;
+}
+
+/* The .theme-transitioning class is added to each theme container while they are expanding or collapsing
+   visibility of children is set to hidden because there appears to be a bug in Ext 4.2
+   with slideOut and slideIn displaying the contents incorrectly
+ */
+.roadmap-board .theme-transitioning * {
+    visibility: hidden !important;
 }
 
 .roadmap-board .theme-button {

@@ -108,7 +108,8 @@
                     emptyText: themeHeader._getEmptyText(),
                     width: '100%',
                     grow: true,
-                    growMin: 20
+                    growMin: 17,
+                    growAppend: '\n'
                 });
                 this.editor.on('autosize', function () {
 
@@ -129,7 +130,7 @@
                     }
                     this.editor.on('select', this._fireFieldUpdated, this);
                     this.editor.on('blur', this._fireFieldUpdated, this);
-                    return this.editor.focus();
+                    this.editor.focus();
                 }
             };
         }
