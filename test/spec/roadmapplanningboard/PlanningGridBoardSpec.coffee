@@ -8,14 +8,6 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
   helpers
-    createPermissionsStub: (config) ->
-      @stub Rally.environment.getContext(), 'getPermissions', ->
-        isSubscriptionAdmin: ->
-          !!config.subAdmin
-        isWorkspaceAdmin: ->
-          !!config.workspaceAdmin
-        isProjectEditor: ->
-          !!config.projectEditor
 
     createGridboard: (includeTypeNames = true) ->
       config =
@@ -74,21 +66,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
   it 'should have a add new button', ->
     @createGridboard().then =>
       expect(!!@gridboard.down('#new')).toBe true
-
-  it 'should set isAdmin on gridboard to true if user is a Sub Admin', ->
-    @createPermissionsStub(subAdmin: true)
-    @createGridboard().then =>
-      expect(@gridboard.getGridOrBoard().isAdmin).toBe true
-
-  it 'should set isAdmin on gridboard to true if user is a WS Admin', ->
-    @createPermissionsStub(workspaceAdmin: true)
-    @createGridboard().then =>
-      expect(@gridboard.getGridOrBoard().isAdmin).toBe true
-
-  it 'should set isAdmin on gridboard to false if user is not a Sub or WS Admin', ->
-    @createPermissionsStub(subAdmin: false, workspaceAdmin: false)
-    @createGridboard().then =>
-      expect(@gridboard.getGridOrBoard().isAdmin).toBe false
 
   describe 'integration', ->
     beforeEach ->

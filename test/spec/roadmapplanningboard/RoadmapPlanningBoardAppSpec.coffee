@@ -1,15 +1,28 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp',
-  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
+  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
+  'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp'
+  'Rally.apps.roadmapplanningboard.SplashContainer'
   'Rally.test.mock.ModelObjectMother'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
   helpers
+    createPermissionsStub: (config) ->
+      @stub Rally.environment.getContext(), 'getPermissions', ->
+        isSubscriptionAdmin: ->
+          !!config.subAdmin
+        isWorkspaceAdmin: ->
+          !!config.workspaceAdmin
+        isProjectEditor: ->
+          !!config.projectEditor
+
     createApp: (expectError = false, config = {}) ->
       config = _.extend
+        alreadyGotIt: true
+        expectSplash: false
+        isAdmin: true
         context: Ext.create 'Rally.app.Context',
           initialValues:
             Ext.merge
@@ -24,7 +37,12 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
 
         settings: {}
         renderTo: 'testDiv'
-      ,config
+      , config
+
+      @stub Rally.apps.roadmapplanningboard.SplashContainer, 'loadPreference', =>
+        pref = {}
+        pref[Rally.apps.roadmapplanningboard.SplashContainer.PREFERENCE_NAME] = config.alreadyGotIt
+        pref
 
       @app = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', config
 
@@ -33,7 +51,13 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
           condition: => @errorNotifyStub.calledOnce
       else
         @waitForComponentReady(@app).then =>
-          @planningBoard = @app.down 'roadmapplanningboard'
+          if !config.expectSplash
+            @waitForComponentReady('#gridboard').then =>
+              @planningBoard = @app.down 'roadmapplanningboard'
+          else
+            deferred = Ext.create 'Deft.Deferred'
+            Ext.defer -> deferred.resolve()
+            deferred.promise
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -91,25 +115,47 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
       expect(@errorNotifyStub.lastCall.args[0]).toEqual
         message: 'Failed to load app: Planning service data load issue'
 
-  it 'should notify of error if there is no roadmap available', ->
+  it 'should show the splash container if there is no roadmap', ->
     @stub @roadmapStore, 'load', ->
-      deferred = new Deft.promise.Deferred()
-      deferred.resolve { records: {} }
-      deferred.promise
+      Deft.Promise.when { records: {} }
 
-    @createApp(true).then =>
-      expect(@errorNotifyStub.lastCall.args[0]).toEqual
-        message: 'No roadmap available'
+    @createApp(false, {expectSplash: true}).then =>
+      expect(@app).not.toContainComponent '#got-it'
+      expect(@app).toContainComponent '#roadmap-splash-container'
 
-  it 'should notify of error if there is no timeline available', ->
+  it 'should show the splash container if there is no timeline', ->
     @stub @timelineStore, 'load', ->
-      deferred = new Deft.promise.Deferred()
-      deferred.resolve { records: {} }
-      deferred.promise
+      Deft.Promise.when { records: {} }
 
-    @createApp(true).then =>
-      expect(@errorNotifyStub.lastCall.args[0]).toEqual
-        message: 'No timeline available'
+    @createApp(false, {expectSplash: true}).then =>
+      expect(@app).not.toContainComponent '#got-it'
+      expect(@app).toContainComponent '#roadmap-splash-container'
+
+  it 'should show the splash container if the preference is not set', ->
+    @createApp(false, {expectSplash: true, alreadyGotIt: false}).then =>
+      expect(@app).toContainComponent '#got-it'
+      expect(@app).toContainComponent '#roadmap-splash-container'
+
+  it 'should show the gridboard after clicking the got it button', ->
+    @createApp(false, {expectSplash: true, alreadyGotIt: false}).then =>
+      @click(css: '.primary.button').then =>
+        @waitForComponentReady(@app.down('#gridboard')).then =>
+          expect(@app).toContainComponent '#gridboard'
+
+  it 'should set isAdmin on gridboard to true if user is a Sub Admin', ->
+    @createPermissionsStub(subAdmin: true)
+    @createApp().then =>
+      expect(@app.down('#gridboard').isAdmin).toBe true
+
+  it 'should set isAdmin on gridboard to true if user is a WS Admin', ->
+    @createPermissionsStub(workspaceAdmin: true)
+    @createApp().then =>
+      expect(@app.down('#gridboard').isAdmin).toBe true
+
+  it 'should set isAdmin on gridboard to false if user is not a Sub or WS Admin', ->
+    @createPermissionsStub(subAdmin: false, workspaceAdmin: false)
+    @createApp().then =>
+      expect(@app.down('#gridboard').isAdmin).toBe false
 
   describe 'Service error handling', ->
     it 'should display a friendly notification if any service (planning, timeline, WSAPI) is unavailable', ->

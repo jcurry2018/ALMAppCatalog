@@ -35,6 +35,11 @@
              */
             typeNames: {},
 
+            /**
+             * @cfg {Boolean} If the user is an admin
+             */
+            isAdmin: false,
+
             cardboardPlugins: []
         },
 
@@ -67,7 +72,7 @@
                 context: this.context,
                 roadmap: this.roadmap,
                 timeline: this.timeline,
-                isAdmin: this._isUserAdmin(),
+                isAdmin: this.isAdmin,
                 types: this.modelNames,
                 typeNames: this.typeNames,
                 attribute: 'Name',
@@ -124,16 +129,6 @@
             if (rankRecord) {
                 params.rankAbove = rankRecord.getUri();
             }
-        },
-
-        _isUserAdmin: function () {
-            var permissions = Rally.environment.getContext().getPermissions();
-            var isAdmin = permissions.isSubscriptionAdmin();
-            if (!isAdmin) {
-                var workspace = this.getContext().getWorkspace();
-                isAdmin = permissions.isWorkspaceAdmin(workspace._ref);
-            }
-            return isAdmin;
         }
     });
 
