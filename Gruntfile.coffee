@@ -220,7 +220,7 @@ module.exports = (grunt) ->
         yuicompress: true
       build:
         files:
-          'build/resources/css/catalog-all.css': ['src/apps/**/*.css']
+          'build/resources/css/catalog-all.css': ['src/apps/**/*.{css,less}']
 
     copy:
       images:
@@ -260,7 +260,7 @@ module.exports = (grunt) ->
         options:
           spawn: false
       styles:
-        files: 'src/apps/**/*.css'
+        files: 'src/apps/**/*.{css,less}'
         tasks: ['css']
 
     nexus:
