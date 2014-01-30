@@ -356,7 +356,7 @@
                 },
                 isMatchingRecord: function (featureRecord) {
                     return plan && _.find(plan.get('features'), function (feature) {
-                        return feature.id === featureRecord.getId().toString();
+                        return ((feature.id === featureRecord.get('_refObjectUUID')) || (feature.id === featureRecord.getId()));
                     });
                 }
             };

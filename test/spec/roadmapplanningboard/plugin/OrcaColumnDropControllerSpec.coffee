@@ -66,7 +66,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
       expect(features.length).toBe cardRecords.length
       for i in [0...features.length]
-        expect(features[i].id).toBe cardRecords[i].getId().toString()
+        expect(features[i].id).toBe cardRecords[i].get('_refObjectUUID')
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()

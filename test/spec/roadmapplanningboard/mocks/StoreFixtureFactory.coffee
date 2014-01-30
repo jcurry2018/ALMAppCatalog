@@ -58,11 +58,11 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         timeframe:
           id: "2"
         features: [
-          id: "1000"
+          id: "F1000"
         ,
-          id: "1001"
+          id: "F1001"
         ,
-          id: "1002"
+          id: "F1002"
         ]
       ,
         id: "513617f7ef8623df1391fefd"
@@ -76,9 +76,9 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         roadmap:
           id: '413617ecef8623df1391fabc'
         features: [
-          id: "1005"
+          id: "F1005"
         ,
-          id: "1006"
+          id: "F1006"
         ]
       ,
         id: "51361807ef8623df1391fefe"
@@ -107,6 +107,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
 
   featureStoreData: [
     ObjectID: "1000"
+    _refObjectUUID: "F1000"
     _ref: '/portfolioitem/feature/1000'
     Name: "Android Support"
     PreliminaryEstimate: {Value: 4,_refObjectName: "L"}
@@ -116,6 +117,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     LeafStoryCount: 42
   ,
     ObjectID: "1001"
+    _refObjectUUID: "F1001"
     _ref: '/portfolioitem/feature/1001'
     Name: "iOS Support"
     PreliminaryEstimate: {Value: 2,_refObjectName: "L"}
@@ -125,6 +127,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     LeafStoryCount: 42
   ,
     ObjectID: "1002"
+    _refObjectUUID: "F1002"
     _ref: '/portfolioitem/feature/1002'
     Name: "HTML 5 Webapp"
     PreliminaryEstimate: {Value: 3,_refObjectName: "L"}
@@ -134,6 +137,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     LeafStoryCount: 42
   ,
     ObjectID: "1003"
+    _refObjectUUID: "F1003"
     _ref: '/portfolioitem/feature/1003'
     Name: "Blackberry Native App"
     PreliminaryEstimate: {Value: 1,_refObjectName: "L"}
@@ -143,6 +147,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     LeafStoryCount: 42
   ,
     ObjectID: "1004"
+    _refObjectUUID: "F1004"
     _ref: '/portfolioitem/feature/1004'
     Name: "Windows Phone Support"
     PreliminaryEstimate: {Value: 3,_refObjectName: "L"}
@@ -152,6 +157,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     LeafStoryCount: 42
   ,
     ObjectID: "1005"
+    _refObjectUUID: "F1005"
     _ref: '/portfolioitem/feature/1005'
     Name: "Ubuntu Phone Application"
     PreliminaryEstimate: {Value: 4,_refObjectName: "L"}
@@ -161,6 +167,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     LeafStoryCount: 42
   ,
     ObjectID: "1006"
+    _refObjectUUID: "F1006"
     _ref: '/portfolioitem/feature/1006'
     Name: "Tester's Large Test Card 1"
     PreliminaryEstimate: {Value: 13,_refObjectName: "L"}
@@ -170,6 +177,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     LeafStoryCount: 42
   ,
     ObjectID: "1007"
+    _refObjectUUID: "F1007"
     _ref: '/portfolioitem/feature/1007'
     Name: "Tester's Large Test Card 2"
     PreliminaryEstimate: {Value: 21,_refObjectName: "L"}
@@ -179,6 +187,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     LeafStoryCount: 42
   ,
     ObjectID: "1008"
+    _refObjectUUID: "F1008"
     _ref: '/portfolioitem/feature/1008'
     Name: "Tester's Large Test Card 3"
     PreliminaryEstimate: {Value: 13,_refObjectName: "L"}
@@ -188,6 +197,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     LeafStoryCount: 42
   ,
     ObjectID: "1009"
+    _refObjectUUID: "F1009"
     _ref: '/portfolioitem/feature/1009'
     Name: "Tester's Large Test Card 4"
     PreliminaryEstimate: {Value: 8,_refObjectName: "L"}
@@ -211,12 +221,14 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
 
   secondFeatureStoreData: [
     ObjectID: "1010"
+    _refObjectUUID: "F1010"
     _ref: '/portfolioitem/feature/1010'
     Name: "Battlestar Gallactica"
     PreliminaryEstimate: {Value: 6,_refObjectName: "L"}
     subscriptionId: "1"
   ,
     ObjectID: "1011"
+    _refObjectUUID: "F1011"
     _ref: '/portfolioitem/feature/1011'
     Name: "Firefly"
     PreliminaryEstimate: {Value: 3,_refObjectName: "L"}

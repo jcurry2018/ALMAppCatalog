@@ -115,7 +115,7 @@
         },
 
         _removeFeature: function (planRecord, featureRecord) {
-            var featureIdToRemove =  featureRecord.getId().toString();
+            var featureIdToRemove =  featureRecord.get('_refObjectUUID');
 
             planRecord.set('features', _.filter(planRecord.get('features'), function (feature) {
                 return feature.id !== featureIdToRemove;
@@ -125,9 +125,11 @@
         _addFeature: function (planRecord, featureRecord, index) {
             var features = _.clone(planRecord.get('features'));
 
+            var featureId = featureRecord.get('_refObjectUUID');
+
             features.splice(index, 0, {
-                id: featureRecord.getId().toString(),
-                ref: featureRecord.getUri()
+                id: featureId,
+                ref: '/' + featureRecord.getRef().reference.type  + '/' + featureId
             });
 
             planRecord.set('features', features);
