@@ -97,7 +97,7 @@
          */
         _findFeatureIndex: function (record) {
             return _.findIndex(this.planRecord.get('features'), function (feature) {
-                return feature.id === record.getId().toString();
+                return feature.id === record.get('_refObjectUUID').toString();
             });
         },
 

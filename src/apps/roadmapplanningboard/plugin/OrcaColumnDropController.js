@@ -37,6 +37,10 @@
             }
         },
 
+        getRefForRelativeRecord: function (relativeRecord) {
+            return this._getFeatureRef(relativeRecord);
+        },
+
         _moveIntoBacklog: function (options) {
             var planRecord = options.sourceColumn.planRecord;
 
