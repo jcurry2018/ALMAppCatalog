@@ -321,7 +321,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
         ObjectID: 3
 
       @ajax.whenCreating('userstory').respondWith([storyData])
-      @ajax.whenReading('hierarchicalrequirement', storyData.ObjectID).respondWith([storyData])
+      @ajax.whenQuerying('artifact').respondWith [storyData]
 
       addNewHelper = new Helpers.AddNewHelper '.planning-board'
       addNewHelper.inlineAdd('Story 3').then =>
@@ -361,7 +361,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
         Rank: storyRank + 1
 
       @ajax.whenQuerying('artifact').respondWith([userStory1, userStory2])
-      @ajax.whenReading('hierarchicalrequirement', userStory2.ObjectID).respondWith(userStory2)
+      @ajax.whenQuerying('artifact').respondWith [userStory2]
       Rally.environment.getMessageBus().publish Rally.Message.objectCreate, [@createUserStoryRecord userStory2]
 
       cards = @getVisibleCardNames()
