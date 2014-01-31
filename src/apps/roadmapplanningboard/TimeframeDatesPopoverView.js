@@ -52,17 +52,8 @@
                             xtype: 'container',
                             colspan: 2,
                             cellCls: 'date-buttons',
+                            // Reverse the order in which we add the buttons to handle floating right in a table cell
                             items: [
-                                {
-                                    xtype: 'rallybutton',
-                                    itemId: 'datesCancel',
-                                    text: 'Cancel',
-                                    cls: 'secondary dark button small right',
-                                    listeners: {
-                                        click: this._onCancel,
-                                        scope: this
-                                    }
-                                },
                                 {
                                     xtype: 'rallybutton',
                                     itemId: 'datesDone',
@@ -70,6 +61,16 @@
                                     cls: 'primary button small right',
                                     listeners: {
                                         click: this._onDone,
+                                        scope: this
+                                    }
+                                },
+                                {
+                                    xtype: 'rallybutton',
+                                    itemId: 'datesCancel',
+                                    text: 'Cancel',
+                                    cls: 'secondary dark button small right',
+                                    listeners: {
+                                        click: this._onCancel,
                                         scope: this
                                     }
                                 }

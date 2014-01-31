@@ -25,7 +25,7 @@
 .roadmap-board .progress-bar-percent-done {
     width: 40px;
     padding: 0 0 0 1px;
-    margin: 0;
+    margin: 0px 0 0 0;
     height: 14px;
     float: right;
     vertical-align: top;
@@ -751,6 +751,15 @@
     vertical-align: middle;
 }
 
+.roadmap-planning-popover td.date-buttons .x4-container > span {
+    width: auto !important;
+    display: inline !important;
+}
+
+.roadmap-planning-popover td.date-buttons .x4-container > span > div {
+    display: block !important;
+}
+
 .roadmap-planning-popover td.date-buttons {
     vertical-align: top;
     text-align: right;
@@ -758,7 +767,7 @@
 
 .roadmap-planning-popover td.date-buttons .x4-btn.primary,
 .roadmap-planning-popover td.date-buttons .x4-btn.secondary {
-    float: none;
+    float: right;
     margin: 0 0 0 4px;
 }
 

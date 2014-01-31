@@ -6,7 +6,7 @@
         alias: 'widget.PlanCapacityProgressBar',
 
         config: {
-            height: '14px',
+            height: '15px',
             isClickable: true,
 
             percentFullColors: {
