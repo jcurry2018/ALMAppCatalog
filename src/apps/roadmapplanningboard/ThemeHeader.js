@@ -6,7 +6,7 @@
         alias: 'widget.roadmapthemeheader',
         cls: 'theme_container',
         requires: [
-            'Rally.ui.detail.FieldContainer'
+            'Rally.ui.field.ClickToEditFieldContainer'
         ],
         config: {
             record: undefined,
@@ -30,7 +30,7 @@
             var record = this.record;
             var field = this.record.getField('theme');
 
-            this.themeContainer = Ext.create('Rally.ui.detail.FieldContainer', {
+            this.themeContainer = Ext.create('Rally.ui.field.ClickToEditFieldContainer', {
                 record: record,
                 field: field,
                 cls: 'field_container',

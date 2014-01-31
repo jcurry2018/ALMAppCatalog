@@ -116,14 +116,15 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
   it 'should save the theme when the theme is changed', ->
     @createCardboard().then =>
 
-      themeHeader = @cardboard.getColumns()[1].getColumnHeader().down('roadmapthemeheader').down('rallydetailfieldcontainer')
+      themeHeader = @cardboard.getColumns()[1].getColumnHeader().down('roadmapthemeheader')
       record = themeHeader.record
       @saveStub = @stub record, 'save'
 
-      themeHeader.goToEditMode()
-      themeHeader.editor.setValue 'My Theme'
-      themeHeader.editor.blur()
-      themeHeader.goToViewMode()
+      themeHeader.themeContainer.goToEditMode()
+      textField = themeHeader.themeContainer.down('textareafield')
+      textField.setValue 'My Theme'
+      textField.blur()
+      themeHeader.themeContainer.goToViewMode()
 
       expect(@saveStub).toHaveBeenCalledOnce()
       expect(record.get('theme')).toBe 'My Theme'
