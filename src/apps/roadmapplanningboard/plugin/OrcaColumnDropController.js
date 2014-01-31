@@ -91,13 +91,14 @@
             this._removeFeature(srcPlanRecord, options.record);
             this._addFeature(destPlanRecord, options.record, options.index);
 
+
             Ext.Ajax.request({
                 method: 'POST',
                 withCredentials: true,
                 url: this._constructUrl(srcPlanRecord.get('roadmap'), srcPlanRecord.getId(), destPlanRecord.getId()),
                 jsonData: {
-                    id: options.record.getId() + '',
-                    ref: options.record.getUri()
+                    id: options.record.get('_refObjectUUID'),
+                    ref: this._getFeatureRef(options.record)
                 },
                 success: function () {
                     srcPlanRecord.commit();
@@ -122,6 +123,11 @@
             }));
         },
 
+        _getFeatureRef: function(featureRecord) {
+            var featureId = featureRecord.get('_refObjectUUID');
+            return '/' + featureRecord.getRef().reference.type  + '/' + featureId;
+        },
+
         _addFeature: function (planRecord, featureRecord, index) {
             var features = _.clone(planRecord.get('features'));
 
@@ -129,7 +135,7 @@
 
             features.splice(index, 0, {
                 id: featureId,
-                ref: '/' + featureRecord.getRef().reference.type  + '/' + featureId
+                ref: this._getFeatureRef(featureRecord)
             });
 
             planRecord.set('features', features);
