@@ -196,6 +196,11 @@
             return storeFilter;
         },
 
+        refreshRecord: function(record, callback) {
+            this.store.setFilter(this.getStoreFilter());
+            return this.callParent(arguments);
+        },
+
         _initialFilter: function (component, filters) {
             this.filterButton.on('filter', this._onFilter, this);
             this._applyFilters(filters);

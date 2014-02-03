@@ -210,3 +210,16 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
       @createColumn().then =>
         expect(@column.getStoreFilter().toString()).toBe '((ActualEndDate = "null") AND (Name = "Some name"))'
+
+  describe '#refreshRecords', ->
+    it 'should get latest store filters', ->
+      @createColumn().then =>
+        getStoreFilterSpy = @spy @column, 'getStoreFilter'
+        @stub @column.store, 'reloadRecord', ->
+          deferred = new Deft.Deferred()
+          deferred.resolve()
+          deferred.promise
+
+        @column.refreshRecord(@column.getRecords()[0], ->).then =>
+          expect(getStoreFilterSpy).toHaveBeenCalledOnce()
+
