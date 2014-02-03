@@ -95,7 +95,7 @@
 
         _createFilterButton: function () {
             return Ext.create('Rally.ui.filter.view.FilterButton', {
-                cls: 'small columnfilter',
+                cls: 'medium columnfilter',
                 stateful: true,
                 stateId: this.context.getScopedStateId('filter.' + this.getColumnIdentifier() + '.' + this.context.getWorkspace()._refObjectUUID),
                 items: this._getFilterItems(),
