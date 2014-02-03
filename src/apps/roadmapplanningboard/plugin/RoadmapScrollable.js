@@ -31,7 +31,6 @@
 
             this.originDrawAddNewColumnButton = cmp.drawAddNewColumnButton;
             cmp.drawAddNewColumnButton = Ext.bind(this.drawAddNewColumnButton, this);
-
             cmp.addNewColumn = Ext.bind(this.addNewColumn, this);
 
             this.callParent(arguments);
