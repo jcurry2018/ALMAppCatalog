@@ -62,7 +62,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
   it 'should define height for planning board based on content window', ->
     Ext.DomHelper.append Ext.getBody(), '<div id="content" style="height: 600px;"><div class="page" style="height: 20px;"></div></div>'
     @createApp().then =>
-      expect(@planningBoard.getHeight()).toBe 580
+      expect(@app.getHeight()).toBe 580
 
   it 'should define height for grid board based on container height', ->
     @createApp(false, {height: 600}).then =>
