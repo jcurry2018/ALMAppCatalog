@@ -94,7 +94,6 @@
         },
 
         _buildGridBoard: function (roadmap, timeline) {
-            var height = this.getHeight() || this._computePanelContentAreaHeight();
             if (roadmap && timeline) {
                 this.add({
                     xtype: 'roadmapplanninggridboard',
@@ -104,7 +103,7 @@
                     typeNames: this.typeNames,
                     modelNames: this.types,
                     cardboardPlugins: this.cardboardPlugins,
-                    height: height
+                    height: this._computePanelContentAreaHeight()
                 });
             } else if (!roadmap) {
                 Rally.ui.notify.Notifier.showError({message: 'No roadmap available'});
@@ -114,6 +113,10 @@
         },
 
         _computePanelContentAreaHeight: function () {
+            if(this.getHeight()) {
+                return this.getHeight();
+            }
+
             var content = Ext.getBody().down('#content');
             if (!content && Rally.BrowserTest) {
                 return Ext.getBody().down('#testDiv').getHeight();
