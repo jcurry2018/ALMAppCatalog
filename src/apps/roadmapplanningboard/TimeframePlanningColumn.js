@@ -321,6 +321,7 @@
             }
 
             this.plannedCapacityRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
+                cls: 'planned-capacity-range-tooltip',
                 target: this.progressBar.getEl(),
                 anchor: 'top',
                 anchorOffset: anchorOffset,

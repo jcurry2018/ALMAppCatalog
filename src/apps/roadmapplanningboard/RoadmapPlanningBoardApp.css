@@ -81,6 +81,9 @@
     position: relative;
     top: 1px;
 }
+.planned-capacity-range-tooltip {
+    white-space: nowrap;
+}
 
 .roadmap-board .progress-bar-container.field-percentDone {
     margin: 0;
