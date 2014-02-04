@@ -52,6 +52,9 @@ module.exports = (grunt) ->
     appsdk_path = path.join process.env.APPSDK_PATH, 'rui'
     served_paths.unshift path.join(appsdk_path, '../..')
 
+  if spec != '*' and grunt.file.expand("test/**/#{spec}+(Spec|Test).+(js|coffee)").length == 0
+    grunt.warn 'The specified spec or jsspec option does not match any test.'
+
   appFiles = 'src/apps/**/*.js'
   specFiles = 'test/spec/**/*Spec.coffee'
 
