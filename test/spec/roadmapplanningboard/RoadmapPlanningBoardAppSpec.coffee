@@ -59,6 +59,18 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
     @createApp().then =>
       expect(@planningBoard.timeline.getId()).toBe @timelineStore.first().getId()
 
+  it 'should define height based on content window', ->
+    Ext.DomHelper.append Ext.getBody(), '<div id="content" style="height: 600px;"><div class="page" style="height: 20px;"></div></div>'
+    @createApp().then =>
+      #test range as jasmine does not like to render html the same with local and test server
+      appHeight = @app._computePanelContentAreaHeight()
+      expect(appHeight).toBe >= 570
+      expect(appHeight).toBe <= 600
+
+  it 'should define height for app', ->
+    @createApp(false, {height: 1000}).then =>
+      expect(@app._computePanelContentAreaHeight()).toBe = 1000
+
   it 'should notify of error if the timeline store fails to load', ->
     @stub @timelineStore, 'load', ->
       deferred = new Deft.promise.Deferred()
