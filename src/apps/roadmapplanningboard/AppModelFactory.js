@@ -150,47 +150,17 @@
                         name: 'name',
                         type: 'string'
                     },
-
-                    // Update these fields to startDate/endDate once we switch over to use Oracle
-                    {
-                        name: 'start',
-                        type: 'date',
-                        dateFormat: 'Y-m-d\\TH:i:s\\Z',
-                        convert: this._normalizeDate
-                    },
-                    {
-                        name: 'end',
-                        type: 'date',
-                        dateFormat: 'Y-m-d\\TH:i:s\\Z',
-                        convert: this._normalizeDate
-                    },
-
-                    // Remove these 2 properties once we switch over to use Oracle and the new startDate/endDate
                     {
                         name: 'startDate',
                         type: 'date',
                         dateFormat: 'Y-m-d\\TH:i:s\\Z',
-                        convert: function (value, record) {
-                            if (!value) {
-                                value = record.get('start');
-                            } else {
-                                value = Rally.apps.roadmapplanningboard.AppModelFactory._normalizeDate(value);
-                            }
-                            return value;
-                        }
+                        convert: this._normalizeDate
                     },
                     {
                         name: 'endDate',
                         type: 'date',
                         dateFormat: 'Y-m-d\\TH:i:s\\Z',
-                        convert: function (value, record) {
-                            if (!value) {
-                                value = record.get('end');
-                            } else {
-                                value = Rally.apps.roadmapplanningboard.AppModelFactory._normalizeDate(value);
-                            }
-                            return value;
-                        }
+                        convert: this._normalizeDate
                     },
                     {
                         name: 'updatable',

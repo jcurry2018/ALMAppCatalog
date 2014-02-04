@@ -440,10 +440,6 @@
             this.timeframeRecord.set('startDate', options.startDate);
             this.timeframeRecord.set('endDate', options.endDate);
 
-            // Remove these 2 lines once we switch over to use Oracle and the new startDate/endDate
-            this.timeframeRecord.set('start', options.startDate);
-            this.timeframeRecord.set('end', options.endDate);
-
             if (this.timeframeRecord.dirty) {
                 this.timeframeRecord.save({
                     requester: this.view

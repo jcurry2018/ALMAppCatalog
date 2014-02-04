@@ -6,9 +6,9 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
   helpers
-    createTimeframe: (start, end) ->
-      start: new Date(start) if start
-      end: new Date(end) if end
+    createTimeframe: (startDate, endDate) ->
+      startDate: new Date(startDate) if startDate
+      endDate: new Date(endDate) if endDate
 
     createTimeline: (config) ->
       Ext.create 'Rally.apps.roadmapplanningboard.util.TimelineViewModel', config
@@ -82,8 +82,8 @@ describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
   it 'should fire the save event when the done button is clicked', ->
     @click(@doneButton.getEl()).then =>
       expect(@saveStub).toHaveBeenCalledWith
-        startDate: @view.timelineViewModel.currentTimeframe.start
-        endDate: @view.timelineViewModel.currentTimeframe.end
+        startDate: @view.timelineViewModel.currentTimeframe.startDate
+        endDate: @view.timelineViewModel.currentTimeframe.endDate
 
   it 'should destroy the view when the cancel button is clicked', ->
     @click(@cancelButton.getEl()).then =>
@@ -121,7 +121,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
           expect(@view.picker.maxDate).toEqual new Date('02/28/2014')
 
       it 'should set min date to the day after the end date of previous timeframe when start date is null', ->
-        @view.timelineViewModel.currentTimeframe.start = null
+        @view.timelineViewModel.currentTimeframe.startDate = null
         @triggerClickPromise().then =>
           expect(@view.picker.minDate).toEqual new Date('02/01/2014')
 
@@ -143,7 +143,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
           expect(@view.picker.maxDate).toEqual new Date('02/28/2014')
 
       it 'should set max date to the day before the start date of next timeframe when end date is null', ->
-        @view.timelineViewModel.currentTimeframe.end = null
+        @view.timelineViewModel.currentTimeframe.endDate = null
         @triggerClickPromise().then =>
           expect(@view.picker.maxDate).toEqual new Date('02/28/2014')
 

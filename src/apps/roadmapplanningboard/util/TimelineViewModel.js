@@ -17,8 +17,8 @@
 
             _createTimeframe: function (timeframeRecord) {
                 return {
-                    start: timeframeRecord.get('startDate'),
-                    end: timeframeRecord.get('endDate')
+                    startDate: timeframeRecord.get('startDate'),
+                    endDate: timeframeRecord.get('endDate')
                 };
             }
         },
@@ -28,22 +28,22 @@
             this.currentTimeframe = config.currentTimeframe;
             this.timeframes = _.sortBy(_.reject(config.timeframes, function (tf) {
                 return _.isEqual(tf, _this.currentTimeframe);
-            }), 'start');
+            }), 'startDate');
         },
 
         getPreviousTimeframe: function () {
-            var start = this.currentTimeframe.start || this.currentTimeframe.end;
+            var startDate = this.currentTimeframe.startDate || this.currentTimeframe.endDate;
             var prevTimeframe = _.findLast(this.timeframes, function (tf) {
-                return !start || tf.end < start;
+                return !startDate || tf.endDate < startDate;
             });
 
             return prevTimeframe || null;
         },
 
         getNextTimeframe: function () {
-            var end = this.currentTimeframe.end || this.currentTimeframe.start;
-            var nextTimeframe = end && _.find(this.timeframes, function (tf) {
-                return tf.start > end;
+            var endDate = this.currentTimeframe.endDate || this.currentTimeframe.startDate;
+            var nextTimeframe = endDate && _.find(this.timeframes, function (tf) {
+                return tf.startDate > endDate;
             });
 
             return nextTimeframe || null;
@@ -53,20 +53,20 @@
             var prevTimeframe = this.getPreviousTimeframe();
             var nextTimeframe = this.getNextTimeframe();
 
-            if ((newTimeframe.start && !Ext.isDate(newTimeframe.start)) ||
-                (newTimeframe.end && !Ext.isDate(newTimeframe.end))) {
+            if ((newTimeframe.startDate && !Ext.isDate(newTimeframe.startDate)) ||
+                (newTimeframe.endDate && !Ext.isDate(newTimeframe.endDate))) {
                 throw 'Start and end date must be valid dates';
             }
 
-            if (newTimeframe.start > newTimeframe.end) {
+            if (newTimeframe.startDate > newTimeframe.endDate) {
                 throw 'Start date is after end date';
             }
 
-            if(prevTimeframe && newTimeframe.start <= prevTimeframe.end) {
+            if(prevTimeframe && newTimeframe.startDate <= prevTimeframe.endDate) {
                 throw 'Start date overlaps an earlier timeframe';
             }
 
-            if(nextTimeframe && newTimeframe.end >= nextTimeframe.start) {
+            if(nextTimeframe && newTimeframe.endDate >= nextTimeframe.startDate) {
                 throw 'End date overlaps a later timeframe';
             }
 

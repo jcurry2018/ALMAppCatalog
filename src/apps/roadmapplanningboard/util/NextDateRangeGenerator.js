@@ -11,10 +11,10 @@
         singleton: true,
 
         quarters: [
-            { start: '01-01', end: '03-31' },
-            { start: '04-01', end: '06-30' },
-            { start: '07-01', end: '09-30' },
-            { start: '10-01', end: '12-31' }
+            { startDate: '01-01', endDate: '03-31' },
+            { startDate: '04-01', endDate: '06-30' },
+            { startDate: '07-01', endDate: '09-30' },
+            { startDate: '10-01', endDate: '12-31' }
         ],
         format: 'Y-m-d',
 
@@ -25,7 +25,7 @@
          */
         getNextStartDate: function (endDate) {
             if (!endDate) {
-                return Ext.Date.parse(this.getQuarter(new Date(Ext.Date.now())).start, this.format);
+                return Ext.Date.parse(this.getQuarter(new Date(Ext.Date.now())).startDate, this.format);
             }
             return Ext.Date.add(endDate, Ext.Date.DAY, 1);
         },
@@ -43,13 +43,13 @@
 
             if (!endDate) {
                 var now = new Date(Ext.Date.now());
-                nextEndDate = Ext.Date.parse(this.getQuarter(now).end, this.format);
+                nextEndDate = Ext.Date.parse(this.getQuarter(now).endDate, this.format);
             } else {
                 var days = this.getDaysBetween(startDate, endDate);
 
                 // Determine if the end date should be a weekish cadence or end on a quarter
                 if (this.isQuarter(startDate, endDate) || !this.isWeeks(days)) {
-                    nextEndDate = Ext.Date.parse(this.getQuarter(nextStartDate).end, this.format);
+                    nextEndDate = Ext.Date.parse(this.getQuarter(nextStartDate).endDate, this.format);
                 } else {
                     nextEndDate = Ext.Date.add(endDate, Ext.Date.DAY, days+1);
                 }
@@ -67,7 +67,7 @@
          */
         isQuarter: function (startDate, endDate) {
             var index = _.findIndex(this.quarters, function (quarter) {
-                return Ext.Date.format(startDate, 'm-d') === quarter.start && Ext.Date.format(endDate, 'm-d') === quarter.end;
+                return Ext.Date.format(startDate, 'm-d') === quarter.startDate && Ext.Date.format(endDate, 'm-d') === quarter.endDate;
             }, this);
 
             return index >= 0;
@@ -87,8 +87,8 @@
 
         /**
          * Get the number of days between 2 dates. The dates must sampled from the same time (ex: midnight)
-         * @param {Date} start The start date
-         * @param {Date} end The end date
+         * @param {Date} startDate The start date
+         * @param {Date} endDate The end date
          * @returns {number} The days between 2 dates
          */
         getDaysBetween: function(startDate, endDate) {
@@ -99,18 +99,18 @@
          * Get the quarter in the {Rally.apps.roadmapplanningboard.TimeframeCreator.quarters} array that the input date
          * falls between
          * @param {Date} date The date to pick a quarter from
-         * @returns {Object} Quarter object with start and end
+         * @returns {Object} Quarter object with startDate and endDate
          */
         getQuarter: function (date) {
             var dateStr = Ext.Date.format(date, 'm-d');
             var year = Ext.Date.format(date, 'Y');
             var quarter = _.find(this.quarters, function (quarter) {
-                return dateStr >= quarter.start && dateStr <= quarter.end;
+                return dateStr >= quarter.startDate && dateStr <= quarter.endDate;
             });
 
             return {
-                start: year + '-' + quarter.start,
-                end: year + '-' + quarter.end
+                startDate: year + '-' + quarter.startDate,
+                endDate: year + '-' + quarter.endDate
             };
         }
     });

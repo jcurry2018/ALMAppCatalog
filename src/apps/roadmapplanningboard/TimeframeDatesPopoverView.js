@@ -76,13 +76,13 @@
                                 }
                             ]
                         },
-                        this._getDateFieldConfig('start', this.timelineViewModel.currentTimeframe.start),
+                        this._getDateFieldConfig('start', this.timelineViewModel.currentTimeframe.startDate),
                         {
                             xtype: 'component',
                             html: 'to',
                             cls: 'popoverToText'
                         },
-                        this._getDateFieldConfig('end', this.timelineViewModel.currentTimeframe.end),
+                        this._getDateFieldConfig('end', this.timelineViewModel.currentTimeframe.endDate),
                         {
                             xtype: 'component',
                             itemId: 'dateType',
@@ -153,13 +153,13 @@
         },
 
         _validateDateRanges: function (dateField) {
-            var start = dateField.itemId === this.startDate.itemId ? this.startDate.getValue() : this.timelineViewModel.currentTimeframe.start;
-            var end = dateField.itemId === this.endDate.itemId ? this.endDate.getValue() : this.timelineViewModel.currentTimeframe.end;
+            var startDate = dateField.itemId === this.startDate.itemId ? this.startDate.getValue() : this.timelineViewModel.currentTimeframe.startDate;
+            var endDate = dateField.itemId === this.endDate.itemId ? this.endDate.getValue() : this.timelineViewModel.currentTimeframe.endDate;
 
             try {
                 this.timelineViewModel.setCurrentTimeframe({
-                    start: start,
-                    end: end
+                    startDate: startDate,
+                    endDate: endDate
                 });
                 return true;
             } catch(error) {
@@ -187,8 +187,8 @@
 
         _save: function () {
             this.fireEvent('save', {
-                startDate: this.timelineViewModel.currentTimeframe.start,
-                endDate: this.timelineViewModel.currentTimeframe.end
+                startDate: this.timelineViewModel.currentTimeframe.startDate,
+                endDate: this.timelineViewModel.currentTimeframe.endDate
             });
         },
 
@@ -217,16 +217,16 @@
                 },
                 minDate: this._getPickerMinDate(dateField),
                 maxDate: this._getPickerMaxDate(dateField),
-                rangeStart: this.timelineViewModel.currentTimeframe.start,
-                rangeEnd: this.timelineViewModel.currentTimeframe.end
+                rangeStart: this.timelineViewModel.currentTimeframe.startDate,
+                rangeEnd: this.timelineViewModel.currentTimeframe.endDate
             };
 
             if (dateField.itemId === this.startDate.itemId) {
-                pickerOpts.value = this.timelineViewModel.currentTimeframe.start;
+                pickerOpts.value = this.timelineViewModel.currentTimeframe.startDate;
                 pickerOpts.minText = 'This date overlaps an earlier timeframe';
                 pickerOpts.maxText = 'This date is after the end date';
             } else {
-                pickerOpts.value = this.timelineViewModel.currentTimeframe.end;
+                pickerOpts.value = this.timelineViewModel.currentTimeframe.endDate;
                 pickerOpts.minText = 'This date is before the start date';
                 pickerOpts.maxText = 'This date overlaps a later timeframe';
             }
@@ -241,8 +241,8 @@
         },
 
         _updatePicker: function (dateField) {
-            this.picker.rangeStart = this.timelineViewModel.currentTimeframe.start;
-            this.picker.rangeEnd = this.timelineViewModel.currentTimeframe.end;
+            this.picker.rangeStart = this.timelineViewModel.currentTimeframe.startDate;
+            this.picker.rangeEnd = this.timelineViewModel.currentTimeframe.endDate;
             this.picker.update(dateField.getValue(), true);
         },
 
@@ -250,11 +250,11 @@
             var prevTimeframe = this.timelineViewModel.getPreviousTimeframe();
 
             if (dateField.itemId === this.endDate.itemId) {
-                return this.timelineViewModel.currentTimeframe.start;
+                return this.timelineViewModel.currentTimeframe.startDate;
             }
 
             if (prevTimeframe) {
-                return Ext.Date.add(prevTimeframe.end, Ext.Date.DAY, 1);
+                return Ext.Date.add(prevTimeframe.endDate, Ext.Date.DAY, 1);
             }
         },
 
@@ -262,11 +262,11 @@
             var nextTimeframe = this.timelineViewModel.getNextTimeframe();
 
             if (dateField.itemId === this.startDate.itemId) {
-                return this.timelineViewModel.currentTimeframe.end;
+                return this.timelineViewModel.currentTimeframe.endDate;
             }
 
             if (nextTimeframe) {
-                return Ext.Date.add(nextTimeframe.start, Ext.Date.DAY, -1);
+                return Ext.Date.add(nextTimeframe.startDate, Ext.Date.DAY, -1);
             }
         },
 

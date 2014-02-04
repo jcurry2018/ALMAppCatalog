@@ -50,18 +50,18 @@ describe 'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator', ->
 
   describe '#getQuarter', ->
     expectedResults = [
-      { input: '2014-01-01', expected: { start: '2014-01-01', end: '2014-03-31' } }
-      { input: '2014-02-01', expected: { start: '2014-01-01', end: '2014-03-31' } }
-      { input: '2014-03-31', expected: { start: '2014-01-01', end: '2014-03-31' } }
-      { input: '2014-04-01', expected: { start: '2014-04-01', end: '2014-06-30' } }
-      { input: '2014-05-01', expected: { start: '2014-04-01', end: '2014-06-30' } }
-      { input: '2014-06-30', expected: { start: '2014-04-01', end: '2014-06-30' } }
-      { input: '2014-07-01', expected: { start: '2014-07-01', end: '2014-09-30' } }
-      { input: '2014-08-01', expected: { start: '2014-07-01', end: '2014-09-30' } }
-      { input: '2014-09-30', expected: { start: '2014-07-01', end: '2014-09-30' } }
-      { input: '2014-10-01', expected: { start: '2014-10-01', end: '2014-12-31' } }
-      { input: '2014-11-01', expected: { start: '2014-10-01', end: '2014-12-31' } }
-      { input: '2014-12-31', expected: { start: '2014-10-01', end: '2014-12-31' } }
+      { input: '2014-01-01', expected: { startDate: '2014-01-01', endDate: '2014-03-31' } }
+      { input: '2014-02-01', expected: { startDate: '2014-01-01', endDate: '2014-03-31' } }
+      { input: '2014-03-31', expected: { startDate: '2014-01-01', endDate: '2014-03-31' } }
+      { input: '2014-04-01', expected: { startDate: '2014-04-01', endDate: '2014-06-30' } }
+      { input: '2014-05-01', expected: { startDate: '2014-04-01', endDate: '2014-06-30' } }
+      { input: '2014-06-30', expected: { startDate: '2014-04-01', endDate: '2014-06-30' } }
+      { input: '2014-07-01', expected: { startDate: '2014-07-01', endDate: '2014-09-30' } }
+      { input: '2014-08-01', expected: { startDate: '2014-07-01', endDate: '2014-09-30' } }
+      { input: '2014-09-30', expected: { startDate: '2014-07-01', endDate: '2014-09-30' } }
+      { input: '2014-10-01', expected: { startDate: '2014-10-01', endDate: '2014-12-31' } }
+      { input: '2014-11-01', expected: { startDate: '2014-10-01', endDate: '2014-12-31' } }
+      { input: '2014-12-31', expected: { startDate: '2014-10-01', endDate: '2014-12-31' } }
     ]
 
     _.each expectedResults, ({input, expected}) =>

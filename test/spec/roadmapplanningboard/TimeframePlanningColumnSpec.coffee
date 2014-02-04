@@ -51,8 +51,8 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       @timeframeRecord = Ext.create Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel(),
         _.extend
           name: 'Q1'
-          start: new Date('04/01/2013')
-          end: new Date('06/30/2013')
+          startDate: new Date('04/01/2013')
+          endDate: new Date('06/30/2013')
         , config
 
     createTimeframePlanWrapper: ->
@@ -111,8 +111,8 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
     it 'should handle empty values as spaces', ->
       @createTimeframeRecord
-        start: null
-        end: null
+        startDate: null
+        endDate: null
       @createPlanRecord
         lowCapacity: 0
         highCapacity: 0

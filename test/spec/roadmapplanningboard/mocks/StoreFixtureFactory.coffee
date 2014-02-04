@@ -281,36 +281,36 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
       data: [
         id: '2'
         name: 'Q1'
-        start: new Date('1/01/2013')
-        end: new Date('3/31/2013')
+        startDate: new Date('1/01/2013')
+        endDate: new Date('3/31/2013')
         timeline:
           id: '1'
       ,
         id: '3'
         name: 'Q2'
-        start: new Date('4/01/2013')
-        end: new Date('6/30/2013')
+        startDate: new Date('4/01/2013')
+        endDate: new Date('6/30/2013')
         timeline:
           id: '1'
       ,
         id: '4'
         name: 'Future Planning Period'
-        start: new Date('7/01/2013')
-        end: new Date('6/30/2014')
+        startDate: new Date('7/01/2013')
+        endDate: new Date('6/30/2014')
         timeline:
           id: '1'
       ,
         id: '7'
         name: ''
-        start: null
-        end: null
+        startDate: null
+        endDate: null
         timeline:
           id: '1'
       ,
         id: '8'
         name: 'Timeframe not linked to a plan'
-        start: new Date('7/01/2014')
-        end: new Date('10/31/2014')
+        startDate: new Date('7/01/2014')
+        endDate: new Date('10/31/2014')
         timeline:
           id: '1'
       ]

@@ -9,9 +9,9 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.util.TimelineViewModel', ->
   helpers
-    createTimeframe: (start, end) ->
-      start: new Date(start) if start
-      end: new Date(end) if end
+    createTimeframe: (startDate, endDate) ->
+      startDate: new Date(startDate) if startDate
+      endDate: new Date(endDate) if endDate
 
     createTimeline: (config) ->
       Ext.create 'Rally.apps.roadmapplanningboard.util.TimelineViewModel', config
@@ -28,16 +28,16 @@ describe 'Rally.apps.roadmapplanningboard.util.TimelineViewModel', ->
 
       @timeframeRecord = Ext.create Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel(),
         name: 'Q1'
-        start: new Date('04/01/2013')
-        end: new Date('06/30/2013')
+        startDate: new Date('04/01/2013')
+        endDate: new Date('06/30/2013')
 
       @viewModel = Rally.apps.roadmapplanningboard.util.TimelineViewModel.createFromStores(@wrapper, @timeframeRecord)
 
     describe '#createFromStores', ->
       it 'should create a view model with the current timeline', ->
         expect(@viewModel.currentTimeframe).toEqual
-          start: @timeframeRecord.get('startDate')
-          end: @timeframeRecord.get('endDate')
+          startDate: @timeframeRecord.get('startDate')
+          endDate: @timeframeRecord.get('endDate')
 
       it 'should create a view model with the correct number of time frames', ->
         expect(@viewModel.timeframes.length).toBe 3
@@ -67,20 +67,20 @@ describe 'Rally.apps.roadmapplanningboard.util.TimelineViewModel', ->
 
       it 'should return null if the current timeframe is the last timeframe', ->
         @timelineModel.currentTimeframe =
-          start: '05/01/2014'
-          end: '05/31/2014'
+          startDate: '05/01/2014'
+          endDate: '05/31/2014'
         expect(@timelineModel.getNextTimeframe()).toBeNull()
 
-      it 'should get the next timeframe if end date is null', ->
+      it 'should get the next timeframe if endDate date is null', ->
         @timelineModel.currentTimeframe =
-          start: @timelineModel.currentTimeframe.start
-          end: null
+          startDate: @timelineModel.currentTimeframe.startDate
+          endDate: null
         expect(@timelineModel.getNextTimeframe()).toEqual @createTimeframe '03/01/2014', '03/31/2014'
 
       it 'should return null if start date and end dates are null', ->
         @timelineModel.currentTimeframe =
-          start: null
-          end: null
+          startDate: null
+          endDate: null
         expect(@timelineModel.getNextTimeframe()).toBeNull()
 
     describe '#getPreviousTimeframe', ->
@@ -89,20 +89,20 @@ describe 'Rally.apps.roadmapplanningboard.util.TimelineViewModel', ->
 
       it 'should return null if the current timeframe is the first timeframe', ->
         @timelineModel.currentTimeframe =
-          start: '12/01/2013'
-          end: '12/31/2013'
+          startDate: '12/01/2013'
+          endDate: '12/31/2013'
         expect(@timelineModel.getPreviousTimeframe()).toBeNull()
 
       it 'should get the previous timeframe if start date is null', ->
         @timelineModel.currentTimeframe =
-          start: null
-          end: @timelineModel.currentTimeframe.end
+          startDate: null
+          endDate: @timelineModel.currentTimeframe.endDate
         expect(@timelineModel.getPreviousTimeframe()).toEqual @createTimeframe '01/01/2014', '01/31/2014'
 
       it 'should return last timeframe if start date and end dates are null', ->
         @timelineModel.currentTimeframe =
-          start: null
-          end: null
+          startDate: null
+          endDate: null
         expect(@timelineModel.getPreviousTimeframe()).toEqual @createTimeframe '04/01/2014', '04/30/2014'
 
     describe '#setCurrentTimeframe', ->
@@ -127,8 +127,8 @@ describe 'Rally.apps.roadmapplanningboard.util.TimelineViewModel', ->
       it 'should not update the current timeframe when you pass in invalid dates', ->
         expect(=>
           @timelineModel.setCurrentTimeframe
-            start: 'junk',
-            end: @timelineModel.currentTimeframe.end
+            startDate: 'junk',
+            endDate: @timelineModel.currentTimeframe.endDate
         ).toThrow 'Start and end date must be valid dates'
 
       describe 'start date is null', ->
