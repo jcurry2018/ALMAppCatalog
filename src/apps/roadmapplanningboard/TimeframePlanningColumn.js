@@ -240,16 +240,18 @@
         },
 
         _createDateRangeTooltip: function () {
-            if (this.dateRangeTooltip) {
-                this.dateRangeTooltip.destroy();
-            }
+            if (this.editPermissions.timeframeDates) {
+                if (this.dateRangeTooltip) {
+                    this.dateRangeTooltip.destroy();
+                }
 
-            this.dateRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
-                target: this.dateRange.getEl(),
-                hideDelay: 100,
-                anchor: 'left',
-                html: this.getDateHeaderTplData().titleText
-            });
+                this.dateRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
+                    target: this.dateRange.getEl(),
+                    hideDelay: 100,
+                    anchor: 'left',
+                    html: this.getDateHeaderTplData().titleText
+                });
+            }
         },
 
         _drawProgressBar: function () {
@@ -380,11 +382,9 @@
         },
 
         getDateHeaderTplData: function () {
-            var title = 'Date Range';
-
             return {
                 formattedDate: this._getDateRange(),
-                titleText: this.editPermissions.timeframeDates ? 'Edit ' + title : title,
+                titleText: 'Edit Date Range',
                 clickableClass: this.editPermissions.timeframeDates ? 'clickable' : ''
             };
         },

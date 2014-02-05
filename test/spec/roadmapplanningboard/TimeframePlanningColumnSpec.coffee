@@ -307,3 +307,17 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
         @click(dateRange).then =>
           @column.timeframePopover.fireEvent('save')
           expect(saveSpy).toHaveBeenCalledOnce()
+
+    describe 'timeframe date tooltip', ->
+
+      it 'should have a timeframe date tooltip if user has edit permissions', ->
+        @createColumn
+          editPermissions:
+            timeframeDates: true
+        expect(this.column.dateRangeTooltip).toBeDefined()
+
+      it 'should not have a timeframe date tooltip if user does not have edit permissions', ->
+        @createColumn
+          editPermissions:
+            timeframeDates: false
+        expect(this.column.dateRangeTooltip).toBeUndefined()
