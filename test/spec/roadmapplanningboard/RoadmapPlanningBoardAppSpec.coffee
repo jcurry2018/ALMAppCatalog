@@ -9,15 +9,6 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
   helpers
-    createPermissionsStub: (config) ->
-      @stub Rally.environment.getContext(), 'getPermissions', ->
-        isSubscriptionAdmin: ->
-          !!config.subAdmin
-        isWorkspaceAdmin: ->
-          !!config.workspaceAdmin
-        isProjectEditor: ->
-          !!config.projectEditor
-
     createApp: (expectError = false, config = {}) ->
       config = _.extend
         alreadyGotIt: true
@@ -42,7 +33,9 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
       @stub Rally.apps.roadmapplanningboard.SplashContainer, 'loadPreference', =>
         pref = {}
         pref[Rally.apps.roadmapplanningboard.SplashContainer.PREFERENCE_NAME] = config.alreadyGotIt
-        pref
+        deferred = new Deft.Deferred()
+        deferred.resolve pref
+        deferred.promise
 
       @app = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', config
 
@@ -116,6 +109,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
         message: 'Failed to load app: Planning service data load issue'
 
   it 'should show the splash container if there is no roadmap', ->
+    @roadmapStore.data.clear()
     @stub @roadmapStore, 'load', ->
       Deft.Promise.when { records: {} }
 
@@ -124,6 +118,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
       expect(@app).toContainComponent '#roadmap-splash-container'
 
   it 'should show the splash container if there is no timeline', ->
+    @timelineStore.data.clear()
     @stub @timelineStore, 'load', ->
       Deft.Promise.when { records: {} }
 
@@ -141,21 +136,6 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
       @click(css: '.primary.button').then =>
         @waitForComponentReady(@app.down('#gridboard')).then =>
           expect(@app).toContainComponent '#gridboard'
-
-  it 'should set isAdmin on gridboard to true if user is a Sub Admin', ->
-    @createPermissionsStub(subAdmin: true)
-    @createApp().then =>
-      expect(@app.down('#gridboard').isAdmin).toBe true
-
-  it 'should set isAdmin on gridboard to true if user is a WS Admin', ->
-    @createPermissionsStub(workspaceAdmin: true)
-    @createApp().then =>
-      expect(@app.down('#gridboard').isAdmin).toBe true
-
-  it 'should set isAdmin on gridboard to false if user is not a Sub or WS Admin', ->
-    @createPermissionsStub(subAdmin: false, workspaceAdmin: false)
-    @createApp().then =>
-      expect(@app.down('#gridboard').isAdmin).toBe false
 
   describe 'Service error handling', ->
     it 'should display a friendly notification if any service (planning, timeline, WSAPI) is unavailable', ->

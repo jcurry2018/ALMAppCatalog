@@ -8,7 +8,10 @@
             'Rally.apps.roadmapplanningboard.SplashContainer',
             'Rally.ui.notify.Notifier',
             'Rally.apps.roadmapplanningboard.DeftInjector',
-            'Rally.apps.roadmapplanningboard.PlanningGridBoard'
+            'Rally.apps.roadmapplanningboard.PlanningGridBoard',
+            'Rally.apps.roadmapplanningboard.util.TimelineRoadmapStoreWrapper',
+            'Rally.apps.roadmapplanningboard.util.UserPermissions',
+            'Rally.apps.roadmapplanningboard.util.RoadmapGenerator'
         ],
         cls: 'roadmapPlanningBoardApp',
         componentCls: 'app',
@@ -40,8 +43,19 @@
         launch: function () {
             Rally.apps.roadmapplanningboard.DeftInjector.init();
 
-            this.roadmapStore = Deft.Injector.resolve('roadmapStore');
-            this.timelineStore = Deft.Injector.resolve('timelineStore');
+            // Assume global context if it wasn't passed
+            this.context = this.context || Rally.environment.getContext();
+
+            this.timelineRoadmapStoreWrapper = Ext.create('Rally.apps.roadmapplanningboard.util.TimelineRoadmapStoreWrapper', {
+                requester: this
+            });
+
+            var userPermissions = Ext.create('Rally.apps.roadmapplanningboard.util.UserPermissions', {
+                workspace: this.context.getWorkspace(),
+                permissions: Rally.environment.getContext().getPermissions()
+            });
+
+            this.isAdmin = userPermissions.isUserAdmin();
 
             Ext.Ajax.on('requestexception', this._onRequestException, this);
 
@@ -60,33 +74,41 @@
                         name: records[1].get('Name')
                     };
                 }
+                
+                var preferencePromise = Rally.apps.roadmapplanningboard.SplashContainer.loadPreference().then({
+                    success: function (result) {
+                        this.alreadyGotIt = result[Rally.apps.roadmapplanningboard.SplashContainer.PREFERENCE_NAME];
+                    },
+                    scope: this
+                });
 
-                var roadmapPromise = this.roadmapStore.load({requester: this, storeServiceName: "Planning"});
-                var timelinePromise = this.timelineStore.load({requester: this, storeServiceName: "Timeline"});
-                var preferencePromise = Rally.apps.roadmapplanningboard.SplashContainer.loadPreference();
-
-                Deft.Promise.all([roadmapPromise, timelinePromise, preferencePromise]).then({
+                Deft.Promise.all([this.timelineRoadmapStoreWrapper.load(), preferencePromise]).then({
                     success: function (results) {
-                        var roadmap = results[0].records[0];
-                        var timeline = results[1].records[0];
-                        var preference = results[2][Rally.apps.roadmapplanningboard.SplashContainer.PREFERENCE_NAME];
-                        var loadCarousel = (!roadmap || !timeline || !preference);
-
-                        if (loadCarousel) {
+                        var roadmapDataExists = this.timelineRoadmapStoreWrapper.hasCompleteRoadmapData();
+                        if (!roadmapDataExists || !this.alreadyGotIt) {
                             this.splash = this.add({
                                 xtype: 'splashcontainer',
-                                isAdmin: this._isUserAdmin(),
-                                showGotIt: roadmap && timeline,
+                                showGetStarted: this.isAdmin && !roadmapDataExists,
+                                showGotIt: roadmapDataExists,
                                 listeners: {
-                                    gotit: function (event, cmp) {
+                                    gotit: function () {
                                         this.splash.destroy();
-                                        this._buildGridBoard(roadmap, timeline);
+                                        this._buildGridBoard();
+                                    },
+                                    getstarted: function () {
+                                        this.splash.destroy();
+                                        this._createRoadmapData().then({
+                                            success: function () {
+                                                this._buildGridBoard();
+                                            },
+                                            scope: this
+                                        });
                                     },
                                     scope: this
                                 }
                             });
                         } else {
-                            this._buildGridBoard(roadmap, timeline);
+                            this._buildGridBoard();
                         }
 
                         if (Rally.BrowserTest) {
@@ -102,6 +124,15 @@
             });
         },
 
+        _createRoadmapData: function () {
+            var roadmapGenerator = Ext.create('Rally.apps.roadmapplanningboard.util.RoadmapGenerator', {
+                timelineRoadmapStoreWrapper: this.timelineRoadmapStoreWrapper,
+                workspace: this.context.getWorkspace()
+            });
+
+            return roadmapGenerator.createCompleteRoadmapData();
+        },
+
         _retrievePITypes: function (callback) {
             Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
                 defaultToLowest: true,
@@ -111,25 +142,19 @@
             });
         },
 
-        _buildGridBoard: function (roadmap, timeline) {
-            if (roadmap && timeline) {
-                this.add({
-                    xtype: 'roadmapplanninggridboard',
-                    itemId: 'gridboard',
-                    context: this.getContext(),
-                    timeline: timeline,
-                    roadmap: roadmap,
-                    isAdmin: this._isUserAdmin(),
-                    typeNames: this.typeNames,
-                    modelNames: this.types,
-                    cardboardPlugins: this.cardboardPlugins,
-                    height: this._computePanelContentAreaHeight()
-                });
-            } else if (!roadmap) {
-                Rally.ui.notify.Notifier.showError({message: 'No roadmap available'});
-            } else {
-                Rally.ui.notify.Notifier.showError({message: 'No timeline available'});
-            }
+        _buildGridBoard: function () {
+            this.add({
+                xtype: 'roadmapplanninggridboard',
+                itemId: 'gridboard',
+                context: this.context,
+                timeline: this.timelineRoadmapStoreWrapper.activeTimeline(),
+                roadmap: this.timelineRoadmapStoreWrapper.activeRoadmap(),
+                isAdmin: this.isAdmin,
+                typeNames: this.typeNames,
+                modelNames: this.types,
+                cardboardPlugins: this.cardboardPlugins,
+                height: this._computePanelContentAreaHeight()
+            });
         },
 
         _computePanelContentAreaHeight: function () {
@@ -152,16 +177,6 @@
                 this.setHeight(this._computePanelContentAreaHeight());
                 el.mask('Roadmap planning is <strong>temporarily unavailable</strong>, please try again in a few minutes.', "roadmap-service-unavailable-error");
             }
-        },
-
-        _isUserAdmin: function () {
-            var permissions = Rally.environment.getContext().getPermissions();
-            var isAdmin = permissions.isSubscriptionAdmin();
-            if (!isAdmin) {
-                var workspace = this.getContext().getWorkspace();
-                isAdmin = permissions.isWorkspaceAdmin(workspace._ref);
-            }
-            return isAdmin;
         }
     });
 })();

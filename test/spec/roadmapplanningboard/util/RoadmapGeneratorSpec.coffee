@@ -17,57 +17,73 @@ describe 'Rally.apps.roadmapplanningboard.util.RoadmapGenerator', ->
       id: index
 
     getTimelineMock: (timeframeCount = 1) ->
-      timeframes = if timeframeCount <= 0 then [] else _.map [1..timeframeCount], (index) => @getTimeframeMock(index)
-      get: -> timeframes
+      timeframes: if timeframeCount <= 0 then [] else _.map [1..timeframeCount], (index) => @getTimeframeMock(index)
+
+    emptyStores: ->
+      @timelineRoadmapStoreWrapper.roadmapStore.data.clear()
+      @timelineRoadmapStoreWrapper.timelineStore.data.clear()
+
+    createCompleteRoadmapData: ->
+      @generator.createCompleteRoadmapData().then ({@roadmap, @timeline}) =>
+
+    createRoadmapGivenATimeline: (timeframeCount = 1) ->
+      @timelineRoadmapStoreWrapper.timelineStore.add @getTimelineMock(timeframeCount)
+      @createCompleteRoadmapData()
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
     @dateFormat = 'Y-m-d'
     @stub Ext.Date, 'now', => Ext.Date.parse('2014-01-24', @dateFormat).getTime()
-    @workspace =
-      Name: 'Some Workspace'
-    @timelineStore = Deft.Injector.resolve('timelineStore')
-    @roadmapStore = Deft.Injector.resolve('roadmapStore')
+    @workspace = Name: 'Some Workspace'
+    @timelineRoadmapStoreWrapper = Ext.create 'Rally.apps.roadmapplanningboard.util.TimelineRoadmapStoreWrapper'
+
     @generator = Ext.create 'Rally.apps.roadmapplanningboard.util.RoadmapGenerator',
-      roadmapStore: @roadmapStore
-      timelineStore: @timelineStore
+      timelineRoadmapStoreWrapper: @timelineRoadmapStoreWrapper
       workspace: @workspace
 
-  describe 'creating a roadmap', ->
+    @createTimelineSpy = @spy @generator, '_createTimeline'
+    @createRoadmapSpy = @spy @generator, '_createRoadmap'
+
+  describe 'timeline exists but no roadmap exists', ->
+
+    beforeEach ->
+      @emptyStores()
+
     it 'should add a new roadmap record to the roadmap store', ->
-      @generator.createRoadmap(@getTimelineMock()).then (@roadmapRecord) =>
-        expect(@roadmapStore.last().id).toBe @roadmapRecord.id
+      @createRoadmapGivenATimeline().then =>
+        expect(@timelineRoadmapStoreWrapper.roadmapStore.last().id).toBe @roadmap.id
 
     it 'should set the new roadmap name to include the workspace name', ->
-      @generator.createRoadmap(@getTimelineMock()).then (@roadmapRecord) =>
-        expect(@roadmapRecord.get('name')).toBe "#{@workspace.Name} Roadmap"
+      @createRoadmapGivenATimeline().then =>
+        expect(@roadmap.get('name')).toBe "#{@workspace.Name} Roadmap"
 
     it 'should set the timeframe for each plan', ->
-      timeline = @getTimelineMock()
-      @generator.createRoadmap(timeline).then (@roadmapRecord) =>
-        expect(@roadmapRecord.get('plans')[0].get('timeframe').ref).toBe timeline.get('timeframes')[0].ref
+      @createRoadmapGivenATimeline().then =>
+        expect(@roadmap.get('plans')[0].get('timeframe').ref).toBe @timeline.get('timeframes')[0].ref
 
     it 'should throw an exception if the timeline does not have timeframes', ->
-      createRoadmap = =>
-        @generator.createRoadmap @getTimelineMock(0)
-      expect(createRoadmap).toThrow 'Timeline must contain timeframes'
+      expect(=> @createRoadmapGivenATimeline 0).toThrow 'Timeline must contain timeframes'
 
     it 'should create a plan for a timeline with a single timeframe', ->
-      @generator.createRoadmap(@getTimelineMock()).then (@roadmapRecord) =>
-        expect(@roadmapRecord.get('plans').length).toBe 1
+      @createRoadmapGivenATimeline().then =>
+        expect(@roadmap.get('plans').length).toBe 1
 
     it 'should create a plan for a timeline with multiple timeframes', ->
-      @generator.createRoadmap(@getTimelineMock(4)).then (@roadmapRecord) =>
-        expect(@roadmapRecord.get('plans').length).toBe 4
+      @createRoadmapGivenATimeline(4).then =>
+        expect(@roadmap.get('plans').length).toBe 4
+
+    it 'should not create a timeline', ->
+      @createRoadmapGivenATimeline().then =>
+        expect(@createTimelineSpy).not.toHaveBeenCalled()
 
     describe 'request to service', ->
       beforeEach ->
-        @roadmapStore.model.setProxy
+        @timelineRoadmapStoreWrapper.roadmapStore.model.setProxy
           type: 'roadmap'
           url: '/planning/service/url'
         @ajaxStub = @stub Ext.Ajax, 'request', (options) ->
           options.callback.call options.scope, options, true
-        @generator.createRoadmap @getTimelineMock()
+        @createRoadmapGivenATimeline()
 
       it 'should set method to POST', ->
         expect(@ajaxStub.lastCall.args[0].method).toBe 'POST'
@@ -75,32 +91,47 @@ describe 'Rally.apps.roadmapplanningboard.util.RoadmapGenerator', ->
       it 'should include a plan in jsonData', ->
         expect(@ajaxStub.lastCall.args[0].jsonData.plans.length).toBe 1
 
+  describe 'no roadmap or timeline exist', ->
 
-  describe 'creating a timeline', ->
     beforeEach ->
-      @generator.createTimeline().then (@timelineRecord) =>
+      @emptyStores()
+      @createCompleteRoadmapData()
 
     it 'should add a new timeline record to the timeline store', ->
-      expect(@timelineStore.last().id).toBe @timelineRecord.id
+      expect(@timelineRoadmapStoreWrapper.timelineStore.last().id).toBe @timeline.id
 
     it 'should set the new timeline name to include the workspace name', ->
-      expect(@timelineRecord.get('name')).toBe "#{@workspace.Name} Timeline"
+      expect(@timeline.get('name')).toBe "#{@workspace.Name} Timeline"
 
     it 'should create a single timeframe for the timeline', ->
-      expect(@timelineRecord.get('timeframes').length).toBe 1
+      expect(@timeline.get('timeframes').length).toBe 1
 
     it 'should set the timeframe date range to the current quarter', ->
-      expect(@getDateRange(_.first(@timelineRecord.get('timeframes')))).toEqual
+      expect(@getDateRange(_.first(@timeline.get('timeframes')))).toEqual
         startDate: '2014-01-01'
         endDate: '2014-03-31'
 
     it 'should set the timeframe name to New Timeframe', ->
-      expect(_.first(@timelineRecord.get('timeframes')).get('name')).toBe 'New Timeframe'
-
-  describe 'creating both a timeline and a roadmap', ->
+      expect(_.first(@timeline.get('timeframes')).get('name')).toBe 'New Timeframe'
 
     it 'should create a timeline before creating a roadmap', ->
-      createTimelineSpy = @spy @generator, 'createTimeline'
-      createRoadmapSpy = @spy @generator, 'createRoadmap'
-      @generator.createTimelineRoadmap().then =>
-        sinon.assert.callOrder createTimelineSpy, createRoadmapSpy
+      sinon.assert.callOrder @createTimelineSpy, @createRoadmapSpy
+
+  describe 'roadmap and timeline both exist', ->
+
+    beforeEach ->
+      @createCompleteRoadmapData()
+
+    it 'should not create a roadmap', ->
+      expect(@createRoadmapSpy).not.toHaveBeenCalled()
+
+    it 'should not create a timeline', ->
+      expect(@createTimelineSpy).not.toHaveBeenCalled()
+
+  describe 'roadmap exists but no timeline exists', ->
+
+    beforeEach ->
+      @timelineRoadmapStoreWrapper.timelineStore.data.clear()
+
+    it 'should throw an error', ->
+      expect(=> @createCompleteRoadmapData()).toThrow 'Cannot create a timeline when a roadmap already exists'

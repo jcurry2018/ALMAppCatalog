@@ -22,7 +22,7 @@
         },
 
         config: {
-            isAdmin: false,
+            showGetStarted: false,
             showGotIt: true
         },
 
@@ -84,7 +84,7 @@
                     ]
                 }
             ]);
-            if (this.isAdmin) {
+            if (this.showGetStarted) {
                 this.down('#carousel').down('#carousel-header').add([
                     {
                         xtype: 'container',
@@ -100,6 +100,7 @@
                             cls: 'primary button medium harmonize-btn',
                             margin: '20 0 20 0',
                             handler: function () {
+                                this._savePreference();
                                 this.fireEvent('getstarted', this);
                             },
                             scope: this

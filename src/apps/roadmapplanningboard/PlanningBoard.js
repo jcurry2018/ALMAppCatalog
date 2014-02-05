@@ -5,7 +5,7 @@
         extend: 'Rally.ui.cardboard.CardBoard',
         alias: 'widget.roadmapplanningboard',
 
-        inject: ['timeframeStore', 'planStore', 'preliminaryEstimateStore'],
+        inject: ['preliminaryEstimateStore'],
 
         requires: [
             'Rally.data.util.PortfolioItemHelper',
@@ -59,8 +59,9 @@
 
         initComponent: function () {
             this.timeframePlanStoreWrapper = Ext.create('Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', {
-                timeframeStore: this.timeframeStore,
-                planStore: this.planStore
+                requester: this,
+                roadmap: this.roadmap,
+                timeline: this.timeline
             });
 
             if(!this.typeNames.child || !this.typeNames.child.name) {
@@ -75,7 +76,7 @@
         },
 
         onModelsRetrieved: function (callback) {
-            Deft.Promise.all([this._loadTimeframeStore(), this._loadPlanStore(), this._loadPreliminaryStore()]).then({
+            Deft.Promise.all([this.timeframePlanStoreWrapper.load(), this._loadPreliminaryStore()]).then({
                 success: function (results) {
                     this.buildColumns();
                     callback.call(this);
@@ -113,30 +114,6 @@
             return _.last(this.getColumns());
         },
 
-        _loadPlanStore: function () {
-            return this.planStore.load({
-                params: {
-                    roadmap: {
-                        id: this.roadmap.getId()
-                    }
-                },
-                reqester: this,
-                storeServiceName: 'Planning'
-            });
-        },
-
-        _loadTimeframeStore: function () {
-            return this.timeframeStore.load({
-                params: {
-                    timeline: {
-                        id: this.timeline.getId()
-                    }
-                },
-                requester: this,
-                storeServiceName: 'Timeline'
-            });
-        },
-
         _loadPreliminaryStore: function() {
             return this.preliminaryEstimateStore.load();
         },
@@ -169,7 +146,7 @@
                 xtype: 'backlogplanningcolumn',
                 types: this.types,
                 typeNames: this.typeNames,
-                planStore: this.planStore,
+                planStore: this.timeframePlanStoreWrapper.planStore,
                 cls: 'column backlog',
                 cardConfig: {
                     preliminaryEstimateStore: this.preliminaryEstimateStore

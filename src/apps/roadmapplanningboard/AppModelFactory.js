@@ -60,9 +60,22 @@
                     },
                     {
                         name: 'timeframe',
-                        serialize: this._serializeModel
+                        serialize: function (record) {
+                            // Do some special serialization of the timeframe, we must have the ref and the id.
+                            // Turns out this is very hard to get using an Ext.Writer
+                            if (record.isModel) {
+                                return {
+                                    id: record.getId(),
+                                    ref: record.get('ref')
+                                };
+                            }
+
+                            return record;
+                        }
                     },
                     {
+                        // This has to be a plain ol' JSON object in order to play nice with the url pattern given to the proxy,
+                        // thank you Ext and your awesome handling of Model relationships
                         name: 'roadmap'
                     },
                     {
@@ -105,7 +118,7 @@
                     },
                     {
                         name: 'plans',
-                        serialize: this._getModelCollectionSerializer()
+                        serialize: this._getRecordCollectionSerializer()
                     }
                 ],
                 proxy: {
@@ -203,7 +216,7 @@
                     {
                         name: 'timeframes',
                         type: 'collection',
-                        serialize: this._getModelCollectionSerializer()
+                        serialize: this._getRecordCollectionSerializer()
                     }
                 ],
                 proxy: {
@@ -214,23 +227,27 @@
             return this.timelineModel;
         },
 
-        _serializeModelCollection: function (values, record) {
+        _serializeRecordCollection: function (values, parentRecord) {
             var _this = this;
 
-            return _.map(values, function(model) {
-                return _this._serializeModel(model);
+            return _.map(values, function(record) {
+                return _this._serializeRecord(record);
             });
         },
 
-        _serializeModel: function (model) {
-            return model.data || model;
+        _serializeRecord: function (record) {
+            if (record.isModel) {
+                return record.getProxy().getWriter().getRecordData(record);
+            }
+
+            return record.data || record;
         },
 
-        _getModelCollectionSerializer: function () {
+        _getRecordCollectionSerializer: function () {
             var _this = this;
 
             return function() {
-                return _this._serializeModelCollection.apply(_this, arguments);
+                return _this._serializeRecordCollection.apply(_this, arguments);
             };
         }
     }, function () {

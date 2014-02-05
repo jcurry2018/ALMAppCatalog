@@ -8,7 +8,6 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
   helpers
-
     createGridboard: (includeTypeNames = true) ->
       config =
         roadmap: @roadmapStore.first()

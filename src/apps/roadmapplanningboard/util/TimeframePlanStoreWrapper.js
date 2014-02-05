@@ -2,9 +2,12 @@
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define('Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', {
+        inject: ['planStore', 'timeframeStore'],
+
         config: {
-            timeframeStore: null,
-            planStore: null
+            roadmap: null,
+            timeline: null,
+            requester: null
         },
 
         constructor: function (config) {
@@ -25,10 +28,41 @@
             });
         },
 
+        load: function () {
+            return Deft.Promise.all([
+                this._loadPlanStore(),
+                this._loadTimeframeStore()
+            ]);
+        },
+
         _getPlanForTimeframe: function (timeframe) {
             return this.planStore.getAt(this.planStore.findBy(function (record) {
                 return record.get('timeframe').id === timeframe.getId();
             }));
+        },
+
+        _loadPlanStore: function () {
+            return this.planStore.load({
+                params: {
+                    roadmap: {
+                        id: this.roadmap.getId()
+                    }
+                },
+                requester: this.requester,
+                storeServiceName: 'Planning'
+            });
+        },
+
+        _loadTimeframeStore: function () {
+            return this.timeframeStore.load({
+                params: {
+                    timeline: {
+                        id: this.timeline.getId()
+                    }
+                },
+                requester: this.requester,
+                storeServiceName: 'Timeline'
+            });
         }
     });
 }).call(this);

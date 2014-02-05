@@ -17,9 +17,9 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         type: 'memory'
 
       data: [
-          id: "413617ecef8623df1391fabc"
+          id: "roadmap-id-1"
           Name: "My Roadmap"
-          ref: "http://localhost:8090/plan-service/api/plan/413617ecef8623df1391fabc"
+          ref: "http://localhost:8090/plan-service/api/plan/roadmap-id-1"
           plans: [
             id: "513617ecef8623df1391fefc"
           ,
@@ -54,7 +54,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         Name: "Release 1.1"
         theme: "Take over the world!"
         roadmap:
-          id: '413617ecef8623df1391fabc'
+          id: 'roadmap-id-1'
         timeframe:
           id: "2"
         features: [
@@ -74,7 +74,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         timeframe:
           id: "3"
         roadmap:
-          id: '413617ecef8623df1391fabc'
+          id: 'roadmap-id-1'
         features: [
           id: "F1005"
         ,
@@ -89,7 +89,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         timeframe:
           id: "4"
         roadmap:
-          id: '413617ecef8623df1391fabc'
+          id: 'roadmap-id-1'
         features: []
       ,
         id: "3"
@@ -264,7 +264,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
       proxy:
         type: 'memory'
       data: [
-        id: '1'
+        id: 'timeline-id-1'
         timeframes: [
           id: 1
         ]
@@ -284,35 +284,35 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         startDate: new Date('1/01/2013')
         endDate: new Date('3/31/2013')
         timeline:
-          id: '1'
+          id: 'timeline-id-1'
       ,
         id: '3'
         name: 'Q2'
         startDate: new Date('4/01/2013')
         endDate: new Date('6/30/2013')
         timeline:
-          id: '1'
+          id: 'timeline-id-1'
       ,
         id: '4'
         name: 'Future Planning Period'
         startDate: new Date('7/01/2013')
         endDate: new Date('6/30/2014')
         timeline:
-          id: '1'
+          id: 'timeline-id-1'
       ,
         id: '7'
         name: ''
         startDate: null
         endDate: null
         timeline:
-          id: '1'
+          id: 'timeline-id-1'
       ,
         id: '8'
         name: 'Timeframe not linked to a plan'
         startDate: new Date('7/01/2014')
         endDate: new Date('10/31/2014')
         timeline:
-          id: '1'
+          id: 'timeline-id-1'
       ]
 
     @timeframeStoreFixture.model.setProxy 'memory'

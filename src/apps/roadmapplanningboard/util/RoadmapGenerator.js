@@ -8,8 +8,7 @@
         ],
 
         config: {
-            roadmapStore: null,
-            timelineStore: null,
+            timelineRoadmapStoreWrapper: null,
             workspace: null
         },
 
@@ -17,18 +16,44 @@
             this.initConfig(config);
         },
 
-        createTimelineRoadmap: function () {
-            return Deft.promise.Chain.pipeline([this.createTimeline, this.createRoadmap], this);
+        createCompleteRoadmapData: function () {
+            var promiseOptions = {
+                success: function () {
+                    return {
+                        roadmap: this.timelineRoadmapStoreWrapper.activeRoadmap(),
+                        timeline: this.timelineRoadmapStoreWrapper.activeTimeline()
+                    };
+                },
+                scope: this
+            };
+
+            if(!this.timelineRoadmapStoreWrapper.hasTimeline() && this.timelineRoadmapStoreWrapper.hasRoadmap()) {
+                throw 'Cannot create a timeline when a roadmap already exists';
+            } else if(!this.timelineRoadmapStoreWrapper.hasTimeline() && !this.timelineRoadmapStoreWrapper.hasRoadmap()) {
+                return this._createTimelineRoadmap().then(promiseOptions);
+            } else if (!this.timelineRoadmapStoreWrapper.hasRoadmap()) {
+                return this._createRoadmap().then(promiseOptions);
+            }
+
+            var deferred = new Deft.Deferred();
+            deferred.resolve(promiseOptions);
+            return deferred.promise;
         },
 
-        createRoadmap: function (timeline) {
+        _createTimelineRoadmap: function () {
+            return Deft.promise.Chain.pipeline([this._createTimeline, this._createRoadmap], this);
+        },
+
+        _createRoadmap: function () {
+            var timeline = this.timelineRoadmapStoreWrapper.activeTimeline();
             var timeframes = timeline.get('timeframes');
+
             if (!timeframes || !timeframes.length) {
                 throw 'Timeline must contain timeframes';
             }
             var deferred = new Deft.Deferred();
 
-            var roadmapRecord = _.first(this.roadmapStore.add({
+            var roadmapRecord = _.first(this.timelineRoadmapStoreWrapper.roadmapStore.add({
                 name: this.workspace.Name + ' Roadmap',
                 plans: this._createPlansForNewRoadmap(timeframes)
             }));
@@ -45,10 +70,10 @@
             return deferred.promise;
         },
         
-        createTimeline: function () {
+        _createTimeline: function () {
             var deferred = new Deft.Deferred();
 
-            var timelineRecord = _.first(this.timelineStore.add({
+            var timelineRecord = _.first(this.timelineRoadmapStoreWrapper.timelineStore.add({
                 name: this.workspace.Name + ' Timeline',
                 timeframes: this._createTimeframesForNewTimeline()
             }));

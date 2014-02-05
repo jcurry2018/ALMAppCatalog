@@ -83,11 +83,6 @@
                 ].concat(this.cardboardPlugins)
             };
 
-            // Assume global context if it wasn't passed
-            if (!this.context) {
-                this.context = Rally.environment.getContext();
-            }
-
             this.callParent(arguments);
         },
 

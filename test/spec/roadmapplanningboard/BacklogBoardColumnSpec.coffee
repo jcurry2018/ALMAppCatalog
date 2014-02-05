@@ -23,7 +23,7 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
       store: store
       planStore: Deft.Injector.resolve('planStore')
       lowestPIType: 'PortfolioItem/Feature'
-      roadmap: Deft.Injector.resolve('roadmapStore').getById('413617ecef8623df1391fabc')
+      roadmap: Deft.Injector.resolve('roadmapStore').getById('roadmap-id-1')
       typeNames:
         child:
           name: 'Feature'

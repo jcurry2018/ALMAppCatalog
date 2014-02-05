@@ -52,3 +52,4 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
 
       nextDateRangeGenerator:
         className: 'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
+

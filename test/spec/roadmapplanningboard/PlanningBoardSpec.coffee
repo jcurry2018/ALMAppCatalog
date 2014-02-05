@@ -142,12 +142,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.getColumns()[3].getCards().length).toBe 0
       expect(@cardboard.getColumns().length).toBe(5)
 
-  it 'should be correctly configured with stores from deft', ->
-    @createCardboard().then =>
-      expect(@cardboard.timeframeStore).toBeTruthy()
-      expect(@cardboard.planStore).toBeTruthy()
-      expect(@cardboard.preliminaryEstimateStore).toBeTruthy()
-
   it 'should have appropriate plan capacity range', ->
     @createCardboard().then =>
       expect(@cardboard.getColumns()[1].getPlanRecord().get('lowCapacity')).toBe 2
