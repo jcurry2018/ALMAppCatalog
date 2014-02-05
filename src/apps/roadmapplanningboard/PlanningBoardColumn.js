@@ -44,13 +44,18 @@
                 showDeleteMenuItem: true,
                 showAddChildMenuItem: false,
                 showRankMenuItems: false
-            }
+            },
+
+            /**
+             * @cfg {Number} Controls how many cards will be displayed in a column. Overrides default config in Column.js.
+             */
+            cardLimit: 25
         },
 
         constructor: function (config) {
             this.mergeConfig(config);
             this.context = this.context || Rally.environment.getContext();
-            if(!this.config.context) {
+            if (!this.config.context) {
                 this.config.context = this.context;
             }
             this.config.storeConfig.autoLoad = !this.filterable;
@@ -63,7 +68,7 @@
         _createBaseFilter: function (bf) {
             var baseFilter;
             if (Ext.isArray(bf)) {
-                baseFilter = _.reduce(bf, function(result, extFilter) {
+                baseFilter = _.reduce(bf, function (result, extFilter) {
                     var filter = new Rally.data.QueryFilter.fromExtFilter(extFilter);
                     return result ? result.and(filter) : filter;
                 }, undefined);
@@ -74,7 +79,7 @@
         },
 
         initComponent: function () {
-            if(!this.typeNames.child || !this.typeNames.child.name) {
+            if (!this.typeNames.child || !this.typeNames.child.name) {
                 throw 'typeNames must have a child property with a name';
             }
 
@@ -112,7 +117,7 @@
         _getFilterItems: function () {
             var filterItems = [];
 
-            if(this.typeNames.parent) {
+            if (this.typeNames.parent) {
                 filterItems.push({
                     xtype: 'rallyparentfilter',
                     modelType: this.typeNames.parent.typePath,
@@ -187,8 +192,8 @@
         getStoreFilter: function (model) {
             var storeFilter = this.baseFilter;
 
-            if(this.filterable && this.filters) {
-                storeFilter = _.reduce(this.filters, function (result, filter){
+            if (this.filterable && this.filters) {
+                storeFilter = _.reduce(this.filters, function (result, filter) {
                     return result ? result.and(filter) : filter;
                 }, storeFilter);
             }
@@ -196,7 +201,7 @@
             return storeFilter;
         },
 
-        refreshRecord: function(record, callback) {
+        refreshRecord: function (record, callback) {
             this.store.setFilter(this.getStoreFilter());
             return this.callParent(arguments);
         },
@@ -223,6 +228,15 @@
                 this.filterButton.removeCls('secondary');
                 this.filterButton.addCls('primary');
             }
+        },
+
+        getAllFetchFields: function () {
+            var fields = this.cardConfig.fields || this.callParent(arguments);
+            // Extra values needed to render correctly:
+            //      Rank = reranking (cannot be DragAndDropRank if manual ranked workspace)
+            //      DisplayColor = color border
+            //      Value = preliminary estimate values
+            return _.union(fields, ['Rank', 'DisplayColor', 'Value']);
         }
     });
 })();

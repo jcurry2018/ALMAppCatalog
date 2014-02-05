@@ -38,10 +38,6 @@
             var recordId = featureRecord.get('_refObjectUUID'),
                 found = _.find(this._getAllPlanFeatures(), { id: recordId });
             return !found;
-        },
-
-        getAllFetchFields: function () {
-            return ['true'];
         }
     });
 
