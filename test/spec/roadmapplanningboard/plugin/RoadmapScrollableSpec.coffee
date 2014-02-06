@@ -181,13 +181,37 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(timeframeColumnCount: 3, presentColumnCount: 0, pastColumnCount: 0).then =>
         expect(@plugin.getScrollableColumns().length).toBe 3
 
-    describe 'add new column button', ->
+  describe 'add new column button', ->
+
+    describe 'one present column', ->
+
+      beforeEach ->
+        @createCardboard(timeframeColumnCount: 3, presentColumnCount: 1, pastColumnCount: 0)
+
+      describe 'when clicked', ->
+
+        beforeEach ->
+          @clickAddNewButton()
+
+        it 'should replace a placeholder column with a new timeframe column', ->
+          expect(Ext.ComponentQuery.query('timeframeplanningcolumn').length).toBe 2
+
+        it 'should make the new column be the second timeframe column', ->
+          expect(@cardboard.getColumns()[2].columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
+
+        it 'should not display a forwards scroll button', ->
+          expect(@getForwardsButton().isVisible()).toBe false
+
+        it 'should not display a backwards scroll button', ->
+          expect(@getBackwardsButton().isVisible()).toBe false
+
+    describe 'with one past column and no present columns', ->
 
       beforeEach ->
         @createCardboard(timeframeColumnCount: 3, presentColumnCount: 0, pastColumnCount: 1)
 
-      it 'should render', ->
-          expect(@cardboard.addNewColumnButton.rendered).toBeTruthy()
+      it 'should be rendered in the last column', ->
+        @assertButtonIsInColumnHeader @cardboard.addNewColumnButton, @plugin.getLastVisibleScrollableColumn()
 
       describe 'when clicked', ->
 
@@ -195,7 +219,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
           @clickAddNewButton()
 
         it 'should add a new column', ->
-          expect(@cardboard.getColumns().length).toBe 4
+          expect(Ext.ComponentQuery.query('timeframeplanningcolumn').length).toBe 1
 
         it 'should make the new column be the first column', ->
           expect(@cardboard.getColumns()[1].columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
@@ -209,6 +233,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         it 'should update the plan store', ->
           expect(_.last(@planStore.data.items).get('name')).toBe 'New Plan'
 
+        it 'should not display a forwards scroll button', ->
+          expect(@getForwardsButton().isVisible()).toBe false
+
         describe 'when scrolling backwards', ->
           beforeEach ->
             @scrollBackwards()
@@ -216,7 +243,44 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
           it 'should scroll correctly', ->
             expect(@cardboard.getColumns()[2].columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
 
+    describe 'with present and future columns', ->
+
+      beforeEach ->
+        @createCardboard(timeframeColumnCount: 3, presentColumnCount: 4, pastColumnCount: 0)
+
+      it 'should be undefined', ->
+        expect(@cardboard.addNewColumnButton).toBeUndefined()
+
+      describe 'when forward scroll button is clicked', ->
+
+        beforeEach ->
+          @scrollForwards()
+
+        it 'should render', ->
+          expect(@cardboard.addNewColumnButton.rendered).toBeTruthy()
+
+        describe 'when clicked', ->
+
+          beforeEach ->
+            @clickAddNewButton()
+
+          it 'should add a new column', ->
+            expect(@plugin.scrollableColumns.length).toBe 5
+
+          it 'should make the new column be the last column', ->
+            expect(_.last(@cardboard.getColumns()).columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
+
+          it 'should put the field in edit mode', ->
+            expect(_.last(@cardboard.getColumns()).columnHeader.down('rallyclicktoeditfieldcontainer').getEditMode()).toBeTruthy()
+
+          it 'should update the timeframe store', ->
+            expect(_.last(@timeframeStore.data.items).get('name')).toBe 'New Timeframe'
+
+          it 'should update the plan store', ->
+            expect(_.last(@planStore.data.items).get('name')).toBe 'New Plan'
+
   describe 'when back scroll button is clicked', ->
+
     it 'should scroll backward', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 4, timeframeColumnCount: 4).then =>
         @scrollBackwards().then =>
@@ -272,6 +336,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
           expect(@getColumnContentCells().length).toBe 5 # 2 + 1 backlog
 
   describe 'when forward scroll button is clicked', ->
+
     it 'should scroll forward', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
         @scrollForwards().then =>
@@ -326,41 +391,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         @scrollBackwards().then =>
           @scrollForwards().then =>
             expect(@getColumnContentCells().length).toBe 4 # 2 + 1 backlog
-  describe 'add new column button', ->
-
-    beforeEach ->
-      @createCardboard(timeframeColumnCount: 3, presentColumnCount: 4, pastColumnCount: 0)
-
-    it 'should be undefined', ->
-      expect(@cardboard.addNewColumnButton).toBeUndefined()
-
-    describe 'when forward scroll button is clicked', ->
-
-      beforeEach ->
-        @scrollForwards()
-
-      it 'should render', ->
-        expect(@cardboard.addNewColumnButton.rendered).toBeTruthy()
-
-      describe 'when clicked', ->
-
-        beforeEach ->
-          @clickAddNewButton()
-
-        it 'should add a new column', ->
-          expect(@cardboard.getColumns().length).toBe 4
-
-        it 'should make the new column be the last column', ->
-          expect(_.last(@cardboard.getColumns()).columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
-
-        it 'should put the field in edit mode', ->
-          expect(_.last(@cardboard.getColumns()).columnHeader.down('rallyclicktoeditfieldcontainer').getEditMode()).toBeTruthy()
-
-        it 'should update the timeframe store', ->
-          expect(_.last(@timeframeStore.data.items).get('name')).toBe 'New Timeframe'
-
-        it 'should update the plan store', ->
-          expect(_.last(@planStore.data.items).get('name')).toBe 'New Plan'
 
   describe 'theme container interactions', ->
 

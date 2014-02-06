@@ -125,9 +125,8 @@
             if (placeHolderColumn) {
                 columnConfig.index = placeHolderColumn.index;
                 this.scrollableColumns[columnConfig.index] = columnConfig;
-
-                return this._drawColumn(placeHolderColumn, columnConfig, placeHolderColumn, columnConfig.index, false);
-
+                var newColumnIndex = Ext.Array.indexOf(this.cmp.columnDefinitions, placeHolderColumn);
+                return this._drawColumn(placeHolderColumn, columnConfig, placeHolderColumn, newColumnIndex, false);
             } else {
                 columnConfig.index = this.scrollableColumns.length;
                 this.scrollableColumns.push(columnConfig);
