@@ -62,7 +62,7 @@ describe 'Rally.apps.roadmapplanningboard.util.RoadmapGenerator', ->
         expect(@roadmap.get('plans')[0].get('timeframe').ref).toBe @timeline.get('timeframes')[0].ref
 
     it 'should throw an exception if the timeline does not have timeframes', ->
-      expect(=> @createRoadmapGivenATimeline 0).toThrow 'Timeline must contain timeframes'
+      expect(@createRoadmapGivenATimeline 0).toRejectWith 'Timeline must contain timeframes'
 
     it 'should create a plan for a timeline with a single timeframe', ->
       @createRoadmapGivenATimeline().then =>
@@ -134,4 +134,4 @@ describe 'Rally.apps.roadmapplanningboard.util.RoadmapGenerator', ->
       @timelineRoadmapStoreWrapper.timelineStore.data.clear()
 
     it 'should throw an error', ->
-      expect(=> @createCompleteRoadmapData()).toThrow 'Cannot create a timeline when a roadmap already exists'
+      expect(@createCompleteRoadmapData()).toRejectWith 'Cannot create a timeline when a roadmap already exists'

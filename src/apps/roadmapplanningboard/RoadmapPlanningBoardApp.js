@@ -101,6 +101,9 @@
                                             success: function () {
                                                 this._buildGridBoard();
                                             },
+                                            failure: function (error) {
+                                                this._displayError('Unable to create roadmap data: ' + error);
+                                            },
                                             scope: this
                                         });
                                     },
@@ -117,11 +120,15 @@
                     },
                     failure: function (operation) {
                         var service = operation.storeServiceName || 'External';
-                        Rally.ui.notify.Notifier.showError({message: 'Failed to load app: ' + service + ' service data load issue'});
+                        this._displayError('Failed to load app: ' + service + ' service data load issue');
                     },
                     scope: this
                 });
             });
+        },
+
+        _displayError: function (message) {
+            Rally.ui.notify.Notifier.showError({message: message});
         },
 
         _createRoadmapData: function () {

@@ -27,16 +27,18 @@
                 scope: this
             };
 
+            var deferred = new Deft.Deferred();
+
             if(!this.timelineRoadmapStoreWrapper.hasTimeline() && this.timelineRoadmapStoreWrapper.hasRoadmap()) {
-                throw 'Cannot create a timeline when a roadmap already exists';
+                deferred.reject('Cannot create a timeline when a roadmap already exists');
             } else if(!this.timelineRoadmapStoreWrapper.hasTimeline() && !this.timelineRoadmapStoreWrapper.hasRoadmap()) {
                 return this._createTimelineRoadmap().then(promiseOptions);
             } else if (!this.timelineRoadmapStoreWrapper.hasRoadmap()) {
                 return this._createRoadmap().then(promiseOptions);
+            } else {
+                deferred.resolve(promiseOptions);
             }
 
-            var deferred = new Deft.Deferred();
-            deferred.resolve(promiseOptions);
             return deferred.promise;
         },
 
@@ -47,25 +49,25 @@
         _createRoadmap: function () {
             var timeline = this.timelineRoadmapStoreWrapper.activeTimeline();
             var timeframes = timeline.get('timeframes');
-
-            if (!timeframes || !timeframes.length) {
-                throw 'Timeline must contain timeframes';
-            }
             var deferred = new Deft.Deferred();
 
-            var roadmapRecord = _.first(this.timelineRoadmapStoreWrapper.roadmapStore.add({
-                name: this.workspace.Name + ' Roadmap',
-                plans: this._createPlansForNewRoadmap(timeframes)
-            }));
+            if (!timeframes || !timeframes.length) {
+                deferred.reject('Timeline must contain timeframes');
+            } else {
+                var roadmapRecord = _.first(this.timelineRoadmapStoreWrapper.roadmapStore.add({
+                    name: this.workspace.Name + ' Roadmap',
+                    plans: this._createPlansForNewRoadmap(timeframes)
+                }));
 
-            roadmapRecord.save({
-                success: function (record, operation) {
-                    deferred.resolve(record);
-                },
-                failure: function (record, operation) {
-                    deferred.reject('Unable to create a new roadmap.');
-                }
-            });
+                roadmapRecord.save({
+                    success: function (record, operation) {
+                        deferred.resolve(record);
+                    },
+                    failure: function (record, operation) {
+                        deferred.reject('Unable to create a new roadmap.');
+                    }
+                });
+            }
 
             return deferred.promise;
         },
