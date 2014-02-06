@@ -75,6 +75,7 @@
                 isAdmin: this.isAdmin,
                 types: this.modelNames,
                 typeNames: this.typeNames,
+                firstLoad: this.firstLoad,
                 attribute: 'Name',
                 plugins: [
                     {

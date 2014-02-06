@@ -99,7 +99,9 @@
                                         this.splash.destroy();
                                         this._createRoadmapData().then({
                                             success: function () {
-                                                this._buildGridBoard();
+                                                this._buildGridBoard({
+                                                    firstLoad: true
+                                                });
                                             },
                                             failure: function (error) {
                                                 this._displayError('Unable to create roadmap data: ' + error);
@@ -149,8 +151,10 @@
             });
         },
 
-        _buildGridBoard: function () {
-            this.add({
+        _buildGridBoard: function (config) {
+            config = config || {};
+
+            this.add(Ext.merge({
                 xtype: 'roadmapplanninggridboard',
                 itemId: 'gridboard',
                 context: this.context,
@@ -161,7 +165,7 @@
                 modelNames: this.types,
                 cardboardPlugins: this.cardboardPlugins,
                 height: this._computePanelContentAreaHeight()
-            });
+            }, config));
         },
 
         _computePanelContentAreaHeight: function () {

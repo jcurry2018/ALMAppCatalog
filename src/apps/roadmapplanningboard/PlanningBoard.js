@@ -25,7 +25,7 @@
             timeline: null,
             isAdmin: false,
             cardConfig: {
-                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'LeafStoryCount', 'PercentDoneByStoryCount'],
+                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'LeafStoryCount', 'PercentDoneByStoryCount', 'PercentDoneByStoryPlanEstimate'],
                 editable: true,
                 skipDefaultFields: true
             },
@@ -123,6 +123,16 @@
          */
         renderColumns: function () {
             this.callParent(arguments);
+
+            if(this.firstLoad) {
+                var titleField = this.getColumns()[1].columnHeader.down('rallyclicktoeditfieldcontainer');
+                if(titleField) {
+                    titleField.goToEditMode();
+                }
+
+                this.firstLoad = false;
+            }
+
             this.drawThemeToggle();
             this.drawAddNewColumnButton();
         },
