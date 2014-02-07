@@ -62,26 +62,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
       @app.destroy()
 
-  it 'should create popover when the progress bar is clicked', ->
-    feature =
-      ObjectID: 878
-      _ref: '/portfolioitem/feature/878'
-      FormattedID: 'F1'
-      Name: 'Name of first PI'
-      Owner:
-        _ref: '/user/1'
-        _refObjectName: 'Name of Owner'
-      State: '/state/1'
-      Summary:
-        Discussion:
-          Count: 1
-
-    @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
-
-    @_createAppAndWaitForVisible =>
-      @_clickAndWaitForVisible('PercentDoneByStoryCount').then =>
-        expect(Ext.select('.percentDonePopover').elements.length).toEqual(1)
-
   it 'shows help component', ->
     @_createApp().then =>
       expect(@app).toHaveHelpComponent()

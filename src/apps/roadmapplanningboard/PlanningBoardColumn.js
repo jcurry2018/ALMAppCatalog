@@ -228,15 +228,6 @@
                 this.filterButton.removeCls('secondary');
                 this.filterButton.addCls('primary');
             }
-        },
-
-        getAllFetchFields: function () {
-            var fields = this.cardConfig.fields || this.callParent(arguments);
-            // Extra values needed to render correctly:
-            //      Rank = reranking (cannot be DragAndDropRank if manual ranked workspace)
-            //      DisplayColor = color border
-            //      Value = preliminary estimate values
-            return _.union(fields, ['Rank', 'DisplayColor', 'Value']);
         }
     });
 })();

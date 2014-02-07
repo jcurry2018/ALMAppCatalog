@@ -284,7 +284,6 @@
         },
 
         _onBoardLoad: function (cardboard) {
-            this._attachPercentDoneToolTip(cardboard);
             this._publishContentUpdated();
             this.setLoading(false);
             Rally.environment.getMessageBus().publish(Rally.Message.piKanbanBoardReady);
@@ -350,30 +349,6 @@
             return columns;
         },
 
-        _attachPercentDoneToolTip: function (cardboard) {
-            cardboard.getEl().select('.rui-card .progress-bar-container').each(function (flyEl) {
-                var el = Ext.get(flyEl.dom);
-                el.on('click', function () {
-                    var cardEl = el.up('.rui-card');
-                    var card = Ext.getCmp(cardEl.id);
-                    var record = card.getRecord();
-                    this._percentDonePopover = Ext.create('Rally.ui.popover.PercentDonePopover', {
-                        target: el,
-                        targetSelector: '#' + cardEl.id + ' .progress-bar-container',
-                        percentDoneData: record.data,
-                        percentDoneName: 'PercentDoneByStoryCount',
-                        piRef: record.data._ref,
-                        listeners: {
-                            destroy: function() {
-                                delete this._percentDonePopover;
-                            },
-                            scope: this
-                        }
-                    });
-                }, this);
-            }, this);
-        },
-
         _renderPolicies: function () {
             var showPoliciesCheckbox = this.down("#showPoliciesCheckbox");
 
@@ -437,7 +412,6 @@
         },
 
         _publishContentUpdatedNoDashboardLayout: function () {
-            this._attachPercentDoneToolTip(this.cardboard);
             this.fireEvent('contentupdated', {dashboardLayout: false});
         }
 

@@ -25,9 +25,12 @@
             timeline: null,
             isAdmin: false,
             cardConfig: {
-                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'LeafStoryCount', 'PercentDoneByStoryCount', 'PercentDoneByStoryPlanEstimate'],
+                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'LeafStoryCount', 'PercentDoneByStoryCount'],
                 editable: true,
                 skipDefaultFields: true
+            },
+            columnConfig: {
+                additionalFetchFields: ['PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount', 'Rank', 'DisplayColor', 'Value']
             },
             ddGroup: 'planningBoard',
             dropAllowed: "planningBoard",

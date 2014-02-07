@@ -59,11 +59,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
     @createColumn().then =>
       expect(@column).toBeTruthy()
 
-  it 'should append necessary fetch fields', ->
-    @columnConfig.cardConfig = {fields: []}
-    @createColumn().then =>
-      expect(@column.getAllFetchFields()).toEqual(['Rank', 'DisplayColor', 'Value'])
-
   it 'should filter by matching record criteria function', ->
     @createColumn().then =>
       @column.isMatchingRecord = ->
