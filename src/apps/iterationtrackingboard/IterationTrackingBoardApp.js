@@ -214,7 +214,9 @@
                     isLeaf: Rally.apps.iterationtrackingboard.IsLeafHelper.isLeaf,
                     getIcon: function(record) {
                         return '';
-                    }
+                    },
+                    enableColumnFiltering: this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
+                    disableColumnMenus: !this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING')
                 });
             }
             return gridConfig;

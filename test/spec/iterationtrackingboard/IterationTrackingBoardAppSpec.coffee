@@ -237,3 +237,33 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
           cols = @app._getGridColumns(['ignored1', 'ignored2'])
 
           expect(cols).toEqual @_getDefaultCols()
+
+  describe 'with the TREE_GRID_COLUMN_FILTERING toggle on', ->
+    beforeEach ->
+      @stubFeatureToggle ['TREE_GRID_COLUMN_FILTERING', 'ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
+
+    it 'shows column menu trigger on hover for filterable column', ->
+      @createApp().then =>
+        @toggleToGrid()
+        nameColumnHeaderSelector = '.btid-grid-header-name'
+        @mouseOver(css: nameColumnHeaderSelector).then =>
+          expect(@app.getEl().down("#{nameColumnHeaderSelector} .#{Ext.baseCSSPrefix}column-header-trigger").isVisible()).toBe true
+
+    it 'has filter menu item for filterable column', ->
+      @createApp().then =>
+        @toggleToGrid()
+        formattedIdColumnHeaderSelector = ".#{Ext.baseCSSPrefix}column-header:nth-child(3)"
+        @mouseOver(css: formattedIdColumnHeaderSelector).then =>
+          @click(css: "#{formattedIdColumnHeaderSelector} .#{Ext.baseCSSPrefix}column-header-trigger").then =>
+            expect(Ext.getBody().down('.rally-grid-column-menu .filters-label')).not.toBeNull
+
+  describe 'with the TREE_GRID_COLUMN_FILTERING toggle off', ->
+    beforeEach ->
+      @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
+
+    it 'does not show column menu trigger on hover for filterable column', ->
+      @createApp().then =>
+        @toggleToGrid()
+        nameColumnHeaderSelector = '.btid-grid-header-name'
+        @mouseOver(css: nameColumnHeaderSelector).then =>
+          expect(@app.getEl().down("#{nameColumnHeaderSelector} .#{Ext.baseCSSPrefix}column-header-trigger")).toBeNull

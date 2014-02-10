@@ -115,10 +115,10 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
     @waitForCallback(@ajaxStub, 1).then =>
       @search('1').then =>
         @waitForCallback(@ajaxStub, 2).then =>
-          expect(@column.filterCollection.toString()).toBe '((Iteration = "null") AND (DirectChildrenCount = 0))'
+          expect(@column.filterCollection.toString()).toBe '((Iteration = null) AND (DirectChildrenCount = 0))'
           @search('2').then =>
             @waitForCallback(@ajaxStub, 3).then =>
-              expect(@column.filterCollection.toString()).toBe '((Iteration = "null") AND (DirectChildrenCount = 0))'
+              expect(@column.filterCollection.toString()).toBe '((Iteration = null) AND (DirectChildrenCount = 0))'
 
   helpers
     createColumn: (options={}) ->

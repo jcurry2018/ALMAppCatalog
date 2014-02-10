@@ -71,11 +71,15 @@
                         user: Rally.util.Ref.getRelativeUri(this.getContext().getUser())
                     });
                 } catch(e) {}
-                filters.push(Rally.data.wsapi.Filter.fromQueryString(query));
+                var filterObj = Rally.data.wsapi.Filter.fromQueryString(query);
+                filterObj.itemId = filterObj.toString();
+                filters.push(filterObj);
             }
 
             if(timeboxScope && _.every(this.getSetting('types').split(','), this._isSchedulableType, this)) {
-                filters.push(timeboxScope.getQueryFilter());
+                var timeboxFilterObj = timeboxScope.getQueryFilter();
+                timeboxFilterObj.itemId = timeboxFilterObj.toString();
+                filters.push(timeboxFilterObj);
             }
             return filters;
         },
