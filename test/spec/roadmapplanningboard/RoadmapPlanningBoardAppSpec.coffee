@@ -80,13 +80,16 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
     Ext.DomHelper.append Ext.getBody(), '<div id="content" style="height: 600px;"><div class="page" style="height: 20px;"></div></div>'
     @createApp().then =>
       #test range as jasmine does not like to render html the same with local and test server
-      appHeight = @app._computePanelContentAreaHeight()
-      expect(appHeight).toBe >= 570
-      expect(appHeight).toBe <= 600
+      appHeight = @app._computeFullPagePanelContentAreaHeight()
+      expect(appHeight >= 570).toBe true
+      expect(appHeight <= 600).toBe true
 
-  it 'should define height for app', ->
+  it 'should define board height based on app height', ->
     @createApp(false, {height: 1000}).then =>
-      expect(@app._computePanelContentAreaHeight()).toBe = 1000
+      #test range as jasmine does not like to render html the same with local and test server
+      boardHeight = @planningBoard.getHeight()
+      expect(boardHeight >= 970).toBe true
+      expect(boardHeight <= 1000).toBe true
 
   it 'should notify of error if the timeline store fails to load', ->
     @stub @timelineStore, 'load', ->

@@ -154,7 +154,7 @@
         _buildGridBoard: function (config) {
             config = config || {};
 
-            this.add(Ext.merge({
+            var boardConfig = Ext.merge({
                 xtype: 'roadmapplanninggridboard',
                 itemId: 'gridboard',
                 context: this.context,
@@ -163,16 +163,17 @@
                 isAdmin: this.isAdmin,
                 typeNames: this.typeNames,
                 modelNames: this.types,
-                cardboardPlugins: this.cardboardPlugins,
-                height: this._computePanelContentAreaHeight()
-            }, config));
-        },
+                cardboardPlugins: this.cardboardPlugins
+            }, config);
 
-        _computePanelContentAreaHeight: function () {
-            if(this.getHeight()) {
-                return this.getHeight();
+            if(!this.getHeight()) {
+                boardConfig.height = this._computeFullPagePanelContentAreaHeight();
             }
 
+            this.add(boardConfig);
+        },
+
+        _computeFullPagePanelContentAreaHeight: function () {
             var content = Ext.getBody().down('#content');
             if (!content && Rally.BrowserTest) {
                 return Ext.getBody().down('#testDiv').getHeight();
@@ -185,7 +186,7 @@
             var el = this.getEl();
 
             if (requester === this && el) {
-                this.setHeight(this._computePanelContentAreaHeight());
+                this.setHeight(this._computeFullPagePanelContentAreaHeight());
                 el.mask('Roadmap planning is <strong>temporarily unavailable</strong>, please try again in a few minutes.', "roadmap-service-unavailable-error");
             }
         }

@@ -42,15 +42,14 @@
         initComponent: function () {
             this.callParent(arguments);
 
-            this.on('ready', this.drawHeader, this);
-            this.on('addcard', this.drawHeader, this);
-            this.on('cardupdated', this.drawHeader, this);
-            this.on('removecard', this.drawHeader, this);
-            this.on('afterrender', this.onAfterRender, this);
+            this.mon(this, 'ready', this._updateHeader, this);
+            this.mon(this, 'addcard', this._updateHeader, this);
+            this.mon(this, 'cardupdated', this._updateHeader, this);
+            this.mon(this, 'removecard', this._updateHeader, this);
 
             if (this.planRecord && this.planRecord.store) {
                 this.planRecord.store.on('update', function () {
-                    this.drawHeader();
+                    this._updateHeader();
                 }, this);
             }
             this._createDummyPlannedCapacityRangeTooltipForSizeCalculations();
@@ -109,7 +108,8 @@
             return this._getSortDirection() === 'ASC' && this.enableRanking;
         },
 
-        onAfterRender: function (event) {
+        afterRender: function (event) {
+            this.callParent(arguments);
             if (this.editPermissions.capacityRanges) {
                 this.columnHeader.getEl().on('click', this.onProgressBarClick, this, {
                     delegate: '.progress-bar-container'
@@ -263,15 +263,15 @@
                     xtype: 'container',
                     tpl: [
                         '<div class="progress-bar-background">',
-                            '<tpl if="highCapacity">',
-                                '<div class="progress-bar-percent-done">{formattedPercent}</div>',
-                                '<div class="progress-bar-display">{progressBarHtml}</div>',
-                            '<tpl else>',
-                                '<div>',
-                                    '<span>{pointTotal}</span> <span class="no-capacity-label">{itemType} {pointText}</span>',
-                                    '<div class="add-capacity"></div>',
-                                '</div>',
-                            '</tpl>',
+                        '<tpl if="highCapacity">',
+                        '<div class="progress-bar-percent-done">{formattedPercent}</div>',
+                        '<div class="progress-bar-display">{progressBarHtml}</div>',
+                        '<tpl else>',
+                        '<div>',
+                        '<span>{pointTotal}</span> <span class="no-capacity-label">{itemType} {pointText}</span>',
+                        '<div class="add-capacity"></div>',
+                        '</div>',
+                        '</tpl>',
                         '</div>'
                     ],
                     data: this.getHeaderTplData(),
@@ -391,9 +391,15 @@
 
         drawHeader: function () {
             this.callParent(arguments);
-            this._drawDateRange();
-            this._drawProgressBar();
-            this._drawTheme();
+            this._updateHeader();
+        },
+
+        _updateHeader: function () {
+            if (!this.destroying && this.rendered) {
+                this._drawDateRange();
+                this._drawProgressBar();
+                this._drawTheme();
+            }
         },
 
         _getDateRange: function () {
