@@ -74,6 +74,7 @@
             this._setupEvents();
             this._setupUpdateBeforeRender();
             this.subscribe(this, Rally.Message.objectUpdate, this._onMessageFromObjectUpdate, this);
+            this.subscribe(this, Rally.Message.bulkUpdate, this._onMessageFromObjectUpdate, this);
         },
 
         _onViewToggle: function(toggleState) {

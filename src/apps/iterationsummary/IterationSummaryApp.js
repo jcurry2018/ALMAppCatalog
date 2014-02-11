@@ -47,12 +47,21 @@
             this.subscribe(this, Rally.Message.objectDestroy, this._refreshApp, this);
             this.subscribe(this, Rally.Message.objectCreate, this._refreshApp, this);
             this.subscribe(this, Rally.Message.objectUpdate, this._refreshApp, this);
+            this.subscribe(this, Rally.Message.bulkUpdate, this._onBulkUpdate, this);
+        },
+
+        _shouldUpdate: function(record) {
+            return Ext.Array.contains(['defect', 'hierarchicalrequirement', 'testset', 'defectsuite', 'testcase'], record.get('_type').toLowerCase());
+        },
+
+        _onBulkUpdate: function(records) {
+            if(_.any(records, this._shouldUpdate, this)) {
+                this._addContent();
+            }
         },
 
         _refreshApp: function(record) {
-            var types = ['defect', 'hierarchicalrequirement', 'testset', 'defectsuite', 'testcase'];
-
-            if (Ext.Array.contains(types, record.get('_type').toLowerCase())) {
+            if(this._shouldUpdate(record)) {
                 this._addContent();
             }
         },

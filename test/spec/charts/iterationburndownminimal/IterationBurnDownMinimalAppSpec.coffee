@@ -322,4 +322,15 @@ describe 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp
 
       expect(chart.chartConfig.legend.enabled).toBe true
 
+  it 'refreshes app on bulkUpdate', ->
+    refreshSpy = @ajax.whenReadingEndpoint("/slm/charts/itsc.sp?sid=&iterationOid=1&cpoid=" + this.getContext().getProject().ObjectID).respondWithHtml itscData, { url: '/slm/charts/itsc.sp', method: 'GET' }
+    Ext.create 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp',
+      context: @getContext()
+      renderTo: 'testDiv'
+
+    @waitForCallback(refreshSpy).then =>
+      refreshSpy.reset()
+      Rally.environment.getMessageBus().publish Rally.Message.bulkUpdate, @mom.getRecord('userstory', count: 2)
+      expect(refreshSpy.callCount).toBe 1
+
 

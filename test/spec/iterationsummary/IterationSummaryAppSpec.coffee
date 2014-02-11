@@ -793,7 +793,6 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
           ).then =>
             expect(timeBoxInfoStub.callCount).toBe 2
 
-
   it "refreshes app on objectUpdate of artifacts", ->
     @createApp({}).then (app) =>
       addStub = @stub(app, 'add')
@@ -809,6 +808,23 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       addSpy = @spy(app, 'add')
 
       Rally.environment.getMessageBus().publish(Rally.Message.objectUpdate, @mom.getRecord('Release'))
+
+      expect(addSpy).not.toHaveBeenCalled()
+
+  it "refreshes app on bulkUpdate of artifacts", ->
+    @createApp({}).then (app) =>
+      addStub = @stub(app, 'add')
+
+      messageBus = Rally.environment.getMessageBus()
+      messageBus.publish(Rally.Message.bulkUpdate, @mom.getRecord(type) for type in ['Defect', 'HierarchicalRequirement', 'DefectSuite', 'TestSet', 'TestCase'])
+
+      expect(addStub.callCount).toBe 1
+
+  it "does not refresh app on bulkUpdate of non-artifacts", ->
+    @createApp({}).then (app) =>
+      addSpy = @spy(app, 'add')
+
+      Rally.environment.getMessageBus().publish(Rally.Message.bulkUpdate, @mom.getRecord(type) for type in ['ConversationPost', 'Release'])
 
       expect(addSpy).not.toHaveBeenCalled()
 
