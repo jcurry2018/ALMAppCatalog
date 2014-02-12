@@ -5,6 +5,9 @@
         extend: 'Rally.apps.charts.burndown.BurnDownApp',
         help: {
             id: 278
+        },
+        integrationHeaders : {
+            name: 'Release Burndown'
         }
     });
 }());

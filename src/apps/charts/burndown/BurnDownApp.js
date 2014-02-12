@@ -11,7 +11,8 @@
             'Rally.data.wsapi.Store',
             'Rally.util.Help',
             'Rally.ui.combobox.IterationComboBox',
-            'Rally.ui.combobox.ReleaseComboBox'
+            'Rally.ui.combobox.ReleaseComboBox',
+            'Rally.apps.charts.IntegrationHeaders'
         ],
 
         mixins: [
@@ -42,7 +43,6 @@
                 showLabels: true
             }
         },
-
         getSettingsFields: function () {
             this.chartSettings = this.chartSettings || Ext.create('Rally.apps.charts.burndown.BurnDownSettings', {
                 app: this
@@ -64,7 +64,7 @@
                     return;
                 }
             }
-
+            Ext.create('Rally.apps.charts.IntegrationHeaders',this).applyTo(this.chartComponentConfig.storeConfig);
             this._addHelpComponent();
             this._loadUserStoryModel();
             this._saveScopeType();
