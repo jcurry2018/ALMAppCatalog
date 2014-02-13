@@ -215,9 +215,9 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
     it 'should get latest store filters', ->
       @createColumn().then =>
         getStoreFilterSpy = @spy @column, 'getStoreFilter'
-        @stub @column.store, 'reloadRecord', ->
+        @stub @column.store, 'reloadRecord', =>
           deferred = new Deft.Deferred()
-          deferred.resolve()
+          deferred.resolve @mom.getRecord('userstory')
           deferred.promise
 
         @column.refreshRecord(@column.getRecords()[0], ->).then =>
