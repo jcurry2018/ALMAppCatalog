@@ -190,7 +190,7 @@
                 storeConfig: {
                     project: null,
                     context: this.requestContext,
-                    fetch: true
+                    fetch: ['ObjectID','Project','WorkSpace','FormattedID','Name','ActualStartDate','PlannedStartDate','ActualEndDate','PlannedEndDate']
                 },
                 gridConfig: {
                     viewConfig: {
