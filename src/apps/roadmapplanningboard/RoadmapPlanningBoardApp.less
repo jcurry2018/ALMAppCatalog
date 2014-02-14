@@ -917,10 +917,60 @@
     font-size: 12px;
 }
 
+.roadmap-board-userstory-popover .rank-cell {
+    background: none;
+}
+
+.roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-table colgroup:first-child col {
+    width: 7px !important;
+}
+
+.roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-row .x4-grid-cell.rank-cell {
+  margin: 0;
+  padding: 0;
+  color: transparent;
+  background-image: none;
+  background-color: #00A9E0;
+  position: relative;
+}
+
+.roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-row.x4-grid-row-over .x4-grid-cell.rank-cell {
+  color: white;
+  cursor: move !important;
+}
+
+.roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-row .x4-grid-cell.rank-cell .x4-grid-cell-inner {
+  background: none;
+  font-family: "Rally";
+  font-size: 18px;
+  padding: 4px 1px 0 1px;
+  text-overflow: clip;
+  margin: 0;
+}
+
+.roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-row .x4-grid-cell.rank-cell .x4-grid-cell-inner:before {
+    content: "\2a";
+}
+
 .roadmap-service-unavailable-error div {
     background-image: none;
     padding: 5px 10px 5px 10px;
     font-size: 12px;
     background-color: #F66349;
     font-weight: normal;
+}
+
+.roadmap-board .rui-card .rui-card-content .field-content .rui-field-label {
+    text-transform: uppercase;
+    margin: 1px 5px 0 2px;
+    color: #666666;
+    font-size: 11px;
+}
+
+.roadmap-board .rui-card .rui-card-content .field-content .rui-field-value {
+    font-size: 11px;
+}
+
+.roadmap-board .rui-card .rui-card-content .field-content.Name .rui-field-value {
+    font-size: 12px;
 }

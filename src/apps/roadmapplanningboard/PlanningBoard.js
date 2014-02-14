@@ -15,7 +15,8 @@
             'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
             'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper',
             'Rally.apps.roadmapplanningboard.util.PlanGenerator',
-            'Rally.ui.Button'
+            'Rally.ui.Button',
+            'Rally.ui.grid.TreeGrid'
         ],
 
         cls: 'roadmap-board cardboard',
@@ -25,7 +26,7 @@
             timeline: null,
             isAdmin: false,
             cardConfig: {
-                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'LeafStoryCount', 'PercentDoneByStoryCount'],
+                fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'PercentDoneByStoryCount', 'UserStories'],
                 editable: true,
                 skipDefaultFields: true
             },
@@ -71,7 +72,63 @@
                 throw 'typeNames must have a child property with a name';
             }
 
+            this._extendUserStoriesFieldConfig();
+
             this.callParent(arguments);
+        },
+
+        _extendUserStoriesFieldConfig: function () {
+            this._extendFieldConfig('UserStories', {
+                fetch: ['UserStories', 'LeafStoryPlanEstimateTotal'],
+                popoverConfig: {
+                    cls: 'roadmap-board-userstory-popover',
+                    placement: ['bottom', 'right', 'left', 'top'],
+                    listViewConfig: {
+                        listeners: {
+                            datachanged: function (listView) {
+                                var record = listView.getRecord();
+                                var card = this.getCard(record);
+
+                                card.ownerColumn.refreshCard(record);
+                            },
+                            scope: this
+                        },
+                        gridConfig: {
+                            columnCfgs: [
+                                'FormattedID',
+                                'Name',
+                                {
+                                    dataIndex: 'ScheduleState', // 'dataIndex' is the actual field name
+                                    text: 'State' // 'text' is the display name
+                                },
+                                {
+                                    dataIndex: 'PlanEstimate',
+                                    editor: {
+                                        decimalPrecision: 0
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            });
+        },
+
+        _extendFieldConfig: function (fieldName, config) {
+            var cardFields = this.cardConfig && this.cardConfig.fields;
+            if (!cardFields) {
+                return;
+            }
+
+            var fieldIndex = _.findIndex(cardFields, function (field) {
+                return Ext.isObject(field) ? field.name === fieldName : field === fieldName;
+            });
+
+            if (fieldIndex >= 0) {
+                var fieldObject = Ext.isObject(cardFields[fieldIndex]) ? cardFields[fieldIndex] : { name: fieldName };
+                cardFields[fieldIndex] = Ext.merge(fieldObject, config);
+                this.cardConfig.fields[fieldIndex] = cardFields[fieldIndex];
+            }
         },
 
         shouldRetrieveModels: function () {

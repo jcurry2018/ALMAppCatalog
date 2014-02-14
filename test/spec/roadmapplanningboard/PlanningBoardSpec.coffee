@@ -105,11 +105,19 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
       expect(@cardboard.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
 
-  it 'should have leaf story count on the cards', ->
-      @createCardboard().then =>
-        _.each @cardboard.getColumns(), (column) =>
-          _.each column.getCards(), (card) =>
-            expect(card.getEl().down('.rui-card-content .LeafStoryCount .rui-field-value').dom.innerHTML).toBe "42"
+  it 'should have user story count on the cards', ->
+    @createCardboard().then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.record.data.UserStories.Count).toBe 3
+          expect(card.getEl().down('.rui-card-content .UserStories .user-story-count').dom.innerHTML).toBe "(3)"
+
+  it 'should have leaf story plan estimate total on the cards', ->
+    @createCardboard().then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.record.data.LeafStoryPlanEstimateTotal).toBe 3.14
+          expect(card.getEl().down('.rui-card-content .UserStories .user-story-points').dom.innerHTML).toContain "3.14"
 
   it 'should have parent on the cards', ->
     @createCardboard().then =>
@@ -225,6 +233,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
           expect(@cardboard._getClickAction()).toEqual("Themes toggled from [false] to [true]")
 
   describe 'permissions', ->
+
     it 'should set editable permissions for admin', ->
       @createCardboard(isAdmin: true).then =>
         columns = _.where @cardboard.getColumns(), xtype: 'timeframeplanningcolumn'
@@ -249,6 +258,47 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
           expect(column.columnHeaderConfig.editable).toBe false
 
   describe '#getFirstRecord', ->
+
     it 'should get the first record in the backlog column', ->
       @createCardboard().then =>
         expect(@cardboard.getFirstRecord().get('Name')).toBe 'Blackberry Native App'
+
+  describe 'card config', ->
+
+    beforeEach ->
+      @config =
+        cardConfig:
+          fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'PercentDoneByStoryCount', 'PercentDoneByStoryPlanEstimate', 'UserStories']
+
+      @createCardboard(@config).then =>
+        @userStoriesField = _.last(@cardboard.cardConfig.fields)
+
+    describe 'user stories field', ->
+
+      it 'should be extended/augmented as an object in the fields array', ->
+        expect(Ext.isObject(@userStoriesField)).toBe true
+        expect(@userStoriesField.name).toEqual 'UserStories'
+
+      it 'should have UserStories and LeafStoryPlanEstimateTotal as additional fetch fields', ->
+        expect(@userStoriesField.fetch).toContain 'UserStories'
+        expect(@userStoriesField.fetch).toContain 'LeafStoryPlanEstimateTotal'
+
+      it 'should have a popoverConfig as an additional config', ->
+        expect(@userStoriesField.popoverConfig).toBeDefined
+
+    describe 'user stories popover config', ->
+
+      it 'should have a bottom-first placement/positioning hierarchy', ->
+        expect(@userStoriesField.popoverConfig.placement).toEqual ['bottom', 'right', 'left', 'top']
+
+      describe 'popover columns', ->
+
+        beforeEach ->
+          @columnConfig = @userStoriesField.popoverConfig.listViewConfig.gridConfig.columnCfgs
+
+        it 'should include ScheduleState as a column', ->
+          expect(@columnConfig).toContain({ dataIndex: 'ScheduleState', text: 'State' })
+
+        it 'should include PlanEstimate as a column', ->
+          expect(@columnConfig).toContain({ dataIndex: 'PlanEstimate', editor: { decimalPrecision: 0 }})
+
