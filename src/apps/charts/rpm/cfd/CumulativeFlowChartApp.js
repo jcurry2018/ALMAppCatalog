@@ -7,14 +7,17 @@
         
         requires: [
             'Rally.ui.chart.Chart',
-            'Rally.apps.charts.Colors'
+            'Rally.apps.charts.Colors',
+            'Rally.apps.charts.IntegrationHeaders'
         ],
 
         help: {
             cls: 'portfolio-cfd-help-container',
             id: 274
         },
-
+        integrationHeaders : {
+            name: 'Portfolio Item CFD'
+        },
 
         chartComponentConfig: {
             xtype: "rallychart",

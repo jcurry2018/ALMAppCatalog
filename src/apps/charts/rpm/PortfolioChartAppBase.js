@@ -27,6 +27,9 @@
                 cls: 'header'
             }
         ],
+        integrationHeaders : {
+            name : "Portfolio Chart"
+        },
 
         getSettingsFields: function () {
             return this.chartSettings.getSettingsConfiguration();
@@ -48,6 +51,7 @@
             this._setupUpdateBeforeRender();
 
             this._loadSavedPortfolioItem();
+            Ext.create('Rally.apps.charts.IntegrationHeaders',this).applyTo(this.chartComponentConfig.storeConfig);
         },
 
         _setupChartSettings: function () {

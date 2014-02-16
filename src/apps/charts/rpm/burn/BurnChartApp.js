@@ -8,12 +8,16 @@
         
         requires: [
             'Rally.ui.chart.Chart',
-            'Rally.apps.charts.Colors'
+            'Rally.apps.charts.Colors',
+            'Rally.apps.charts.IntegrationHeaders'
         ],
 
         help: {
             cls:'piburnup-help-container',
             id: 273
+        },
+        integrationHeaders : {
+            name : "Portfolio Item Burnup"
         },
 
         chartComponentConfig: {

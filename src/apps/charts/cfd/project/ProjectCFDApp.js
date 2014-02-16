@@ -25,6 +25,9 @@
                 timeFrameUnit: 'day'
             }
         },
+        integrationHeaders : {
+            name : "Project CFD"
+        },
 
         chartSettings: undefined, // ProjectCFDChartSettings object
 
@@ -35,6 +38,7 @@
                 cls: 'header'
             }
         ],
+
 
         help: {
             id: 279
@@ -181,13 +185,14 @@
         },
 
         _buildChartStoreConfig: function() {
-            return {
+            var config = {
                 context: { workspace: this.workspace._ref },
                 find: this._buildChartStoreConfigFind(),
                 fetch: this._buildChartStoreConfigFetch(),
                 hydrate: this._buildChartStoreConfigHydrate(),
                 compress: true
             };
+            return Ext.create("Rally.apps.charts.IntegrationHeaders",this).applyTo(config);
         },
 
         _buildChartStoreConfigFind: function() {
