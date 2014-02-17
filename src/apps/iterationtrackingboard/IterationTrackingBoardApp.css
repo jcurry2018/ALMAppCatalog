@@ -26,25 +26,6 @@
     margin: 3px 0px 0px 5px;
 }
 
-.iterationtrackingboard .x4-grid-row-summary {
-    background-color: #F6F6F6;
-}
-
-.iterationtrackingboard .x4-grid-row-summary .x4-grid-cell-inner {
-    margin: 0 1px;
-    padding: 0;
-}
-
-.iterationtrackingboard .x4-grid-row-summary .rollup {
-    background-color: #D6D6D6;
-    display: inline-block;
-    font-family: NotoSans, Helvetica, Arial;
-    font-size: 12px;
-    line-height: 21px;
-    text-align: center;
-    width: 100%;
-}
-
 .settings-no-grid {
     padding: 10px;
 }

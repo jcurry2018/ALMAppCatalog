@@ -136,7 +136,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
 
   it 'should show the gridboard after clicking the got it button', ->
     @createApp(false, {expectSplash: true, alreadyGotIt: false}).then =>
-      @click(css: '.primary').then =>
+      @click(css: '.primary.button').then =>
         @waitForComponentReady(@app.down('#gridboard')).then =>
           expect(@app).toContainComponent '#gridboard'
 

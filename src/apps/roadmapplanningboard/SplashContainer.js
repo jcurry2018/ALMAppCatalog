@@ -97,7 +97,7 @@
                             buttonAlign: 'center',
                             text: 'Get Started!',
                             itemId: 'get-started',
-                            cls: 'primary medium',
+                            cls: 'primary button medium harmonize-btn',
                             margin: '20 0 20 0',
                             handler: function () {
                                 this._savePreference();
@@ -115,7 +115,7 @@
                         xtype: 'rallybutton',
                         text: 'Got it!',
                         itemId: 'got-it',
-                        cls: 'primary medium',
+                        cls: 'primary button medium harmonize-btn',
                         handler: function () {
                             this._savePreference();
                             this.fireEvent('gotit', this);
@@ -129,7 +129,7 @@
                     xtype: 'rallybutton',
                     text: 'Learn more',
                     itemId: 'learn-more',
-                    cls: 'secondary medium',
+                    cls: 'secondary button medium harmonize-btn',
                     href: Rally.util.Help.getHelpUrl({id: 280})
                 }
             ]);
