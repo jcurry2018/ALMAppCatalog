@@ -8,5 +8,6 @@ The latest stable version of the app catalog is availble here: https://github.co
 Copyright (c) Rally Software Development Corp. 2013 Distributed under the MIT License.
 
 ## Development
+
 * External App Development: [Readme](https://github.com/RallyApps/app-catalog/blob/master/README.md)
 * ALM Development: [Wiki](wiki/)
