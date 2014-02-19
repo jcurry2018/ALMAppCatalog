@@ -1,7 +1,8 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.util.DateTime',
+  'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp'
+  'Rally.util.DateTime'
   'Rally.app.Context'
 ]
 
@@ -51,16 +52,11 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         }
       }]
 
-    toggleToGridOrBoard: (view) ->
-      toggler = @app.gridboard.down('rallygridboardtoggle')
-      toggler.applyState toggle: view
-      toggler.fireEvent 'toggle', view
-
     toggleToBoard: ->
-      @toggleToGridOrBoard('board')
+      @app.gridboard.setToggleState('board')
 
     toggleToGrid: ->
-      @toggleToGridOrBoard('grid')
+      @app.gridboard.setToggleState('grid')
 
     stubFeatureToggle: (toggles) ->
       stub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled');
@@ -120,7 +116,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   it 'should include PortfolioItem in columnConfig.additionalFetchFields', ->
     @createApp().then =>
-
       expect(@app.gridboard.getGridOrBoard().columnConfig.additionalFetchFields).toContain 'PortfolioItem'
 
   it 'should have a default card fields setting', ->
@@ -158,18 +153,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @toggleToGrid()
       expect(@app.down('rallytreegrid')).not.toBeNull()
       expect(@app.down('rallygrid')).toBeNull()
-
-  it 'should recreate the treegrid with given columns on reconfigure event', ->
-    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
-
-    @createApp().then =>
-      @toggleToGrid()
-      initialGridId = @app.down('rallytreegrid').id
-
-      @app.gridboard.getGridOrBoard().fireEvent('reconfigure', ['Name'])
-      @toggleToGrid()
-      @waitForVisible(css: '.x-tree-panel').then =>
-        expect(@app.down('rallytreegrid').id).toNotEqual initialGridId
 
   it 'should show a regular grid when treegrid toggled off', ->
     @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']

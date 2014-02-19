@@ -9,10 +9,14 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFeedback',
             'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable',
+            'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.apps.roadmapplanningboard.PlanningBoard'
         ],
 
         cls: 'roadmap-board',
+
+        toggleState: 'board',
+        stateId: 'roadmapgridboard',
 
         config: {
             /**
@@ -53,10 +57,20 @@
                     beforecreate: this._onBeforeCreate,
                     beforeeditorshow: this._onBeforeCreate
                 },
+                style: {
+                    'float': 'left'
+                },
                 fieldLabel: 'New ' + this.typeNames.child.name
             };
             this.plugins = [
                 'rallygridboardaddnew',
+                {
+                    ptype: 'rallygridboardfieldpicker',
+                    showInBoardMode: true,
+                    headerPosition: 'left',
+                    stateful: true,
+                    stateId: this.getContext().getScopedStateId('fields')
+                },
                 {
                     ptype: 'rallygridboardfeedback',
                     feedbackDialogConfig: {

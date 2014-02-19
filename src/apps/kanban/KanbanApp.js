@@ -133,6 +133,8 @@
 
             return {
                 xtype: 'rallygridboard',
+                stateful: false,
+                toggleState: 'board',
                 cardBoardConfig: cardboardConfig,
                 plugins: plugins,
                 context: this.getContext(),

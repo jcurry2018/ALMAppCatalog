@@ -137,18 +137,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
         _.each column.getCards(), (card) =>
           expect(card.getEl().down('.rui-card-right-side .PreliminaryEstimate .rui-field-value').dom.innerHTML).toBe "L"
 
-  it 'should have project on the cards', ->
-    @createCardboard().then =>
-      _.each @cardboard.getColumns(), (column) =>
-        _.each column.getCards(), (card) =>
-          expect(card.getEl().down('.rui-card-content .Project .rui-field-value').dom.innerHTML).toBe "My Project"
-
-  it 'should have percent done on the cards', ->
-    @createCardboard().then =>
-      _.each @cardboard.getColumns(), (column) =>
-        _.each column.getCards(), (card) =>
-          expect(card.getEl().down('.rui-card-content .progress-bar-container.field-PercentDoneByStoryCount .progress-bar-label')).toBeTruthy()
-
   it 'should have features in the appropriate columns', ->
     @createCardboard().then =>
       expect(@cardboard.getColumns()[1].getCards().length).toBe 3

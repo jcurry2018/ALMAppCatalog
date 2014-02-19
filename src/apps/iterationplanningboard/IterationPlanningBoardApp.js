@@ -63,6 +63,7 @@
                 xtype: 'iterationplanningboardapptimeboxgridboard',
                 context: this.getContext(),
                 modelNames: this.modelNames,
+                toggleState: 'board',
                 plugins: plugins,
                 cardBoardConfig: {
                     cardConfig: {

@@ -20,6 +20,7 @@
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
+            'Rally.ui.gridboard.plugin.GridBoardToggleable',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
             'Rally.ui.filter.view.TagFilter',
@@ -114,6 +115,9 @@
                 'rallygridboardfieldpicker'
             ]);
 
+            if (context.isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE')) {
+                plugins.push('rallygridboardtoggleable');
+            }
             if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS') && !context.isFeatureEnabled('F4359_FILTER')) {
                 plugins.push({
                     ptype: 'rallygridboardartifacttypechooser',
@@ -133,7 +137,6 @@
                 xtype: 'rallygridboard',
                 stateId: 'iterationtracking-gridboard',
                 context: context,
-                enableToggle: context.isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE'),
                 plugins: this.plugins,
                 modelNames: this.modelNames,
                 allModelNames: context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID') ? this.allModelNames : null,
