@@ -105,25 +105,25 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
       expect(@cardboard.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
 
-#  it 'should have user story count on the cards if UserStories is a selected card field', ->
-#    @createCardboard().then =>
-#      _.each @cardboard.getColumns(), (column) =>
-#        _.each column.getCards(), (card) =>
-#          expect(card.record.data.UserStories.Count).toBe 3
-#
-#  it 'should have leaf story count on the cards if UserStories is a selected card field', ->
-#    @createCardboard().then =>
-#      _.each @cardboard.getColumns(), (column) =>
-#        _.each column.getCards(), (card) =>
-#          expect(card.record.data.LeafStoryCount).toBe 42
-#          expect(card.getEl().down('.rui-card-content .UserStories .user-story-count').dom.innerHTML).toBe "(42)"
-#
-#  it 'should have leaf story plan estimate total on the cards', ->
-#    @createCardboard().then =>
-#      _.each @cardboard.getColumns(), (column) =>
-#        _.each column.getCards(), (card) =>
-#          expect(card.record.data.LeafStoryPlanEstimateTotal).toBe 3.14
-#          expect(card.getEl().down('.rui-card-content .UserStories .user-story-points').dom.innerHTML).toContain "3.14"
+  it 'should have user story count on the cards if UserStories is a selected card field', ->
+    @createCardboard(cardConfig: fields: ['UserStories']).then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.record.data.UserStories.Count).toBe 3
+
+  it 'should have leaf story count on the cards if UserStories is a selected card field', ->
+    @createCardboard(cardConfig: fields: ['UserStories']).then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.record.data.LeafStoryCount).toBe 42
+          expect(card.getEl().down('.rui-card-content .UserStories .user-story-count').dom.innerHTML).toBe "(42)"
+
+  it 'should have leaf story plan estimate total on the cards if UserStories is a selected card field', ->
+    @createCardboard(cardConfig: fields: ['UserStories']).then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.record.data.LeafStoryPlanEstimateTotal).toBe 3.14
+          expect(card.getEl().down('.rui-card-content .UserStories .user-story-points').dom.innerHTML).toContain "3.14"
 
   it 'should have parent on the cards', ->
     @createCardboard().then =>
