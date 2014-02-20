@@ -71,12 +71,12 @@ table.settings-showLabels td {
     background-position: 0 -13px;
 }
 
-.x-boundlist-item img.stateFieldValue {
+.statefieldvalue-boundlist-item img.stateFieldValue {
     background: transparent url('checkbox.gif');
     height: 13px;
     width: 13px;
 }
-.x-boundlist-selected img.stateFieldValue{
+.statefieldvalue-boundlist-selected img.stateFieldValue{
     background: transparent url('checkbox.gif');
     height: 13px;
     width: 13px;
