@@ -145,9 +145,11 @@
         },
 
         _sizeButtonToColumnHeader: function(button, column){
-            var columnHeaderHeight = column.getHeaderTitle().getHeight();
+            var columnHeaderHeight = column.getHeaderTitle().getHeight() - 30;
 
-            button.getEl().setHeight(columnHeaderHeight);
+            button.getEl()
+                .setHeight(columnHeaderHeight)
+                .setStyle('margin-top', '28px');
         },
 
         getFirstVisibleScrollableColumn: function () {

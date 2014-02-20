@@ -160,7 +160,7 @@
                     text: '<i class="icon-add"></i>',
                     elTooltip: 'Add Timeframe',
                     cls: 'scroll-button right',
-                    height: column.getHeaderTitle().getHeight(),
+                    height: 28,
                     frame: false,
                     handler: this._addNewColumn,
                     renderTo: column.getHeaderTitle().getEl(),
