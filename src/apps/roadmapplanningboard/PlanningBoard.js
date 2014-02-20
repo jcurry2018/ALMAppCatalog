@@ -79,7 +79,7 @@
 
         _extendUserStoriesFieldConfig: function () {
             this._extendFieldConfig('UserStories', {
-                fetch: ['UserStories', 'LeafStoryPlanEstimateTotal'],
+                fetch: ['UserStories', 'LeafStoryPlanEstimateTotal', 'LeafStoryCount'],
                 popoverConfig: {
                     cls: 'roadmap-board-userstory-popover',
                     placement: ['bottom', 'right', 'left', 'top'],
