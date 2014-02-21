@@ -257,15 +257,31 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       @createCardboard().then =>
         expect(@cardboard.getFirstRecord().get('Name')).toBe 'Blackberry Native App'
 
-  describe 'card config', ->
+  describe '#refresh', ->
+    beforeEach ->
+      @config = columnConfig:
+        fields: ['UserStories']
+
+      @createCardboard().then =>
+        @parentRefreshSpy = @spy @cardboard.self.superclass, 'refresh'
+        @cardboard.refresh @config
+
+    it 'should not mutate the newConfig', ->
+      # testing for object equality causes jasmine to crash when the field is not a string
+      expect(typeof @config.columnConfig.fields[0]).toBe 'string'
+
+    it 'should call refresh on the parent with extended field objects', ->
+      expect(@parentRefreshSpy.lastCall.args[0].columnConfig.fields[0].name).toBe 'UserStories'
+
+  describe 'column config', ->
 
     beforeEach ->
       @config =
-        cardConfig:
+        columnConfig:
           fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'PercentDoneByStoryCount', 'PercentDoneByStoryPlanEstimate', 'UserStories']
 
       @createCardboard(@config).then =>
-        @userStoriesField = _.last(@cardboard.cardConfig.fields)
+        @userStoriesField = _.last(@cardboard.columnConfig.fields)
 
     describe 'user stories field', ->
 
