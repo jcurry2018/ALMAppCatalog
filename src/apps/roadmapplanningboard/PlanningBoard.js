@@ -26,11 +26,11 @@
             timeline: null,
             isAdmin: false,
             cardConfig: {
+                fields: ['FormattedID', 'Name'],
                 editable: true,
                 skipDefaultFields: true
             },
             columnConfig: {
-                fields: ['FormattedID', 'Owner', 'Name', 'PreliminaryEstimate', 'Parent'],
                 additionalFetchFields: ['PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount', 'Rank', 'DisplayColor', 'Value']
             },
             ddGroup: 'planningBoard',
