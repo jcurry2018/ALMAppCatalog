@@ -26,7 +26,7 @@
             timeline: null,
             isAdmin: false,
             cardConfig: {
-                fields: ['FormattedID', 'Name'],
+                fields: ['FormattedID', 'Owner', 'Name', 'PreliminaryEstimate', 'Parent'],
                 editable: true,
                 skipDefaultFields: true
             },
