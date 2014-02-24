@@ -141,9 +141,7 @@
 
             return this.calculateTimeboxInfo().then({
                 success: function() {
-                    if (this.down('#dataContainer')) {
-                        this.down('#dataContainer').destroy();
-                    }
+                    this._checkAndDestroy('#dataContainer');
 
                     this.add({
                         xtype: 'container',
@@ -216,6 +214,12 @@
                 timeboxLength: timeboxCounts.workdays,
                 daysRemaining: timeboxCounts.remaining
             };
+        },
+
+        _checkAndDestroy: function(itemId) {
+            if (this.down(itemId)) {
+                this.down(itemId).destroy();
+            }
         },
 
         _getStatusRowData: function() {
@@ -511,6 +515,7 @@
             return this._getAcceptanceConfigObject().then({
                 success: function(acceptanceConfigObject) {
                     this.down('#stats').suspendLayouts();
+                    this.down('#stats').removeAll();
                     this._displayStatusRow(acceptanceConfigObject);
                     this._displayStatusRow(this._getDefectsConfigObject());
                     if (!this._isHsOrTeamEdition()) {

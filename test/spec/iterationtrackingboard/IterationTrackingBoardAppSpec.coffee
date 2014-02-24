@@ -99,10 +99,11 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       @app.onTimeboxScopeChange newScope
 
-      expect(removeStub).toHaveBeenCalledOnce()
-      expect(removeStub).toHaveBeenCalledWith 'gridBoard'
+      @waitForCallback(removeStub).then =>
+        expect(removeStub).toHaveBeenCalledOnce()
+        expect(removeStub).toHaveBeenCalledWith 'gridBoard'
 
-      expect(@app.down('#gridBoard')).toBeDefined()
+        expect(@app.down('#gridBoard')).toBeDefined()
 
   it 'fires contentupdated event after board load', ->
     contentUpdatedHandlerStub = @stub()

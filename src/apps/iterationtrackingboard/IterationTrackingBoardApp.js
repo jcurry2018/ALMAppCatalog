@@ -43,7 +43,6 @@
         },
 
         onScopeChange: function(scope) {
-            this.remove('gridBoard');
             this._loadModels();
         },
 
@@ -132,6 +131,8 @@
 
         _addGrid: function(gridConfig){
             var context = this.getContext();
+
+            this.remove('gridBoard');
 
             this.gridboard = this.add({
                 itemId: 'gridBoard',
