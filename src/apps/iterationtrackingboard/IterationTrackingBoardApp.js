@@ -107,6 +107,10 @@
                 plugins.push('rallygridboardownerfilter');
             }
 
+            if (context.isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE')) {
+                plugins.push('rallygridboardtoggleable');
+            }
+
             plugins = plugins.concat([{
                     ptype: 'rallygridboardfilterinfo',
                     isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
@@ -115,9 +119,6 @@
                 'rallygridboardfieldpicker'
             ]);
 
-            if (context.isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE')) {
-                plugins.push('rallygridboardtoggleable');
-            }
             if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS') && !context.isFeatureEnabled('F4359_FILTER')) {
                 plugins.push({
                     ptype: 'rallygridboardartifacttypechooser',
