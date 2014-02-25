@@ -3,7 +3,8 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp'
   'Rally.util.DateTime'
-  'Rally.app.Context'
+  'Rally.app.Context',
+  'Rally.domain.Subscription'
 ]
 
 describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
@@ -250,3 +251,24 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         nameColumnHeaderSelector = '.btid-grid-header-name'
         @mouseOver(css: nameColumnHeaderSelector).then =>
           expect(@app.getEl().down("#{nameColumnHeaderSelector} .#{Ext.baseCSSPrefix}column-header-trigger")).toBeNull
+
+  describe 'model types', ->
+
+    beforeEach ->
+      @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
+
+    it 'should include test sets in UE', ->
+      @stub(Rally.domain.Subscription::, 'isUnlimitedEdition').returns true
+      @createApp().then =>
+        @toggleToGrid()
+        expect(@app.modelNames).toContain 'Test Set'
+        expect(@app.allModelNames).toContain 'Test Set'
+        expect(@app.down('rallytreegrid').getStore().parentTypes).toContain 'TestSet'
+
+    it 'should not include test sets in UE', ->
+      @stub(Rally.domain.Subscription::, 'isUnlimitedEdition').returns false
+      @createApp().then =>
+        @toggleToGrid()
+        expect(@app.modelNames).not.toContain 'Test Set'
+        expect(@app.allModelNames).not.toContain 'Test Set'
+        expect(@app.down('rallytreegrid').getStore().parentTypes).not.toContain 'TestSet'
