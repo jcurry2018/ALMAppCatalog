@@ -209,10 +209,9 @@
                         testcase: ['WorkProduct']
                     },
                     storeConfig: {
-                        nodeParam: 'Parent',
                         parentTypes: parentTypes,
                         childTypes: ['Defect', 'Task', 'TestCase'],
-                        rootNodeFilters: this.context.getTimeboxScope().getQueryFilter(),
+                        filters: [this.context.getTimeboxScope().getQueryFilter()],
                         sorters: [{
                             property: Rally.data.Ranker.getRankField(treeGridModel),
                             direction: 'ASC'
@@ -226,7 +225,6 @@
                         store = store.treeStore || store;
                         return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);
                     },
-                    rootVisible: false,
                     columnCfgs: columns ? this._getGridColumns(columns) : null,
                     defaultColumnCfgs: this._getGridColumns(),
                     pageResetMessages: [Rally.app.Message.timeboxScopeChange],
