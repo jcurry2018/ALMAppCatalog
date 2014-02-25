@@ -111,6 +111,9 @@
                         cls: 'roadmap-board-userstory-popover',
                         placement: ['bottom', 'right', 'left', 'top'],
                         listViewConfig: {
+                            addNewConfig: {
+                                showAddWithDetails: false
+                            },
                             listeners: {
                                 datachanged: function (listView) {
                                     var record = listView.getRecord();
