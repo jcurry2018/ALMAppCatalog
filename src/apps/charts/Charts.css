@@ -52,10 +52,11 @@
 }
 
 .app-settings .settings-form .settingsLabel {
-    text-transform: uppercase;
-    font-weight: bold;
     display: block;
+    font-family: NotoSansBold, Helvetica, Arial;
+    font-weight: normal;
     min-height: 20px;
+    text-transform: uppercase;
     width: 100px;
 }
 

@@ -23,7 +23,8 @@
 }
 
 .portfolio-kanban .showPolicies {
-    font-weight: bold;
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
+    font-weight: normal;
     float: right;
     margin: 3px 10px 6px 0;
 }

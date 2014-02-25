@@ -12,6 +12,7 @@
 }
 
 .team-board-app .rui-card .rui-card-content .card-header .card-header-user-info .team-member-name {
+    font-family: NotoSansBold, Helvetica, Arial;
     font-size: 15px;
-    font-weight: bold;
+    font-weight: normal;
 }

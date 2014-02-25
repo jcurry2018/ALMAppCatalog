@@ -42,14 +42,16 @@ th.planning-column {
 }
 
 .planning-column .columnTitle {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
     font-size: 18px;
-    font-weight: bold;
+    font-weight: normal;
     color: #333333;
 }
 
 .planning-column .timeboxDates {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: normal;
     color: #8f8f8f;
     margin-bottom: 7px;
 }
