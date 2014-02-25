@@ -69,7 +69,7 @@
                     showInBoardMode: true,
                     headerPosition: 'left',
                     alwaysSelectedValues: ['FormattedID', 'Name'],
-                    boardFieldDefaults: ['PreliminaryEstimate', 'Discussions', 'UserStories'],
+                    boardFieldDefaults: ['PreliminaryEstimate', 'Discussions', 'UserStories', 'Name'],
                     stateful: true,
                     stateId: this.getContext().getScopedStateId('fields')
                 },
