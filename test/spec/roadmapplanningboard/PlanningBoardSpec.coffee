@@ -126,13 +126,13 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
           expect(card.getEl().down('.rui-card-content .UserStories .user-story-points').dom.innerHTML).toContain "3.14"
 
   it 'should have parent on the cards', ->
-    @createCardboard().then =>
+    @createCardboard(cardConfig: fields: ['Parent']).then =>
       _.each @cardboard.getColumns(), (column) =>
         _.each column.getCards(), (card) =>
           expect(card.getEl().down('.rui-card-content .Parent .rui-field-value').dom.innerHTML).toBe "I1: Who's Your Daddy"
 
   it 'should have preliminary estimate on the cards', ->
-    @createCardboard().then =>
+    @createCardboard(cardConfig: fields: ['PreliminaryEstimate']).then =>
       _.each @cardboard.getColumns(), (column) =>
         _.each column.getCards(), (card) =>
           expect(card.getEl().down('.rui-card-right-side .PreliminaryEstimate .rui-field-value').dom.innerHTML).toBe "L"

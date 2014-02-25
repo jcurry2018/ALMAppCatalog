@@ -68,6 +68,8 @@
                     ptype: 'rallygridboardfieldpicker',
                     showInBoardMode: true,
                     headerPosition: 'left',
+                    alwaysSelectedValues: ['FormattedID', 'Name'],
+                    boardFieldDefaults: ['PreliminaryEstimate', 'Discussions', 'UserStories'],
                     stateful: true,
                     stateId: this.getContext().getScopedStateId('fields')
                 },
