@@ -198,6 +198,7 @@
                     storeConfig: {
                         nodeParam: 'Parent',
                         parentFieldNames: ['Requirement', 'WorkProduct', 'DefectSuite'],
+                        parentTypes: ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'],
                         childTypes: ['Defect', 'Task', 'TestCase'],
                         rootNodeFilters: this.context.getTimeboxScope().getQueryFilter(),
                         sorters: {
@@ -240,12 +241,8 @@
         },
 
         _loadModels: function() {
-            var topLevelTypes = ['User Story', 'Defect', 'Defect Suite'],
+            var topLevelTypes = ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
                 allTypes = topLevelTypes.concat(['Task', 'Test Case']);
-            if(this.getContext().getSubscription().isUnlimitedEdition()) {
-                topLevelTypes.push('Test Set');
-                allTypes.push('Test Set');
-            }
             Rally.data.ModelFactory.getModels({
                 types: allTypes,
                 context: this.getContext().getDataContext(),
