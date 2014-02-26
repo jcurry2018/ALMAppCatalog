@@ -126,12 +126,17 @@
                 var queries = [];
                 dojo.forEach(checkBoxes, function(checkBox) {
                     if (checkBox.getChecked()) {
-                        queries.push({key:checkBox.getValue(),
+                        var queryObj = {
+                            key: checkBox.getValue(),
                             type: checkBox.getValue(),
                             fetch: "Name,FormattedID,Owner,ObjectID,Rank,PlanEstimate,Children,Ready,Blocked",
-                            query: '(ScheduleState < Accepted)',
+                            query: new rally.sdk.util.Query('ScheduleState < Accepted'),
                             order: "Rank"
-                        });
+                        };
+                        if(checkBox.getValue() === 'HierarchicalRequirement') {
+                            queryObj.query = queryObj.query.and('Children.ObjectID = null');
+                        }
+                        queries.push(queryObj);
                     }
                 });
         
@@ -140,11 +145,7 @@
                     rally.forEach(queries, function(query) {
                         if (results[query.key]) {
                             rally.forEach(results[query.key], function(item) {
-                                //exclude epic stories since estimates cannot be altered
-                                if ((item._type !== 'HierarchicalRequirement') ||
-                                        (item._type === 'HierarchicalRequirement' && item.Children.length === 0)) {
-                                    items = items.concat(item);
-                                }
+                                items = items.concat(item);
                             });
                         }
                     });
@@ -175,7 +176,7 @@
                     callback(items);
                 }
         
-                rallyDataSource.findAll(queries, bucketItems);
+                rallyDataSource.find(queries, bucketItems);
             };
         
             this._refreshBoard = function() {
