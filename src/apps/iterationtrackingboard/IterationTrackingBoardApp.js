@@ -115,7 +115,10 @@
                     isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
                     stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
                 },
-                'rallygridboardfieldpicker'
+                {
+                    ptype: 'rallygridboardfieldpicker',
+                    gridFieldBlackList: ['DisplayColor']
+                }
             ]);
 
             if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS') && !context.isFeatureEnabled('F4359_FILTER')) {
