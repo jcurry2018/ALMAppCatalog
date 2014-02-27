@@ -68,7 +68,6 @@
                     ptype: 'rallygridboardfieldpicker',
                     showInBoardMode: true,
                     headerPosition: 'left',
-                    alwaysSelectedValues: ['FormattedID', 'Name'],
                     boardFieldDefaults: ['PreliminaryEstimate', 'Discussions', 'UserStories', 'Name'],
                     gridFieldBlackList: ['DragAndDropRank', 'DisplayColor'],
                     stateful: true,
