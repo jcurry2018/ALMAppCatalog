@@ -54,6 +54,7 @@
                 theme: '',
                 roadmap: {id: this.roadmap.getId()}, // Turn the roadmap into a JSON into a JSON object in order correctly match the url pattern in the Plan model proxy.
                 timeframe: timeframeRecord,
+                features: [],
                 lowCapacity: 0,
                 highCapacity: 0
             })).save({
