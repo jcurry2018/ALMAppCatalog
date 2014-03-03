@@ -20,7 +20,9 @@
         appName: 'Iteration Summary',
         cls: 'iteration-summary-app',
         scopeType: 'iteration',
-
+        mixins: [
+            'Rally.clientmetrics.ClientMetricsRecordable'
+        ],
         clientMetrics: [
             {
                 method: '_onEditLinkClick',
@@ -264,9 +266,7 @@
                     }, this);
 
                     if (loadPromises.length === 0) {
-                        if (Rally.BrowserTest) {
-                            Rally.BrowserTest.publishComponentReady(this);
-                        }
+                        this.recordComponentReady();
                     } else {
                         Deft.Promise.all(loadPromises).then({
                             success: function() {
@@ -522,9 +522,7 @@
                         this._displayStatusRow(this._getTestsConfigObject());
                     }
                     this.down('#stats').resumeLayouts(true);
-                    if (Rally.BrowserTest) {
-                        Rally.BrowserTest.publishComponentReady(this);
-                    }
+                    this.recordComponentReady();
                 },
                 scope: this
             });

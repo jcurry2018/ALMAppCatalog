@@ -28,6 +28,9 @@
                 beginEvent: 'updateBeforeRender',
                 endEvent: 'updateAfterRender',
                 description: 'IterationBurnDownMinimalApp - chart rendering time'
+            },
+            {
+                componentReadyEvent: 'updateAfterRender'
             }
         ],
 

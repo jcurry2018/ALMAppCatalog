@@ -25,9 +25,13 @@
             'Rally.ui.filter.view.OwnerFilter',
             'Rally.ui.filter.view.TagPillFilter',
             'Rally.app.Message',
-            'Rally.apps.iterationtrackingboard.IsLeafHelper'
+            'Rally.apps.iterationtrackingboard.IsLeafHelper',
+            'Rally.clientmetrics.ClientMetricsRecordable'
         ],
-        mixins: ['Rally.app.CardFieldSelectable'],
+        mixins: [
+            'Rally.app.CardFieldSelectable',
+            'Rally.clientmetrics.ClientMetricsRecordable'
+        ],
         componentCls: 'iterationtrackingboard',
         alias: 'widget.rallyiterationtrackingboard',
 
@@ -282,9 +286,7 @@
 
         _onLoad: function() {
             this._publishContentUpdated();
-            if (Rally.BrowserTest) {
-                Rally.BrowserTest.publishComponentReady(this);
-            }
+            this.recordComponentReady();
         },
 
         _onBoardFilter: function() {

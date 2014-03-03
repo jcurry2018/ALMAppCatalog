@@ -5,8 +5,11 @@
         extend: 'Rally.app.App',
 
         requires: [
-            'Rally.ui.discussion.DiscussionRichTextStreamView'
+            'Rally.ui.discussion.DiscussionRichTextStreamView',
+            'Rally.clientmetrics.ClientMetricsRecordable'
         ],
+
+        mixins: ['Rally.clientmetrics.ClientMetricsRecordable'],
 
         appName: 'Recent Activity',
 
@@ -22,6 +25,9 @@
                 listeners: {
                     refresh: function(){
                         this.fireEvent('contentupdated', {dashboardLayout: false});
+                    },
+                    ready: function() {
+                        this.recordComponentReady();
                     },
                     scope: this
                 }
