@@ -23,7 +23,7 @@
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
-            'Rally.ui.filter.view.TagFilter',
+            'Rally.ui.filter.view.TagPillFilter',
             'Rally.app.Message',
             'Rally.apps.iterationtrackingboard.IsLeafHelper'
         ],
@@ -92,7 +92,7 @@
                                 project: this.getContext().getProjectRef()
                             },
                             {
-                                xtype: 'rallytagfilter',
+                                xtype: 'rallytagpillfilter',
                                 margin: '0 5'
                             },
                             {
