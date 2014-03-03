@@ -51,6 +51,8 @@
         launch: function() {
             this.setLoading();
 
+            this.useTimeboxScope = this.getSetting('useTimeboxScope');
+
             Rally.data.ModelFactory.getModel({
                 type: 'UserStory',
                 success: this._onStoryModelRetrieved,
@@ -84,6 +86,19 @@
                 defaultCardFields: this.getSetting('cardFields'),
                 isDndWorkspace: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled
             });
+        },
+
+        /**
+         * Called when any timebox scope change is received.
+         * @protected
+         * @param {Rally.app.TimeboxScope} timeboxScope The new scope
+         */
+        onTimeboxScopeChange: function(timeboxScope) {
+            this.callParent(arguments);
+            if (this.useTimeboxScope) {
+                this.gridboard.destroy();
+                this.launch();
+            }
         },
 
         _shouldShowColumnLevelFieldPicker: function() {
