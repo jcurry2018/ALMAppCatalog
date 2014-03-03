@@ -75,7 +75,9 @@
             this._addFeature(planRecord, options.record, options.index);
 
             planRecord.save({
-                success: function () {
+                success: function (record, operation) {
+                    planRecord.set('features', Ext.JSON.decode(operation.response.responseText).results);
+                    planRecord.commit();
                     return this._onDropSaveSuccess(options.column, null, options.card, options.record, "move");
                 },
                 failure: function (response, opts) {
@@ -104,7 +106,13 @@
                     id: options.record.get('_refObjectUUID'),
                     ref: this._getFeatureRef(options.record)
                 },
-                success: function () {
+                success: function (response, opts) {
+                    var data = Ext.JSON.decode(response.responseText);
+
+                    if (data) {
+                        destPlanRecord.set('features', data.results);
+                    }
+
                     srcPlanRecord.commit();
                     if (srcPlanRecord !== destPlanRecord) {
                         destPlanRecord.commit();
