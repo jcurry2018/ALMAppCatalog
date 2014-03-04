@@ -32,9 +32,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         @destPlanRecordSaveStub = @stub destPlanRecord, 'save', () ->
           expect(@dirty).toBeTruthy()
 
-      features = destPlanRecord?.get('features') || sourcePlanRecord?.get('features') || []
-      @response.responseText = Ext.JSON.encode results: features
-
       options.destColumnDropController.onCardDropped dragData, options.destIndex
 
     _createColumn: (options, shouldRender) ->
@@ -57,8 +54,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         renderTo: target
         contentCell: target
         headerCell: target
-#        isMatchingRecord: (record) ->
-#          record.get('_refObjectUUID') isnt 'F1002' # simulate a feature that doesn't exist in wsapi
         typeNames:
           child:
             name: 'Feature'
@@ -113,10 +108,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     @rightColumnDropController.init(@rightColumn)
     @backlogColumnDropController = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
     @backlogColumnDropController.init(@backlogColumn)
-    @response = Ext.JSON.encode responseText: results: []
 
-    @ajaxRequest = @stub Ext.Ajax, 'request', (options) =>
-      options.success.call(options.scope, @response)
+    @ajaxRequest = @stub Ext.Ajax, 'request', (options) ->
+      options.success.call(options.scope)
 
   afterEach ->
     Deft.Injector.reset()
@@ -297,19 +291,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         it 'should update plan record', ->
           @expectPlanFeaturesToMatchCards(@leftColumn)
 
-#      describe 'from middle to bottom', ->
-#
-#        beforeEach ->
-#          @cardLengthBefore = @leftColumn.getCards().length
-#          @card = @leftColumn.getCards()[1]
-#          @dragCard
-#            sourceColumn: @leftColumn
-#            destColumnDropController: @leftColumnDropController
-#            sourceIndex: 1
-#            destIndex: 2
-#
-#        it 'should place the card in the correct location', ->
-#
       describe 'from top to middle', ->
 
         beforeEach ->

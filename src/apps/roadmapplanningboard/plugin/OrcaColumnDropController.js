@@ -25,8 +25,17 @@
         handleBeforeCardDroppedSave: function (options) {
             var sourceIsBacklog = !options.sourceColumn.planRecord;
             var destIsBacklog = !options.column.planRecord;
+            var draggingWithinBacklog = sourceIsBacklog && destIsBacklog;
 
-            if(sourceIsBacklog && destIsBacklog) {
+            if (!destIsBacklog) {
+                options.index = this._getMappedIndex(options);
+            }
+
+            if (this.canDragDropCard(options.card) && !draggingWithinBacklog) {
+                options.card.removeCls(this.self.cardDraggableCls);
+            }
+
+            if(draggingWithinBacklog) {
                 return this.callParent(arguments);
             } else if (sourceIsBacklog) {
                 return this._moveOutOfBacklog(options);
@@ -35,6 +44,28 @@
             } else {
                 return this._moveFromColumnToColumn(options);
             }
+        },
+
+        /**
+         * Calculate the index to insert a new feature in the features array.
+         * This could be different than the index in the the cards array.
+         * @param {Rally.ui.cardboard.Card[]} cards
+         * @param {Number} destCardIndex
+         * @returns {Number}
+         * @private
+         */
+        _getMappedIndex: function (options) {
+            var features = this._getFilteredFeatures(options.column.planRecord, options.card.getRecord());
+
+            var cardToInsertBefore = options.column.getCards()[options.index + 1];
+            if (!cardToInsertBefore) {
+                return features.length;
+            }
+
+            // find the index of the record in planRecord Feature
+            return _.findIndex(features, function (feature) {
+                return cardToInsertBefore.getRecord().get('_refObjectUUID') === feature.id;
+            });
         },
 
         getRefForRelativeRecord: function (relativeRecord) {
@@ -57,6 +88,7 @@
                 options.record.save({
                     requester: options.column,
                     callback: function (updatedRecord, operation) {
+                        this._afterCardDropComplete(options);
                         if (operation.success) {
                             return this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, "move");
                         } else {
@@ -75,13 +107,14 @@
             this._addFeature(planRecord, options.record, options.index);
 
             planRecord.save({
-                success: function (record, operation) {
-                    planRecord.set('features', Ext.JSON.decode(operation.response.responseText).results);
-                    planRecord.commit();
+                success: function () {
                     return this._onDropSaveSuccess(options.column, null, options.card, options.record, "move");
                 },
                 failure: function (response, opts) {
                     return this._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
+                },
+                callback: function () {
+                    this._afterCardDropComplete(options);
                 },
                 requester: options.column,
                 scope: this,
@@ -89,14 +122,13 @@
             });
         },
 
-        _moveFromColumnToColumn: function (options) {
+        _moveFromColumnToColumn: function(options) {
             var context = this.cmp.context || Rally.environment.getContext();
             var srcPlanRecord = options.sourceColumn.planRecord;
             var destPlanRecord = options.column.planRecord;
 
             this._removeFeature(srcPlanRecord, options.record);
             this._addFeature(destPlanRecord, options.record, options.index);
-
 
             Ext.Ajax.request({
                 method: 'POST',
@@ -106,33 +138,36 @@
                     id: options.record.get('_refObjectUUID'),
                     ref: this._getFeatureRef(options.record)
                 },
-                success: function (response, opts) {
-                    var data = Ext.JSON.decode(response.responseText);
-
-                    if (data) {
-                        destPlanRecord.set('features', data.results);
-                    }
-
+                success: function() {
                     srcPlanRecord.commit();
                     if (srcPlanRecord !== destPlanRecord) {
                         destPlanRecord.commit();
                     }
                     return this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
                 },
-                failure: function (response, opts) {
+                failure: function(response, opts) {
                     return this._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
+                },
+                callback: function() {
+                    this._afterCardDropComplete(options);
                 },
                 scope: this,
                 params: Ext.apply({ workspace: context.getWorkspace()._refObjectUUID}, options.params)
             });
         },
 
-        _removeFeature: function (planRecord, featureRecord) {
-            var featureIdToRemove =  featureRecord.get('_refObjectUUID');
+        _afterCardDropComplete: function (options) {
+            this.addDragDropHandle(options.card);
+        },
 
-            planRecord.set('features', _.filter(planRecord.get('features'), function (feature) {
-                return feature.id !== featureIdToRemove;
-            }));
+        _removeFeature: function (planRecord, featureRecord) {
+            planRecord.set('features', this._getFilteredFeatures(planRecord, featureRecord));
+        },
+
+        _getFilteredFeatures: function (planRecord, featureRecord) {
+            return _.reject(planRecord.get('features'), function (feature) {
+                return feature.id === featureRecord.get('_refObjectUUID');
+            });
         },
 
         _getFeatureRef: function(featureRecord) {
