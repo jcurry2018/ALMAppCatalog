@@ -90,13 +90,17 @@
                 });
             }
 
+            if (config.isPageScoped) {
+                items.push(
+                    {
+                        name: 'useTimeboxScope',
+                        xtype: 'rallycheckboxfield',
+                        fieldLabel: 'Scope',
+                        boxLabel: 'Filter cards if page is scoped to an iteration or release'
+                    }
+                );
+            }
             items.push(
-                {
-                    name: 'useTimeboxScope',
-                    xtype: 'rallycheckboxfield',
-                    fieldLabel: 'Scope',
-                    boxLabel: 'Filter cards if page is scoped to an iteration or release'
-                },
                 {
                     name: 'hideReleasedCards',
                     xtype: 'rallycheckboxfield',
