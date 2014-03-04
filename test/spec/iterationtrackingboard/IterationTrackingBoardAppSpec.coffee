@@ -29,6 +29,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
             timebox: Ext.create 'Rally.app.TimeboxScope', record: @iterationRecord
             project:
               _ref: @projectRef
+            workspace:
+              WorkspaceConfiguration:
+                DragDropRankingEnabled: true
         ),
         renderTo: 'testDiv'
       , config))

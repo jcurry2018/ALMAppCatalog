@@ -115,6 +115,11 @@
                 plugins.push('rallygridboardtoggleable');
             }
 
+            var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner'];
+            if (this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
+                alwaysSelectedValues.push('DragAndDropRank');
+            }
+
             plugins = plugins.concat([{
                     ptype: 'rallygridboardfilterinfo',
                     isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
@@ -122,7 +127,8 @@
                 },
                 {
                     ptype: 'rallygridboardfieldpicker',
-                    gridFieldBlackList: ['DisplayColor']
+                    gridFieldBlackList: ['DisplayColor'],
+                    alwaysSelectedValues: alwaysSelectedValues
                 }
             ]);
 
@@ -239,7 +245,8 @@
                     },
                     enableColumnFiltering: this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
                     disableColumnMenus: !this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
-                    showSummary: this.getContext().isFeatureEnabled('F4757_TREE_GRID_CHANGES')
+                    showSummary: this.getContext().isFeatureEnabled('F4757_TREE_GRID_CHANGES'),
+                    enableRanking: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled
                 });
             }
             return gridConfig;
