@@ -26,6 +26,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
             capacityRanges: true
             theme: true
             timeframeDates: true
+            deletePlan: true
           columnHeaderConfig:
             editable: true
             record: @timeframeRecord
@@ -34,6 +35,9 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           typeNames:
             child:
               name: 'Feature'
+          listeners:
+            deleteplan: => @deletePlanStub()
+            daterangechange: => @dateRangeChangeStub()
         , config
 
     createPlanRecord: (config) ->
@@ -60,16 +64,19 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
         timeframeStore: Deft.Injector.resolve 'timeframeStore'
         planStore: Deft.Injector.resolve 'planStore'
 
-#    mouseOver: (element) ->
-#      Rally.test.fireEvent(element, 'mouseover')
+    clickDeleteButton: ->
+      @column.deletePlanButton.fireEvent 'click', @column.deletePlanButton
+      @confirmDialog = Ext.ComponentQuery.query('rallyconfirmdialog')[0]
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
     @featureStoreFixture = Deft.Injector.resolve 'featureStore'
+    @deletePlanStub = @stub()
+    @dateRangeChangeStub = @stub()
 
   afterEach ->
     Deft.Injector.reset()
-    @column.destroy()
+    @column?.destroy()
 
   describe 'timeframe column', ->
     beforeEach ->
@@ -299,14 +306,19 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       @click(dateRange).then =>
         expect(!!@column.timeframePopover).toBe false
 
-    it 'should update timeframeRecord when timeframe date popover fires the save event', ->
-      saveSpy = @spy @timeframeRecord, 'save'
-      @createColumn()
-      dateRange = @column.dateRange.getEl()
-      if !Ext.isGecko
-        @click(dateRange).then =>
-          @column.timeframePopover.fireEvent('save')
-          expect(saveSpy).toHaveBeenCalledOnce()
+    describe 'when timeframe dates popover fires the save event', ->
+
+      beforeEach ->
+        @saveSpy = @spy @timeframeRecord, 'save'
+        @createColumn()
+        @column.onTimeframeDatesClick target: @column.dateRange.getEl()
+        @column.timeframePopover.fireEvent 'save'
+
+      it 'should save the timeframeRecord', ->
+        expect(@saveSpy).toHaveBeenCalledOnce()
+
+      it 'should fire the daterangechange event on the column', ->
+        expect(@dateRangeChangeStub).toHaveBeenCalledOnce()
 
     describe 'timeframe date tooltip', ->
 
@@ -321,3 +333,58 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           editPermissions:
             timeframeDates: false
         expect(this.column.dateRangeTooltip).toBeUndefined()
+
+  describe 'header buttons', ->
+
+    beforeEach ->
+      @createPlanRecord()
+      @createTimeframeRecord()
+
+    describe 'delete plan button', ->
+
+      it 'should show the delete plan button if the user has edit permissions', ->
+        @createColumn(editPermissions: { deletePlan: true })
+        expect(@column.deletePlanButton).toBeDefined()
+
+      it 'should not show the delete plan button if the user does not have edit permissions', ->
+        @createColumn(editPermissions: { deletePlan: false })
+        expect(!!@column.deletePlanButton).toBe false
+
+      describe 'when clicked', ->
+
+        describe 'on column with features', ->
+
+          beforeEach ->
+            @createPlanRecord features: [{id: 1}, {id: 2}]
+            @createColumn
+              editPermissions: { deletePlan: true }
+            @clickDeleteButton()
+
+          it 'should not fire the deleteplan event', ->
+            expect(@deletePlanStub).not.toHaveBeenCalled()
+
+          it 'should show a confirmation dialog', ->
+            expect(!!@confirmDialog).toBe true
+
+          describe 'confirmation dialog', ->
+
+            it 'should fire deleteplan when clicking Delete', ->
+              @confirmDialog.down('#confirmButton').fireEvent 'click'
+              expect(@deletePlanStub).toHaveBeenCalledOnce()
+
+            it 'should not fire deleteplan when clicking Cancel', ->
+              @confirmDialog.down('#cancelButton').fireEvent 'click'
+              expect(@deletePlanStub).not.toHaveBeenCalled()
+
+        describe 'on column without features', ->
+
+          beforeEach ->
+            @createColumn(editPermissions: { deletePlan: true })
+            @clickDeleteButton()
+
+          it 'should fire the deleteplan event', ->
+            expect(@deletePlanStub).toHaveBeenCalledOnce()
+
+          it 'should not show a confirmation dialog', ->
+            expect(!!@confirmDialog).toBe false
+

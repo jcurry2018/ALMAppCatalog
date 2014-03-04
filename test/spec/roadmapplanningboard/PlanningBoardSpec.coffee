@@ -3,6 +3,7 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
   'Rally.apps.roadmapplanningboard.PlanningBoard'
+  'Rally.env.Context'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
@@ -15,12 +16,18 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
         slideDuration: 10
         renderTo: 'testDiv'
         types: ['PortfolioItem/Feature']
+        toggles:
+          deletePlan: true
+        context: Rally.environment.getContext()
       , config
 
       if includeTypeNames
        config.typeNames =
          child:
            name: 'Feature'
+
+      if config.toggles.deletePlan
+        @stubFeatureToggle ['ROADMAP_PLANNING_PAGE', 'ROADMAP_PLANNING_ALLOW_PLAN_DELETION']
 
       @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard', config
 
@@ -46,8 +53,25 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
           condition: ->
             expandStub.called
 
+    clickAddNewButton: ->
+      @click(css: '.scroll-button.right')
+
     getThemeElements: ->
       _.map(@cardboard.getEl().query('.theme_container'), Ext.get)
+
+    getTimeframePlanningColumns: ->
+      _.where @cardboard.getColumns(), xtype: 'timeframeplanningcolumn', @
+
+    deleteLastColumn: ->
+      @cardboard._deleteTimeframePlanningColumn _.last(@cardboard.getColumns())
+
+    deleteColumn: (index) ->
+      @cardboard._deleteTimeframePlanningColumn @cardboard.getColumns()[index]
+
+    stubFeatureToggle: (toggles) ->
+      stub = @stub Rally.env.Context::, 'isFeatureEnabled'
+      stub.withArgs(toggle).returns(true) for toggle in toggles
+      stub
 
 
   beforeEach ->
@@ -155,12 +179,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   describe 'add new column button', ->
 
-    helpers
-      clickAddNewButton: ->
-        @click(css: '.scroll-button.right')
-
-
     describe 'when user is admin', ->
+
       beforeEach ->
         @createCardboard(isAdmin: true)
 
@@ -195,6 +215,51 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
         expect(@cardboard.addNewColumnButton).toBeUndefined()
 
 
+  describe 'deleting columns', ->
+
+    it 'should refresh the backlog column', ->
+      @createCardboard(isAdmin: true).then =>
+        refreshSpy = @spy @cardboard.getColumns()[0], 'refresh'
+        @deleteColumn 1
+        expect(refreshSpy).toHaveBeenCalledOnce()
+
+    describe 'deleting all of the columns', ->
+
+      beforeEach ->
+        @createCardboard(isAdmin: true).then =>
+          _.times @planStore.count(), => @deleteColumn(1)
+
+      it 'should contain a single timeframe column', ->
+        expect(@getTimeframePlanningColumns().length).toBe 1
+
+      it 'should add a new empty timeframe column', ->
+        expect(@cardboard.getColumns()[1].planRecord.get('features')).toEqual []
+
+    describe 'deleting newly added columns', ->
+
+      beforeEach ->
+        @createCardboard(isAdmin: true).then =>
+          @cardboard._addNewColumn().then =>
+            @cardboard._addNewColumn().then =>
+              @cardboard._addNewColumn().then =>
+                expect(@planStore.count()).toBe 7
+                # 0: backlog, 1-4: existing columns, 5-7: new columns
+                # delete the 'middle' new column, then the last new column, then the first
+                @deleteColumn(6).then =>
+                  @deleteColumn(6).then =>
+                    @deleteColumn(5)
+
+      it 'should remove the new plans from the plan store', ->
+        expect(@planStore.count()).toBe 4
+
+      describe 'when the remaining columns are deleted', ->
+
+        beforeEach ->
+          _.times @planStore.count(), => @deleteColumn(1)
+
+        it 'should contain a single timeframe column', ->
+          expect(@getTimeframePlanningColumns().length).toBe 1
+
   describe 'theme container interactions', ->
 
     it 'should show expanded themes when the board is created', ->
@@ -228,28 +293,50 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   describe 'permissions', ->
 
-    it 'should set editable permissions for admin', ->
-      @createCardboard(isAdmin: true).then =>
-        columns = _.where @cardboard.getColumns(), xtype: 'timeframeplanningcolumn'
-        _.each columns, (column) =>
-          expect(column.editPermissions).toEqual
-            capacityRanges: true
-            theme: true
-            timeframeDates: true
-          expect(column.dropControllerConfig.dragDropEnabled).toBe true
-          expect(column.columnHeaderConfig.editable).toBe true
+    describe 'workspace admin', ->
+
+      it 'should set editable permissions for admin', ->
+        @createCardboard(isAdmin: true).then =>
+          columns = @getTimeframePlanningColumns()
+          _.each columns, (column) =>
+            expect(column.editPermissions).toEqual
+              capacityRanges: true
+              theme: true
+              timeframeDates: true
+              deletePlan: true
+            expect(column.dropControllerConfig.dragDropEnabled).toBe true
+            expect(column.columnHeaderConfig.editable).toBe true
 
 
-    it 'should set uneditable permissions for non-admin', ->
-      @createCardboard(isAdmin: false).then =>
-        columns = _.where @cardboard.getColumns(), xtype: 'timeframeplanningcolumn'
-        _.each columns, (column) =>
-          expect(column.editPermissions).toEqual
-            capacityRanges: false
-            theme: false
-            timeframeDates: false
-          expect(column.dropControllerConfig.dragDropEnabled).toBe false
-          expect(column.columnHeaderConfig.editable).toBe false
+      it 'should set uneditable permissions for non-admin', ->
+        @createCardboard(isAdmin: false).then =>
+          columns = @getTimeframePlanningColumns()
+          _.each columns, (column) =>
+            expect(column.editPermissions).toEqual
+              capacityRanges: false
+              theme: false
+              timeframeDates: false
+              deletePlan: false
+            expect(column.dropControllerConfig.dragDropEnabled).toBe false
+            expect(column.columnHeaderConfig.editable).toBe false
+
+    describe 'toggles', ->
+
+      describe 'ROADMAP_PLANNING_ALLOW_PLAN_DELETION', ->
+
+        describe 'toggled on', ->
+
+          it 'should show the delete button on a column', ->
+            @createCardboard(isAdmin: true).then =>
+              timeframePlanningColumn = @cardboard.getColumns()[1]
+              expect(timeframePlanningColumn.deletePlanButton).toBeDefined()
+
+        describe 'toggled off', ->
+
+          it 'should not show the delete button on a column', ->
+            @createCardboard(isAdmin: true, toggles: { deletePlan: false } ).then =>
+              timeframePlanningColumn = @cardboard.getColumns()[1]
+              expect(timeframePlanningColumn.deletePlanButton).toBeUndefined()
 
   describe '#getFirstRecord', ->
 

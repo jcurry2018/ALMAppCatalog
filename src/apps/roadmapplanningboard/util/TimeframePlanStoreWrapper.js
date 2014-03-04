@@ -35,6 +35,21 @@
             ]);
         },
 
+        deletePlan: function (planRecord) {
+            var deferred = new Deft.Deferred();
+
+            planRecord.destroy({
+                success: function () {
+                    deferred.resolve();
+                },
+                failure: function () {
+                    deferred.reject('Failed to delete plan record');
+                }
+            });
+
+            return deferred.promise;
+        },
+
         _getPlanForTimeframe: function (timeframe) {
             return this.planStore.getAt(this.planStore.findBy(function (record) {
                 return record.get('timeframe').id === timeframe.getId();

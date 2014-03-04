@@ -296,7 +296,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         id: '4'
         name: 'Future Planning Period'
         startDate: new Date('7/01/2013')
-        endDate: new Date('6/30/2014')
+        endDate: new Date('6/30/2099')
         timeline:
           id: 'timeline-id-1'
       ,

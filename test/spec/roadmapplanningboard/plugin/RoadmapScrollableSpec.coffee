@@ -3,7 +3,7 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
   'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable'
-  'Rally.apps.roadmapplanningboard.PlanningBoard',
+  'Rally.apps.roadmapplanningboard.PlanningBoard'
   'Rally.apps.roadmapplanningboard.AppModelFactory'
 ]
 
@@ -120,11 +120,138 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     assertButtonIsInColumnHeader: (button, column) ->
       expect(column.getColumnHeader().getEl().getById(button.getEl().id)).not.toBeNull()
 
+    deleteVisibleTimeframeColumn: (testId) ->
+      column = @getColumnByTestId testId
+      @cardboard.destroyColumn column, destroy: true
+
+    getColumnByTestId: (testId) ->
+      _.find @cardboard.getColumns(), (column) -> column.testId is testId.toString()
+
+    isColumnVisible: (testId) ->
+      !!@getColumnByTestId(testId)
+
+    getFirstVisibleColumn: ->
+      @cardboard.getColumns()[1]
+
+    getLastVisibleColumn: ->
+      _.last(@cardboard.getColumns())
+
+    isLastVisibleColumn: (testId) ->
+      @getLastVisibleColumn().testId is testId.toString()
+
+    isFirstVisibleColumn: (testId) ->
+      @getFirstVisibleColumn().testId is testId.toString()
+
+    isPlaceholderColumn: (column) ->
+      column.xtype is 'cardboardplaceholdercolumn'
+
+    getVisiblePlaceholderColumns: ->
+      _.filter @cardboard.getColumns(), (column) => @isPlaceholderColumn(column)
+
+    getVisibleColumnIds: ->
+      _.pluck @cardboard.getColumns(), 'testId'
+
+
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
     @timeframeStore = Deft.Injector.resolve('timeframeStore')
     @planStore = Deft.Injector.resolve('planStore')
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith([])
+
+  afterEach ->
+    Deft.Injector.reset()
+    @cardboard?.destroy()
+
+  describe '#destroyColumn', ->
+
+    describe 'when forward scroll button is visible', ->
+
+      beforeEach ->
+        # starting column testIds: [ '1' ] [ '0', '2', '3', '4', '5' ] [ '6' ]
+        @createCardboard()
+
+      describe 'when first visible column is deleted', ->
+
+        beforeEach ->
+          @deleteVisibleTimeframeColumn(2)
+
+        it 'should remove the column from the cardboard', ->
+          expect(@isColumnVisible(2)).toBe false
+
+        it 'should display the next timeframe column', ->
+          expect(@isLastVisibleColumn(6)).toBe true
+
+        it 'should not render any placeholder columns', ->
+          expect(@getVisiblePlaceholderColumns().length).toBe 0
+
+      describe 'when middle visible column is deleted', ->
+
+        beforeEach ->
+          @deleteVisibleTimeframeColumn(3)
+
+        it 'should remove the column from the cardboard', ->
+          expect(@isColumnVisible(3)).toBe false
+
+        it 'should display the next timeframe column', ->
+          expect(@isLastVisibleColumn(6)).toBe true
+
+        it 'should not render any placeholder columns', ->
+          expect(@getVisiblePlaceholderColumns().length).toBe 0
+
+      describe 'when last visible column is deleted', ->
+
+        beforeEach ->
+          @deleteVisibleTimeframeColumn(5)
+
+        it 'should remove the column from the cardboard', ->
+          expect(@isColumnVisible(5)).toBe false
+
+        it 'should display the next timeframe column', ->
+          expect(@isLastVisibleColumn(6)).toBe true
+
+        it 'should not render any placeholder columns', ->
+          expect(@getVisiblePlaceholderColumns().length).toBe 0
+
+    describe 'when only backwards scroll button is visible', ->
+
+      describe 'when there are more than one visible timeframe columns', ->
+
+        beforeEach ->
+          # starting column testIds: [ '1' ] [ '0', '2', '3', '4', '5' ]
+          @createCardboard(pastColumnCount: 1, presentColumnCount: 4).then =>
+            @deleteVisibleTimeframeColumn(5)
+
+        it 'should add a single placeholder column', ->
+          expect(@getVisiblePlaceholderColumns().length).toBe 1
+
+        it 'should add a placeholder column to the last position', ->
+          expect(@isPlaceholderColumn(@getLastVisibleColumn())).toBe true
+
+      describe 'when the last visible column is deleted', ->
+
+        beforeEach ->
+          # starting column testIds: [ '1' ] [ '0', '2', __ , __ , __ ]
+          @createCardboard(pastColumnCount: 1, presentColumnCount: 1).then =>
+            @deleteVisibleTimeframeColumn(2)
+
+        it 'should show one column from past columns', ->
+          expect(@isColumnVisible(1)).toBe true
+
+        it 'should show the correct number of placeholder columns', ->
+          expect(@getVisiblePlaceholderColumns().length).toBe 3
+
+        it 'should not show forward scroll button', ->
+          expect(@getForwardsButton().isVisible()).toBe false
+
+    describe 'when neither of the scroll buttons are visible', ->
+
+      beforeEach ->
+        # starting column testIds: [ '0', '1', '2' , __ , __ ]
+        @createCardboard(pastColumnCount: 0, presentColumnCount: 2).then =>
+          @deleteVisibleTimeframeColumn(2)
+
+      it 'should add a placeholder column', ->
+        expect(@getVisiblePlaceholderColumns().length).toBe 3
 
   describe 'scrollable board setup', ->
 
@@ -183,6 +310,15 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
 
   describe 'add new column button', ->
 
+    describe 'with multiple placeholder columns', ->
+
+      beforeEach ->
+        # starting column testIds: [ '1' ] [ '0', '2', '3' , __ , __ ]
+        @createCardboard(pastColumnCount: 1, presentColumnCount: 2)
+
+      it 'should render on the last column', ->
+        @assertButtonIsInColumnHeader @cardboard.addNewColumnButton, _.last(@cardboard.getColumns())
+
     describe 'one present column', ->
 
       beforeEach ->
@@ -213,19 +349,22 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       it 'should be rendered in the last column', ->
         @assertButtonIsInColumnHeader @cardboard.addNewColumnButton, @plugin.getLastVisibleScrollableColumn()
 
+      it 'should show the first past column', ->
+        expect(Ext.ComponentQuery.query('timeframeplanningcolumn').length).toBe 1
+
       describe 'when clicked', ->
 
         beforeEach ->
           @clickAddNewButton()
 
         it 'should add a new column', ->
-          expect(Ext.ComponentQuery.query('timeframeplanningcolumn').length).toBe 1
+          expect(Ext.ComponentQuery.query('timeframeplanningcolumn').length).toBe 2
 
-        it 'should make the new column be the first column', ->
-          expect(@cardboard.getColumns()[1].columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
+        it 'should make the new column be the second column', ->
+          expect(@cardboard.getColumns()[2].columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
 
         it 'should put the field in edit mode', ->
-          expect(@cardboard.getColumns()[1].columnHeader.down('rallyclicktoeditfieldcontainer').getEditMode()).toBeTruthy()
+          expect(@cardboard.getColumns()[2].columnHeader.down('rallyclicktoeditfieldcontainer').getEditMode()).toBeTruthy()
 
         it 'should update the timeframe store', ->
           expect(_.last(@timeframeStore.data.items).get('name')).toBe 'New Timeframe'
@@ -236,12 +375,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         it 'should not display a forwards scroll button', ->
           expect(@getForwardsButton().isVisible()).toBe false
 
-        describe 'when scrolling backwards', ->
-          beforeEach ->
-            @scrollBackwards()
-
-          it 'should scroll correctly', ->
-            expect(@cardboard.getColumns()[2].columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
+        it 'should not display a backwards scroll button', ->
+          expect(@getBackwardsButton().isVisible()).toBe false
 
     describe 'with present and future columns', ->
 
@@ -280,6 +415,20 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
             expect(_.last(@planStore.data.items).get('name')).toBe 'New Plan'
 
   describe 'when back scroll button is clicked', ->
+
+    describe 'when more than one placeholder column is visible', ->
+
+      beforeEach ->
+        @createCardboard(pastColumnCount: 2, presentColumnCount: 2).then =>
+
+      it 'should remove a placeholder column', ->
+        @scrollBackwards().then =>
+          expect(@getVisiblePlaceholderColumns().length).toBe 1
+
+      it 'should remove all placeholder columns when scrolled backwards twice', ->
+        @scrollBackwards().then =>
+          @scrollBackwards().then =>
+            expect(@getVisiblePlaceholderColumns().length).toBe 0
 
     it 'should scroll backward', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 4, timeframeColumnCount: 4).then =>
@@ -386,12 +535,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         @scrollForwards().then =>
           expect(@plugin.getFirstVisibleScrollableColumn().timeframeRecord.getId()).toEqual '2'
 
-    it 'should scroll back and forward again with placeholder columns', ->
-      @createCardboard(pastColumnCount: 2, presentColumnCount: 1, timeframeColumnCount: 3).then =>
-        @scrollBackwards().then =>
-          @scrollForwards().then =>
-            expect(@getColumnContentCells().length).toBe 4 # 2 + 1 backlog
-
   describe 'theme container interactions', ->
 
     describe 'when scrolling backward', ->
@@ -441,3 +584,41 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
               _.each @getThemeElements(), (element) =>
                 expect(element.isVisible()).toBe true
                 expect(element.query('.field_container').length).toBe 1
+
+  describe '#_onColumnDateRangeChange', ->
+
+    it 'should move the updated column to fill the gap', ->
+      # starting column testIds: [ '0', '1', '2', '3', '4' ] [ '5' ]
+      @createCardboard(presentColumnCount: 5, pastColumnCount: 0).then =>
+        deletedColumnTimeframe = @getColumnByTestId(2).timeframeRecord
+
+        # updated column testIds: [ '0', '1', '3', '4', '5' ]
+        @deleteVisibleTimeframeColumn(2)
+
+        @updatedColumn = @getColumnByTestId(5)
+        @updatedColumn.timeframeRecord.set('startDate', deletedColumnTimeframe.get('startDate'))
+        @updatedColumn.timeframeRecord.set('endDate', deletedColumnTimeframe.get('endDate'))
+
+        @cardboard._onColumnDateRangeChange(@updatedColumn)
+
+        expect(@getVisibleColumnIds()).toEqual [ '0', '1', '5', '3', '4' ]
+
+    it 'should shift the board to show the updated column in the first position', ->
+      # starting column testIds: [ '0', '1', '2', '3', '4' ] [ '5', '6', '7' ]
+      @createCardboard(presentColumnCount: 7, pastColumnCount: 0).then =>
+        deletedColumnTimeframe = @getColumnByTestId(2).timeframeRecord
+
+        # updated column testIds: [ '0', '1', '3', '4', '5' ] [ '6', '7' ]
+        @deleteVisibleTimeframeColumn(2)
+
+        @scrollForwards().then =>
+          @scrollForwards().then =>
+            # after scrolling: [ '0', '4', '5', '6', '7' ]
+
+            @updatedColumn = @getColumnByTestId(7)
+            @updatedColumn.timeframeRecord.set('startDate', deletedColumnTimeframe.get('startDate'))
+            @updatedColumn.timeframeRecord.set('endDate', deletedColumnTimeframe.get('endDate'))
+
+            @cardboard._onColumnDateRangeChange(@updatedColumn)
+
+            expect(@getVisibleColumnIds()).toEqual [ '0', '7', '3', '4', '5' ]

@@ -78,7 +78,7 @@
         },
 
         refresh: function (newConfig) {
-            newConfig = _.cloneDeep(newConfig);
+            newConfig = _.cloneDeep(newConfig) || {};
             this._extendFieldDefinitions(newConfig);
             this.callParent([newConfig]);
         },
@@ -315,18 +315,29 @@
             this.themeToggleButton.show();
         },
 
-        _addNewColumn: function () {
-            var generator = Ext.create('Rally.apps.roadmapplanningboard.util.PlanGenerator', {
-                timeframePlanStoreWrapper: this.timeframePlanStoreWrapper,
-                roadmap: this.roadmap
-            });
-            
+        _addNewColumn: function (options) {
+            options = options || {};
+
             this.addNewColumnButton.setDisabled(true);
-            
-            generator.createPlanWithTimeframe().then({
+
+            var getRecordPromise;
+
+            if (options.timeframeRecord && options.planRecord) {
+                var deferred = new Deft.Deferred();
+                deferred.resolve({
+                    timeframeRecord: options.timeframeRecord,
+                    planRecord: options.planRecord
+                });
+                getRecordPromise = deferred.promise;
+            } else {
+                getRecordPromise = this._addNewPlanRecord();
+            }
+
+            return getRecordPromise.then({
                 success: function (records) {
                     var column = this.addNewColumn(this._addColumnFromTimeframeAndPlan(records.timeframeRecord, records.planRecord));
                     column.columnHeader.down('rallyclicktoeditfieldcontainer').goToEditMode();
+                    return column;
                 },
                 failure: function (error) {
                     this.addNewColumnButton.setDisabled(false);
@@ -334,6 +345,15 @@
                 },
                 scope: this
             });
+        },
+
+        _addNewPlanRecord: function (options) {
+            var generator = Ext.create('Rally.apps.roadmapplanningboard.util.PlanGenerator', {
+                timeframePlanStoreWrapper: this.timeframePlanStoreWrapper,
+                roadmap: this.roadmap
+            });
+
+            return generator.createPlanWithTimeframe(options);
         },
 
         addNewColumn: function (columnConfig) {
@@ -392,6 +412,8 @@
         },
 
         _addColumnFromTimeframeAndPlan: function (timeframe, plan) {
+            var allowPlanDeletion = this.context && this.context.isFeatureEnabled('ROADMAP_PLANNING_PAGE') && this.context.isFeatureEnabled('ROADMAP_PLANNING_ALLOW_PLAN_DELETION') && this.isAdmin;
+
             return {
                 xtype: 'timeframeplanningcolumn',
                 timeframeRecord: timeframe,
@@ -410,7 +432,8 @@
                 editPermissions: {
                     capacityRanges: this.isAdmin,
                     theme: this.isAdmin,
-                    timeframeDates: this.isAdmin
+                    timeframeDates: this.isAdmin,
+                    deletePlan: allowPlanDeletion
                 },
                 dropControllerConfig: {
                     dragDropEnabled: this.isAdmin
@@ -419,8 +442,82 @@
                     return plan && _.find(plan.get('features'), function (feature) {
                         return (feature.id === featureRecord.get('_refObjectUUID'));
                     });
+                },
+                listeners: {
+                    deleteplan: this._deleteTimeframePlanningColumn,
+                    daterangechange: this._onColumnDateRangeChange,
+                    scope: this
                 }
             };
+        },
+
+        _onColumnDateRangeChange: function (column) {
+            // resorting of columns handled in RoadmapScrollable plugin
+        },
+
+        _deleteTimeframePlanningColumn: function (column) {
+            this.pendingDeletions = this.pendingDeletions || [];
+            this.pendingDeletions.push(column.planRecord);
+
+            var deletingLastColumn = (this.timeframePlanStoreWrapper.planStore.count() - this.pendingDeletions.length) < 1;
+
+            if (column.deletePlanButton) {
+                column.deletePlanButton.hide();
+            }
+
+            if (deletingLastColumn) {
+                return this._addNewPlanRecord({resetDates: true}).then({
+                    success: function (options) {
+                        this._deletePlan(column).then({
+                            success: function () {
+                                this._addNewColumn(options);
+                            },
+                            scope: this
+                        });
+                    },
+                    scope: this
+                });
+            }
+
+            return this._deletePlan(column);
+        },
+
+        _deletePlan: function (column) {
+            var timeframeName = column.timeframeRecord.get('name');
+            var planRecordToDelete = column.planRecord;
+
+            return this.timeframePlanStoreWrapper.deletePlan(column.planRecord).then({
+                success: function () {
+                    this.destroyColumn(column);
+                    this.pendingDeletions = _.reject(this.pendingDeletions, function (record) {
+                        return record.getId() === planRecordToDelete.getId();
+                    });
+                    this.getColumns()[0].refresh();
+                    Rally.ui.notify.Notifier.showConfirmation({message: 'Column "' + timeframeName + '" deleted.'});
+                },
+                failure: function (error) {
+                    Rally.ui.notify.Notifier.showError({message: error});
+                },
+                scope: this
+            });
+        },
+
+        _isColumnOutOfOrder: function (currentColumn) {
+            var columns = this.getColumns();
+            var currentColumnIndex = _.findIndex(columns, function (column) {
+                return column.getId() === currentColumn.getId();
+            }, this);
+
+            var previousColumn = columns[currentColumnIndex - 1] || null;
+            var nextColumn = columns[currentColumnIndex + 1] || null;
+
+            var previousTimeframe = previousColumn && previousColumn.timeframeRecord;
+            var nextTimeframe = nextColumn && nextColumn.timeframeRecord;
+
+            var startsAfterPreviousTimeframe = !previousTimeframe || (currentColumn.timeframeRecord.get('endDate') > previousTimeframe.get('endDate'));
+            var endsBeforeNextTimeframe = !nextTimeframe || (currentColumn.timeframeRecord.get('endDate') < nextTimeframe.get('endDate'));
+
+            return !startsAfterPreviousTimeframe || !endsBeforeNextTimeframe;
         },
 
         _getClickAction: function () {

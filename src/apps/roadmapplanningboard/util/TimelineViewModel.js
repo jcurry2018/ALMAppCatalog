@@ -31,8 +31,10 @@
             }), 'startDate');
         },
 
-        getPreviousTimeframe: function () {
-            var startDate = this.currentTimeframe.startDate || this.currentTimeframe.endDate;
+        getPreviousTimeframe: function (currentTimeframe) {
+            currentTimeframe = currentTimeframe || this.currentTimeframe;
+
+            var startDate = currentTimeframe.startDate || currentTimeframe.endDate;
             var prevTimeframe = _.findLast(this.timeframes, function (tf) {
                 return !startDate || tf.endDate < startDate;
             });
@@ -40,8 +42,10 @@
             return prevTimeframe || null;
         },
 
-        getNextTimeframe: function () {
-            var endDate = this.currentTimeframe.endDate || this.currentTimeframe.startDate;
+        getNextTimeframe: function (currentTimeframe) {
+            currentTimeframe = currentTimeframe || this.currentTimeframe;
+
+            var endDate = currentTimeframe.endDate || currentTimeframe.startDate;
             var nextTimeframe = endDate && _.find(this.timeframes, function (tf) {
                 return tf.startDate > endDate;
             });
@@ -50,9 +54,6 @@
         },
 
         setCurrentTimeframe: function (newTimeframe) {
-            var prevTimeframe = this.getPreviousTimeframe();
-            var nextTimeframe = this.getNextTimeframe();
-
             if ((newTimeframe.startDate && !Ext.isDate(newTimeframe.startDate)) ||
                 (newTimeframe.endDate && !Ext.isDate(newTimeframe.endDate))) {
                 throw 'Start and end date must be valid dates';
@@ -62,15 +63,23 @@
                 throw 'Start date is after end date';
             }
 
-            if(prevTimeframe && newTimeframe.startDate <= prevTimeframe.endDate) {
-                throw 'Start date overlaps an earlier timeframe';
-            }
-
-            if(nextTimeframe && newTimeframe.endDate >= nextTimeframe.startDate) {
-                throw 'End date overlaps a later timeframe';
+            if (this._isTimeframeOverlapping(newTimeframe)) {
+                throw 'Date range overlaps an existing timeframe';
             }
 
             this.currentTimeframe = newTimeframe;
+        },
+
+        _isTimeframeOverlapping: function (newTimeframe) {
+            return _.some(this.timeframes, function (timeframe) {
+                var overlappingInside = this._isDateInRange(newTimeframe.startDate, timeframe) || this._isDateInRange(newTimeframe.endDate, timeframe);
+                var overlappingOutside = newTimeframe.startDate <= timeframe.startDate && newTimeframe.endDate >= timeframe.endDate;
+                return overlappingInside || overlappingOutside;
+            }, this);
+        },
+
+        _isDateInRange: function (date, dateRange) {
+            return date >= dateRange.startDate && date <= dateRange.endDate;
         }
     });
 }).call(this);

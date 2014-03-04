@@ -146,6 +146,11 @@
                             this.picker.value = dateField.getValue();
                             this._updatePicker(dateField);
                         }
+
+                        if (isValid) {
+                            var otherDateField = dateField === this.startDate ? this.endDate : this.startDate;
+                            otherDateField.clearInvalid();
+                        }
                     },
                     scope: this
                 }
@@ -153,8 +158,8 @@
         },
 
         _validateDateRanges: function (dateField) {
-            var startDate = dateField.itemId === this.startDate.itemId ? this.startDate.getValue() : this.timelineViewModel.currentTimeframe.startDate;
-            var endDate = dateField.itemId === this.endDate.itemId ? this.endDate.getValue() : this.timelineViewModel.currentTimeframe.endDate;
+            var startDate = this.startDate.getValue();
+            var endDate = this.endDate.getValue();
 
             try {
                 this.timelineViewModel.setCurrentTimeframe({

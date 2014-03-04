@@ -18,20 +18,34 @@
             this.initConfig(config);
         },
 
-        createPlanWithTimeframe: function () {
-            var lastRecord = _.last(this.timeframePlanStoreWrapper.getTimeframeAndPlanRecords());
+        createPlanWithTimeframe: function (options) {
+            options = options || {};
 
-            return Deft.promise.Chain.pipeline([this._createTimeframe, this._createPlan], this, lastRecord.timeframe);
+            var lastRecordWithAPlan = _.last(this.timeframePlanStoreWrapper.getTimeframeAndPlanRecords());
+            var lastTimeframeRecord = lastRecordWithAPlan ? lastRecordWithAPlan.timeframe : this.timeframePlanStoreWrapper.timeframeStore.last();
+
+            var timeframeData = {
+                timeline: lastTimeframeRecord.get('timeline'),
+                startDate: null,
+                endDate: null
+            };
+
+            if (!options.resetDates && lastRecordWithAPlan) {
+                timeframeData.startDate = lastTimeframeRecord.get('startDate');
+                timeframeData.endDate = lastTimeframeRecord.get('endDate');
+            }
+
+            return Deft.promise.Chain.pipeline([this._createTimeframe, this._createPlan], this, timeframeData);
         },
 
-        _createTimeframe: function (oldTimeframeRecord) {
+        _createTimeframe: function (timeframeData) {
             var deferred = Ext.create('Deft.Deferred');
 
             _.first(this.timeframePlanStoreWrapper.timeframeStore.add({
                 name: "New Timeframe",
-                startDate: this.nextDateRangeGenerator.getNextStartDate(oldTimeframeRecord.get('endDate')),
-                endDate: this.nextDateRangeGenerator.getNextEndDate(oldTimeframeRecord.get('startDate'), oldTimeframeRecord.get('endDate')),
-                timeline: oldTimeframeRecord.get('timeline')
+                startDate: this.nextDateRangeGenerator.getNextStartDate(timeframeData.endDate),
+                endDate: this.nextDateRangeGenerator.getNextEndDate(timeframeData.startDate, timeframeData.endDate),
+                timeline: timeframeData.timeline
             })).save({
 
                 success: function(record, operation) {

@@ -20,7 +20,8 @@
             editPermissions: {
                 capacityRanges: true,
                 theme: true,
-                timeframeDates: true
+                timeframeDates: true,
+                deletePlan: true
             },
             timeframePlanStoreWrapper: undefined,
             timeframeRecord: undefined,
@@ -41,6 +42,8 @@
 
         initComponent: function () {
             this.callParent(arguments);
+
+            this.addEvents('deleteplan', 'daterangechange');
 
             this.mon(this, 'ready', this._updateHeader, this);
             this.mon(this, 'addcard', this._updateHeader, this);
@@ -154,22 +157,10 @@
                 target: target,
                 owner: this,
                 offsetFromTarget: [
-                    {
-                        x: 0,
-                        y: 0
-                    },
-                    {
-                        x: 0,
-                        y: 0
-                    },
-                    {
-                        x: 0,
-                        y: 5
-                    },
-                    {
-                        x: 0,
-                        y: 0
-                    }
+                    { x: 0, y: 0 },
+                    { x: 0, y: 0 },
+                    { x: 0, y: 5 },
+                    { x: 0, y: 0 }
                 ],
                 controllerConfig: {
                     model: this.planRecord
@@ -192,22 +183,10 @@
             this.timeframePopover = Ext.create('Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', {
                 target: Ext.get(event.target),
                 offsetFromTarget: [
-                    {
-                        x: 0,
-                        y: 0
-                    },
-                    {
-                        x: 0,
-                        y: 0
-                    },
-                    {
-                        x: 0,
-                        y: 5
-                    },
-                    {
-                        x: 0,
-                        y: 0
-                    }
+                    { x: 0, y: 0 },
+                    { x: 0, y: 0 },
+                    { x: 0, y: 5 },
+                    { x: 0, y: 0 }
                 ],
                 timelineViewModel: Rally.apps.roadmapplanningboard.util.TimelineViewModel.createFromStores(this.timeframePlanStoreWrapper, this.timeframeRecord),
                 listeners: {
@@ -248,7 +227,7 @@
                 this.dateRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
                     target: this.dateRange.getEl(),
                     hideDelay: 100,
-                    anchor: 'left',
+                    anchor: 'right',
                     html: this.getDateHeaderTplData().titleText
                 });
             }
@@ -347,6 +326,64 @@
             }
         },
 
+        _drawHeaderButtons: function () {
+            if (!this.headerButtonContainer) {
+                this.headerButtonContainer = this.getHeaderTitle().add({
+                    xtype: 'container',
+                    cls: 'header-button-container'
+                });
+            }
+
+            this._drawDeletePlanButton();
+        },
+
+        _drawDeletePlanButton: function () {
+            if (!this.deletePlanButton && this.editPermissions.deletePlan) {
+                this.deletePlanButton = this.headerButtonContainer.add({
+                    xtype: 'rallybutton',
+                    iconCls: 'icon-delete',
+                    cls: 'picto small',
+                    elTooltip: 'Delete column',
+                    listeners: {
+                        click: function () {
+                            if (this.planRecord.get('features').length ) {
+                                this._drawDeletePlanConfirmDialog();
+                            } else {
+                                this.fireEvent('deleteplan', this);
+                            }
+                        },
+                        scope: this
+                    }
+                });
+            }
+        },
+
+        _drawDeletePlanConfirmDialog: function () {
+            if (this.confirmationDialog) {
+                this.confirmationDialog.destroy();
+            }
+
+            this.confirmationDialog = Ext.create('Rally.ui.dialog.ConfirmDialog', {
+                cls: 'roadmap-delete-plan-confirm',
+                title: '<span class="title-icon icon-warning"></span>Delete Plan from Roadmap',
+                message: 'Deleting this plan will remove the timeframe for all projects and return features in this plan to the backlog.',
+                confirmLabel: 'Delete',
+                listeners: {
+                    confirm: function () {
+                        this.fireEvent('deleteplan', this);
+                    },
+                    scope: this
+                }
+            });
+        },
+
+        destroy: function () {
+            if (this.confirmationDialog) {
+                this.confirmationDialog.destroy();
+            }
+            this.callParent(arguments);
+        },
+
         getHeaderTplData: function () {
             var pointField = this.pointField;
             var highCapacity = this._getHighCapacity();
@@ -399,6 +436,7 @@
                 this._drawDateRange();
                 this._drawProgressBar();
                 this._drawTheme();
+                this._drawHeaderButtons();
             }
         },
 
@@ -449,7 +487,11 @@
 
             if (this.timeframeRecord.dirty) {
                 this.timeframeRecord.save({
-                    requester: this.view
+                    success: function () {
+                        this.fireEvent('daterangechange', this);
+                    },
+                    requester: this.view,
+                    scope: this
                 });
             }
 

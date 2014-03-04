@@ -18,6 +18,8 @@
          */
         timeframeColumnCount: 4,
 
+        currentTimeframeIndex: 0,
+
         /**
          * @cfg {String} columnConfig The xtype of the columns created if the available columns is less than {Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable#timeframeColumnCount}
          */
@@ -26,19 +28,25 @@
         },
 
         init: function (cmp) {
-            this.originBuildColumns = cmp.buildColumns;
+            this.originalBuildColumns = cmp.buildColumns;
             cmp.buildColumns = Ext.bind(this.buildColumns, this);
 
-            this.originDrawAddNewColumnButton = cmp.drawAddNewColumnButton;
+            this.originalDrawAddNewColumnButton = cmp.drawAddNewColumnButton;
             cmp.drawAddNewColumnButton = Ext.bind(this.drawAddNewColumnButton, this);
             cmp.addNewColumn = Ext.bind(this.addNewColumn, this);
+
+            this.originalDestroyColumn = cmp.destroyColumn;
+            cmp.destroyColumn = Ext.bind(this.destroyColumn, this);
+
+            this.originalOnColumnDateRangeChange = cmp._onColumnDateRangeChange;
+            cmp._onColumnDateRangeChange = Ext.bind(this._onColumnDateRangeChange, this);
 
             this.callParent(arguments);
         },
 
         drawAddNewColumnButton: function () {
             if (this._isForwardsButtonHidden()) {
-                this.originDrawAddNewColumnButton.call(this.cmp);
+                this.originalDrawAddNewColumnButton.call(this.cmp);
             }
         },
 
@@ -47,42 +55,67 @@
          * @param store
          */
         buildColumns: function (store) {
-            var columns = this.originBuildColumns.call(this.cmp, store);
+            var columns = this.originalBuildColumns.call(this.cmp, store);
 
             this.backlogColumn = columns[0];
             this.scrollableColumns = columns.slice(1);
-            // add an index to each column for tracking
-            _.map(this.scrollableColumns, function (column, index) {
-                column.index = index;
-                return column;
-            });
 
-            this.cmp.columns = [this.backlogColumn].concat(this._getVisibleColumns(this._getPresentColumns(this.scrollableColumns)));
+            this._sortColumns();
+
+            this.currentTimeframeIndex = this._getIndexOfFirstColumnToShow();
+
+            this._addPlaceholderColumns();
+
+            this.cmp.columns = [this.backlogColumn].concat(this._getColumnsToShow());
+
             return this.cmp.columns;
         },
 
-        _getPresentColumns: function (columns) {
+        _onColumnDateRangeChange: function (updatedColumn) {
+            this._sortColumns();
+
+            var columnMovedOffBoard = !_.some(this._getColumnsToShow(), function (column) {
+                return column.timeframeRecord && column.timeframeRecord.getId() === updatedColumn.timeframeRecord.getId();
+            });
+
+            if (columnMovedOffBoard) {
+                this.currentTimeframeIndex = updatedColumn.index; // Scroll to updated column
+            }
+
+            this._hideColumn(updatedColumn);
+            this._syncColumns();
+
+            this.originalOnColumnDateRangeChange.call(this.cmp, updatedColumn);
+        },
+
+        _sortColumns: function () {
+            this.scrollableColumns.sort(function (columnA, columnB) {
+                var timeframeA = columnA.timeframeRecord;
+                var timeframeB = columnB.timeframeRecord;
+
+                if (!timeframeA && !timeframeB) {
+                    return 0;
+                } else if (!timeframeA) {
+                    return 1;
+                } else if (!timeframeB) {
+                    return -1;
+                }
+
+                return timeframeA.get('endDate') > timeframeB.get('endDate') ? 1 : -1;
+            });
+
+            this._reindexColumns();
+        },
+
+        _getIndexOfFirstColumnToShow: function () {
             var now = new Date();
             var format = 'Y-m-d';
 
-            this.presentColumns = this.presentColumns || _.filter(columns, function (column) {
-                return Ext.Date.format(column.timeframeRecord.get('endDate'), format) >= Ext.Date.format(now, format);
+            var firstPresentColumn = _.find(this.scrollableColumns, function (column) {
+                return column.timeframeRecord && Ext.Date.format(column.timeframeRecord.get('endDate'), format) >= Ext.Date.format(now, format);
             }, this);
 
-            return this.presentColumns;
-        },
-
-        _getVisibleColumns: function (presentColumns) {
-            if (presentColumns.length < this.timeframeColumnCount) {
-                var placeholderColumns = _.map(_.range(this.timeframeColumnCount - presentColumns.length), function (index) {
-                    return _.extend({ index: index + this.scrollableColumns.length}, this.columnConfig);
-                }, this);
-
-                this.scrollableColumns = this.scrollableColumns.concat(placeholderColumns);
-                return presentColumns.concat(placeholderColumns);
-            } else {
-                return _.first(presentColumns, this.timeframeColumnCount);
-            }
+            return firstPresentColumn ? firstPresentColumn.index : 0;
         },
 
         _isBackwardsButtonHidden: function () {
@@ -93,51 +126,161 @@
             return this.getLastVisibleScrollableColumn().index === this.scrollableColumns.length - 1;
         },
 
-        _scroll: function (forwards) {
-            var insertNextToColumn = this._getInsertNextToColumn(forwards);
-            var newIndex = _.indexOf(this.cmp.getColumns(), insertNextToColumn);
-            var newlyVisibleColumn = this.scrollableColumns[insertNextToColumn.index + (forwards ? 1 : -1)];
+        _syncColumns: function () {
+            this._reindexColumns();
+            this._adjustCurrentColumnIndex();
+            this._updatePlaceholderColumns();
+            this._renderScrollableColumns();
+            this._renderButtons();
+        },
 
-            var column = this._drawColumn(this._getColumnToRemove(forwards), newlyVisibleColumn, insertNextToColumn, newIndex, forwards);
+        _scroll: function (forwards) {
+            this.currentTimeframeIndex += forwards ? 1 : -1;
+
+            this._syncColumns();
 
             this.cmp.fireEvent('scroll', this.cmp);
-
-            return column;
         },
-
-        _drawColumn: function (removingColumn, newColumn, nextToColumn, index, forwards) {
-
-            var columnEls = this.cmp.createColumnElements(forwards ? 'after' : 'before', nextToColumn);
-            this.cmp.destroyColumn(removingColumn);
-            var column = this.cmp.addColumn(newColumn, index);
-            this.cmp.renderColumn(column, columnEls);
-            column.on('ready', this._onNewlyAddedColumnReady, this, {single: true});
-            this.cmp.drawThemeToggle();
-            this.drawAddNewColumnButton();
-            this._afterScroll();
-
-            return column;
-        },
-
 
         addNewColumn: function (columnConfig) {
             var placeHolderColumn = this._getFirstPlaceholderColumn();
+
             if (placeHolderColumn) {
-                columnConfig.index = placeHolderColumn.index;
-                this.scrollableColumns[columnConfig.index] = columnConfig;
-                var newColumnIndex = Ext.Array.indexOf(this.cmp.columnDefinitions, placeHolderColumn);
-                return this._drawColumn(placeHolderColumn, columnConfig, placeHolderColumn, newColumnIndex, false);
+                this.scrollableColumns.splice(placeHolderColumn.index, 0, columnConfig);
             } else {
-                columnConfig.index = this.scrollableColumns.length;
                 this.scrollableColumns.push(columnConfig);
-                return this._scroll(true);
+                this.currentTimeframeIndex++;
             }
+
+            this._syncColumns();
+
+            return this._getVisibleColumn(columnConfig);
+        },
+
+        destroyColumn: function (columnToDelete) {
+            this.scrollableColumns.splice(columnToDelete.index, 1);
+            this._hideColumn(columnToDelete);
+            this._syncColumns();
+        },
+
+        _hideColumn: function (column) {
+            this.originalDestroyColumn.call(this.cmp, column);
+        },
+
+        _renderScrollableColumns: function () {
+            _.each(this._getColumnsToHide(), function (column) {
+                this._hideColumn(column);
+            }, this);
+
+            _.each(this._getColumnsToShow(), function (columnConfig) {
+                var columnNotVisible = !this._getVisibleColumn(columnConfig);
+
+                if (columnNotVisible) {
+                    this._drawColumn(columnConfig);
+                }
+            }, this);
+        },
+
+        _drawColumn: function (columnConfig) {
+            var displayIndex = this._getDisplayIndexForScrollableColumn(columnConfig);
+            var column = this.cmp.addColumn(columnConfig, displayIndex);
+            column.on('ready', this._onNewlyAddedColumnReady, this, {single: true});
+            this.cmp.renderColumn(column, this._createColumnEls(displayIndex));
+        },
+
+        _shouldShowColumn: function (column) {
+            return column.index >= this.currentTimeframeIndex && column.index < this.currentTimeframeIndex + this.timeframeColumnCount;
+        },
+
+        _getColumnsToShow: function () {
+            return _.filter(this.scrollableColumns, function (column) {
+                return this._shouldShowColumn(column);
+            }, this);
+        },
+
+        _getColumnsToHide: function () {
+            return _.filter(this.getScrollableColumns(), function (column) {
+                return !this._shouldShowColumn(column);
+            }, this);
+        },
+
+        _getVisibleColumn: function (columnConfig) {
+            return _.find(this.getScrollableColumns(), function (visibleColumn) {
+                if (columnConfig.planRecord && visibleColumn.planRecord) {
+                    return columnConfig.planRecord.getId() === visibleColumn.planRecord.getId();
+                }
+
+                return _.has(columnConfig, 'placeholderId') && (columnConfig.placeholderId === visibleColumn.placeholderId);
+            });
+        },
+
+        _createColumnEls: function (displayIndex) {
+            return this.cmp.createColumnElements('after', this.cmp.getColumns()[displayIndex - 1]);
+        },
+
+        _updatePlaceholderColumns: function () {
+            this._removePlaceholderColumns();
+            this._addPlaceholderColumns();
+        },
+
+        _addPlaceholderColumns: function() {
+            var numPlaceholderColumnsToAdd = this.currentTimeframeIndex + this.timeframeColumnCount - this.scrollableColumns.length;
+
+            var placeholderColumns = _.times(numPlaceholderColumnsToAdd, function (index) {
+                return Ext.merge({
+                    placeholderId: index,
+                    index: index + this.scrollableColumns.length
+                }, this.columnConfig);
+            }, this);
+
+            this.scrollableColumns = this.scrollableColumns.concat(placeholderColumns);
+        },
+
+        _removePlaceholderColumns: function() {
+            this.scrollableColumns = _.reject(this.scrollableColumns, function (column) {
+                return this._isPlaceholderColumn(column);
+            }, this);
+        },
+
+        _reindexColumns: function () {
+            _.each(this.scrollableColumns, function (column, index) {
+                column.index = index;
+
+                var visibleColumn = this._getVisibleColumn(column);
+                if (visibleColumn) {
+                    visibleColumn.index = index;
+                }
+            }, this);
+        },
+
+        _adjustCurrentColumnIndex: function() {
+            var visibleTimeframeColumns = _.filter(this.getScrollableColumns(), function (column) {
+                return !this._isPlaceholderColumn(column);
+            }, this);
+
+            if(_.isEmpty(visibleTimeframeColumns) && this.currentTimeframeIndex > 0) {
+                this.currentTimeframeIndex--;
+            }
+        },
+
+        _getDisplayIndexForScrollableColumn: function (scrollableColumn) {
+            return scrollableColumn.index - this.currentTimeframeIndex + 1;
+        },
+
+        _renderButtons: function () {
+            this.cmp.drawThemeToggle();
+            this.drawAddNewColumnButton();
+            this._afterScroll();
+        },
+
+        _isPlaceholderColumn: function (column) {
+            return column.xtype === 'cardboardplaceholdercolumn';
         },
 
         _getFirstPlaceholderColumn: function () {
             return _.find(this.getScrollableColumns(), function (column) {
-                return column.xtype === 'cardboardplaceholdercolumn';
-            });
+                return this._isPlaceholderColumn(column);
+            }, this);
         },
 
         _onNewlyAddedColumnReady: function () {
@@ -161,7 +304,8 @@
         },
 
         getScrollableColumns: function () {
-            return this.cmp.getColumns().slice(1);
+            var columns = this.cmp.getColumns();
+            return columns ? columns.slice(1) : [];
         }
     });
 })();

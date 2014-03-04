@@ -29,6 +29,7 @@ describe 'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', ->
       expect(@wrapper.getTimeframeAndPlanRecords().length).toBe 4
 
   describe '#load', ->
+
     beforeEach ->
       @timeframeStoreLoadSpy = @spy @wrapper.timeframeStore, 'load'
       @planStoreLoadSpy = @spy @wrapper.planStore, 'load'
@@ -47,3 +48,22 @@ describe 'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', ->
     it 'should load the timeframe store with the correct arguments', ->
       # Use the sinon assert syntax since error messages read better
       sinon.assert.calledWith(@timeframeStoreLoadSpy, @timeframeMatcher)
+
+  describe '#deletePlan', ->
+
+    beforeEach ->
+      @planRecordToDelete = @wrapper.planStore.first()
+
+    it 'should return a promise', ->
+      expect(@wrapper.deletePlan(@planRecordToDelete).then).toBeDefined()
+
+    it 'should delete the plan from the plan store', ->
+      @wrapper.deletePlan(@planRecordToDelete)
+      expect(@wrapper.planStore.findRecord('id', @planRecordToDelete.getId())).toBeNull()
+
+    it 'should not delete the timeframe from the timeframe store', ->
+      timeframe = @planRecordToDelete.get('timeframe')
+      @wrapper.deletePlan(@planRecordToDelete)
+      expect(@wrapper.timeframeStore.findRecord('id', timeframe.id)).toBeDefined()
+
+

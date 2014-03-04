@@ -90,6 +90,7 @@
     position: relative;
     top: 1px;
 }
+
 .planned-capacity-range-tooltip {
     white-space: nowrap;
 }
@@ -103,9 +104,50 @@
     border-right: none;
 }
 
+.roadmap-board .column-container .column-header .column-header-title {
+    padding: 0;
+}
+
+.roadmap-board .column-container .column-header .column-header-title > span {
+    position: relative;
+    padding: 15px 8px 8px 8px;
+    min-height: 82px;
+}
+
+.roadmap-board .planning-column .column-header .column-header-title .header-button-container {
+    display: none;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 0;
+    margin: 0px 8px 4px 8px;
+}
+
+.roadmap-board .planning-column .column-header .column-header-title .header-button-container > span > div {
+    border-radius: 2px;
+    background-color: #C0C0C0;
+    float: right;
+}
+
+.roadmap-board .planning-column .column-header .column-header-title .header-button-container .x4-btn {
+    float: right;
+    border-radius: 2px;
+    background-color: #C0C0C0;
+    padding: 3px 2px 3px 4px
+}
+
+.roadmap-board .planning-column .column-header .column-header-title .header-button-container .x4-btn:hover {
+    color: #FFFFFF;
+    background-color: #00A9E0;
+}
+
+.roadmap-board .planning-column .column-header .column-header-title > span:hover .header-button-container {
+    display: block;
+}
+
 .roadmap-board .column-header .column-header-title .columnfilter {
     position: absolute;
-    left: 10px;
+    left: -26px;
     top: 11px;
 }
 
@@ -159,15 +201,20 @@
 
 /* Modifications to accommodate differences in Firefox */
 
-@-moz-document url-prefix() {
+@-moz-document
+url-prefix
+(
+)
+{
 
-    .roadmap-board .planning-column .columnTitle .fieldContainerView {
-        padding: 1px 1px;
-    }
+.roadmap-board .planning-column .columnTitle .fieldContainerView {
+    padding: 1px 1px;
+}
 
-    .roadmap-board .planning-column .columnTitle input {
-        padding: 0px 0px;
-    }
+.roadmap-board .planning-column .columnTitle input {
+    padding: 0px 0px;
+}
+
 }
 
 .roadmap-board .planning-column .columnTitle table {
@@ -219,7 +266,7 @@
 }
 
 .roadmap-board .progress-bar-background .no-capacity-label {
-    font-family: ProximaNova,Helvetica,Arial;
+    font-family: ProximaNova, Helvetica, Arial;
 }
 
 .roadmap-board .progress-bar-background .x4-btn {
@@ -272,11 +319,6 @@
     font-size: 18px;
     font-weight: normal;
     color: rgb(0, 0, 0);
-}
-
-.roadmap-board .column-container .column-header .column-header-title {
-    padding: 15px 8px 8px 8px;
-    min-height: 82px;
 }
 
 .roadmap-board .column-container .planning-column {
@@ -381,7 +423,7 @@
     border-radius: 0 0 0 5px;
 }
 
-.roadmap-board .theme-button .x4-btn-icon-el{
+.roadmap-board .theme-button .x4-btn-icon-el {
     position: absolute;
     top: -4px;
 }
@@ -418,7 +460,7 @@
 .roadmap-splash-container {
 
     .start-screen-1 {
-      background: url('start-screen-1.png');
+        background: url('start-screen-1.png');
     }
 
     .start-screen-2 {
@@ -593,7 +635,6 @@
 .roadmap-planning-popover .x4-datepicker .x4-datepicker-month .x4-btn * {
     cursor: default !important;
 }
-
 
 .roadmap-planning-popover .x4-datepicker .x4-datepicker-month .x4-btn-center {
     overflow: visible;
@@ -927,6 +968,7 @@
     width: 222px;
     margin: 5px 2px 0 1px;
 }
+
 .roadmap-planning-popover #capacity-validation-error li {
     font-family: NotoSans, Helvetica, Arial;
     font-size: 12px;
@@ -941,35 +983,35 @@
 }
 
 .roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-row .x4-grid-cell .x4-grid-cell-inner {
-  height: 26px;
+    height: 26px;
 }
 
 .roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-row .x4-grid-cell .x4-grid-cell-inner .row-action-icon.icon-gear {
-  position: relative;
-  top: 1px;
+    position: relative;
+    top: 1px;
 }
 
 .roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-row .x4-grid-cell.rank-cell {
-  margin: 0;
-  padding: 0;
-  color: transparent;
-  background-image: none;
-  background-color: #00A9E0;
-  position: relative;
+    margin: 0;
+    padding: 0;
+    color: transparent;
+    background-image: none;
+    background-color: #00A9E0;
+    position: relative;
 }
 
 .roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-row.x4-grid-row-over .x4-grid-cell.rank-cell {
-  color: white;
-  cursor: move !important;
+    color: white;
+    cursor: move !important;
 }
 
 .roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-row .x4-grid-cell.rank-cell .x4-grid-cell-inner {
-  background: none;
-  font-family: "Rally";
-  font-size: 18px;
-  padding: 4px 1px 0 1px;
-  text-overflow: clip;
-  margin: 0;
+    background: none;
+    font-family: "Rally";
+    font-size: 18px;
+    padding: 4px 1px 0 1px;
+    text-overflow: clip;
+    margin: 0;
 }
 
 .roadmap-board-userstory-popover .rally-grid .x4-grid-body .x4-grid-row .x4-grid-cell.rank-cell .x4-grid-cell-inner:before {
@@ -997,4 +1039,18 @@
 
 .roadmap-board .rui-card .rui-card-content .field-content.Name .rui-field-value {
     font-size: 12px;
+}
+
+.roadmap-delete-plan-confirm .confirmMessage {
+    text-align: left;
+    font-size: 12px;
+    padding: 10px;
+}
+
+.roadmap-delete-plan-confirm .title-icon {
+    color: #FAD200;
+    font-size: 16px;
+    position: relative;
+    top: 2px;
+    padding: 0px 4px 0px 0px;
 }

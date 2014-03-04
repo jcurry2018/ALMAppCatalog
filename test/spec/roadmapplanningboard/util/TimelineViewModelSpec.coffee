@@ -118,11 +118,11 @@ describe 'Rally.apps.roadmapplanningboard.util.TimelineViewModel', ->
 
       it 'should not allow start date to be before previous end date', ->
         newTimeframe = @createTimeframe '01/30/2014', '02/28/2014'
-        expect(=> @timelineModel.setCurrentTimeframe(newTimeframe)).toThrow 'Start date overlaps an earlier timeframe'
+        expect(=> @timelineModel.setCurrentTimeframe(newTimeframe)).toThrow 'Date range overlaps an existing timeframe'
 
       it 'should not allow end date to be after next start date', ->
         newTimeframe = @createTimeframe '02/01/2014', '03/03/2014'
-        expect(=> @timelineModel.setCurrentTimeframe(newTimeframe)).toThrow 'End date overlaps a later timeframe'
+        expect(=> @timelineModel.setCurrentTimeframe(newTimeframe)).toThrow 'Date range overlaps an existing timeframe'
 
       it 'should not update the current timeframe when you pass in invalid dates', ->
         expect(=>
@@ -139,7 +139,7 @@ describe 'Rally.apps.roadmapplanningboard.util.TimelineViewModel', ->
 
         it 'should fail if end date overlaps a timeframe', ->
           newTimeframe = @createTimeframe null, '03/02/2014'
-          expect(=> @timelineModel.setCurrentTimeframe(newTimeframe)).toThrow 'End date overlaps a later timeframe'
+          expect(=> @timelineModel.setCurrentTimeframe(newTimeframe)).toThrow 'Date range overlaps an existing timeframe'
 
       describe 'end date is null', ->
         it 'should pass if start date does not overlap a timeframe', ->
@@ -149,4 +149,4 @@ describe 'Rally.apps.roadmapplanningboard.util.TimelineViewModel', ->
 
         it 'should fail if start date overlaps a timeframe', ->
           newTimeframe = @createTimeframe '01/30/2014', null
-          expect(=> @timelineModel.setCurrentTimeframe(newTimeframe)).toThrow 'Start date overlaps an earlier timeframe'
+          expect(=> @timelineModel.setCurrentTimeframe(newTimeframe)).toThrow 'Date range overlaps an existing timeframe'
