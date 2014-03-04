@@ -327,8 +327,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(@app.getEl().query('.card-blocked-icon').length).toBe 1
       expect(@app.getEl().query('.card-color-icon').length).toBe 1
 
-
-
   helpers
     createApp: (settings = {}, options = {}, context = {}) ->
       @app = Ext.create 'Rally.apps.kanban.KanbanApp',
