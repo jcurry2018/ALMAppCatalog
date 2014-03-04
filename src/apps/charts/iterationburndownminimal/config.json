@@ -8,6 +8,7 @@
       "IterationBurnDownMinimalApp.js"
    ],
    "css": [
-      "../Charts.css"
+      "../Charts.css",
+      "app.css"
    ]
 }
