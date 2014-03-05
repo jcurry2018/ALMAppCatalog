@@ -358,44 +358,5 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(typeof @config.columnConfig.fields[0]).toBe 'string'
 
     it 'should call refresh on the parent with extended field objects', ->
-      expect(@parentRefreshSpy.lastCall.args[0].columnConfig.fields[0].name).toBe 'UserStories'
-
-  describe 'column config', ->
-
-    beforeEach ->
-      @config =
-        columnConfig:
-          fields: ['FormattedID', 'Owner', 'Name', 'Project', 'PreliminaryEstimate', 'Parent', 'PercentDoneByStoryCount', 'PercentDoneByStoryPlanEstimate', 'UserStories']
-
-      @createCardboard(@config).then =>
-        @userStoriesField = _.last(@cardboard.columnConfig.fields)
-
-    describe 'user stories field', ->
-
-      it 'should be extended/augmented as an object in the fields array', ->
-        expect(Ext.isObject(@userStoriesField)).toBe true
-        expect(@userStoriesField.name).toEqual 'UserStories'
-
-      it 'should have UserStories and LeafStoryPlanEstimateTotal as additional fetch fields', ->
-        expect(@userStoriesField.fetch).toContain 'UserStories'
-        expect(@userStoriesField.fetch).toContain 'LeafStoryPlanEstimateTotal'
-
-      it 'should have a popoverConfig as an additional config', ->
-        expect(@userStoriesField.popoverConfig).toBeDefined
-
-    describe 'user stories popover config', ->
-
-      it 'should have a bottom-first placement/positioning hierarchy', ->
-        expect(@userStoriesField.popoverConfig.placement).toEqual ['bottom', 'right', 'left', 'top']
-
-      describe 'popover columns', ->
-
-        beforeEach ->
-          @columnConfig = @userStoriesField.popoverConfig.listViewConfig.gridConfig.columnCfgs
-
-        it 'should include ScheduleState as a column', ->
-          expect(@columnConfig).toContain({ dataIndex: 'ScheduleState', text: 'State' })
-
-        it 'should include PlanEstimate as a column', ->
-          expect(@columnConfig).toContain({ dataIndex: 'PlanEstimate', editor: { decimalPrecision: 0 }})
+      expect(@parentRefreshSpy.lastCall.args[0].columnConfig.fields[0]).toBe 'UserStories'
 

@@ -27,7 +27,38 @@
             isAdmin: false,
             cardConfig: {
                 editable: true,
-                skipDefaultFields: true
+                skipDefaultFields: true,
+                customFieldConfig: {
+                    UserStories: {
+                        fetch: ['UserStories', 'LeafStoryPlanEstimateTotal', 'LeafStoryCount'],
+                        popoverConfig: {
+                            cls: 'roadmap-board-userstory-popover',
+                            placement: ['bottom', 'right', 'left', 'top'],
+                            listViewConfig: {
+                                addNewConfig: {
+                                    showAddWithDetails: false
+                                },
+                                gridConfig: {
+                                    columnCfgs: [
+                                        'FormattedID',
+                                        'Name',
+                                        {
+                                            dataIndex: 'ScheduleState', // 'dataIndex' is the actual field name
+                                            text: 'State' // 'text' is the display name
+                                        },
+                                        {
+                                            dataIndex: 'PlanEstimate',
+                                            editor: {
+                                                decimalPrecision: 0
+                                            }
+                                        },
+                                        'Project'
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
             },
             columnConfig: {
                 additionalFetchFields: ['PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount', 'Rank', 'DisplayColor', 'Value']
@@ -71,78 +102,9 @@
                 throw 'typeNames must have a child property with a name';
             }
 
-            this._extendFieldDefinitions(this.config);
             this.mergeConfig(this.config);
 
             this.callParent(arguments);
-        },
-
-        refresh: function (newConfig) {
-            newConfig = _.cloneDeep(newConfig) || {};
-            this._extendFieldDefinitions(newConfig);
-            this.callParent([newConfig]);
-        },
-
-        _extendFieldDefinitions: function (config) {
-            var columnFields = config.columnConfig && config.columnConfig.fields;
-            if (!columnFields) {
-                return;
-            }
-
-            var customFieldConfigs = this._getCustomFieldConfigs();
-
-            _.each(columnFields, function (field, fieldIndex) {
-                field = Ext.isObject(field) ? field : { name: field };
-
-                var customFieldConfig = customFieldConfigs[field.name];
-                if(customFieldConfig) {
-                    columnFields[fieldIndex] = Ext.merge(field, customFieldConfig);
-                }
-            }, this);
-
-            config.columnConfig.fields = columnFields;
-        },
-
-        _getCustomFieldConfigs: function () {
-            return {
-                UserStories: {
-                    fetch: ['UserStories', 'LeafStoryPlanEstimateTotal', 'LeafStoryCount'],
-                    popoverConfig: {
-                        cls: 'roadmap-board-userstory-popover',
-                        placement: ['bottom', 'right', 'left', 'top'],
-                        listViewConfig: {
-                            addNewConfig: {
-                                showAddWithDetails: false
-                            },
-                            listeners: {
-                                datachanged: function (listView) {
-                                    var record = listView.getRecord();
-                                    var card = this.getCard(record);
-
-                                    card.ownerColumn.refreshCard(record);
-                                },
-                                scope: this
-                            },
-                            gridConfig: {
-                                columnCfgs: [
-                                    'FormattedID',
-                                    'Name',
-                                    {
-                                        dataIndex: 'ScheduleState', // 'dataIndex' is the actual field name
-                                        text: 'State' // 'text' is the display name
-                                    },
-                                    {
-                                        dataIndex: 'PlanEstimate',
-                                        editor: {
-                                            decimalPrecision: 0
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                }
-            };
         },
 
         shouldRetrieveModels: function () {
