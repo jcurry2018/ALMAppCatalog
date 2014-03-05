@@ -230,7 +230,7 @@ module.exports = (grunt) ->
       apphtml:
         files: [
           { expand: true, src: ['apps/**/deploy/*.html'], cwd: 'src', dest: 'build/html/', rename: (dest, src) -> "#{dest}#{src.replace('deploy/', '').replace('apps/', '')}" }
-          { expand: true, src: ['src/legacy/*.html'], dest: 'build/html/legacy/', flatten: true }
+          { expand: true, src: ['src/legacy/*.html', 'src/legacy/*.mp3'], dest: 'build/html/legacy/', flatten: true }
         ]
 
     coffee:
