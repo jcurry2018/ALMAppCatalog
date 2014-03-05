@@ -39,12 +39,3 @@ describe 'Rally.apps.kanban.Settings', ->
     it 'does not includes Rank if isDndWorkspace is specified as false', ->
       fields = @getSettingsFields false
       expect(@isRankInBlackList(fields)).toBe false
-
-    it 'shows iteration/release filter checkbox if page is scoped', ->
-      fields = @getSettingsFields true, true
-      expect(_.pluck(fields, 'name')).toContain 'useTimeboxScope'
-
-    it 'does not show iteration/release filter checkbox if page is not scoped', ->
-      fields = @getSettingsFields true, false
-      expect(_.pluck(fields, 'name')).not.toContain 'useTimeboxScope'
-      

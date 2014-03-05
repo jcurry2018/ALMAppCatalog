@@ -23,6 +23,7 @@
         appName: 'Kanban',
 
         settingsScope: 'project',
+        useTimeboxScope: true,
 
         items: [
             {
@@ -50,8 +51,6 @@
 
         launch: function() {
             this.setLoading();
-
-            this.useTimeboxScope = this.getSetting('useTimeboxScope');
 
             Rally.data.ModelFactory.getModel({
                 type: 'UserStory',
@@ -84,8 +83,7 @@
             return Rally.apps.kanban.Settings.getFields({
                 shouldShowColumnLevelFieldPicker: this._shouldShowColumnLevelFieldPicker(),
                 defaultCardFields: this.getSetting('cardFields'),
-                isDndWorkspace: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled,
-                isPageScoped: !!this.context.getTimeboxScope()
+                isDndWorkspace: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled
             });
         },
 
@@ -96,10 +94,8 @@
          */
         onTimeboxScopeChange: function(timeboxScope) {
             this.callParent(arguments);
-            if (this.useTimeboxScope) {
-                this.gridboard.destroy();
-                this.launch();
-            }
+            this.gridboard.destroy();
+            this.launch();
         },
 
         _shouldShowColumnLevelFieldPicker: function() {
