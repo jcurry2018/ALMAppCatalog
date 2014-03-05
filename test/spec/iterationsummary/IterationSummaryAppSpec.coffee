@@ -15,6 +15,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
           workspace:globalContext.getWorkspace()
           user:globalContext.getUser()
           subscription:globalContext.getSubscription()
+          timebox: @mom.getRecord('iteration')
         }, initialValues)
       })
 
