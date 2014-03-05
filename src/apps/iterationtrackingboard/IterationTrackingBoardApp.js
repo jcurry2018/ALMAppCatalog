@@ -97,7 +97,8 @@
                             },
                             {
                                 xtype: 'rallytagpillfilter',
-                                margin: '0 5'
+                                margin: '0 5',
+                                showPills: this.getContext().isFeatureEnabled('S59980_S59981_FILTER_UI_IMPROVEMENTS')
                             },
                             {
                                 xtype: 'rallymodelfilter',
