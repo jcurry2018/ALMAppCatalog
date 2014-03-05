@@ -26,7 +26,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @app = Ext.create('Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', Ext.apply(
         context: Ext.create('Rally.app.Context',
           initialValues:
-            timebox: @iterationRecord
+            timebox: Ext.create 'Rally.app.TimeboxScope', record: @iterationRecord
             project:
               _ref: @projectRef
         ),

@@ -38,19 +38,21 @@
         scopeObject: undefined,
         chartType: "burndown",
         buttonPadding: 15,
+        supportsUnscheduled: false,
+        appName: 'Iteration Progress',
 
         onScopeChange: function (scope) {
             this._onScopeObjectLoaded(scope.getRecord());
+            this.down('#toggle').show();
+        },
+
+        onNoAvailableTimeboxes: function() {
+            this.remove('iterationburndownminimalchart', false);
+            this.down('#toggle').hide();
         },
 
         initComponent: function () {
             this.callParent(arguments);
-
-            this.add({
-                xtype: 'container',
-                itemId: 'header',
-                cls: 'header'
-            });
 
             this.buttonContainer = this.add({
                 xtype: 'container',

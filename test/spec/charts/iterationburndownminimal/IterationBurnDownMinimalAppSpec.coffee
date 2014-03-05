@@ -10,7 +10,7 @@ describe 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp
           project: globalContext.getProject()
           workspace: globalContext.getWorkspace()
           user: globalContext.getUser()
-          timebox: @_createIterationRecord()
+          timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
           subscription: globalContext.getSubscription()
           appID: 1
         , initialValues)
@@ -333,4 +333,15 @@ describe 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp
       Rally.environment.getMessageBus().publish Rally.Message.bulkUpdate, @mom.getRecord('userstory', count: 2)
       expect(refreshSpy.callCount).toBe 1
 
+  it 'cleans up app content when no timeboxes available', ->
+    refreshSpy = @ajax.whenReadingEndpoint("/slm/charts/itsc.sp?sid=&iterationOid=1&cpoid=" + this.getContext().getProject().ObjectID).respondWithHtml itscData, { url: '/slm/charts/itsc.sp', method: 'GET' }
+    app = Ext.create 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp',
+      context: @getContext()
+      renderTo: 'testDiv'
 
+    @waitForCallback(refreshSpy).then =>
+      expect(app.down('rallychart')).not.toBeNull()
+      expect(app.down('#toggle').isVisible()).toBe true
+      app.onNoAvailableTimeboxes()
+      expect(app.down('rallychart')).toBeNull()
+      expect(app.down('#toggle').isVisible()).toBe false

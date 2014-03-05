@@ -1723,3 +1723,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         expect(configTests.subtitle).toBe "(3 of 9)"
         expect(configTests.status).toBe "error"
         expect(configTests.message).toBe app.self.CURRENT_TESTS_FAILING_MESSAGE
+
+    it 'cleans up app content when no timeboxes available', ->
+      @createApp({}).then (app) =>
+        expect(app.down('#dataContainer')).not.toBeNull()
+        app.onNoAvailableTimeboxes()
+        expect(app.down('#dataContainer')).toBeNull()

@@ -71,7 +71,7 @@ describe 'Rally.apps.board.BoardApp', ->
 
   it 'scopes the board to the current timebox scope', ->
     @createApp({}, context:
-      timebox: @_createIterationRecord()
+      timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
     ).then =>
 
       expect(@_getBoard().getStoreConfig().filters.length).toBe 1
@@ -81,7 +81,7 @@ describe 'Rally.apps.board.BoardApp', ->
   it 'scopes the board to the current timebox scope and specified query filter', ->
     query = '(Name contains foo)'
     @createApp({query: query}, context:
-        timebox: @_createIterationRecord()
+        timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
     ).then =>
 
       expect(@_getBoard().getStoreConfig().filters.length).toBe 2
@@ -100,7 +100,7 @@ describe 'Rally.apps.board.BoardApp', ->
     )
 
     @createApp({}, context:
-      timebox: @_createIterationRecord()
+      timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
     ).then =>
 
       refreshSpy = @spy(@_getBoard(), 'refresh')

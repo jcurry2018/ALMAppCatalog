@@ -17,7 +17,7 @@ describe 'Rally.apps.grid.GridApp', ->
       @once condition: => @grid = @app.down 'rallygrid'
 
     createTimeboxScopedApp: (config) ->
-      @createApp config, timebox: @mom.getRecord 'iteration'
+      @createApp config, timebox: Ext.create 'Rally.app.TimeboxScope', record: @mom.getRecord 'iteration'
 
   beforeEach ->
     @ajax.whenQuerying('userstory').respondWith []

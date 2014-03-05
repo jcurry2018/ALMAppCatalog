@@ -44,6 +44,8 @@
             DEFINED_STATE: "Defined"
         },
 
+        supportsUnscheduled: false,
+
         initComponent: function() {
             this.callParent(arguments);
             this.subscribe(this, Rally.Message.objectDestroy, this._refreshApp, this);
@@ -71,6 +73,10 @@
         onScopeChange: function(scope) {
             delete this._tzOffset;
             this._addContent();
+        },
+
+        onNoAvailableTimeboxes: function() {
+            this._checkAndDestroy('#dataContainer');
         },
 
         _isHsOrTeamEdition: function() {

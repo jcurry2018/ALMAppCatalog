@@ -32,6 +32,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'ci', 'Does a full build, runs tests and deploys to nexus', ['build', 'test:ci', 'nexus:__createartifact__']
 
   grunt.registerTask 'test:__buildjasmineconf__', 'Internal task to build and alter the jasmine conf', ['jasmine:apps:build', 'replace:jasmine']
+  grunt.registerTask 'test:fast', 'Just configs and runs the tests. Does not do any compiling. grunt && grunt watch should be running.', ['test:__buildjasmineconf__', 'express:inline', 'webdriver_jasmine_runner:chrome']
   grunt.registerTask 'test:conf', 'Fetches the deps, compiles coffee and css files, runs jshint and builds the jasmine test config', ['nexus:deps', 'clean:test', 'coffee', 'css', 'test:__buildjasmineconf__']
   grunt.registerTask 'test:fastconf', 'Just builds the jasmine test config', ['test:__buildjasmineconf__']
   grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:apps']
