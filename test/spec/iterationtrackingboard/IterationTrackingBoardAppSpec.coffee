@@ -253,6 +253,22 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @mouseOver(css: nameColumnHeaderSelector).then =>
           expect(@app.getEl().down("#{nameColumnHeaderSelector} .#{Ext.baseCSSPrefix}column-header-trigger")).toBeNull
 
+  describe 'summmary', ->
+    beforeEach ->
+      @featureToggleStub = @stubFeatureToggle ['F2903_USE_ITERATION_TREE_GRID']
+
+    it 'enables the summary row on the treegrid when the toggle is on', ->
+      @featureToggleStub.withArgs('F4757_TREE_GRID_CHANGES').returns true
+      @createApp().then =>
+        @toggleToGrid()
+        expect(@app.down('#gridBoard').getGridOrBoard().showSummary).toBe true
+
+    it 'disables the summary row on the treegrid when the toggle is off', ->
+      @featureToggleStub.withArgs('F4757_TREE_GRID_CHANGES').returns false
+      @createApp().then =>
+        @toggleToGrid()
+        expect(@app.down('#gridBoard').getGridOrBoard().showSummary).toBe false
+
   describe 'model types', ->
 
     beforeEach ->

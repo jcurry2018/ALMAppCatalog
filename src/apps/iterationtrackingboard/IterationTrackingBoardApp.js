@@ -238,7 +238,8 @@
                         return '';
                     },
                     enableColumnFiltering: this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
-                    disableColumnMenus: !this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING')
+                    disableColumnMenus: !this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
+                    showSummary: this.getContext().isFeatureEnabled('F4757_TREE_GRID_CHANGES')
                 });
             }
             return gridConfig;
