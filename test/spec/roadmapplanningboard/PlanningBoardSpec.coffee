@@ -351,12 +351,43 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
       @createCardboard().then =>
         @parentRefreshSpy = @spy @cardboard.self.superclass, 'refresh'
-        @cardboard.refresh @config
 
-    it 'should not mutate the newConfig', ->
-      # testing for object equality causes jasmine to crash when the field is not a string
-      expect(typeof @config.columnConfig.fields[0]).toBe 'string'
+    describe 'without rebuildBoard option', ->
 
-    it 'should call refresh on the parent with extended field objects', ->
-      expect(@parentRefreshSpy.lastCall.args[0].columnConfig.fields[0]).toBe 'UserStories'
+      beforeEach ->
+        @cardboard.refresh()
 
+      it 'should call the parent refresh', ->
+        expect(@parentRefreshSpy).toHaveBeenCalledOnce()
+
+    describe 'with rebuildBoard option set to true', ->
+
+      beforeEach ->
+        @firstTimeframeColumn = @cardboard.getColumns()[1]
+        @showMaskSpy = @spy @cardboard, 'showMask'
+        @hideMaskSpy = @spy @cardboard, 'hideMask'
+        @loadColumnDataSpy = @spy @cardboard, '_loadColumnData'
+        @buildColumnsSpy = @spy @cardboard, 'buildColumns'
+        @refreshBacklogSpy = @spy @cardboard.getColumns()[0], 'refresh'
+        @cardboard.refresh(rebuildBoard: true)
+
+      it 'should show a mask', ->
+        expect(@showMaskSpy).toHaveBeenCalledWith 'Refreshing the board...'
+
+      it 'should hide the mask when done loading', ->
+        expect(@hideMaskSpy).toHaveBeenCalled()
+
+      it 'should load column data', ->
+        expect(@loadColumnDataSpy).toHaveBeenCalledOnce()
+
+      it 'should build columns after loading data', ->
+        sinon.assert.callOrder @loadColumnDataSpy, @buildColumnsSpy
+
+      it 'should call buildColumns with render set to true', ->
+        expect(@buildColumnsSpy.lastCall.args[0].render).toBe true
+
+      it 'should call buildColumns with firstTimeframe', ->
+        expect(@buildColumnsSpy.lastCall.args[0].firstTimeframe.getId()).toBe @firstTimeframeColumn.timeframeRecord.getId()
+
+      it 'should refresh the backlog after building columns', ->
+        sinon.assert.callOrder @buildColumnsSpy, @refreshBacklogSpy

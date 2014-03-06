@@ -107,16 +107,57 @@
             this.callParent(arguments);
         },
 
+        refresh: function (options) {
+            options = options || {};
+
+            if (options.rebuildBoard) {
+                this.showMask('Refreshing the board...');
+                this.addCls('loading');
+
+                return this._loadColumnData().then({
+                    success: function () {
+                        var firstTimeframeColumn = this.getColumns()[1]; // first visible timeframe column
+                        var firstTimeframeRecord = firstTimeframeColumn && firstTimeframeColumn.timeframeRecord;
+
+                        this.buildColumns({
+                            firstTimeframe: firstTimeframeRecord,
+                            render: true
+                        });
+                    },
+                    scope: this
+                }).then({
+                    success: this._refreshBacklog,
+                    scope: this
+                }).always(function () {
+                    this.hideMask();
+                    this.removeCls('loading');
+                }, this);
+            } else {
+                var deferred = new Deft.Deferred()
+                this.on('load', function () { deferred.resolve(); }, this, {single: true});
+
+                this.callParent(arguments);
+
+                return deferred.promise;
+            }
+        },
+
         shouldRetrieveModels: function () {
             return !this.columns || this.columns.length === 0;
         },
 
         onModelsRetrieved: function (callback) {
-            Deft.Promise.all([this.timeframePlanStoreWrapper.load(), this._loadPreliminaryStore()]).then({
-                success: function (results) {
+            return this._loadColumnData().then({
+                success: function () {
                     this.buildColumns();
                     callback.call(this);
                 },
+                scope: this
+            });
+        },
+
+        _loadColumnData: function () {
+            return Deft.Promise.all([this.timeframePlanStoreWrapper.load(), this._loadPreliminaryStore()]).then({
                 failure: function (operation) {
                     var service = operation.storeServiceName || 'External';
                     Rally.ui.notify.Notifier.showError({message: 'Failed to load: ' + service + ' service data load issue'});
@@ -454,7 +495,7 @@
                     this.pendingDeletions = _.reject(this.pendingDeletions, function (record) {
                         return record.getId() === planRecordToDelete.getId();
                     });
-                    this.getColumns()[0].refresh();
+                    this._refreshBacklog();
                     Rally.ui.notify.Notifier.showConfirmation({message: 'Column "' + timeframeName + '" deleted.'});
                 },
                 failure: function (error) {
@@ -484,7 +525,12 @@
 
         _getClickAction: function () {
             return 'Themes toggled from [' + !this.showTheme + '] to [' + this.showTheme + ']';
+        },
+
+        _refreshBacklog: function () {
+            this.getColumns()[0].refresh();
         }
+
     });
 
 })();

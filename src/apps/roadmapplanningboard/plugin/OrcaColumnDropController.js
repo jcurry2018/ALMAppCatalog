@@ -146,7 +146,7 @@
                     return this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
                 },
                 failure: function(response, opts) {
-                    return this._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
+                    return this._onDropSaveFailure(options, response);
                 },
                 callback: function() {
                     this._afterCardDropComplete(options);
@@ -154,6 +154,10 @@
                 scope: this,
                 params: Ext.apply({ workspace: context.getWorkspace()._refObjectUUID}, options.params)
             });
+        },
+
+        _onDropSaveFailure: function (options, operation) {
+            this.cmp.ownerCardboard.refresh({rebuildBoard: true});
         },
 
         _afterCardDropComplete: function (options) {

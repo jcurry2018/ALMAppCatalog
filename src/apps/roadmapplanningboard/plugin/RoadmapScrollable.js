@@ -54,19 +54,26 @@
          *
          * @param store
          */
-        buildColumns: function (store) {
-            var columns = this.originalBuildColumns.call(this.cmp, store);
+        buildColumns: function (options) {
+            options = options || {};
+
+            var columns = this.originalBuildColumns.call(this.cmp, options);
 
             this.backlogColumn = columns[0];
             this.scrollableColumns = columns.slice(1);
 
             this._sortColumns();
 
-            this.currentTimeframeIndex = this._getIndexOfFirstColumnToShow();
+            this.currentTimeframeIndex = this._getIndexOfFirstColumnToShow(options.firstTimeframe);
 
             this._addPlaceholderColumns();
 
-            this.cmp.columns = [this.backlogColumn].concat(this._getColumnsToShow());
+            if (options.render) {
+                this._hideColumns();
+                this._syncColumns();
+            } else {
+                this.cmp.columns = [this.backlogColumn].concat(this._getColumnsToShow());
+            }
 
             return this.cmp.columns;
         },
@@ -107,15 +114,42 @@
             this._reindexColumns();
         },
 
-        _getIndexOfFirstColumnToShow: function () {
+        _getIndexOfFirstColumnToShow: function (firstTimeframe) {
+            var firstColumnToShow;
+
+            if (firstTimeframe) {
+                firstColumnToShow = this._getColumnForTimeframe(firstTimeframe);
+            }
+
+            if (!firstColumnToShow) {
+                firstColumnToShow = this._getFirstPresentColumn() || this._getMostRecentPastColumn();
+            }
+
+            return firstColumnToShow.index;
+        },
+
+        _getColumnForTimeframe: function (timeframe) {
+            return _.find(this.scrollableColumns, function (column) {
+                return column.timeframeRecord && column.timeframeRecord.getId() === timeframe.getId();
+            });
+        },
+
+        _getMostRecentPastColumn: function () {
             var now = new Date();
             var format = 'Y-m-d';
 
-            var firstPresentColumn = _.find(this.scrollableColumns, function (column) {
-                return column.timeframeRecord && Ext.Date.format(column.timeframeRecord.get('endDate'), format) >= Ext.Date.format(now, format);
-            }, this);
+            return _.max(this.scrollableColumns, function (column) {
+                return column.timeframeRecord && column.timeframeRecord.get('endDate');
+            });
+        },
 
-            return firstPresentColumn ? firstPresentColumn.index : 0;
+        _getFirstPresentColumn: function () {
+            var now = new Date();
+            var format = 'Y-m-d';
+
+            return _.find(this.scrollableColumns, function (column) {
+                return column.timeframeRecord && Ext.Date.format(column.timeframeRecord.get('endDate'), format) >= Ext.Date.format(now, format);
+            });
         },
 
         _isBackwardsButtonHidden: function () {
@@ -165,6 +199,12 @@
 
         _hideColumn: function (column) {
             this.originalDestroyColumn.call(this.cmp, column);
+        },
+
+        _hideColumns: function () {
+            _.each(this.cmp.getColumns().slice(1), function (column) {
+                this._hideColumn(column);
+            }, this);
         },
 
         _renderScrollableColumns: function () {
@@ -254,11 +294,11 @@
         },
 
         _adjustCurrentColumnIndex: function() {
-            var visibleTimeframeColumns = _.filter(this.getScrollableColumns(), function (column) {
+            var timeframeColumnsToShow = _.filter(this._getColumnsToShow(), function (column) {
                 return !this._isPlaceholderColumn(column);
             }, this);
 
-            if(_.isEmpty(visibleTimeframeColumns) && this.currentTimeframeIndex > 0) {
+            if (_.isEmpty(timeframeColumnsToShow) && this.currentTimeframeIndex > 0) {
                 this.currentTimeframeIndex--;
             }
         },

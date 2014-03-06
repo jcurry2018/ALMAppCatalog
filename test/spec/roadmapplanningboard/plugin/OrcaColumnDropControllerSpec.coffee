@@ -562,3 +562,16 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
         it 'should update plan record', ->
           @expectPlanFeaturesToMatchCards(@leftColumn)
+
+  describe '#_onDropSaveFailure', ->
+
+    beforeEach ->
+      @leftColumn.ownerCardboard = refresh: =>
+      @cardboardRefreshStub = @stub @leftColumn.ownerCardboard, 'refresh'
+      @leftColumnDropController._onDropSaveFailure()
+
+    it 'should refresh the cardboard', ->
+      expect(@cardboardRefreshStub).toHaveBeenCalledOnce()
+
+    it 'should set rebuildBoard to true when refreshing the board', ->
+      expect(@cardboardRefreshStub.lastCall.args[0].rebuildBoard).toBe true
