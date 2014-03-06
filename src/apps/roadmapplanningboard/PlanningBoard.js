@@ -133,7 +133,7 @@
                     this.removeCls('loading');
                 }, this);
             } else {
-                var deferred = new Deft.Deferred()
+                var deferred = new Deft.Deferred();
                 this.on('load', function () { deferred.resolve(); }, this, {single: true});
 
                 this.callParent(arguments);

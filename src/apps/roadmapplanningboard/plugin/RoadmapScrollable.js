@@ -135,9 +135,6 @@
         },
 
         _getMostRecentPastColumn: function () {
-            var now = new Date();
-            var format = 'Y-m-d';
-
             return _.max(this.scrollableColumns, function (column) {
                 return column.timeframeRecord && column.timeframeRecord.get('endDate');
             });
