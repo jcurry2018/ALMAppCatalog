@@ -100,8 +100,10 @@
             var deferred = Ext.create('Deft.Deferred');
 
             if (!Ext.isDefined(this._tzOffset)) {
+                this.recordLoadBegin({description: 'calculating timebox info'});
                 Rally.environment.getIoProvider().httpGet({
-                    url: Rally.environment.getServer().getWsapiUrl() + '/iteration.js?includeSchema=true&pagesize=1&fetch=Name',
+                    requester: this,
+                    url: Rally.environment.getServer().getWsapiUrl() + '/iteration?includeSchema=true&pagesize=1&fetch=Name',
                     success: function(results) {
                         if (results.Schema.properties.EndDate.format.tzOffset !== undefined) {
                             this._tzOffset = results.Schema.properties.EndDate.format.tzOffset / 60;
@@ -109,6 +111,7 @@
                             this._tzOffset = 0;
                         }
                         this.timeBoxInfo = this._determineTimeBoxInfo(this._tzOffset);
+                        this.recordLoadEnd();
                         deferred.resolve();
                     },
                     scope: this
@@ -122,14 +125,16 @@
         getScheduleStates: function() {
             var deferred = Ext.create('Deft.Deferred');
 
+            this.recordLoadBegin({description: 'getting schedule states'});
             if (!Ext.isDefined(this._scheduleStates)) {
                 Rally.data.ModelFactory.getModel({
                     type: 'UserStory',
                     context: this.getContext().getDataContext(),
                     success: function(model) {
                         model.getField('ScheduleState').getAllowedValueStore().load({
+                            requester: this,
                             callback: function(records, operation, success) {
-                                this._scheduleStates = Ext.Array.map(records, function(record) {
+                                this._scheduleStates = _.map(records, function(record) {
                                     return record.get('StringValue');
                                 });
                                 deferred.resolve(this._scheduleStates);
@@ -142,7 +147,10 @@
             } else {
                 deferred.resolve(this._scheduleStates);
             }
-            return deferred.promise;
+            return deferred.promise.always(function(obj) {
+                this.recordLoadEnd();
+                return obj;
+            }, this);
         },
 
         _addContent: function(scope) {
@@ -232,11 +240,13 @@
         },
 
         _getStatusRowData: function() {
-            this.results = {};
             var queryObjects = {
                 hierarchicalrequirement: 'Defects:summary[State],TestCases:summary[LastVerdict],PlanEstimate,AcceptedDate,ScheduleState',
                 defect: 'TestCases:summary[LastVerdict],PlanEstimate,AcceptedDate,ScheduleState'
             };
+            this.results = {};
+
+            this.recordLoadBegin({description: 'getting status row data'});
 
             if (!this._isHsOrTeamEdition()) {
                 Ext.apply(queryObjects, {
@@ -260,6 +270,7 @@
                                 filters: [this.getContext().getTimeboxScope().getQueryFilter()],
                                 limit: Infinity,
                                 autoLoad: true,
+                                requester: this,
                                 listeners: {
                                     load: function(store, data) {
                                         this.results[store.model.prettyTypeName] = data;
@@ -273,10 +284,12 @@
                     }, this);
 
                     if (loadPromises.length === 0) {
+                        this.recordLoadEnd();
                         this.recordComponentReady();
                     } else {
                         Deft.Promise.all(loadPromises).then({
                             success: function() {
+                                this.recordLoadEnd();
                                 this._displayStatusRows();
                             },
                             scope: this
