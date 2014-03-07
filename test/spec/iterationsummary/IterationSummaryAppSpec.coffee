@@ -9,15 +9,14 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
     getContext: (initialValues) ->
       globalContext = Rally.environment.getContext()
 
-      Ext.create('Rally.app.Context', {
-        initialValues:Ext.merge({
+      Ext.create 'Rally.app.Context',
+        initialValues:Ext.merge
           project:globalContext.getProject()
           workspace:globalContext.getWorkspace()
           user:globalContext.getUser()
           subscription:globalContext.getSubscription()
-          timebox: @mom.getRecord('iteration')
-        }, initialValues)
-      })
+          timebox: Ext.create 'Rally.app.TimeboxScope', record: @mom.getRecord 'iteration'
+        , initialValues
 
     createApp: (initialValues) ->
       @container = Ext.create('Ext.Container', {
@@ -29,7 +28,10 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       })
 
       @container.add(app)
-      @waitForComponentReady(app)
+      if app.getContext().getTimeboxScope().getRecord()
+        @waitForComponentReady(app)
+      else
+        @once condition: -> app.down '#unscheduledBlankSlate'
 
     stubApp: (config) ->
       @stubPromiseFunction(Rally.apps.iterationsummary.IterationSummaryApp.prototype, 'getScheduleStates',
@@ -826,6 +828,17 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       addSpy = @spy(app, 'add')
 
       Rally.environment.getMessageBus().publish(Rally.Message.bulkUpdate, @mom.getRecord(type) for type in ['ConversationPost', 'Release'])
+
+      expect(addSpy).not.toHaveBeenCalled()
+
+  it 'does not refresh app on objectUpdate if unscheduled', ->
+    @createApp(timebox: Ext.create 'Rally.app.TimeboxScope',
+      type: 'iteration',
+      record: null
+    ).then (app) =>
+      addSpy = @spy(app, 'add')
+
+      Rally.environment.getMessageBus().publish Rally.Message.objectUpdate, @mom.getRecord 'defect'
 
       expect(addSpy).not.toHaveBeenCalled()
 

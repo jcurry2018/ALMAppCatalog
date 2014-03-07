@@ -55,7 +55,8 @@
         },
 
         _shouldUpdate: function(record) {
-            return Ext.Array.contains(['defect', 'hierarchicalrequirement', 'testset', 'defectsuite', 'testcase'], record.get('_type').toLowerCase());
+            return this.getContext().getTimeboxScope().getRecord() &&
+                Ext.Array.contains(['defect', 'hierarchicalrequirement', 'testset', 'defectsuite', 'testcase'], record.get('_type').toLowerCase());
         },
 
         _onBulkUpdate: function(records) {
