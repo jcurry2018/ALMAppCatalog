@@ -58,22 +58,35 @@ describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
       @click(@view.endDate.getEl().down('input').dom).then =>
         @validPicker(@view.endDate)
 
-  it 'should call custom validator when a date field value is changed', ->
+  it 'should not call validation on change before the done button has been clicked', ->
     validatorSpy = @spy @view.startDate, 'validator'
     @view.startDate.setValue('junk');
-    expect(validatorSpy).toHaveBeenCalledOnce()
+    expect(validatorSpy).not.toHaveBeenCalled()
 
-  it 'should disable the done button when a validation error occurs', ->
+  it 'should call validation on both fields when the done button is clicked', ->
+    startValidatorSpy = @spy @view.startDate, 'validator'
+    endValidatorSpy = @spy @view.endDate, 'validator'
+
+    @click(@doneButton.getEl()).then =>
+      expect(startValidatorSpy).toHaveBeenCalledOnce()
+      expect(endValidatorSpy).toHaveBeenCalledOnce()
+
+  it 'should enable validation on change after the done button is clicked', ->
+    @view.startDate.setValue('junk');
+
+    @click(@doneButton.getEl()).then =>
+      validatorSpy = @spy @view.startDate, 'validator'
+      @view.startDate.setValue('2/02/2014');
+      expect(validatorSpy).toHaveBeenCalledOnce()
+
+  it 'should disable the done button when done is clicked and a date field is invalid', ->
     @view.startDate.setValue('03/01/2014');
-    expect(@doneButton.isDisabled()).toBe true
+    @click(@doneButton.getEl()).then =>
+      expect(@doneButton.isDisabled()).toBe true
 
   it 'should enable the done button when a valid date range is selected', ->
     @view.startDate.setValue('02/02/2014');
     expect(@doneButton.isDisabled()).toBe false
-
-  it 'should disable the done button when you pass in invalid dates', ->
-    @writeTo(@view.startDate, 'Junk').then =>
-      expect(@doneButton.isDisabled()).toBe true
 
   it 'should destroy the view when the done button is clicked', ->
     @click(@doneButton.getEl()).then =>
@@ -112,21 +125,11 @@ describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
       beforeEach ->
         @triggerClickPromise = => @click(@view.startDate.triggerEl.first())
 
-      it 'should set min date to the day after the end date of the previous timeframe', ->
-        @triggerClickPromise().then =>
-          expect(@view.picker.minDate).toEqual new Date('02/01/2014')
-
       it 'should set max date to the end date of the current timeframe', ->
         @triggerClickPromise().then =>
           expect(@view.picker.maxDate).toEqual new Date('02/28/2014')
 
-      it 'should set min date to the day after the end date of previous timeframe when start date is null', ->
-        @view.timelineViewModel.currentTimeframe.startDate = null
-        @triggerClickPromise().then =>
-          expect(@view.picker.minDate).toEqual new Date('02/01/2014')
-
-      it 'should set min date to undefined when previous time frame is null', ->
-        @view.timelineViewModel.timeframes.shift()
+      it 'should not set min date', ->
         @triggerClickPromise().then =>
           expect(@view.picker.minDate).toBeUndefined()
 
@@ -138,17 +141,39 @@ describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
         @triggerClickPromise().then =>
           expect(@view.picker.minDate).toEqual new Date('02/01/2014')
 
-      it 'should set max date to the day before the start date of the next timeframe', ->
-        @triggerClickPromise().then =>
-          expect(@view.picker.maxDate).toEqual new Date('02/28/2014')
-
-      it 'should set max date to the day before the start date of next timeframe when end date is null', ->
-        @view.timelineViewModel.currentTimeframe.endDate = null
-        @triggerClickPromise().then =>
-          expect(@view.picker.maxDate).toEqual new Date('02/28/2014')
-
-      it 'should set max date to undefined when next time frame is null', ->
-        @view.timelineViewModel.timeframes.pop()
+      it 'should not set max date', ->
         @triggerClickPromise().then =>
           expect(@view.picker.maxDate).toBeUndefined()
 
+  describe '#_validateDateRanges', ->
+
+    it 'should return true if dateFields represent a valid range', ->
+      @view.startDate.setValue('02/02/2014');
+      @view.endDate.setValue('02/27/2014');
+      expect(@view._validateDateRanges()).toBe true
+
+    it 'should not allow the start date to be after the end date', ->
+      @view.endDate.setValue('02/27/2014');
+      @view.startDate.setValue('02/28/2014');
+      expect(@view._validateDateRanges()).toBe 'Start date is after end date'
+
+    it 'should not allow start date to be inside another timeframe', ->
+      @view.startDate.setValue('01/31/2014');
+      expect(@view._validateDateRanges()).toBe 'Date range overlaps an existing timeframe'
+
+    it 'should not allow end date to be inside another timeframe', ->
+      @view.endDate.setValue('03/01/2014');
+      expect(@view._validateDateRanges()).toBe 'Date range overlaps an existing timeframe'
+
+    it 'should not allow timeframe to completely overlap another timeframe', ->
+      @view.startDate.setValue('12/31/2013');
+      @view.endDate.setValue('2/28/2014');
+      expect(@view._validateDateRanges()).toBe 'Date range overlaps an existing timeframe'
+
+    it 'should not allow a non-valid start date', ->
+      @view.startDate.setValue('not a date');
+      expect(@view._validateDateRanges()).toBe 'Date fields must contain valid dates'
+
+    it 'should not allow a non-valid end date', ->
+      @view.endDate.setValue('not a date');
+      expect(@view._validateDateRanges()).toBe 'Date fields must contain valid dates'

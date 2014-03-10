@@ -53,24 +53,7 @@
             return nextTimeframe || null;
         },
 
-        setCurrentTimeframe: function (newTimeframe) {
-            if ((newTimeframe.startDate && !Ext.isDate(newTimeframe.startDate)) ||
-                (newTimeframe.endDate && !Ext.isDate(newTimeframe.endDate))) {
-                throw 'Start and end date must be valid dates';
-            }
-
-            if (newTimeframe.startDate > newTimeframe.endDate) {
-                throw 'Start date is after end date';
-            }
-
-            if (this._isTimeframeOverlapping(newTimeframe)) {
-                throw 'Date range overlaps an existing timeframe';
-            }
-
-            this.currentTimeframe = newTimeframe;
-        },
-
-        _isTimeframeOverlapping: function (newTimeframe) {
+        isTimeframeOverlapping: function (newTimeframe) {
             return _.some(this.timeframes, function (timeframe) {
                 var overlappingInside = this._isDateInRange(newTimeframe.startDate, timeframe) || this._isDateInRange(newTimeframe.endDate, timeframe);
                 var overlappingOutside = newTimeframe.startDate <= timeframe.startDate && newTimeframe.endDate >= timeframe.endDate;

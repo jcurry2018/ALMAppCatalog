@@ -118,20 +118,17 @@
                 checkChangeBuffer: this.waitTimeForDateFieldValidation,
                 value: value,
                 validateOnBlur: false,
+                validateOnChange: false,
                 validator: function () {
-                    return _this._validateDateRanges(this);
+                    return _this._validateDateRanges();
                 },
                 onTriggerClick: function () {
                     return _this._createPicker(this, displayText);
                 },
                 listeners: {
                     validitychange: function (dateField, isValid) {
-                        var doneButton = this.down('#datesDone');
-
                         if(isValid) {
-                            doneButton.enable();
-                        } else {
-                            doneButton.disable();
+                            this.down('#datesDone').enable();
                         }
                     },
                     focus: function (dateField) {
@@ -144,7 +141,7 @@
                     aftervalidate: function (dateField, isValid) {
                         if (this.picker && isValid) {
                             this.picker.value = dateField.getValue();
-                            this._updatePicker(dateField);
+                            this._updatePicker(dateField, isValid);
                         }
 
                         if (isValid) {
@@ -157,19 +154,27 @@
             };
         },
 
-        _validateDateRanges: function (dateField) {
-            var startDate = this.startDate.getValue();
-            var endDate = this.endDate.getValue();
+        _validateDateRanges: function () {
+            var newTimeframe = {
+                startDate: this.startDate.getValue(),
+                endDate: this.endDate.getValue()
+            };
 
-            try {
-                this.timelineViewModel.setCurrentTimeframe({
-                    startDate: startDate,
-                    endDate: endDate
-                });
-                return true;
-            } catch(error) {
-                return error;
+            if (!Ext.isDate(newTimeframe.startDate) || !Ext.isDate(newTimeframe.endDate)) {
+                return 'Date fields must contain valid dates';
             }
+
+            if (newTimeframe.startDate > newTimeframe.endDate) {
+                return 'Start date is after end date';
+            }
+
+            this.timelineViewModel.currentTimeframe = newTimeframe;
+
+            if (this.timelineViewModel.isTimeframeOverlapping(newTimeframe)) {
+                return 'Date range overlaps an existing timeframe';
+            }
+
+            return true;
         },
 
         _onCancel: function () {
@@ -183,8 +188,19 @@
         },
 
         destroy: function () {
-            if(this.saveOnClose && this.startDate.isValid() && this.endDate.isValid()) {
-                this._save();
+            if(this.saveOnClose) {
+                var startDateValid = this.startDate.isValid();
+                var endDateValid = this.endDate.isValid();
+
+                if (startDateValid && endDateValid) {
+                    this._save();
+                } else {
+                    this.startDate.validateOnChange = true;
+                    this.endDate.validateOnChange = true;
+                    this.down('#datesDone').disable();
+                    return false;
+                }
+
             }
 
             this.callParent(arguments);
@@ -217,24 +233,25 @@
                 handler: function (picker, date) {
                     dateField.setValue(date);
 
-                    _this._updatePicker(dateField);
+                    var isValid = _this._dateFieldsValid();
+                    _this._updatePicker(dateField, isValid);
                     _this._addDateSelectedTransitions(dateField);
                 },
-                minDate: this._getPickerMinDate(dateField),
-                maxDate: this._getPickerMaxDate(dateField),
-                rangeStart: this.timelineViewModel.currentTimeframe.startDate,
-                rangeEnd: this.timelineViewModel.currentTimeframe.endDate
+                disabledDateRanges: this.timelineViewModel.timeframes,
+                disabledDatesText: 'This date overlaps an existing timeframe'
             };
 
             if (dateField.itemId === this.startDate.itemId) {
                 pickerOpts.value = this.timelineViewModel.currentTimeframe.startDate;
-                pickerOpts.minText = 'This date overlaps an earlier timeframe';
+                pickerOpts.maxDate = this.timelineViewModel.currentTimeframe.endDate;
                 pickerOpts.maxText = 'This date is after the end date';
             } else {
                 pickerOpts.value = this.timelineViewModel.currentTimeframe.endDate;
+                pickerOpts.minDate = this.timelineViewModel.currentTimeframe.startDate;
                 pickerOpts.minText = 'This date is before the start date';
-                pickerOpts.maxText = 'This date overlaps a later timeframe';
             }
+
+            this._setPickerRange(pickerOpts, this._dateFieldsValid());
 
             this.picker = this.down('#datesPopoverLayout').add(pickerOpts);
 
@@ -245,33 +262,22 @@
             });
         },
 
-        _updatePicker: function (dateField) {
-            this.picker.rangeStart = this.timelineViewModel.currentTimeframe.startDate;
-            this.picker.rangeEnd = this.timelineViewModel.currentTimeframe.endDate;
+        _dateFieldsValid: function () {
+            return this._validateDateRanges() === true;
+        },
+
+        _updatePicker: function (dateField, isValid) {
+            this._setPickerRange(this.picker, isValid);
             this.picker.update(dateField.getValue(), true);
         },
 
-        _getPickerMinDate: function (dateField) {
-            var prevTimeframe = this.timelineViewModel.getPreviousTimeframe();
-
-            if (dateField.itemId === this.endDate.itemId) {
-                return this.timelineViewModel.currentTimeframe.startDate;
-            }
-
-            if (prevTimeframe) {
-                return Ext.Date.add(prevTimeframe.endDate, Ext.Date.DAY, 1);
-            }
-        },
-
-        _getPickerMaxDate: function (dateField) {
-            var nextTimeframe = this.timelineViewModel.getNextTimeframe();
-
-            if (dateField.itemId === this.startDate.itemId) {
-                return this.timelineViewModel.currentTimeframe.endDate;
-            }
-
-            if (nextTimeframe) {
-                return Ext.Date.add(nextTimeframe.startDate, Ext.Date.DAY, -1);
+        _setPickerRange: function (picker, isValid) {
+            if (isValid) {
+                picker.rangeStart = this.timelineViewModel.currentTimeframe.startDate;
+                picker.rangeEnd = this.timelineViewModel.currentTimeframe.endDate;
+            } else {
+                picker.rangeStart = null;
+                picker.rangeEnd = null;
             }
         },
 
