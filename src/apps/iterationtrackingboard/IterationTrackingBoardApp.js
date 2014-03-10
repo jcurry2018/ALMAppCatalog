@@ -116,11 +116,7 @@
                 alwaysSelectedValues.push('DragAndDropRank');
             }
 
-            plugins = plugins.concat([{
-                    ptype: 'rallygridboardfilterinfo',
-                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
-                    stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
-                },
+            plugins = plugins.concat([
                 {
                     ptype: 'rallygridboardfieldpicker',
                     gridFieldBlackList: ['DisplayColor'],
