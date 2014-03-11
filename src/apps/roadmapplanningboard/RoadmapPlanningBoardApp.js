@@ -11,11 +11,14 @@
             'Rally.apps.roadmapplanningboard.PlanningGridBoard',
             'Rally.apps.roadmapplanningboard.util.TimelineRoadmapStoreWrapper',
             'Rally.apps.roadmapplanningboard.util.UserPermissions',
-            'Rally.apps.roadmapplanningboard.util.RoadmapGenerator'
+            'Rally.apps.roadmapplanningboard.util.RoadmapGenerator',
+            'Rally.clientmetrics.ClientMetricsRecordable'
         ],
         cls: 'roadmapPlanningBoardApp',
         componentCls: 'app',
-
+        mixins: [
+            'Rally.clientmetrics.ClientMetricsRecordable'
+        ],
         config: {
             feedbackConfig: {
                 feedbackDialogConfig: {
@@ -163,7 +166,11 @@
                 isAdmin: this.isAdmin,
                 typeNames: this.typeNames,
                 modelNames: this.types,
-                cardboardPlugins: this.cardboardPlugins
+                cardboardPlugins: this.cardboardPlugins,
+                listeners: {
+                    load: this._onLoad,
+                    scope: this
+                }
             }, config);
 
             if(!this.getHeight()) {
@@ -189,6 +196,10 @@
                 this.setHeight(this._computeFullPagePanelContentAreaHeight());
                 el.mask('Roadmap planning is <strong>temporarily unavailable</strong>, please try again in a few minutes.', "roadmap-service-unavailable-error");
             }
+        },
+
+        _onLoad: function() {
+            this.recordComponentReady();
         }
     });
 })();
