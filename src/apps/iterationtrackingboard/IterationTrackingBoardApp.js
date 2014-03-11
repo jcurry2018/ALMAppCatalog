@@ -91,15 +91,11 @@
                         items: [
                             {
                                 xtype: 'rallyownerfilter',
-                                margin: '0 5',
+                                margin: '5 5 5 5',
                                 filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
                                 project: this.getContext().getProjectRef()
                             },
-                            {
-                                xtype: 'rallytagpillfilter',
-                                margin: '0 5',
-                                showPills: this.getContext().isFeatureEnabled('S59980_S59981_FILTER_UI_IMPROVEMENTS')
-                            },
+                            this._createTagFilterItem(context),
                             {
                                 xtype: 'rallymodelfilter',
                                 models: compositeModel.getArtifactComponentModels()
@@ -120,11 +116,15 @@
                 alwaysSelectedValues.push('DragAndDropRank');
             }
 
-            plugins = plugins.concat([{
-                    ptype: 'rallygridboardfilterinfo',
-                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
-                    stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
-                },
+            if (!context.isFeatureEnabled('F4359_FILTER')) {
+                plugins = plugins.concat([{
+                        ptype: 'rallygridboardfilterinfo',
+                        isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
+                        stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
+                }]);
+            }
+
+            plugins = plugins.concat([
                 {
                     ptype: 'rallygridboardfieldpicker',
                     gridFieldBlackList: ['DisplayColor'],
@@ -189,6 +189,16 @@
                     scope: this
                 }
             });
+        },
+
+        _createTagFilterItem: function(context) {
+            var filterUiImprovementsToggleEnabled = context.isFeatureEnabled('S59980_S59981_FILTER_UI_IMPROVEMENTS');
+            return {
+                xtype: 'rallytagpillfilter',
+                margin: filterUiImprovementsToggleEnabled ? '-10 5 5 5' : '5 5 5 5',
+                showPills: filterUiImprovementsToggleEnabled,
+                showClear: filterUiImprovementsToggleEnabled
+            };
         },
 
         _getGridConfig: function(treeGridModel, columns) {
