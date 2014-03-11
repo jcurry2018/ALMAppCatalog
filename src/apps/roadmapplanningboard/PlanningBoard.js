@@ -488,6 +488,7 @@
         _deletePlan: function (column) {
             var timeframeName = column.timeframeRecord.get('name');
             var planRecordToDelete = column.planRecord;
+            var columnHadFeatures = column.planRecord.get('features').length;
 
             return this.timeframePlanStoreWrapper.deletePlan(column.planRecord).then({
                 success: function () {
@@ -495,7 +496,9 @@
                     this.pendingDeletions = _.reject(this.pendingDeletions, function (record) {
                         return record.getId() === planRecordToDelete.getId();
                     });
-                    this._refreshBacklog();
+                    if (columnHadFeatures) {
+                        this._refreshBacklog();
+                    }
                     Rally.ui.notify.Notifier.showConfirmation({message: 'Column "' + timeframeName + '" deleted.'});
                 },
                 failure: function (error) {

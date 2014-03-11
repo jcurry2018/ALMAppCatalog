@@ -217,11 +217,18 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   describe 'deleting columns', ->
 
-    it 'should refresh the backlog column', ->
+    it 'should refresh the backlog column if the deleted column had features', ->
       @createCardboard(isAdmin: true).then =>
         refreshSpy = @spy @cardboard.getColumns()[0], 'refresh'
         @deleteColumn 1
         expect(refreshSpy).toHaveBeenCalledOnce()
+
+    it 'should not refresh the backlog column if the deleted column did not have features', ->
+      @createCardboard(isAdmin: true).then =>
+        refreshSpy = @spy @cardboard.getColumns()[0], 'refresh'
+        @cardboard.getColumns()[1].planRecord.set('features', []);
+        @deleteColumn 1
+        expect(refreshSpy).not.toHaveBeenCalledOnce()
 
     describe 'deleting all of the columns', ->
 
