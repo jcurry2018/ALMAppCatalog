@@ -12,6 +12,8 @@
             'Rally.data.Ranker',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.grid.TreeGrid',
+            'Rally.ui.cardboard.plugin.FixedHeader',
+            'Rally.ui.cardboard.plugin.Print',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
@@ -158,6 +160,10 @@
                 allModelNames: context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID') ? this.allModelNames : null,
                 cardBoardConfig: {
                     serverSideFiltering: context.isFeatureEnabled('F4359_FILTER'),
+                    plugins: [
+                        {ptype: 'rallycardboardprinting', pluginId: 'print'},
+                        {ptype: 'rallyfixedheadercardboard'}
+                    ],
                     columnConfig: {
                         additionalFetchFields: ['PortfolioItem'],
                         plugins: [{

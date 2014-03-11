@@ -88,7 +88,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
     @createApp(false, {height: 1000}).then =>
       #test range as jasmine does not like to render html the same with local and test server
       boardHeight = @planningBoard.getHeight()
-      expect(boardHeight >= 970).toBe true
+      expect(boardHeight >= 950).toBe true
       expect(boardHeight <= 1000).toBe true
 
   it 'should notify of error if the timeline store fails to load', ->

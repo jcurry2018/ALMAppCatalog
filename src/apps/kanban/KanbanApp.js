@@ -16,6 +16,7 @@
             'Rally.ui.cardboard.PolicyContainer',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.plugin.Scrollable',
+            'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.report.StandardReport'
         ],
         cls: 'kanban',
@@ -24,13 +25,6 @@
 
         settingsScope: 'project',
         useTimeboxScope: true,
-
-        items: [
-            {
-                xtype: 'container',
-                itemId: 'bodyContainer'
-            }
-        ],
 
         config: {
             defaultSettings: {
@@ -115,7 +109,7 @@
                 cardboardConfig.columns = this._getColumnConfig(columnSetting);
             }
 
-            this.gridboard = this.down('#bodyContainer').add(this._getGridboardConfig(cardboardConfig));
+            this.gridboard = this.add(this._getGridboardConfig(cardboardConfig));
 
             this.cardboard = this.gridboard.getGridOrBoard();
         },
@@ -218,6 +212,7 @@
                 xtype: 'rallycardboard',
                 plugins: [
                     {ptype: 'rallycardboardprinting', pluginId: 'print'},
+                    {ptype: 'rallyfixedheadercardboard'},
                     {
                         ptype: 'rallyscrollablecardboard',
                         containerEl: this.getEl()
