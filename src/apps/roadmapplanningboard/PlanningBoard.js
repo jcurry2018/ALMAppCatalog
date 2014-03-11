@@ -32,7 +32,6 @@
                     UserStories: {
                         fetch: ['UserStories', 'LeafStoryPlanEstimateTotal', 'LeafStoryCount'],
                         popoverConfig: {
-                            cls: 'roadmap-board-userstory-popover',
                             placement: ['bottom', 'right', 'left', 'top'],
                             listViewConfig: {
                                 addNewConfig: {
