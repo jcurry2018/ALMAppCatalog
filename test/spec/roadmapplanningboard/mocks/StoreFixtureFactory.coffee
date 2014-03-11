@@ -111,6 +111,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     _ref: '/portfolioitem/feature/1000'
     Name: "Android Support"
     PreliminaryEstimate: {Value: 4,_refObjectName: "L"}
+    RefinedEstimate: 5
     subscriptionId: "1"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
@@ -121,6 +122,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     _ref: '/portfolioitem/feature/1001'
     Name: "iOS Support"
     PreliminaryEstimate: {Value: 2,_refObjectName: "L"}
+    RefinedEstimate: 4
     subscriptionId: "1"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
@@ -131,6 +133,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     _ref: '/portfolioitem/feature/1002'
     Name: "HTML 5 Webapp"
     PreliminaryEstimate: {Value: 3,_refObjectName: "L"}
+    RefinedEstimate: 3
     subscriptionId: "1"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
@@ -141,6 +144,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     _ref: '/portfolioitem/feature/1003'
     Name: "Blackberry Native App"
     PreliminaryEstimate: {Value: 1,_refObjectName: "L"}
+    RefinedEstimate: 2
     subscriptionId: "1"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
@@ -151,6 +155,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     _ref: '/portfolioitem/feature/1004'
     Name: "Windows Phone Support"
     PreliminaryEstimate: {Value: 3,_refObjectName: "L"}
+    RefinedEstimate: 1
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
@@ -161,6 +166,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     _ref: '/portfolioitem/feature/1005'
     Name: "Ubuntu Phone Application"
     PreliminaryEstimate: {Value: 4,_refObjectName: "L"}
+    RefinedEstimate: 0
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
@@ -171,6 +177,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     _ref: '/portfolioitem/feature/1006'
     Name: "Tester's Large Test Card 1"
     PreliminaryEstimate: {Value: 13,_refObjectName: "L"}
+    RefinedEstimate: 0
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
@@ -181,6 +188,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     _ref: '/portfolioitem/feature/1007'
     Name: "Tester's Large Test Card 2"
     PreliminaryEstimate: {Value: 21,_refObjectName: "L"}
+    RefinedEstimate: 0
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
@@ -191,6 +199,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     _ref: '/portfolioitem/feature/1008'
     Name: "Tester's Large Test Card 3"
     PreliminaryEstimate: {Value: 13,_refObjectName: "L"}
+    RefinedEstimate: 0
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
@@ -201,6 +210,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     _ref: '/portfolioitem/feature/1009'
     Name: "Tester's Large Test Card 4"
     PreliminaryEstimate: {Value: 8,_refObjectName: "L"}
+    RefinedEstimate: 0
     subscriptionId: "2"
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}

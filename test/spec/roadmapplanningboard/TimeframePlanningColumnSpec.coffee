@@ -103,7 +103,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
       headerTplData = @column.getHeaderTplData()
 
-      expect(headerTplData['progressBarHtml']).toContain '72 of 42'
+      expect(headerTplData['progressBarHtml']).toContain '74 of 42'
 
     it 'should render a thermometer in the header template (filtered data)', ->
       @createColumn()
@@ -114,7 +114,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
       headerTplData = @column.getHeaderTplData()
 
-      expect(headerTplData['progressBarHtml']).toContain '6 of 42'
+      expect(headerTplData['progressBarHtml']).toContain '9 of 42'
 
     it 'should handle empty values as spaces', ->
       @createTimeframeRecord
@@ -388,3 +388,32 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           it 'should not show a confirmation dialog', ->
             expect(!!@confirmDialog).toBe false
 
+
+  describe 'capacity calculation', ->
+    beforeEach ->
+      @createPlanRecord()
+      @createTimeframeRecord()
+
+    it 'should use preliminary estimate if the card does not have a refined estimate or it is zero', ->
+
+      @createColumn()
+      @column.isMatchingRecord = (record) ->
+        record.data.RefinedEstimate <= 0
+
+      @column.refresh()
+
+      expect(@column.getHeaderTplData().pointTotal).toEqual 59
+
+    it 'should use refined estimate if the card has a refined estimate', ->
+
+      @createColumn()
+      @column.isMatchingRecord = (record) ->
+        record.data.RefinedEstimate > 0
+
+      @column.refresh()
+
+      expect(@column.getHeaderTplData().pointTotal).toEqual 15
+
+    it 'calculation should use refined before preliminary estimate', ->
+      @createColumn()
+      expect(@column.getHeaderTplData().pointTotal).toEqual 74

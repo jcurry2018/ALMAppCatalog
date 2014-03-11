@@ -27,7 +27,7 @@
             timeframeRecord: undefined,
             planRecord: undefined,
             dateFormat: 'M j',
-            pointField: 'PreliminaryEstimate'
+            pointFields: ['RefinedEstimate', 'PreliminaryEstimate']
         },
 
         constructor: function (config) {
@@ -385,7 +385,7 @@
         },
 
         getHeaderTplData: function () {
-            var pointField = this.pointField;
+            var pointFields = this.pointFields;
             var highCapacity = this._getHighCapacity();
             var lowCapacity = (this.planRecord && this.planRecord.get('lowCapacity')) || 0;
 
@@ -393,10 +393,12 @@
                 denominator: highCapacity,
                 numeratorItems: this.getCards(true),
                 numeratorItemValueFunction: function (card) {
-                    if (card.getRecord().get(pointField)) {
-                        return card.getRecord().get(pointField).Value || 0;
-                    }
-                    return 0;
+                    var value = _.find(_.map(pointFields, function(pointField) {
+                        var fieldValue = card.getRecord().get(pointField);
+                        return fieldValue ? (fieldValue.Value || fieldValue) : false;
+                    }));
+
+                    return value || 0;
                 }
             });
 
