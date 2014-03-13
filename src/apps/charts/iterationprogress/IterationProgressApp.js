@@ -1,19 +1,19 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define('Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp', {
+    Ext.define('Rally.apps.charts.iterationprogress.IterationProgressApp', {
         extend: 'Rally.app.TimeboxScopedApp',
 
         settingsScope: 'workspace',
 
         requires: [
-            'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalViewToggle',
-            'Rally.apps.charts.iterationburndownminimal.CumulativeFlowMinimalChart',
-            'Rally.apps.charts.iterationburndownminimal.BurnDownMinimalChart',
-            'Rally.apps.charts.iterationburndownminimal.HeatmapMinimalChart'
+            'Rally.apps.charts.iterationprogress.IterationProgressViewToggle',
+            'Rally.apps.charts.iterationprogress.CumulativeFlowChart',
+            'Rally.apps.charts.iterationprogress.BurndownChart',
+            'Rally.apps.charts.iterationprogress.HeatmapChart'
         ],
 
-        cls: 'iterationburndownminimal-app',
+        cls: 'iterationprogress-app',
 
         items: [],
 
@@ -21,12 +21,12 @@
             {
                 beginMethod: '_getIterationData',
                 endMethod: '_createChartDatafromXML',
-                description: 'IterationBurnDownMinimalApp - call A0 endpoint to get data'
+                description: 'IterationProgressApp - call A0 endpoint to get data'
             },
             {
                 beginEvent: 'updateBeforeRender',
                 endEvent: 'updateAfterRender',
-                description: 'IterationBurnDownMinimalApp - chart rendering time'
+                description: 'IterationProgressApp - chart rendering time'
             },
             {
                 componentReadyEvent: 'updateAfterRender'
@@ -47,7 +47,7 @@
         },
 
         onNoAvailableTimeboxes: function() {
-            this.remove('iterationburndownminimalchart', false);
+            this.remove('iterationprogresschart', false);
             this.down('#toggle').hide();
         },
 
@@ -64,7 +64,7 @@
 
             this.buttonContainer.add({
                 itemId: 'toggle',
-                xtype: 'rallyiterationburndownminimalviewtoggle',
+                xtype: 'rallyiterationprogressviewtoggle',
                 stateful: true,
                 style: {
                     'display':'block',
@@ -82,6 +82,7 @@
 
             this._setupEvents();
             this.subscribe(this, Rally.Message.objectUpdate, this._onMessageFromObjectUpdate, this);
+            this.subscribe(this, Rally.Message.objectDestroy, this._onMessageFromObjectUpdate, this);
             this.subscribe(this, Rally.Message.bulkUpdate, this._onMessageFromObjectUpdate, this);
         },
 
@@ -136,9 +137,9 @@
         _getIterationData: function (iteration) {
 
             var typeMap = {
-                heatmap: "Rally.apps.charts.iterationburndownminimal.HeatmapMinimalChart",
-                burndown: "Rally.apps.charts.iterationburndownminimal.BurnDownMinimalChart",
-                cumulativeflow: "Rally.apps.charts.iterationburndownminimal.CumulativeFlowMinimalChart"
+                heatmap: "Rally.apps.charts.iterationprogress.HeatmapChart",
+                burndown: "Rally.apps.charts.iterationprogress.BurndownChart",
+                cumulativeflow: "Rally.apps.charts.iterationprogress.CumulativeFlowChart"
             };
             
             if (iteration) {
@@ -162,12 +163,12 @@
             chart = chart || this.chartComponentConfig;
             this._setupUpdateBeforeRender(chart);
             this.setLoading();
-            this.remove('iterationburndownminimalchart', false);
+            this.remove('iterationprogresschart', false);
             chart.chartConfig.chart.height = (this.height) ? this.height : this._getHeight();
             chart.chartConfig.chart.height -= (this.buttonContainer.getHeight() );
             chart.chartConfig.chart.width = (this.width) ? this.width : this._getWidth();
 
-            chart.itemId = 'iterationburndownminimalchart';
+            chart.itemId = 'iterationprogresschart';
             this.add(chart);
             this.setLoading(false);
         }

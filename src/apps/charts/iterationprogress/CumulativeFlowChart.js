@@ -1,13 +1,13 @@
 (function(){
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("Rally.apps.charts.iterationburndownminimal.CumulativeFlowMinimalChart", {
+    Ext.define("Rally.apps.charts.iterationprogress.CumulativeFlowChart", {
         alias: "widget.rallycumulativeflowchart",
         extend: "Ext.Container",
         requires: [ 'Rally.ui.chart.Chart' ],
         mixins: [
-            "Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalMixin",
-            "Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalChart"
+            "Rally.apps.charts.iterationprogress.IterationProgressMixin",
+            "Rally.apps.charts.iterationprogress.IterationProgressChart"
         ],
 
         currentScope: undefined,
@@ -97,7 +97,7 @@
                    categories: [ ],
                    series: [ ]
                }
-           }, Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalChart.prototype.chartComponentConfig);
+           }, Rally.apps.charts.iterationprogress.IterationProgressChart.prototype.chartComponentConfig);
         },
 
         _createCumulativeFlowChartDatafromXML: function (xmlDoc) {

@@ -5,7 +5,7 @@ Ext.require [
   'Rally.app.Context'
 ]
 
-describe 'Rally.apps.charts.iterationheatmap.IterationHeatMapApp', ->
+xdescribe 'Rally.apps.charts.iterationheatmap.IterationHeatMapApp', ->
 
   helpers
     createApp: (config)->

@@ -8,7 +8,7 @@
         'problem': '#EF3F35' // red
     };
 
-    Ext.define("Rally.apps.charts.iterationburndownminimal.HeatmapMinimalChart", {
+    Ext.define("Rally.apps.charts.iterationprogress.HeatmapChart", {
         alias: "widget.rallyheatmapchart",
         extend: "Ext.Container",
         requires: [ 'Rally.ui.chart.Chart' ],
@@ -222,7 +222,7 @@
                             showInLegend: false
                         }
                     },
-                    subtitle: {                  
+                    subtitle: {
                         useHTML:true, //class refactor
                         text: '<table align="center" id="heatmapLegend"><tr><td><span class="defined-sample-swatch"></span><span>Planned</td>' +
                               '<td><span class="in-progress-sample-swatch"></span>Active</td>'+

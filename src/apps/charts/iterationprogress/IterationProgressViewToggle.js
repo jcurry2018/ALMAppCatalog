@@ -1,10 +1,10 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define('Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalViewToggle', {
+    Ext.define('Rally.apps.charts.iterationprogress.IterationProgressViewToggle', {
         requires:['Rally.ui.Button'],
         extend:'Ext.Container',
-        alias:'widget.rallyiterationburndownminimalviewtoggle',
+        alias:'widget.rallyiterationprogressviewtoggle',
         mixins: ['Ext.state.Stateful'],
 
         stateEvents: ['toggle'],
@@ -23,26 +23,26 @@
                 cls: 'toggle left burndown',
                 iconCls: 'icon-bars',
                 frame: false,
-                toggleGroup: 'iterationburndownminimalviewtoggle',
+                toggleGroup: 'iterationprogressviewtoggle',
                 toolTipConfig: {
                     html: 'Burndown',
                     anchor: 'bottom',
                     hideDelay: 0
                 },
-                userAction:'IterationBurnDownMinimalApp - User clicked burndown'
+                userAction:'IterationProgressApp - User clicked burndown'
             },
             {
                 itemId: 'cumulativeflow',
                 cls: 'toggle right cumulativeflow',
                 iconCls: 'icon-graph',
                 frame: false,
-                toggleGroup: 'iterationburndownminimalviewtoggle',
+                toggleGroup: 'iterationprogressviewtoggle',
                 toolTipConfig: {
                     html: 'Cumulative Flow',
                     anchor: 'bottom',
                     hideDelay: 0
                 },
-                userAction:'IterationBurnDownMinimalApp - User clicked CFD'
+                userAction:'IterationProgressApp - User clicked CFD'
             }],
 
         initComponent: function() {
@@ -63,13 +63,13 @@
                     cls: 'toggle center heatmap',
                     iconCls: 'icon-pie',
                     frame: false,
-                    toggleGroup: 'iterationburndownminimalviewtoggle',
+                    toggleGroup: 'iterationprogressviewtoggle',
                     toolTipConfig: {
                         html: 'Heatmap',
                         anchor: 'bottom',
                         hideDelay: 0
                     },
-                    userAction:'IterationBurnDownMinimalApp - User clicked heatmap'
+                    userAction:'IterationProgressApp - User clicked heatmap'
                 });
             }
 

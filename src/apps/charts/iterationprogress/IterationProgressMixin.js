@@ -1,7 +1,7 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalMixin", {
+    Ext.define("Rally.apps.charts.iterationprogress.IterationProgressMixin", {
         requires: [
             "Rally.ui.chart.Chart"
         ],
