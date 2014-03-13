@@ -198,12 +198,13 @@
         },
 
         _createTagFilterItem: function(context) {
-            var filterUiImprovementsToggleEnabled = context.isFeatureEnabled('S59980_S59981_FILTER_UI_IMPROVEMENTS');
+            var filterUiImprovementsToggleEnabled = context.isFeatureEnabled('S59980_S59981_S60525_FILTER_UI_IMPROVEMENTS');
             return {
                 xtype: 'rallytagpillfilter',
                 margin: filterUiImprovementsToggleEnabled ? '-10 5 5 5' : '5 5 5 5',
                 showPills: filterUiImprovementsToggleEnabled,
-                showClear: filterUiImprovementsToggleEnabled
+                showClear: filterUiImprovementsToggleEnabled,
+                remoteFilter: filterUiImprovementsToggleEnabled
             };
         },
 
