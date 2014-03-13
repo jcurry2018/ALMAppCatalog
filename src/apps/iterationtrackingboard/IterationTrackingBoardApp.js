@@ -194,7 +194,13 @@
         _getGridConfig: function(treeGridModel, columns) {
             var context = this.getContext(),
                 stateString = context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID') ? 'iteration-tracking-treegrid' : 'iteration-tracking-grid',
-                stateId = context.getScopedStateId(stateString);
+                stateId = context.getScopedStateId(stateString),
+                header = this.items.getAt(0),
+                treeGridHeight =  this.container.getSize().height;
+
+            if (header){
+                treeGridHeight -= header.getHeight();
+            }
 
             var gridConfig = {
                 storeConfig: {
@@ -203,7 +209,8 @@
                 columnCfgs: this._getGridColumns(),
                 enableBulkEdit: context.isFeatureEnabled('EXT4_GRID_BULK_EDIT'),
                 stateId: stateId,
-                stateful: true
+                stateful: true,
+                height: treeGridHeight
             };
 
             if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
