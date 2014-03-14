@@ -200,7 +200,7 @@
             if (isPillPickerEnabled) {
                 return {
                     xtype: 'rallyownerpillfilter',
-                    margin: '-10 5 5 5',
+                    margin: '-15 0 5 0',
                     filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
                     project: projectRef,
                     showPills: false,
@@ -209,7 +209,7 @@
             } else {
                 return {
                     xtype: 'rallyownerfilter',
-                    margin: '5 5 5 5',
+                    margin: '5 0 5 0',
                     filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
                     project: projectRef
                 };
@@ -221,7 +221,7 @@
             var filterUiImprovementsToggleEnabled = context.isFeatureEnabled('S59980_S59981_S60525_FILTER_UI_IMPROVEMENTS');
             return {
                 xtype: 'rallytagpillfilter',
-                margin: filterUiImprovementsToggleEnabled ? '-10 5 5 5' : '5 5 5 5',
+                margin: filterUiImprovementsToggleEnabled ? '-15 0 5 0' : '5 0 5 0',
                 showPills: filterUiImprovementsToggleEnabled,
                 showClear: filterUiImprovementsToggleEnabled,
                 remoteFilter: filterUiImprovementsToggleEnabled
