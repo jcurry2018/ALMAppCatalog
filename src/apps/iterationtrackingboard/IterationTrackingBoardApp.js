@@ -1,5 +1,4 @@
 (function() {
-(function() {
     var Ext = window.Ext4 || window.Ext;
 
     /**
@@ -206,14 +205,14 @@
                     project: projectRef,
                     showPills: false,
                     showClear: true
-                }
+                };
             } else {
                 return {
                     xtype: 'rallyownerfilter',
                     margin: '5 5 5 5',
                     filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
                     project: projectRef
-                }
+                };
             }
 
         },
