@@ -733,49 +733,5 @@
         </table>
     </div>
 </div>
-<div id="easter"></div>
 </body>
-<script type="text/javascript">
-var willboTracker = { };
-willboTracker['$className'] = 'willboTracker';
-/*
- * Konami-JS ~
- * :: Now with support for touch events and multiple instances for
- * :: those situations that call for multiple easter eggs!
- * Code: http://konami-js.googlecode.com/
- * Examples: http://www.snaptortoise.com/konami-js
- * Copyright (c) 2009 George Mandis (georgemandis.com, snaptortoise.com)
- * Version: 1.4.2 (9/2/2013)
- * Licensed under the MIT License (http://opensource.org/licenses/MIT)
- * Tested in: Safari 4+, Google Chrome 4+, Firefox 3+, IE7+, Mobile Safari 2.2.1 and Dolphin Browser
- */
-var Konami=function(a){var b={addEvent:function(a,b,c,d){a.addEventListener?a.addEventListener(b,c,!1):a.attachEvent&&(a["e"+b+c]=c,a[b+c]=function(){a["e"+b+c](window.event,d)},a.attachEvent("on"+b,a[b+c]))},input:"",pattern:"38384040373937396665",load:function(a){this.addEvent(document,"keydown",function(c,d){return d&&(b=d),b.input+=c?c.keyCode:event.keyCode,b.input.length>b.pattern.length&&(b.input=b.input.substr(b.input.length-b.pattern.length)),b.input==b.pattern?(b.code(a),b.input="",c.preventDefault(),!1):void 0},this),this.iphone.load(a)},code:function(a){window.location=a},iphone:{start_x:0,start_y:0,stop_x:0,stop_y:0,tap:!1,capture:!1,orig_keys:"",keys:["UP","UP","DOWN","DOWN","LEFT","RIGHT","LEFT","RIGHT","TAP","TAP"],code:function(a){b.code(a)},load:function(a){this.orig_keys=this.keys,b.addEvent(document,"touchmove",function(a){if(1==a.touches.length&&1==b.iphone.capture){var c=a.touches[0];b.iphone.stop_x=c.pageX,b.iphone.stop_y=c.pageY,b.iphone.tap=!1,b.iphone.capture=!1,b.iphone.check_direction()}}),b.addEvent(document,"touchend",function(){1==b.iphone.tap&&b.iphone.check_direction(a)},!1),b.addEvent(document,"touchstart",function(a){b.iphone.start_x=a.changedTouches[0].pageX,b.iphone.start_y=a.changedTouches[0].pageY,b.iphone.tap=!0,b.iphone.capture=!0})},check_direction:function(a){x_magnitude=Math.abs(this.start_x-this.stop_x),y_magnitude=Math.abs(this.start_y-this.stop_y),x=this.start_x-this.stop_x<0?"RIGHT":"LEFT",y=this.start_y-this.stop_y<0?"DOWN":"UP",result=x_magnitude>y_magnitude?x:y,result=1==this.tap?"TAP":result,result==this.keys[0]&&(this.keys=this.keys.slice(1,this.keys.length)),0==this.keys.length&&(this.keys=this.orig_keys,this.code(a))}}};return"string"==typeof a&&b.load(a),"function"==typeof a&&(b.code=a,b.load()),b};
-
-new Konami(function() {
-
-    if (window.top.location.hash.indexOf('dashboard') < 0 || navigator.userAgent.indexOf('Chrome') < 0){
-        return;
-    } else {
-        var messageBus = window.top.Rally.environment.getMessageBus();
-        messageBus.publish.apply(messageBus, ['rally.clientmetrics.message.action', {description: 'Hungry Willbo launched', component: willboTracker}]);
-        messageBus.publish.apply(messageBus, ['rally.clientmetrics.message.loadbegin', {description: 'Hungry Willbo played', component: willboTracker}]);
-        console.log("If you are interested in learning more on altering Rally Apps for your own purpose feel free to click this link");
-        console.log("http://www.rallydev.com/community/developer/how-customize-rally-new-app");
-        document.getElementById('cardBoard').style.display = 'none';
-        document.getElementById('easter').innerHTML = "<button onClick='killEasterEgg()'>Quit</button><br /><iframe width='100%' height='800px' src='/slm/js-lib/app-catalog/build/html/legacy/HungryWillboApp.html'></iframe>";
-        document.getElementsByTagName('iframe')[0].focus();
-    }
-});
-var killEasterEgg = function(){
-    //get high score off of child window
-    var highestScore = '0 - (0 steps)';
-    if (window.frames[0].window.highScore && window.frames[0].window.highSteps) {
-        highestScore = window.frames[0].window.highScore + '-(' + window.frames[0].window.highSteps + ' steps)';
-    }
-    var messageBus = window.top.Rally.environment.getMessageBus();
-    messageBus.publish.apply(messageBus, ['rally.clientmetrics.message.loadend', {description: 'Hungry Willbo played', component: willboTracker, willboHighScore: highestScore}]);
-    document.getElementById('cardBoard').style.display = 'block';
-    document.getElementById('easter').innerHTML = '';
-}
-</script>
 </html>
