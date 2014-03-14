@@ -1,4 +1,5 @@
 (function() {
+(function() {
     var Ext = window.Ext4 || window.Ext;
 
     /**
@@ -25,6 +26,7 @@
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
+            'Rally.ui.filter.view.OwnerPillFilter',
             'Rally.ui.filter.view.TagPillFilter',
             'Rally.app.Message',
             'Rally.apps.iterationtrackingboard.IsLeafHelper',
@@ -91,12 +93,7 @@
                         stateful: true,
                         stateId: context.getScopedStateId('iteration-tracking-filter-button'),
                         items: [
-                            {
-                                xtype: 'rallyownerfilter',
-                                margin: '5 5 5 5',
-                                filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
-                                project: this.getContext().getProjectRef()
-                            },
+                            this._createOwnerFilterItem(context),
                             this._createTagFilterItem(context),
                             {
                                 xtype: 'rallymodelfilter',
@@ -195,6 +192,30 @@
                     scope: this
                 }
             });
+        },
+
+        _createOwnerFilterItem: function(context) {
+            var isPillPickerEnabled = context.isFeatureEnabled('S59980_S59981_FILTER_UI_IMPROVEMENTS'),
+                projectRef = context.getProjectRef();
+
+            if (isPillPickerEnabled) {
+                return {
+                    xtype: 'rallyownerpillfilter',
+                    margin: '-10 5 5 5',
+                    filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
+                    project: projectRef,
+                    showPills: false,
+                    showClear: true
+                }
+            } else {
+                return {
+                    xtype: 'rallyownerfilter',
+                    margin: '5 5 5 5',
+                    filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
+                    project: projectRef
+                }
+            }
+
         },
 
         _createTagFilterItem: function(context) {
