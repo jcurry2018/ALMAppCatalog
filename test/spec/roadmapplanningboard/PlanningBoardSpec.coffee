@@ -16,8 +16,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
         slideDuration: 10
         renderTo: 'testDiv'
         types: ['PortfolioItem/Feature']
-        toggles:
-          deletePlan: true
         context: Rally.environment.getContext()
       , config
 
@@ -25,9 +23,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
        config.typeNames =
          child:
            name: 'Feature'
-
-      if config.toggles.deletePlan
-        @stubFeatureToggle ['ROADMAP_PLANNING_PAGE', 'ROADMAP_PLANNING_ALLOW_PLAN_DELETION']
 
       @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard', config
 
@@ -326,24 +321,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
               deletePlan: false
             expect(column.dropControllerConfig.dragDropEnabled).toBe false
             expect(column.columnHeaderConfig.editable).toBe false
-
-    describe 'toggles', ->
-
-      describe 'ROADMAP_PLANNING_ALLOW_PLAN_DELETION', ->
-
-        describe 'toggled on', ->
-
-          it 'should show the delete button on a column', ->
-            @createCardboard(isAdmin: true).then =>
-              timeframePlanningColumn = @cardboard.getColumns()[1]
-              expect(timeframePlanningColumn.deletePlanButton).toBeDefined()
-
-        describe 'toggled off', ->
-
-          it 'should not show the delete button on a column', ->
-            @createCardboard(isAdmin: true, toggles: { deletePlan: false } ).then =>
-              timeframePlanningColumn = @cardboard.getColumns()[1]
-              expect(timeframePlanningColumn.deletePlanButton).toBeUndefined()
 
   describe '#getFirstRecord', ->
 

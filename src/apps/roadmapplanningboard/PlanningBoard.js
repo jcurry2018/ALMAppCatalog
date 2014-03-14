@@ -414,8 +414,6 @@
         },
 
         _addColumnFromTimeframeAndPlan: function (timeframe, plan) {
-            var allowPlanDeletion = this.context && this.context.isFeatureEnabled('ROADMAP_PLANNING_PAGE') && this.context.isFeatureEnabled('ROADMAP_PLANNING_ALLOW_PLAN_DELETION') && this.isAdmin;
-
             return {
                 xtype: 'timeframeplanningcolumn',
                 timeframeRecord: timeframe,
@@ -435,7 +433,7 @@
                     capacityRanges: this.isAdmin,
                     theme: this.isAdmin,
                     timeframeDates: this.isAdmin,
-                    deletePlan: allowPlanDeletion
+                    deletePlan: this.isAdmin
                 },
                 dropControllerConfig: {
                     dragDropEnabled: this.isAdmin
