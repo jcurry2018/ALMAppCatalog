@@ -45,11 +45,12 @@
                 showAddChildMenuItem: false,
                 showRankMenuItems: false
             },
-
             /**
-             * @cfg {Number} Controls how many cards will be displayed in a column. Overrides default config in Column.js.
+             * @cfg {Boolean} renderCardsWhenReady
+             * If set to true, cards will be rendered to the column one at a time as they become available.
+             * If set to false, cards will wait to be rendered until all are ready.
              */
-            cardLimit: 25
+            renderCardsWhenReady: true
         },
 
         constructor: function (config) {
@@ -58,7 +59,6 @@
             if (!this.config.context) {
                 this.config.context = this.context;
             }
-            this.config.storeConfig.autoLoad = !this.filterable;
             if (this.config.baseFilter) {
                 this.config.baseFilter = this._createBaseFilter(this.config.baseFilter);
             }
@@ -89,13 +89,24 @@
 
             this.callParent(arguments);
 
-            return this.on('beforerender', function () {
+            this.addEvents('filtersinitialized');
+
+            this.on('beforerender', function () {
                 var cls = 'planning-column';
                 this.getContentCell().addCls(cls);
                 return this.getColumnHeaderCell().addCls(cls);
             }, this, {
                 single: true
             });
+        },
+
+        loadStore: function () {
+            if (this.filterable && !this.filtersInitialized) {
+                this.on('filtersinitialized', this.loadStore, this, {single: true});
+                return;
+            }
+
+            this.callParent(arguments);
         },
 
         _createFilterButton: function () {
@@ -209,8 +220,8 @@
         _initialFilter: function (component, filters) {
             this.filterButton.on('filter', this._onFilter, this);
             this._applyFilters(filters);
-            this.config.storeConfig.autoLoad = true;
-            this.loadStore();
+            this.filtersInitialized = true;
+            this.fireEvent('filtersinitialized', this);
         },
 
         _onFilter: function (component, filters) {

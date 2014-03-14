@@ -26,6 +26,7 @@
             timeframePlanStoreWrapper: undefined,
             timeframeRecord: undefined,
             planRecord: undefined,
+            cardLimit: 200,
             dateFormat: 'M j',
             pointFields: ['RefinedEstimate', 'PreliminaryEstimate']
         },
@@ -134,6 +135,7 @@
                     return result.or(filter);
                 }
             }, null, this);
+
             return result || this._createFeatureFilter(null);
         },
 

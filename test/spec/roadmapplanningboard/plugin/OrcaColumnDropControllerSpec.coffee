@@ -54,6 +54,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         renderTo: target
         contentCell: target
         headerCell: target
+        renderCardsWhenReady: false
         typeNames:
           child:
             name: 'Feature'
@@ -98,6 +99,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       lowestPIType: 'PortfolioItem/Feature'
       enableCrossColumnRanking: true
       ownerCardboard: {}
+      renderCardsWhenReady: false
       typeNames:
         child:
           name: 'Feature'
