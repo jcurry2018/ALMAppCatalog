@@ -194,7 +194,7 @@
         },
 
         _createOwnerFilterItem: function(context) {
-            var isPillPickerEnabled = context.isFeatureEnabled('S59980_S59981_FILTER_UI_IMPROVEMENTS'),
+            var isPillPickerEnabled = context.isFeatureEnabled('S59980_S59981_S60525_FILTER_UI_IMPROVEMENTS'),
                 projectRef = context.getProjectRef();
 
             if (isPillPickerEnabled) {
