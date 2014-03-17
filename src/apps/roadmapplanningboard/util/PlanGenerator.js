@@ -64,7 +64,7 @@
             var deferred = Ext.create('Deft.Deferred');
 
             _.first(this.timeframePlanStoreWrapper.planStore.add({
-                name: 'New Plan',
+                name: timeframeRecord.get('name'),
                 theme: '',
                 roadmap: {id: this.roadmap.getId()}, // Turn the roadmap into a JSON into a JSON object in order correctly match the url pattern in the Plan model proxy.
                 timeframe: timeframeRecord,

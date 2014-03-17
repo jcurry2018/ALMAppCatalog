@@ -12,6 +12,7 @@
 
         constructor: function (config) {
             this.initConfig(config);
+            this.timeframeStore.on('update', this._timeframeUpdated, this);
         },
 
         getTimeframeAndPlanRecords: function () {
@@ -19,7 +20,7 @@
             var records = _.map(this.timeframeStore.data.items, function(timeframe){
                 return {
                     timeframe: timeframe,
-                    plan: _this._getPlanForTimeframe(timeframe)
+                    plan: _this._getPlanForTimeFrameAndSyncName(timeframe)
                 };
             });
 
@@ -78,6 +79,24 @@
                 requester: this.requester,
                 storeServiceName: 'Timeline'
             });
+        },
+
+        _timeframeUpdated: function(store, record, operation, modifiedFieldNames, eOpts) {
+            if (operation === 'edit' && _.contains(modifiedFieldNames, 'name')) {
+                this._getPlanForTimeFrameAndSyncName(record);
+            }
+        },
+
+        _getPlanForTimeFrameAndSyncName: function (timeframe) {
+            var plan = this._getPlanForTimeframe(timeframe);
+            var timeframName = timeframe.get('name');
+
+            if (plan && plan.get('name') !== timeframName) {
+                plan.set('name', timeframName);
+                plan.save();
+            }
+
+            return plan;
         }
     });
 }).call(this);

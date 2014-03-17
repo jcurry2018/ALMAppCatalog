@@ -25,8 +25,16 @@ describe 'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', ->
 
   describe '#getTimeframeAndPlanRecords', ->
 
+    beforeEach ->
+      @timeframePlans = @wrapper.getTimeframeAndPlanRecords()
+
     it 'should only get timeframe records that are associated with plans', ->
-      expect(@wrapper.getTimeframeAndPlanRecords().length).toBe 4
+      expect(@timeframePlans.length).toBe 4
+
+    it 'should sync the timeframe and plan names', ->
+      timeframe = @wrapper.timeframeStore.first()
+      plan = @wrapper.planStore.first()
+      expect(plan.get 'name').toBe timeframe.get 'name'
 
   describe '#load', ->
 
@@ -65,5 +73,17 @@ describe 'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', ->
       timeframe = @planRecordToDelete.get('timeframe')
       @wrapper.deletePlan(@planRecordToDelete)
       expect(@wrapper.timeframeStore.findRecord('id', timeframe.id)).toBeDefined()
+
+  describe 'timeframe update', ->
+
+    it 'should update the name of the associated plan', ->
+      newName = 'new plan name'
+      timeframe = @wrapper.timeframeStore.first()
+      plan = @wrapper.planStore.first()
+      timeframe.set 'name', newName
+      timeframe.save()
+      expect(plan.get 'name').toBe newName
+
+
 
 

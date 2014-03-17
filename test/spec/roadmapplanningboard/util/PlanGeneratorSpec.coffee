@@ -26,6 +26,9 @@ describe 'Rally.apps.roadmapplanningboard.util.PlanGenerator', ->
 
     it 'should set the timeframe on the plan', ->
       expect(@planRecord.get('timeframe').getId()).toBe @timeframeRecord.getId()
+
+    it 'should set the plan name to the timeframe name', ->
+      expect(@planRecord.get 'name').toBe @timeframeRecord.get 'name'
       
     it 'should add a timeframe to the timeframe store', ->
       expect(@timeframeStore.last().getId()).toBe @timeframeRecord.getId()
