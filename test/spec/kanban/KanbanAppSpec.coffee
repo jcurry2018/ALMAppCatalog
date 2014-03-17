@@ -327,10 +327,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(@app.getEl().query('.card-blocked-icon').length).toBe 1
       expect(@app.getEl().query('.card-color-icon').length).toBe 1
 
-  it 'should contain board-toggled class needed for fixed header plugin', ->
-    @createApp().then =>
-      expect(@app.getEl().dom.className).toContain 'board-toggled'
-
   helpers
     createApp: (settings = {}, options = {}, context = {}) ->
       @app = Ext.create 'Rally.apps.kanban.KanbanApp',
