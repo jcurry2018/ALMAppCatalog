@@ -268,7 +268,6 @@ module.exports = (grunt) ->
       options:
         url: 'http://alm-build.f4tech.com:8080'
         repository: 'thirdparty'
-        curl: true
       deps:
         options:
           fetch: (->
