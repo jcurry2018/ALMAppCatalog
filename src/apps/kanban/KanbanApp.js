@@ -16,10 +16,9 @@
             'Rally.ui.cardboard.PolicyContainer',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.plugin.Scrollable',
-            'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.report.StandardReport'
         ],
-        cls: 'kanban board-toggled',
+        cls: 'kanban',
         alias: 'widget.kanbanapp',
         appName: 'Kanban',
 
@@ -212,7 +211,6 @@
                 xtype: 'rallycardboard',
                 plugins: [
                     {ptype: 'rallycardboardprinting', pluginId: 'print'},
-                    {ptype: 'rallyfixedheadercardboard'},
                     {
                         ptype: 'rallyscrollablecardboard',
                         containerEl: this.getEl()
