@@ -200,7 +200,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
           expect(_.last(@timeframeStore.data.items).get('name')).toBe 'New Timeframe'
 
         it 'should update the plan store', ->
-          expect(_.last(@planStore.data.items).get('name')).toBe 'New Plan'
+          expect(_.last(@planStore.data.items).get('name')).toBe 'New Timeframe'
 
     describe 'when user is not admin', ->
       beforeEach ->
