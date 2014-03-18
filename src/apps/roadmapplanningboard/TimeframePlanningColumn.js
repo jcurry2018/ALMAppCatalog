@@ -147,9 +147,14 @@
             });
         },
 
+        addCapacityClick: function(button, event) {
+            this.onProgressBarClick(event);
+        },
+
         onProgressBarClick: function (event) {
             var target = Ext.get(Ext.query('.progress-bar-background', this.getColumnHeader().getEl().dom)[0]);
 
+            event.stopPropagation();
             this.plannedCapacityRangeTooltip.disable();
 
             if (this.popover) {
@@ -280,7 +285,7 @@
                     text: 'Set Capacity',
                     cls: 'secondary dark',
                     renderTo: Ext.query('.add-capacity', this.getColumnHeader().getEl().dom)[0],
-                    handler: this.onProgressBarClick,
+                    handler: this.addCapacityClick,
                     scope: this
                 });
             }
