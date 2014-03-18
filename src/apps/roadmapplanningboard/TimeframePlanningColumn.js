@@ -33,6 +33,7 @@
 
         constructor: function (config) {
             this.mergeConfig(config);
+            this.config.storeConfig = this.config.storeConfig || {};
             this.config.storeConfig.sorters = [
                 {
                     sorterFn: Ext.bind(this._sortPlan, this)

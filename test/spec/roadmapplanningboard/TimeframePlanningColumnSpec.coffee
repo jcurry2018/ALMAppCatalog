@@ -146,20 +146,47 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
   describe 'loading features from store', ->
 
+    helpers
+      createColumnUsingAjax: (options) ->
+        @createColumn Ext.merge(
+          fields: ['FormattedID', 'Name']
+          types: ['PortfolioItem/Feature']
+          model: 'PortfolioItem/Feature'
+          useInMemoryStore: false
+        , options)
+
     beforeEach ->
       @createTimeframeRecord()
       @createPlanRecord()
-
       features = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.featureStoreData
       @ajaxSpy = @ajax.whenQuerying('PortfolioItem/Feature').respondWith(features)
 
-      @createColumn
-        types: ['PortfolioItem/Feature']
-        model: 'PortfolioItem/Feature'
-        useInMemoryStore: false
-
     it 'should only load the store once when the column is created', ->
-      expect(@ajaxSpy.callCount).toBe 1
+      @createColumnUsingAjax().then =>
+        expect(@ajaxSpy.callCount).toBe 1
+
+    describe 'with shallow fetch enabled', ->
+
+      beforeEach ->
+        @createColumnUsingAjax storeConfig: shallowFetch: true
+
+      it 'should set the shallowFetch param in the request', ->
+        expect(@ajaxSpy.lastCall.args[0].params.shallowFetch).toBeDefined()
+
+      it 'should not set the fetch param in the request', ->
+        expect(@ajaxSpy.lastCall.args[0].params.fetch).toBeUndefined()
+
+    describe 'with shallow fetch disabled', ->
+
+      beforeEach ->
+        @createColumnUsingAjax storeConfig: shallowFetch: false
+
+      it 'should not set the shallowFetch param in the request', ->
+        expect(@ajaxSpy.lastCall.args[0].params.shallowFetch).toBeUndefined()
+
+      it 'should set the fetch param in the request', ->
+        expect(@ajaxSpy.lastCall.args[0].params.fetch).toBeDefined()
+
 
   describe '#getStoreFilter', ->
 

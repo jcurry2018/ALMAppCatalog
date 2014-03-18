@@ -130,12 +130,12 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
         _.each column.getCards(), (card) =>
           expect(card.record.data.UserStories.Count).toBe 3
 
-  xit 'should have leaf story count on the cards if UserStories is a selected card field', ->
+  it 'should have direct children count on the cards if UserStories is a selected card field', ->
     @createCardboard(cardConfig: fields: ['UserStories']).then =>
       _.each @cardboard.getColumns(), (column) =>
         _.each column.getCards(), (card) =>
-          expect(card.record.data.LeafStoryCount).toBe 42
-          expect(card.getEl().down('.rui-card-content .UserStories .user-story-count').dom.innerHTML).toBe "(42)"
+          expect(card.record.data.DirectChildrenCount).toBe 39
+          expect(card.getEl().down('.rui-card-content .UserStories .user-story-count').dom.innerHTML).toBe "(39)"
 
   it 'should have leaf story plan estimate total on the cards if UserStories is a selected card field', ->
     @createCardboard(cardConfig: fields: ['UserStories']).then =>

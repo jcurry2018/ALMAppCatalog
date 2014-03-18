@@ -212,6 +212,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
         expect(@column.getStoreFilter().toString()).toBe '((ActualEndDate = "null") AND (Name = "Some name"))'
 
   describe '#refreshRecords', ->
+
     it 'should get latest store filters', ->
       @createColumn().then =>
         getStoreFilterSpy = @spy @column, 'getStoreFilter'
@@ -223,3 +224,31 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
         @column.refreshRecord(@column.getRecords()[0], ->).then =>
           expect(getStoreFilterSpy).toHaveBeenCalledOnce()
 
+  describe '#getAllFetchFields', ->
+
+    beforeEach ->
+      @columnConfig.fields = ['PreliminaryEstimate','UserStories']
+      @columnConfig.cardConfig =
+        customFieldConfig:
+          PreliminaryEstimate:
+            fetch: [ { name: 'PreliminaryEstimate', properties: ['Value', 'Name'] } ]
+
+    describe 'with shallowFetch enabled', ->
+
+      beforeEach ->
+        @columnConfig.storeConfig = shallowFetch: true
+        @createColumn()
+
+      it 'should add additional fetch fields for fields with custom config', ->
+        expect(@column.getAllFetchFields()).toContain('PreliminaryEstimate[Value;Name]');
+
+    describe 'with shallowFetch disabled', ->
+
+      beforeEach ->
+        @columnConfig.storeConfig = shallowFetch: false
+        @createColumn()
+
+      it 'should add additional fetch fields for fields with custom config', ->
+        expect(@column.getAllFetchFields()).toContain('PreliminaryEstimate');
+        expect(@column.getAllFetchFields()).toContain('Value');
+        expect(@column.getAllFetchFields()).toContain('Name');

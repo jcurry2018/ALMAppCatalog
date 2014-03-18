@@ -25,12 +25,59 @@
             roadmap: null,
             timeline: null,
             isAdmin: false,
+            storeConfig: {
+                shallowFetch: true
+            },
             cardConfig: {
                 editable: true,
                 skipDefaultFields: true,
                 customFieldConfig: {
+                    // Note: These additional fields are added by ALM when using a standard fetch
+                    // They need to be explicitly added to the fetch params when using a shallow fetch
+                    // TODO: These additional fields should eventually be moved into some sort of shallow fetch builder/decorator in the SDK
+                    PercentDoneByStoryPlanEstimate: {
+                        fetch: [
+                            'PercentDoneByStoryPlanEstimate',
+                            'PercentDoneByStoryCount',
+                            'LeafStoryCount',
+                            'LeafStoryPlanEstimateTotal',
+                            'ActualEndDate',
+                            'PlannedStartDate',
+                            'PlannedEndDate',
+                            'AcceptedLeafStoryPlanEstimateTotal',
+                            'AcceptedLeafStoryCount',
+                            'UnEstimatedLeafStoryCount',
+                            'Notes',
+                            'PortfolioItemTypeOrdinal',
+                            'LateChildCount',
+                            'Release'
+                        ]
+                    },
+                    PercentDoneByStoryCount: {
+                        fetch: [
+                            'PercentDoneByStoryPlanEstimate',
+                            'PercentDoneByStoryCount',
+                            'LeafStoryCount',
+                            'LeafStoryPlanEstimateTotal',
+                            'ActualEndDate',
+                            'PlannedStartDate',
+                            'PlannedEndDate',
+                            'AcceptedLeafStoryPlanEstimateTotal',
+                            'AcceptedLeafStoryCount',
+                            'UnEstimatedLeafStoryCount',
+                            'Notes',
+                            'PortfolioItemTypeOrdinal',
+                            'LateChildCount',
+                            'Release'
+                        ]
+                    },
+                    PreliminaryEstimate: {
+                        fetch: [
+                            { name: 'PreliminaryEstimate', properties: ['Value', 'Name'] }
+                        ]
+                    },
                     UserStories: {
-                        fetch: ['UserStories', 'LeafStoryPlanEstimateTotal', 'LeafStoryCount'],
+                        fetch: ['LeafStoryPlanEstimateTotal', 'DirectChildrenCount'],
                         popoverConfig: {
                             placement: ['bottom', 'right', 'left', 'top'],
                             listViewConfig: {
@@ -60,7 +107,7 @@
                 }
             },
             columnConfig: {
-                additionalFetchFields: ['PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount', 'Rank', 'DisplayColor', 'Value']
+                additionalFetchFields: ['PreliminaryEstimate', 'RefinedEstimate']
             },
             ddGroup: 'planningBoard',
             dropAllowed: "planningBoard",

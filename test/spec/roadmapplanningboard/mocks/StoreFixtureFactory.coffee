@@ -116,6 +116,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
+    DirectChildrenCount: 39
   ,
     ObjectID: "1001"
     _refObjectUUID: "F1001"
@@ -127,6 +128,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
+    DirectChildrenCount: 39
   ,
     ObjectID: "1002"
     _refObjectUUID: "F1002"
@@ -138,6 +140,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
+    DirectChildrenCount: 39
   ,
     ObjectID: "1003"
     _refObjectUUID: "F1003"
@@ -149,6 +152,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
+    DirectChildrenCount: 39
   ,
     ObjectID: "1004"
     _refObjectUUID: "F1004"
@@ -160,6 +164,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
+    DirectChildrenCount: 39
   ,
     ObjectID: "1005"
     _refObjectUUID: "F1005"
@@ -171,6 +176,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
+    DirectChildrenCount: 39
   ,
     ObjectID: "1006"
     _refObjectUUID: "F1006"
@@ -182,6 +188,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
+    DirectChildrenCount: 39
   ,
     ObjectID: "1007"
     _refObjectUUID: "F1007"
@@ -193,6 +200,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
+    DirectChildrenCount: 39
   ,
     ObjectID: "1008"
     _refObjectUUID: "F1008"
@@ -204,6 +212,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
+    DirectChildrenCount: 39
   ,
     ObjectID: "1009"
     _refObjectUUID: "F1009"
@@ -215,6 +224,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Project: {_refObjectName: "My Project"}
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
+    DirectChildrenCount: 39
   ]
 
   getFeatureStoreFixture: ->
