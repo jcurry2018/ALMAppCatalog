@@ -126,7 +126,8 @@
                 {
                     ptype: 'rallygridboardfieldpicker',
                     gridFieldBlackList: ['DisplayColor'],
-                    alwaysSelectedValues: alwaysSelectedValues
+                    alwaysSelectedValues: alwaysSelectedValues,
+                    modelNames: this._getFieldPickerDisplayNames(context, compositeModel, treeGridModel)
                 }
             ]);
 
@@ -138,10 +139,10 @@
                 });
             }
             this.plugins = plugins;
-            this._addGrid(this._getGridConfig(treeGridModel));
+            this._addGrid(this._getGridConfig(treeGridModel), this._getGridBoardModelNames(context, compositeModel));
         },
 
-        _addGrid: function(gridConfig){
+        _addGrid: function(gridConfig, modelNames){
             var context = this.getContext();
 
             this.remove('gridBoard');
@@ -152,8 +153,7 @@
                 stateId: 'iterationtracking-gridboard',
                 context: context,
                 plugins: this.plugins,
-                modelNames: this.modelNames,
-                allModelNames: context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID') ? this.allModelNames : null,
+                modelNames: modelNames,
                 cardBoardConfig: {
                     serverSideFiltering: context.isFeatureEnabled('F4359_FILTER'),
                     plugins: [
@@ -244,10 +244,7 @@
             };
 
             if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
-                var parentTypes = ['HierarchicalRequirement', 'Defect', 'DefectSuite'];
-                if(this.getContext().getSubscription().isUnlimitedEdition()) {
-                    parentTypes.push('TestSet');
-                }
+                var parentTypes = ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'];
                 Ext.apply(gridConfig, {
                     xtype: 'rallytreegrid',
                     model: treeGridModel,
@@ -304,30 +301,47 @@
         },
 
         _loadModels: function() {
-            var topLevelTypes = ['User Story', 'Defect', 'Defect Suite'],
-                allTypes = topLevelTypes.concat(['Task', 'Test Case']);
-            if(this.getContext().getSubscription().isUnlimitedEdition()) {
-                topLevelTypes.push('Test Set');
-                allTypes.push('Test Set');
-            }
+            var topLevelModelNames = ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
+                childModelNames = ['Task', 'Test Case'],
+                allModelNames = topLevelModelNames.concat(childModelNames);
+
             Rally.data.ModelFactory.getModels({
-                types: allTypes,
+                types: allModelNames,
                 context: this.getContext().getDataContext(),
                 success: function(models) {
-                    var topLevelModels = _.filter(models, function(model, key) {
-                            return _.contains(topLevelTypes, key);
-                        }),
-                        compositeModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(topLevelModels, this.getContext()),
-                        treeGridModel;
-                    this.modelNames = topLevelTypes;
-                    this.allModelNames = allTypes;
-                    if (this.getContext().isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
-                        treeGridModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(_.values(models), this.getContext());
-                    }
-                    this._addGridBoard(compositeModel, treeGridModel);
+                    this._onModelLoad(models, topLevelModelNames);
                 },
                 scope: this
             });
+        },
+
+        _getFieldPickerDisplayNames: function(context, compositeModel, treeGridModel) {
+            var models;
+
+            if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID') && !Ext.isEmpty(treeGridModel)) {
+                models = treeGridModel.getArtifactComponentModels();
+            } else {
+                models = compositeModel.getArtifactComponentModels();
+            }
+
+            return _.pluck(models, 'displayName');
+        },
+
+        _getGridBoardModelNames: function(context, compositeModel) {
+            return _.pluck(compositeModel.getArtifactComponentModels(), 'displayName');
+        },
+
+        _onModelLoad: function(models, topLevelModelNames) {
+            var availableTopLevelModels = _.filter(models, function(model, modelName) {
+                    return _.contains(topLevelModelNames, modelName);
+                }),
+                compositeModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(availableTopLevelModels, this.getContext()),
+                treeGridModel;
+
+            if (this.getContext().isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
+                treeGridModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(_.values(models), this.getContext());
+            }
+            this._addGridBoard(compositeModel, treeGridModel);
         },
 
         _onLoad: function() {

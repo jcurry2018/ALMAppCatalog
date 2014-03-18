@@ -273,26 +273,15 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @toggleToGrid()
         expect(@app.down('#gridBoard').getGridOrBoard().showSummary).toBe false
 
-  describe 'model types', ->
+  describe 'tree grid model types', ->
 
     beforeEach ->
       @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
 
-    it 'should include test sets in UE', ->
-      @stub(Rally.domain.Subscription::, 'isUnlimitedEdition').returns true
+    it 'should include test sets', ->
       @createApp().then =>
         @toggleToGrid()
-        expect(@app.modelNames).toContain 'Test Set'
-        expect(@app.allModelNames).toContain 'Test Set'
         expect(@app.down('rallytreegrid').getStore().parentTypes).toContain 'TestSet'
-
-    it 'should not include test sets in UE', ->
-      @stub(Rally.domain.Subscription::, 'isUnlimitedEdition').returns false
-      @createApp().then =>
-        @toggleToGrid()
-        expect(@app.modelNames).not.toContain 'Test Set'
-        expect(@app.allModelNames).not.toContain 'Test Set'
-        expect(@app.down('rallytreegrid').getStore().parentTypes).not.toContain 'TestSet'
 
   describe 'toggle grid/board cls to ensure overlfow-y gets set for fixed header plugin', ->
     it 'should add board-toggled class to app on initial load in board view', ->
