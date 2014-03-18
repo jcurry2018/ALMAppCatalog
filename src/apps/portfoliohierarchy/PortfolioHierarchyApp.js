@@ -95,6 +95,7 @@
             return Ext.create('Rally.ui.tree.PortfolioTree', {
                 stateful: true,
                 stateId: this.getAppId() + 'rallyportfoliotree',
+                workspace: this.getContext().getWorkspace(),
                 topLevelModel: typeRecord.get('TypePath'),
                 topLevelStoreConfig: {
                     filters: filters,

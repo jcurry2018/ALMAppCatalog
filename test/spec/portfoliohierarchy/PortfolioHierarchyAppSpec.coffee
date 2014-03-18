@@ -131,3 +131,8 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
     @_createApp().then =>
       expect(loadSpy.callCount).toBe 0
       expect(@app.down('#bodyContainer').getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
+
+  it 'should set workspace on the tree config', ->
+    @_createApp().then =>
+      tree = @app.down('rallytree')
+      expect(tree.workspace._ref).toBe Rally.environment.getContext().getWorkspace()._ref
