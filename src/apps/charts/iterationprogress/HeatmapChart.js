@@ -192,7 +192,7 @@
                             name: 'Grand Children',
                             data: this._childChartData,
                             size: '80%',
-                            innerSize: '60%',
+                            innerSize: '80%',
                             dataLabels: { enabled: false }
                         }
                     ]

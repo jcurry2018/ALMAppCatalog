@@ -81,6 +81,7 @@
             });
 
             this._setupEvents();
+            this.subscribe(this, Rally.Message.objectCreate, this._onMessageFromObjectUpdate, this);
             this.subscribe(this, Rally.Message.objectUpdate, this._onMessageFromObjectUpdate, this);
             this.subscribe(this, Rally.Message.objectDestroy, this._onMessageFromObjectUpdate, this);
             this.subscribe(this, Rally.Message.bulkUpdate, this._onMessageFromObjectUpdate, this);
