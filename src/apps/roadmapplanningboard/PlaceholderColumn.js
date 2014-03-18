@@ -23,10 +23,17 @@
             Ext.fly(this.headerCell).addCls('planning-column');
             this.columnHeader = Ext.widget(Ext.merge(config, this.columnHeaderConfig));
 
+            // Add a couple of containers to match the structure of the timeframe planning column header
             this.columnHeader.add({
                 xtype: 'container',
                 tpl: [
-                    '<div class="progress-bar-background"></div>',
+                    '<div class="progress-bar-background"></div>'
+                ],
+                data: {}
+            });
+            this.columnHeader.add({
+                xtype: 'container',
+                tpl: [
                     '<div class="theme_container"></div>'
                 ],
                 data: {}
