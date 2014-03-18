@@ -325,3 +325,4 @@ module.exports = (grunt) ->
   grunt.event.on 'watch', (action, filepath) ->
     changedFiles[filepath] = action
     onChange()
+

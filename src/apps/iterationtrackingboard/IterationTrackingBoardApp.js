@@ -185,7 +185,7 @@
                 },
                 listeners: {
                     load: this._onLoad,
-                    toggle: this._publishContentUpdated,
+                    toggle: this._onToggle,
                     recordupdate: this._publishContentUpdatedNoDashboardLayout,
                     recordcreate: this._publishContentUpdatedNoDashboardLayout,
                     scope: this
@@ -341,6 +341,17 @@
 
         _onBoardFilterComplete: function() {
             this.setLoading(false);
+        },
+
+        _onToggle: function(toggleState) {
+            var appEl = this.getEl();
+
+            if (toggleState === 'board') {
+                appEl.replaceCls('grid-toggled', 'board-toggled');
+            } else {
+                appEl.replaceCls('board-toggled', 'grid-toggled');
+            }
+            this._publishContentUpdated();
         },
 
         _publishContentUpdated: function() {

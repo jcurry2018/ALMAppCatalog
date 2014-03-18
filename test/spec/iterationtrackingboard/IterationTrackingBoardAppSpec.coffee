@@ -2,6 +2,7 @@ Ext = window.Ext4 || window.Ext
 
 Ext.require [
   'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp'
+  'Rally.ui.gridboard.GridBoard'
   'Rally.util.DateTime'
   'Rally.app.Context',
   'Rally.domain.Subscription'
@@ -292,3 +293,24 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         expect(@app.modelNames).not.toContain 'Test Set'
         expect(@app.allModelNames).not.toContain 'Test Set'
         expect(@app.down('rallytreegrid').getStore().parentTypes).not.toContain 'TestSet'
+
+  describe 'toggle grid/board cls to ensure overlfow-y gets set for fixed header plugin', ->
+    it 'should add board-toggled class to app on initial load in board view', ->
+      @stub(Rally.ui.gridboard.GridBoard::, 'toggleState', 'board')
+      @createApp().then =>
+        expect(@app.getEl().dom.className).toContain 'board-toggled'
+
+    it 'should add board-toggled class to app when toggled to board view', ->
+      @createApp().then =>
+        @toggleToBoard()
+        expect(@app.getEl().dom.className).toContain 'board-toggled'
+
+    it 'should add grid-toggled class to app on initial load in grid view', ->
+      @stub(Rally.ui.gridboard.GridBoard::, 'toggleState', 'grid')
+      @createApp().then =>
+        expect(@app.getEl().dom.className).toContain 'grid-toggled'
+
+    it 'should add grid-toggled class to app when toggled to grid view', ->
+      @createApp().then =>
+        @toggleToGrid()
+        expect(@app.getEl().dom.className).toContain 'grid-toggled'

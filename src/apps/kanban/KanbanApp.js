@@ -16,7 +16,6 @@
             'Rally.ui.cardboard.PolicyContainer',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.plugin.Scrollable',
-            'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.report.StandardReport'
         ],
         cls: 'kanban',
@@ -212,7 +211,6 @@
                 xtype: 'rallycardboard',
                 plugins: [
                     {ptype: 'rallycardboardprinting', pluginId: 'print'},
-                    {ptype: 'rallyfixedheadercardboard'},
                     {
                         ptype: 'rallyscrollablecardboard',
                         containerEl: this.getEl()
@@ -381,6 +379,16 @@
             params[groupByFieldName] = this.cardboard.getColumns()[0].getValue();
         },
 
+        _onBeforeCardSaved: function(column, card, type) {
+            var columnSetting = this._getColumnSetting();
+            if (columnSetting) {
+                var setting = columnSetting[column.getValue()];
+                if (setting && setting.scheduleStateMapping) {
+                    card.getRecord().set('ScheduleState', setting.scheduleStateMapping);
+                }
+            }
+        },
+
         _publishContentUpdated: function() {
             this.fireEvent('contentupdated');
             if (Rally.BrowserTest) {
@@ -390,16 +398,6 @@
 
         _publishContentUpdatedNoDashboardLayout: function() {
             this.fireEvent('contentupdated', {dashboardLayout: false});
-        },
-
-        _onBeforeCardSaved: function(column, card, type) {
-            var columnSetting = this._getColumnSetting();
-            if (columnSetting) {
-                var setting = columnSetting[column.getValue()];
-                if (setting && setting.scheduleStateMapping) {
-                    card.getRecord().set('ScheduleState', setting.scheduleStateMapping);
-                }
-            }
         }
     });
 })();

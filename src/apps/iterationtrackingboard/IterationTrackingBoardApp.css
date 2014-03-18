@@ -1,12 +1,18 @@
-/* needed for fixed header plugin*/
 .iterationtrackingboard {
     height: 100%;
+}
+
+.iterationtrackingboard.grid-toggled {
+    overflow-y: auto !important;
+}
+
+.iterationtrackingboard.board-toggled {
     overflow-y: hidden !important;
 }
+
 .iterationtrackingboard .rui-gridboard {
     height: 100%;
 }
-/* end needed for fixed header plugin*/
 
 .iterationtrackingboard .header {
     line-height: normal;
