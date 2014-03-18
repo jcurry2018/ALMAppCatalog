@@ -130,7 +130,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
         _.each column.getCards(), (card) =>
           expect(card.record.data.UserStories.Count).toBe 3
 
-  it 'should have leaf story count on the cards if UserStories is a selected card field', ->
+  xit 'should have leaf story count on the cards if UserStories is a selected card field', ->
     @createCardboard(cardConfig: fields: ['UserStories']).then =>
       _.each @cardboard.getColumns(), (column) =>
         _.each column.getCards(), (card) =>
