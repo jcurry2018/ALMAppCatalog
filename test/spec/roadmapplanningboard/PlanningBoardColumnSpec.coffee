@@ -236,7 +236,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
     describe 'with shallowFetch enabled', ->
 
       beforeEach ->
-        @columnConfig.storeConfig = shallowFetch: true
+        @columnConfig.storeConfig = useShallowFetch: true
         @createColumn()
 
       it 'should add additional fetch fields for fields with custom config', ->
@@ -245,7 +245,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
     describe 'with shallowFetch disabled', ->
 
       beforeEach ->
-        @columnConfig.storeConfig = shallowFetch: false
+        @columnConfig.storeConfig = useShallowFetch: false
         @createColumn()
 
       it 'should add additional fetch fields for fields with custom config', ->
