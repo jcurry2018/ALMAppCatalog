@@ -26,7 +26,8 @@
             timeline: null,
             isAdmin: false,
             storeConfig: {
-                shallowFetch: true
+                shallowFetch: true,
+                enablePostGet: true
             },
             cardConfig: {
                 editable: true,
