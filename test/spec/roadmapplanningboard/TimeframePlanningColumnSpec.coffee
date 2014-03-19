@@ -167,25 +167,33 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
     describe 'with shallow fetch enabled', ->
 
-      beforeEach ->
-        @createColumnUsingAjax storeConfig: shallowFetch: true
+      helpers
+        createColumn: ->
+          @createColumnUsingAjax(storeConfig: useShallowFetch: true)
+          @waitForCallback(@ajaxSpy)
 
       it 'should set the shallowFetch param in the request', ->
-        expect(@ajaxSpy.lastCall.args[0].params.shallowFetch).toBeDefined()
+        @createColumn().then =>
+          expect(@ajaxSpy.lastCall.args[0].params.shallowFetch).toBeDefined()
 
       it 'should not set the fetch param in the request', ->
-        expect(@ajaxSpy.lastCall.args[0].params.fetch).toBeUndefined()
+        @createColumn().then =>
+          expect(@ajaxSpy.lastCall.args[0].params.fetch).toBeUndefined()
 
     describe 'with shallow fetch disabled', ->
 
-      beforeEach ->
-        @createColumnUsingAjax storeConfig: shallowFetch: false
+      helpers
+        createColumn: ->
+          @createColumnUsingAjax(storeConfig: useShallowFetch: false)
+          @waitForCallback(@ajaxSpy)
 
       it 'should not set the shallowFetch param in the request', ->
-        expect(@ajaxSpy.lastCall.args[0].params.shallowFetch).toBeUndefined()
+        @createColumn().then =>
+          expect(@ajaxSpy.lastCall.args[0].params.shallowFetch).toBeUndefined()
 
       it 'should set the fetch param in the request', ->
-        expect(@ajaxSpy.lastCall.args[0].params.fetch).toBeDefined()
+        @createColumn().then =>
+          expect(@ajaxSpy.lastCall.args[0].params.fetch).toBeDefined()
 
 
   describe '#getStoreFilter', ->
