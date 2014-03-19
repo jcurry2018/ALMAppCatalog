@@ -27,7 +27,7 @@
             isAdmin: false,
             storeConfig: {
                 shallowFetch: true,
-                enablePostGet: true
+                enablePostGet: false
             },
             cardConfig: {
                 editable: true,
