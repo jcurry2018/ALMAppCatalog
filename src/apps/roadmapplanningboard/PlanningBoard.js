@@ -27,7 +27,7 @@
             isAdmin: false,
             storeConfig: {
                 shallowFetch: true,
-                enablePostGet: false
+                enablePostGet: true
             },
             cardConfig: {
                 editable: true,
@@ -75,6 +75,8 @@
                     PreliminaryEstimate: {
                         fetch: [
                             { name: 'PreliminaryEstimate', properties: ['Value', 'Name'] }
+//                            { name: 'PreliminaryEstimate', properties: ['Value', 'Name'] },
+//                            'Name', 'Value'
                         ]
                     },
                     UserStories: {

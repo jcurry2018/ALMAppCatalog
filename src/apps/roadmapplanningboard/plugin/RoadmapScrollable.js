@@ -125,7 +125,7 @@
                 firstColumnToShow = this._getFirstPresentColumn() || this._getMostRecentPastColumn();
             }
 
-            return firstColumnToShow.index;
+            return firstColumnToShow.index || 0;
         },
 
         _getColumnForTimeframe: function (timeframe) {

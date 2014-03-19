@@ -270,15 +270,6 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           @click(this.column.getColumnHeader().getEl().down('.progress-bar-container')).then =>
             expect(!!@column.popover).toBe false
 
-      it 'should show the planned capacity tooltip on mouseover', ->
-        @createColumn().then =>
-          expect(@column.plannedCapacityRangeTooltip.isDisabled()).toBe false
-          expect(@column.plannedCapacityRangeTooltip.isVisible()).toBe false
-          @mouseOver(id: @column.progressBar.getId(), {x: 10, y: -5}).then =>
-            validate = ->
-              expect(@column.plannedCapacityRangeTooltip.isVisible()).toBe true
-            setTimeout(validate, 1000)
-
   describe 'theme header', ->
     beforeEach ->
       @createTimeframeRecord()
