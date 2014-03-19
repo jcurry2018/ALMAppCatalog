@@ -126,7 +126,7 @@
                     field = _.isObject(field) ? field : { name: field };
                     var properties = field.properties || [];
 
-                    if (this.storeConfig.useShallowFetch && properties.length) {
+                    if (this.storeConfig.shallowFetch && properties.length) {
                         fetchFields.push(field.name + '[' + properties.join(';')  + ']');
                     } else {
                         fetchFields.push(field.name);

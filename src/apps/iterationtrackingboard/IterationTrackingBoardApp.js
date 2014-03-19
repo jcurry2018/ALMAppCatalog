@@ -267,15 +267,11 @@
                         sorters: [{
                             property: Rally.data.Ranker.getRankField(treeGridModel),
                             direction: 'ASC'
-                        }],
-                        childLevelSorters: [{
-                            property: Rally.data.Ranker.getRankField(treeGridModel),
-                            direction: 'ASC'
                         },{
                             property: 'TaskIndex',
                             direction: 'ASC'
                         }],
-                        fetch: ['ObjectID', 'Tasks', 'Defects', 'TestCases']
+                        fetch: ['FormattedID', 'Tasks', 'Defects', 'TestCases']
                     },
                     treeColumnRenderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
                         store = store.treeStore || store;
