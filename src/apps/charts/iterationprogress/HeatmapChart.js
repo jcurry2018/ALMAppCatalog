@@ -178,14 +178,7 @@
                             name: 'Children',
                             data: this._chartData,
                             size: '70%',
-                            dataLabels:
-                            {
-                                distance: -10,
-                                color: 'black',
-                                style: {
-                                    fontWeight: 'bold'
-                                }
-                            }
+                            dataLabels: { enabled: false }
                         },
                         {
                             type:'pie',
