@@ -7,10 +7,14 @@
 			".grunt",
 			"bin",
 			"build",
+			"deploy",
 			"lib",
 			"node_modules",
-			"deploy"
+			"test/gen"
 		],
-		"file_exclude_patterns": ["*.iml", "*.sublime-*"]
+		"file_exclude_patterns": [
+			"*.iml",
+			"*.sublime-*",
+		]
 	}]
 }
