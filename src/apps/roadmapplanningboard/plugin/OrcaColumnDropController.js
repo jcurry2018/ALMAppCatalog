@@ -23,8 +23,8 @@
         },
 
         handleBeforeCardDroppedSave: function (options) {
-            var sourceIsBacklog = !options.sourceColumn.planRecord;
-            var destIsBacklog = !options.column.planRecord;
+            var sourceIsBacklog = this._isBacklogColumn(options.sourceColumn);
+            var destIsBacklog = this._isBacklogColumn(options.column);
             var draggingWithinBacklog = sourceIsBacklog && destIsBacklog;
 
             if (!destIsBacklog) {
@@ -44,6 +44,10 @@
             } else {
                 return this._moveFromColumnToColumn(options);
             }
+        },
+
+        _isBacklogColumn: function(column) {
+            return !column.planRecord;
         },
 
         /**
@@ -80,25 +84,11 @@
             // Remove card from plan column
             planRecord.save({
                 requester: options.column,
+                success: function() {
+                    this.cmp.refresh();
+                },
                 scope: this
             });
-
-            // Rank card on backlog column
-            if (options.column.fireEvent('beforecarddroppedsave', options.column, options.card)) {
-                options.record.save({
-                    requester: options.column,
-                    callback: function (updatedRecord, operation) {
-                        this._afterCardDropComplete(options);
-                        if (operation.success) {
-                            return this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, "move");
-                        } else {
-                            return this._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
-                        }
-                    },
-                    scope: this,
-                    params: options.params
-                });
-            }
         },
 
         _moveOutOfBacklog: function (options) {

@@ -14,6 +14,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       dragData =
         card: options.sourceColumn.getCards()[options.sourceIndex]
         column: options.sourceColumn
+        backlogColumn: options.backlogColumn
 
       sourcePlanRecord = options.sourceColumn.planRecord
       destPlanRecord = options.destColumnDropController.cmp.planRecord
@@ -25,8 +26,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       @recordSaveStub = @stub dragData.card.getRecord(), 'save', () ->
 
       if sourcePlanRecord
-        @sourcePlanRecordSaveStub = @stub sourcePlanRecord, 'save', () ->
+        @sourcePlanRecordSaveStub = @stub sourcePlanRecord, 'save', (options) ->
           expect(@dirty).toBeTruthy()
+          options.success.call({cmp: dragData.backlogColumn})
 
       if destPlanRecord and destPlanRecord isnt sourcePlanRecord
         @destPlanRecordSaveStub = @stub destPlanRecord, 'save', () ->
@@ -472,10 +474,12 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
           @leftCardCount = @leftColumn.getCards().length
           @backlogCardCount = @backlogColumn.getCards().length
           @card = @leftColumn.getCards()[0]
+          @refreshStub = @stub @backlogColumn, 'refresh'
 
           @dragCard
             sourceColumn: @leftColumn
             destColumnDropController: @backlogColumnDropController
+            backlogColumn: @backlogColumn
             sourceIndex: 0
             destIndex: 0
 
@@ -494,8 +498,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         it 'should call the save method of the left column', ->
           expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
 
-        it 'should send rankAbove', ->
-          expect(@recordSaveStub.lastCall.args[0].params.rankAbove).toContain '1010'
+        it 'should refresh column and not rerank', ->
+          expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
+          expect(@refreshStub).toHaveBeenCalledOnce()
 
         it 'should update plan record', ->
           @expectPlanFeaturesToMatchCards(@leftColumn)
@@ -506,10 +511,12 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
           @leftCardCount = @leftColumn.getCards().length
           @backlogCardCount = @backlogColumn.getCards().length
           @card = @leftColumn.getCards()[0]
+          @refreshStub = @stub @backlogColumn, 'refresh'
 
           @dragCard
             sourceColumn: @leftColumn
             destColumnDropController: @backlogColumnDropController
+            backlogColumn: @backlogColumn
             sourceIndex: 0
             destIndex: 2
 
@@ -525,8 +532,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         it 'should place the card in the correct location', ->
           expect(@backlogColumn.getCards()[2].getId()).toEqual @card.getId()
 
-        it 'should send rankBelow', ->
-          expect(@recordSaveStub.lastCall.args[0].params.rankBelow).toContain '1011'
+        it 'should refresh column and not rerank', ->
+         expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
+         expect(@refreshStub).toHaveBeenCalledOnce()
 
         it 'should update plan record', ->
           @expectPlanFeaturesToMatchCards(@leftColumn)
@@ -537,10 +545,12 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
           @leftCardCount = @leftColumn.getCards().length
           @backlogCardCount = @backlogColumn.getCards().length
           @card = @leftColumn.getCards()[2]
+          @refreshStub = @stub @backlogColumn, 'refresh'
 
           @dragCard
             sourceColumn: @leftColumn
             destColumnDropController: @backlogColumnDropController
+            backlogColumn: @backlogColumn
             sourceIndex: 2
             destIndex: 0
 
@@ -559,8 +569,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         it 'should call the save method of the left column', ->
           expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
 
-        it 'should send rankAbove', ->
-          expect(@recordSaveStub.lastCall.args[0].params.rankAbove).toContain '1010'
+        it 'should refresh column and not rerank', ->
+          expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
+          expect(@refreshStub).toHaveBeenCalledOnce()
 
         it 'should update plan record', ->
           @expectPlanFeaturesToMatchCards(@leftColumn)
