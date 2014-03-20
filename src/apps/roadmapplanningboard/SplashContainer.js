@@ -40,6 +40,21 @@
         initComponent: function () {
             this.callParent(arguments);
 
+            var carouselItems = _.times(5, function (index) {
+                return {
+                    xtype: 'component',
+                    cls: 'start-screen start-screen-' + (index + 1),
+                    width: 655,
+                    height: 385
+                };
+            });
+
+            var headerText = 'Create realistic feature roadmap plans that consider feature size, business value, development risk, and overall development capacity.';
+            var helpLink = Rally.util.Help.getLinkTag({
+                id: 281,
+                text: 'What about my Release?'
+            });
+
             this.add([
                 {
                     xtype: 'rallycarousel',
@@ -47,92 +62,36 @@
                     showHeader: true,
                     headerConfig: {
                         title: 'Introducing the new Roadmap Planning Board!',
-                        text: 'Create realistic feature roadmap plans that consider feature size, business value, development risk, and overall development capability'
+                        text: headerText + ' ' + helpLink
                     },
 
-                    carouselItems: [
-                        {
-                            xtype: 'component',
-                            cls: 'start-screen-1',
-                            width: 650,
-                            height: 380
-                        },
-                        {
-                            xtype: 'component',
-                            cls: 'start-screen-2',
-                            width: 650,
-                            height: 380
-                        },
-                        {
-                            xtype: 'component',
-                            cls: 'start-screen-3',
-                            width: 650,
-                            height: 380
-                        },
-                        {
-                            xtype: 'component',
-                            cls: 'start-screen-4',
-                            width: 650,
-                            height: 380
-                        },
-                        {
-                            xtype: 'component',
-                            cls: 'start-screen-5',
-                            width: 650,
-                            height: 380
-                        }
-                    ]
+                    carouselItems: carouselItems
                 }
             ]);
-            if (this.showGetStarted) {
-                this.down('#carousel').down('#carousel-header').add([
-                    {
-                        xtype: 'container',
-                        layout: {
-                            type: 'vbox',
-                            align: 'center'
-                        },
-                        items: [{
-                            xtype: 'rallybutton',
-                            buttonAlign: 'center',
-                            text: 'Get Started!',
-                            itemId: 'get-started',
-                            cls: 'primary medium',
-                            margin: '20 0 20 0',
-                            handler: function () {
-                                this._savePreference();
-                                this.fireEvent('getstarted', this);
-                            },
-                            scope: this
-                        }]
-                    }
-                ]);
+
+            var footer = this.down('#carousel').down('#carousel-footer');
+
+            if (this.showGetStarted || this.showGotIt) {
+                footer.add({
+                    xtype: 'rallybutton',
+                    text: this.showGetStarted ? 'Get Started!' : 'Got it!',
+                    itemId: this.showGetStarted ? 'get-started' : 'got-it',
+                    cls: 'splash-action-button primary medium',
+                    handler: function () {
+                        this._savePreference();
+                        this.fireEvent(this.showGetStarted ? 'getstarted' : 'gotit', this);
+                    },
+                    scope: this
+                });
             }
 
-            if (this.showGotIt) {
-                this.down('#carousel').down('#carousel-footer').add([
-                    {
-                        xtype: 'rallybutton',
-                        text: 'Got it!',
-                        itemId: 'got-it',
-                        cls: 'primary medium',
-                        handler: function () {
-                            this._savePreference();
-                            this.fireEvent('gotit', this);
-                        },
-                        scope: this
-                    }
-                ]);
-            }
-            this.down('#carousel').down('#carousel-footer').add([
-                {
-                    xtype: 'rallybutton',
-                    text: 'Learn more',
-                    itemId: 'learn-more',
-                    cls: 'secondary medium',
-                    href: Rally.util.Help.getHelpUrl({id: 280})
-                }
-            ]);
+            footer.add({
+                xtype: 'rallybutton',
+                text: 'Learn more',
+                itemId: 'learn-more',
+                cls: 'secondary medium',
+                href: Rally.util.Help.getHelpUrl({id: 280})
+            });
 
             this.addEvents(
                 'gotit',

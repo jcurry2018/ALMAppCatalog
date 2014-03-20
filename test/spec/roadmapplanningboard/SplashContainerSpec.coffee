@@ -9,8 +9,6 @@ describe 'Rally.apps.roadmapplanningboard.SplashContainer', ->
   helpers
     createSplashContainer: (config) ->
       @container = Ext.create 'Rally.apps.roadmapplanningboard.SplashContainer', _.extend
-        showGetStarted: true
-        showGotIt: true
         renderTo: 'testDiv'
       , config
 
@@ -35,47 +33,56 @@ describe 'Rally.apps.roadmapplanningboard.SplashContainer', ->
 
   describe '"Get Started" button', ->
 
-    it 'should be visible if showGetStarted config is true', ->
-      @createSplashContainer(showGetStarted: true)
-      expect(@container).toContainComponent '#get-started'
+    describe 'when showGetStarted is true', ->
+
+      beforeEach ->
+        @createSplashContainer(showGetStarted: true)
+
+      it 'should be visible', ->
+        expect(@container).toContainComponent '#get-started'
+
+      it 'should fire getstarted event when clicked', ->
+        eventStub = @stub()
+        @container.on 'getstarted', eventStub
+        @clickButton('#get-started').then =>
+          expect(eventStub).toHaveBeenCalledOnce()
+
+      it 'should save preferences when get clicked', ->
+        @clickButton('#get-started').then =>
+          expect(@preferenceSaveStub).toHaveBeenCalledWith @expectedPreferenceSaveArgs
+
+  describe 'when showGetStarted is false', ->
+
+    beforeEach ->
+      @createSplashContainer(showGetStarted: false)
 
     it 'should not be visible if showGetStarted config is false', ->
-      @createSplashContainer(showGetStarted: false)
       expect(@container).not.toContainComponent '#get-started'
-
-    it 'should fire getstarted event when clicked', ->
-      @createSplashContainer()
-      eventStub = @stub()
-      @container.on 'getstarted', eventStub
-      @clickButton('#get-started').then =>
-        expect(eventStub).toHaveBeenCalledOnce()
-
-    it 'should save preferences when get clicked', ->
-      @createSplashContainer()
-      @clickButton('#get-started').then =>
-        expect(@preferenceSaveStub).toHaveBeenCalledWith @expectedPreferenceSaveArgs
-
 
   describe '"Got It" button', ->
 
-    it 'should be visible if the showGotIt config is true', ->
-      @createSplashContainer(showGotIt: true)
-      expect(@container).toContainComponent '#got-it'
+    describe 'when showGotIt is true', ->
 
-    it 'should not be visible if the showGotIt config is false', ->
-      @createSplashContainer(showGotIt: false)
-      expect(@container).not.toContainComponent '#got-it'
+      beforeEach ->
+        @createSplashContainer(showGotIt: true)
 
-    it 'should fire gotit event when clicked', ->
-      @createSplashContainer()
-      eventStub = @stub()
-      @container.on 'gotit', eventStub
-      @clickButton('#got-it').then =>
-        expect(eventStub).toHaveBeenCalledOnce()
+      it 'should be visible if the showGotIt config is true', ->
+        expect(@container).toContainComponent '#got-it'
 
-    it 'should save preferences when clicked', ->
-      @createSplashContainer()
-      @clickButton('#got-it').then =>
-        expect(@preferenceSaveStub).toHaveBeenCalledWith @expectedPreferenceSaveArgs
+      it 'should fire gotit event when clicked', ->
+        eventStub = @stub()
+        @container.on 'gotit', eventStub
+        @clickButton('#got-it').then =>
+          expect(eventStub).toHaveBeenCalledOnce()
 
+      it 'should save preferences when clicked', ->
+        @clickButton('#got-it').then =>
+          expect(@preferenceSaveStub).toHaveBeenCalledWith @expectedPreferenceSaveArgs
 
+    describe 'when showGotIt is false', ->
+
+      beforeEach ->
+        @createSplashContainer(showGotIt: false)
+
+      it 'should not be visible if the showGotIt config is false', ->
+        expect(@container).not.toContainComponent '#got-it'
