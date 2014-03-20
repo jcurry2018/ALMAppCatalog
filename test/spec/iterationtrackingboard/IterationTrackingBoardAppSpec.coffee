@@ -81,18 +81,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
   afterEach ->
     @app?.destroy()
 
-  describe 'when blank slate is not shown', ->
-    it 'should show field picker in settings ', ->
-      @createApp(isShowingBlankSlate: -> false).then =>
-        @app.showFieldPicker = true
-        expect(Ext.isObject(_.find(@app.getSettingsFields(), name: 'cardFields'))).toBe true
-
-  describe 'when blank slate is shown', ->
-    it 'should not show field picker in settings ', ->
-      @createApp(isShowingBlankSlate: -> true).then =>
-        @app.showFieldPicker = true
-        expect(Ext.isEmpty(_.find(@app.getSettingsFields(), name: 'cardFields'))).toBe true
-
   it 'resets view on scope change', ->
     @createApp().then =>
       removeStub = @stub(@app, 'remove')
@@ -126,7 +114,19 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   it 'should have a default card fields setting', ->
     @createApp().then =>
-      expect(@app.getSetting('cardFields')).toBe 'Parent,Tasks,Defects,Discussion,PlanEstimate'
+      expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
+
+  it 'should have use the cardFields setting if available', ->
+    @createApp(
+      settings:
+        cardFields: 'HelloKitty'
+    ).then =>
+      expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['HelloKitty']
+
+  it 'should show the field picker in board mode', ->
+    @createApp().then =>
+      @toggleToBoard()
+      expect(@app.down('#fieldpickerbtn').isVisible()).toBe true
 
   it 'should enable bulk edit when toggled on', ->
     @stubFeatureToggle ['EXT4_GRID_BULK_EDIT', 'ITERATION_TRACKING_BOARD_GRID_TOGGLE']
@@ -167,28 +167,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @toggleToGrid()
       expect(@app.down('rallygrid')).not.toBeNull()
       expect(@app.down('rallytreegrid')).toBeNull()
-
-  describe '#getSettingsFields', ->
-
-    describe 'when user is opted into beta tracking experience', ->
-
-      it 'should have grid and board fields', ->
-        @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
-
-        @createApp().then =>
-          settingsFields = @app.getSettingsFields()
-
-          expect(_.find(settingsFields, {settingsType: 'grid'})).toBeTruthy()
-          expect(_.find(settingsFields, {settingsType: 'board'})).toBeTruthy()
-
-    describe 'when user is NOT opted into beta tracking experience', ->
-
-      it 'should not have grid and board fields when BETA_TRACKING_EXPERIENCE is disabled', ->
-        @createApp().then =>
-          settingsFields = @app.getSettingsFields()
-
-          expect(_.find(settingsFields, {settingsType: 'grid'})).toBeFalsy()
-          expect(_.find(settingsFields, {settingsType: 'board'})).toBeTruthy()
 
   describe '#_getGridColumns', ->
     helpers

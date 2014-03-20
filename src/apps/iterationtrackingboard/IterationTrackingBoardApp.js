@@ -44,8 +44,7 @@
         config: {
             defaultSettings: {
                 showCardAge: true,
-                cardAgeThreshold: 3,
-                cardFields: 'Parent,Tasks,Defects,Discussion,PlanEstimate'
+                cardAgeThreshold: 3
             }
         },
 
@@ -56,16 +55,8 @@
         getSettingsFields: function () {
             var fields = this.callParent(arguments);
 
-            if (!this.isShowingBlankSlate()) {
-                this.appendCardFieldPickerSetting(fields);
-                if (this.showGridSettings) {
-                    fields.push({xtype: 'component', settingsType: 'grid', html: 'There are currently no grid settings', cls: 'settings-no-grid'});
-                }
-            }
-
             fields.push({
                 type: 'cardage',
-                settingsType: 'board',
                 config: {
                     margin: '0 0 0 80',
                     width: 300
@@ -76,7 +67,6 @@
         },
 
         launch: function() {
-            this.showGridSettings = this.getContext().isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE');
             this.callParent(arguments);
         },
 
@@ -115,21 +105,22 @@
             }
 
             if (!context.isFeatureEnabled('F4359_FILTER')) {
-                plugins = plugins.concat([{
-                        ptype: 'rallygridboardfilterinfo',
-                        isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
-                        stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
-                }]);
+                plugins.push({
+                    ptype: 'rallygridboardfilterinfo',
+                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
+                    stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
+                });
             }
 
-            plugins = plugins.concat([
-                {
-                    ptype: 'rallygridboardfieldpicker',
-                    gridFieldBlackList: ['DisplayColor'],
-                    alwaysSelectedValues: alwaysSelectedValues,
-                    modelNames: this._getFieldPickerDisplayNames(context, compositeModel, treeGridModel)
-                }
-            ]);
+            plugins.push({
+                ptype: 'rallygridboardfieldpicker',
+                gridFieldBlackList: ['DisplayColor'],
+                alwaysSelectedValues: alwaysSelectedValues,
+                modelNames: this._getFieldPickerDisplayNames(context, compositeModel, treeGridModel),
+                showInBoardMode: true,
+                boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
+                    ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
+            });
 
             if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS') && !context.isFeatureEnabled('F4359_FILTER')) {
                 plugins.push({
@@ -138,7 +129,7 @@
                     showAgreements: true
                 });
             }
-            this.plugins = plugins;
+            this.gridBoardPlugins = plugins;
             this._addGrid(this._getGridConfig(treeGridModel), this._getGridBoardModelNames(context, compositeModel));
         },
 
@@ -152,7 +143,7 @@
                 xtype: 'rallygridboard',
                 stateId: 'iterationtracking-gridboard',
                 context: context,
-                plugins: this.plugins,
+                plugins: this.gridBoardPlugins,
                 modelNames: modelNames,
                 cardBoardConfig: {
                     serverSideFiltering: context.isFeatureEnabled('F4359_FILTER'),
@@ -168,9 +159,7 @@
                         }]
                     },
                     cardConfig: {
-                        fields: this.getCardFieldNames(),
-                        showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1,
-                        showBlockedReason: true
+                        showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
                     },
                     listeners: {
                         filter: this._onBoardFilter,
