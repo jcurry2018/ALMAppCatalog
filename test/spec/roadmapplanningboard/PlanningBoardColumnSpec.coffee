@@ -24,6 +24,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
         renderTo: target
         contentCell: target
         headerCell: target, @columnConfig
+        filterCollection: Ext.create 'Rally.data.filter.FilterCollection'
 
       @column = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', config
       @waitForComponentReady @column
@@ -223,6 +224,15 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
         @column.refreshRecord(@column.getRecords()[0], ->).then =>
           expect(getStoreFilterSpy).toHaveBeenCalledOnce()
+
+  describe '#refresh', ->
+
+    it 'should clear filters', ->
+
+      @createColumn().then =>
+        clearSpy = @spy @column.filterCollection, 'clearAllFilters'
+        @column.refresh()
+        expect(clearSpy).toHaveBeenCalled()
 
   describe '#getAllFetchFields', ->
 

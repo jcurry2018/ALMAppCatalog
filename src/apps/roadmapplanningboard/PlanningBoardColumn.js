@@ -248,6 +248,13 @@
             return this.callParent(arguments);
         },
 
+        refresh: function(newConfig) {
+            if (this.filterCollection) {
+                this.filterCollection.clearAllFilters();
+            }
+            this.callParent(arguments);
+        },
+
         _initialFilter: function (component, filters) {
             this.filterButton.on('filter', this._onFilter, this);
             this._applyFilters(filters);
