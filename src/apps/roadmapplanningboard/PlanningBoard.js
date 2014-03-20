@@ -74,9 +74,8 @@
                     },
                     PreliminaryEstimate: {
                         fetch: [
-                            { name: 'PreliminaryEstimate', properties: ['Value', 'Name'] }
-//                            { name: 'PreliminaryEstimate', properties: ['Value', 'Name'] },
-//                            'Name', 'Value'
+                            { name: 'PreliminaryEstimate', properties: ['Value', 'Name'] },
+                            'Name', 'Value'
                         ]
                     },
                     UserStories: {
