@@ -96,6 +96,7 @@
                 stateful: true,
                 stateId: this.getAppId() + 'rallyportfoliotree',
                 workspace: this.getContext().getWorkspace(),
+                shouldRetrievePlanData: !!Rally.environment.getContext().isFeatureEnabled("ROADMAP_PLANNING_PAGE"),
                 topLevelModel: typeRecord.get('TypePath'),
                 topLevelStoreConfig: {
                     filters: filters,
