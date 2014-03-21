@@ -170,11 +170,9 @@
                     { x: 0, y: 5 },
                     { x: 0, y: 0 }
                 ],
-                controllerConfig: {
-                    model: this.planRecord
-                },
+                model: this.planRecord,
                 listeners: {
-                    beforedestroy: function () {
+                    destroy: function () {
                         this.popover = null;
                         if (this._getHighCapacity()) {
                             this.plannedCapacityRangeTooltip.enable();

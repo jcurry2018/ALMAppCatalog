@@ -3,7 +3,7 @@
 
     Ext.define('Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', {
         extend: 'Rally.ui.popover.Popover',
-        alias: 'widget.capacitypopover',
+        alias: 'widget.daterangepopover',
         requires: [
             'Rally.apps.roadmapplanningboard.util.TimelineViewModel',
             'Rally.ui.picker.DatePicker',
@@ -95,13 +95,13 @@
                     xtype: 'component',
                     autoEl: 'div',
                     id: 'startdate-validation-error',
-                    cls: ['form-error-msg-field']
+                    cls: ['form-error-msg-field', 'date-range-error-msg-field']
                 },
                 {
                     xtype: 'component',
                     autoEl: 'div',
                     id: 'enddate-validation-error',
-                    cls: ['form-error-msg-field']
+                    cls: ['form-error-msg-field', 'date-range-error-msg-field']
                 }
             ];
         },
