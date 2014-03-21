@@ -168,31 +168,31 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
     describe 'with shallow fetch enabled', ->
 
       helpers
-        createColumn: ->
+        createColumnWithShallowFetchEnabled: ->
           @createColumnUsingAjax(storeConfig: useShallowFetch: true)
           @waitForCallback(@ajaxSpy)
 
       it 'should set the shallowFetch param in the request', ->
-        @createColumn().then =>
+        @createColumnWithShallowFetchEnabled().then =>
           expect(@ajaxSpy.lastCall.args[0].params.shallowFetch).toBeDefined()
 
       it 'should not set the fetch param in the request', ->
-        @createColumn().then =>
+        @createColumnWithShallowFetchEnabled().then =>
           expect(@ajaxSpy.lastCall.args[0].params.fetch).toBeUndefined()
 
     describe 'with shallow fetch disabled', ->
-
+      
       helpers
-        createColumn: ->
+        createColumnWithShallowFetchDisabled: ->
           @createColumnUsingAjax(storeConfig: useShallowFetch: false)
           @waitForCallback(@ajaxSpy)
 
       it 'should not set the shallowFetch param in the request', ->
-        @createColumn().then =>
+        @createColumnWithShallowFetchDisabled().then =>
           expect(@ajaxSpy.lastCall.args[0].params.shallowFetch).toBeUndefined()
 
       it 'should set the fetch param in the request', ->
-        @createColumn().then =>
+        @createColumnWithShallowFetchDisabled().then =>
           expect(@ajaxSpy.lastCall.args[0].params.fetch).toBeDefined()
 
 
