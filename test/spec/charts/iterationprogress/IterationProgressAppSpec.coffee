@@ -1,6 +1,6 @@
 Ext = window.Ext4 || window.Ext
 
-describe 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp', ->
+describe 'Rally.apps.charts.iterationprogress.IterationProgressApp', ->
   helpers
     getContext: (initialValues) ->
       globalContext = Rally.environment.getContext()
@@ -244,7 +244,7 @@ describe 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp
     itscReadRequest = @ajax.whenReadingEndpoint("/slm/charts/itsc.sp?sid=&iterationOid=1&cpoid=" + this.getContext().getProject().ObjectID).respondWithHtml itscData, { url: '/slm/charts/itsc.sp', method: 'GET' }
 
     addSpy = @spy()
-    app = Ext.create 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp',
+    app = Ext.create 'Rally.apps.charts.iterationprogress.IterationProgressApp',
       context: @getContext()
       renderTo: 'testDiv'
       listeners:
@@ -279,7 +279,7 @@ describe 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp
     icfcReadRequest = @ajax.whenReadingEndpoint("/slm/charts/icfc.sp?sid=&iterationOid=1&bigChart=true&cpoid=" + this.getContext().getProject().ObjectID).respondWithHtml icfcData, { url: '/slm/charts/icfc.sp', method: 'GET' }
 
     addSpy = @spy()
-    app = Ext.create 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp',
+    app = Ext.create 'Rally.apps.charts.iterationprogress.IterationProgressApp',
       context: @getContext()
       renderTo: 'testDiv'
       listeners:
@@ -324,7 +324,7 @@ describe 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp
 
   it 'refreshes app on bulkUpdate', ->
     refreshSpy = @ajax.whenReadingEndpoint("/slm/charts/itsc.sp?sid=&iterationOid=1&cpoid=" + this.getContext().getProject().ObjectID).respondWithHtml itscData, { url: '/slm/charts/itsc.sp', method: 'GET' }
-    Ext.create 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp',
+    Ext.create 'Rally.apps.charts.iterationprogress.IterationProgressApp',
       context: @getContext()
       renderTo: 'testDiv'
 
@@ -335,7 +335,7 @@ describe 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp
 
   it 'cleans up app content when no timeboxes available', ->
     refreshSpy = @ajax.whenReadingEndpoint("/slm/charts/itsc.sp?sid=&iterationOid=1&cpoid=" + this.getContext().getProject().ObjectID).respondWithHtml itscData, { url: '/slm/charts/itsc.sp', method: 'GET' }
-    app = Ext.create 'Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp',
+    app = Ext.create 'Rally.apps.charts.iterationprogress.IterationProgressApp',
       context: @getContext()
       renderTo: 'testDiv'
 

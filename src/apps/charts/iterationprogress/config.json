@@ -1,0 +1,14 @@
+{
+   "name": "Iteration Progress",
+   "className": "Rally.apps.charts.iterationprogress.IterationProgressApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "IterationProgressChart.js",
+      "IterationProgressApp.js"
+   ],
+   "css": [
+      "../Charts.css",
+      "app.css"
+   ]
+}
