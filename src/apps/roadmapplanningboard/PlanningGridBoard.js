@@ -76,9 +76,13 @@
                 {
                     ptype: 'rallygridboardfeedback',
                     feedbackDialogConfig: {
-                        title: 'Feedback on Roadmap Planning Board',
+                        title: 'What do you think about the Roadmap Planning Board?',
                         subject: 'Roadmap Planning Board',
-                        feedbackId: 'roadmapplanningboard'
+                        feedbackId: 'roadmapplanningboard',
+                        helpInfo: {
+                            id: 282,
+                            text: "What's coming soon?"
+                        }
                     }
                 }
             ];
