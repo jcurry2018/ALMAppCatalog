@@ -342,10 +342,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     firstStoryName = 'Story 1'
     userStory1 =
       Iteration: @getIteration1(),
-      _ref: '/hierarchicalrequirement/1'
-      _refObjectName: firstStoryName
       Name: firstStoryName
-      ObjectID: 1,
       Rank: storyRank
 
     @ajax.whenQuerying('artifact').respondWith(userStory1)
@@ -354,13 +351,10 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       secondStoryName = 'Story ranked lower than 1'
       userStory2 =
         Iteration: @getIteration1(),
-        _ref: '/hierarchicalrequirement/2'
-        _refObjectName: secondStoryName
         Name: secondStoryName
         ObjectID: 2,
         Rank: storyRank + 1
 
-      @ajax.whenQuerying('artifact').respondWith([userStory1, userStory2])
       @ajax.whenQuerying('artifact').respondWith [userStory2]
       Rally.environment.getMessageBus().publish Rally.Message.objectCreate, [@createUserStoryRecord userStory2]
 
