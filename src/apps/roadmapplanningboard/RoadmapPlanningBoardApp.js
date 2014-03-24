@@ -1,4 +1,4 @@
-(function () {
+(function() {
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', {
@@ -43,7 +43,7 @@
             ]
         },
 
-        launch: function () {
+        launch: function() {
             Rally.apps.roadmapplanningboard.DeftInjector.init();
 
             // Assume global context if it wasn't passed
@@ -60,9 +60,11 @@
 
             this.isAdmin = userPermissions.isUserAdmin();
 
+            this.browserCheck();
+
             Ext.Ajax.on('requestexception', this._onRequestException, this);
 
-            this._retrievePITypes(function (records) {
+            this._retrievePITypes(function(records) {
                 this.types = [records[0].get('TypePath')];
                 this.typeNames = {
                     child: {
@@ -77,16 +79,16 @@
                         name: records[1].get('Name')
                     };
                 }
-                
+
                 var preferencePromise = Rally.apps.roadmapplanningboard.SplashContainer.loadPreference().then({
-                    success: function (result) {
+                    success: function(result) {
                         this.alreadyGotIt = result[Rally.apps.roadmapplanningboard.SplashContainer.PREFERENCE_NAME];
                     },
                     scope: this
                 });
 
                 Deft.Promise.all([this.timelineRoadmapStoreWrapper.load(), preferencePromise]).then({
-                    success: function (results) {
+                    success: function(results) {
                         var roadmapDataExists = this.timelineRoadmapStoreWrapper.hasCompleteRoadmapData();
                         if (!roadmapDataExists || !this.alreadyGotIt) {
                             this.splash = this.add({
@@ -94,19 +96,19 @@
                                 showGetStarted: this.isAdmin && !roadmapDataExists,
                                 showGotIt: roadmapDataExists,
                                 listeners: {
-                                    gotit: function () {
+                                    gotit: function() {
                                         this.splash.destroy();
                                         this._buildGridBoard();
                                     },
-                                    getstarted: function () {
+                                    getstarted: function() {
                                         this.splash.destroy();
                                         this._createRoadmapData().then({
-                                            success: function () {
+                                            success: function() {
                                                 this._buildGridBoard({
                                                     firstLoad: true
                                                 });
                                             },
-                                            failure: function (error) {
+                                            failure: function(error) {
                                                 this._displayError('Unable to create roadmap data: ' + error);
                                             },
                                             scope: this
@@ -123,7 +125,7 @@
                             Rally.BrowserTest.publishComponentReady(this);
                         }
                     },
-                    failure: function (operation) {
+                    failure: function(operation) {
                         var service = operation.storeServiceName || 'External';
                         this._displayError('Failed to load app: ' + service + ' service data load issue');
                     },
@@ -132,11 +134,68 @@
             });
         },
 
-        _displayError: function (message) {
+        browserCheck: function() {
+            var browserInfo = this._getBrowserInfo();
+
+            if (!this._isSupportedBrowser(browserInfo)) {
+                Rally.ui.notify.Notifier.showError({
+                    allowHTML: true,
+                    message: browserInfo.displayName + " " + browserInfo.version + ' is not supported. For a better experience, please use a <a target="_blank" href="https://help.rallydev.com/supported-web-browsers">supported browser</a>'
+                });
+            }
+        },
+
+        _getBrowserInfo: function () {
+            var userAgent = window.navigator.userAgent;
+            var name;
+            var version;
+            var displayName;
+            var browserRegex = userAgent.match(/(Chrome|Firefox)\/\d+/g) || userAgent.match(/Safari\/\d+/g) || userAgent.match(/MSIE \d+/g);
+
+            try {
+                if (browserRegex) {
+                    name = browserRegex[0].match(/[a-zA-Z]+/g)[0];
+                    displayName = name === 'MSIE' ? 'IE' : name;
+
+                    if (name === 'Safari') {
+                        name = userAgent.match(/Macintosh;/g) ? 'Mac_Safari' : 'Win_Safari';
+                        version = userAgent.match(/Version\/\d+/g)[0].match(/\d+/g)[0];
+                    } else {
+                        version = browserRegex[0].match(/\d+/g)[0];
+                    }
+                }
+            }
+
+            catch (e) {
+                name = "Unknown";
+            }
+
+            finally {
+                return {
+                    name: name || 'Unknown',
+                    displayName: displayName,
+                    version: version
+                };
+            }
+        },
+
+        _isSupportedBrowser: function (browserInfo) {
+            var supportedBrowserVersions = {
+                Chrome: 32,
+                Firefox: 27,
+                Mac_Safari: 6,
+                Win_Safari: 4,
+                MSIE: 9
+            };
+
+            return browserInfo.name !== 'Unknown' && browserInfo.version && browserInfo.version >= supportedBrowserVersions[browserInfo.name];
+        },
+
+        _displayError: function(message) {
             Rally.ui.notify.Notifier.showError({message: message});
         },
 
-        _createRoadmapData: function () {
+        _createRoadmapData: function() {
             var roadmapGenerator = Ext.create('Rally.apps.roadmapplanningboard.util.RoadmapGenerator', {
                 timelineRoadmapStoreWrapper: this.timelineRoadmapStoreWrapper,
                 workspace: this.context.getWorkspace()
@@ -145,7 +204,7 @@
             return roadmapGenerator.createCompleteRoadmapData();
         },
 
-        _retrievePITypes: function (callback) {
+        _retrievePITypes: function(callback) {
             Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
                 defaultToLowest: true,
                 loadAllTypes: true,
@@ -154,7 +213,7 @@
             });
         },
 
-        _buildGridBoard: function (config) {
+        _buildGridBoard: function(config) {
             config = config || {};
 
             var boardConfig = Ext.merge({
@@ -173,14 +232,14 @@
                 }
             }, config);
 
-            if(!this.getHeight()) {
+            if (!this.getHeight()) {
                 boardConfig.height = this._computeFullPagePanelContentAreaHeight();
             }
 
             this.add(boardConfig);
         },
 
-        _computeFullPagePanelContentAreaHeight: function () {
+        _computeFullPagePanelContentAreaHeight: function() {
             var content = Ext.getBody().down('#content');
             if (!content && Rally.BrowserTest) {
                 return Ext.getBody().down('#testDiv').getHeight();
@@ -188,7 +247,7 @@
             return content.getHeight() - content.down('.page').getHeight();
         },
 
-        _onRequestException: function (connection, response, requestOptions) {
+        _onRequestException: function(connection, response, requestOptions) {
             var requester = requestOptions.operation && requestOptions.operation.requester;
             var el = this.getEl();
 
