@@ -129,13 +129,12 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(@app.down('#fieldpickerbtn').isVisible()).toBe true
 
   it 'should enable bulk edit when toggled on', ->
-    @stubFeatureToggle ['BETA_TRACKING_EXPERIENCE', 'ITERATION_TRACKING_BOARD_GRID_TOGGLE']
+    @stubFeatureToggle ['BETA_TRACKING_EXPERIENCE']
     @createApp().then =>
       @toggleToGrid()
       expect(@app.down('#gridBoard').getGridOrBoard().enableBulkEdit).toBe true
 
   it 'should filter the grid to the currently selected iteration', ->
-    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
     requestStub = @stubRequests()
 
     @createApp().then =>
@@ -144,7 +143,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(requestStub).toBeWsapiRequestWith filters: @getIterationFilter()
 
   it 'should filter the board to the currently selected iteration', ->
-    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
     requests = @stubRequests()
 
     @createApp().then =>
@@ -153,61 +151,39 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(request).toBeWsapiRequestWith(filters: @getIterationFilter()) for request in requests
 
   it 'should show a treegrid when treegrid toggled on', ->
-    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
-
     @createApp().then =>
       @toggleToGrid()
       expect(@app.down('rallytreegrid')).not.toBeNull()
       expect(@app.down('rallygrid')).toBeNull()
-
-  it 'should show a regular grid when treegrid toggled off', ->
-    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
-
-    @createApp().then =>
-      @toggleToGrid()
-      expect(@app.down('rallygrid')).not.toBeNull()
-      expect(@app.down('rallytreegrid')).toBeNull()
 
   describe '#_getGridColumns', ->
     helpers
       _getDefaultCols: ->
         ['FormattedID', 'Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion']
 
-    describe 'with the F2903_USE_ITERATION_TREE_GRID toggle on', ->
-      beforeEach ->
-        @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
+    it 'returns the default columns with the FormattedID removed when given no input', ->
+      @createApp().then =>
+        cols = @app._getGridColumns()
+        expectedColumns = _.remove(@_getDefaultCols(), (col) ->
+          col != 'FormattedID'
+        )
 
-      it 'returns the default columns with the FormattedID removed when given no input', ->
-        @createApp().then =>
-          cols = @app._getGridColumns()
-          expectedColumns = _.remove(@_getDefaultCols(), (col) ->
-            col != 'FormattedID'
-          )
+        expect(cols).toEqual expectedColumns
 
-          expect(cols).toEqual expectedColumns
+    it 'returns the input columns with the FormattedID removed', ->
+      @createApp().then =>
+        cols = @app._getGridColumns(['used1', 'used2', 'FormattedID'])
 
-      it 'returns the input columns with the FormattedID removed', ->
-        @createApp().then =>
-          cols = @app._getGridColumns(['used1', 'used2', 'FormattedID'])
+        expect(cols).toEqual ['used1', 'used2']
 
-          expect(cols).toEqual ['used1', 'used2']
-
-    describe 'with the F2903_USE_ITERATION_TREE_GRID toggle off', ->
-      it 'always returns the default columns when given no input', ->
-        @createApp().then =>
-          cols = @app._getGridColumns()
-
-          expect(cols).toEqual @_getDefaultCols()
-
-      it 'always returns the default columns when given column input', ->
-        @createApp().then =>
-          cols = @app._getGridColumns(['ignored1', 'ignored2'])
-
-          expect(cols).toEqual @_getDefaultCols()
+    it 'enables the summary row on the treegrid when the toggle is on', ->
+      @createApp().then =>
+        @toggleToGrid()
+        expect(@app.down('#gridBoard').getGridOrBoard().showSummary).toBe true
 
   describe 'with the TREE_GRID_COLUMN_FILTERING toggle on', ->
     beforeEach ->
-      @stubFeatureToggle ['TREE_GRID_COLUMN_FILTERING', 'ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
+      @stubFeatureToggle ['TREE_GRID_COLUMN_FILTERING']
 
     it 'shows column menu trigger on hover for filterable column', ->
       @createApp().then =>
@@ -225,9 +201,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
             expect(Ext.getBody().down('.rally-grid-column-menu .filters-label')).not.toBeNull
 
   describe 'with the TREE_GRID_COLUMN_FILTERING toggle off', ->
-    beforeEach ->
-      @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
-
     it 'does not show column menu trigger on hover for filterable column', ->
       @createApp().then =>
         @toggleToGrid()
@@ -235,33 +208,13 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @mouseOver(css: nameColumnHeaderSelector).then =>
           expect(@app.getEl().down("#{nameColumnHeaderSelector} .#{Ext.baseCSSPrefix}column-header-trigger")).toBeNull
 
-  describe 'summmary', ->
-    beforeEach ->
-      @featureToggleStub = @stubFeatureToggle ['F2903_USE_ITERATION_TREE_GRID']
-
-    it 'enables the summary row on the treegrid when the toggle is on', ->
-      @featureToggleStub.withArgs('F4757_TREE_GRID_CHANGES').returns true
-      @createApp().then =>
-        @toggleToGrid()
-        expect(@app.down('#gridBoard').getGridOrBoard().showSummary).toBe true
-
-    it 'disables the summary row on the treegrid when the toggle is off', ->
-      @featureToggleStub.withArgs('F4757_TREE_GRID_CHANGES').returns false
-      @createApp().then =>
-        @toggleToGrid()
-        expect(@app.down('#gridBoard').getGridOrBoard().showSummary).toBe false
-
   describe 'tree grid model types', ->
-
-    beforeEach ->
-      @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
-
     it 'should include test sets', ->
       @createApp().then =>
         @toggleToGrid()
         expect(@app.down('rallytreegrid').getStore().parentTypes).toContain 'TestSet'
 
-  describe 'toggle grid/board cls to ensure overlfow-y gets set for fixed header plugin', ->
+  describe 'toggle grid/board cls to ensure overflow-y gets set for fixed header plugin', ->
     it 'should add board-toggled class to app on initial load in board view', ->
       @stub(Rally.ui.gridboard.GridBoard::, 'toggleState', 'board')
       @createApp().then =>
@@ -271,11 +224,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then =>
         @toggleToBoard()
         expect(@app.getEl().dom.className).toContain 'board-toggled'
-
-    it 'should add grid-toggled class to app on initial load in grid view', ->
-      @stub(Rally.ui.gridboard.GridBoard::, 'toggleState', 'grid')
-      @createApp().then =>
-        expect(@app.getEl().dom.className).toContain 'grid-toggled'
 
     it 'should add grid-toggled class to app when toggled to grid view', ->
       @createApp().then =>

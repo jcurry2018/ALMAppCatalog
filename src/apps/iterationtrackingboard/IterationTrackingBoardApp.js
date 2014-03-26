@@ -95,10 +95,7 @@
                 plugins.push('rallygridboardownerfilter');
             }
 
-            if (context.isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE')) {
-                plugins.push('rallygridboardtoggleable');
-            }
-
+            plugins.push('rallygridboardtoggleable');
             var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner'];
             if (this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
                 alwaysSelectedValues.push('DragAndDropRank');
@@ -116,7 +113,7 @@
                 ptype: 'rallygridboardfieldpicker',
                 gridFieldBlackList: ['DisplayColor'],
                 alwaysSelectedValues: alwaysSelectedValues,
-                modelNames: this._getFieldPickerDisplayNames(context, compositeModel, treeGridModel),
+                modelNames: this._getFieldPickerDisplayNames(context, treeGridModel),
                 showInBoardMode: true,
                 boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
                     ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
@@ -219,7 +216,7 @@
 
         _getGridConfig: function(treeGridModel, columns) {
             var context = this.getContext(),
-                stateString = context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID') ? 'iteration-tracking-treegrid' : 'iteration-tracking-grid',
+                stateString = 'iteration-tracking-treegrid',
                 stateId = context.getScopedStateId(stateString),
                 header = this.items.getAt(0),
                 treeGridHeight =  this.container.getSize().height;
@@ -239,63 +236,58 @@
                 height: treeGridHeight
             };
 
-            if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
-                var parentTypes = ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'];
-                Ext.apply(gridConfig, {
-                    xtype: 'rallytreegrid',
-                    model: treeGridModel,
-                    parentFieldNames: {
-                        defect: ['Requirement', 'DefectSuite'],
-                        task: ['WorkProduct'],
-                        testcase: ['WorkProduct']
-                    },
-                    storeConfig: {
-                        parentTypes: parentTypes,
-                        childTypes: ['Defect', 'Task', 'TestCase'],
-                        filters: [this.context.getTimeboxScope().getQueryFilter()],
-                        sorters: [{
-                            property: Rally.data.Ranker.getRankField(treeGridModel),
-                            direction: 'ASC'
-                        }],
-                        childLevelSorters: [{
-                            property: Rally.data.Ranker.getRankField(treeGridModel),
-                            direction: 'ASC'
-                        },{
-                            property: 'TaskIndex',
-                            direction: 'ASC'
-                        }],
-                        fetch: ['ObjectID', 'Tasks', 'Defects', 'TestCases']
-                    },
-                    treeColumnRenderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
-                        store = store.treeStore || store;
-                        return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);
-                    },
-                    columnCfgs: columns ? this._getGridColumns(columns) : null,
-                    defaultColumnCfgs: this._getGridColumns(),
-                    pageResetMessages: [Rally.app.Message.timeboxScopeChange],
-                    isLeaf: Rally.apps.iterationtrackingboard.IsLeafHelper.isLeaf,
-                    getIcon: function(record) {
-                        return '';
-                    },
-                    enableColumnFiltering: this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
-                    disableColumnMenus: !this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
-                    showSummary: this.getContext().isFeatureEnabled('F4757_TREE_GRID_CHANGES'),
-                    enableRanking: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled
-                });
-            }
+            var parentTypes = ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'];
+            Ext.apply(gridConfig, {
+                xtype: 'rallytreegrid',
+                model: treeGridModel,
+                parentFieldNames: {
+                    defect: ['Requirement', 'DefectSuite'],
+                    task: ['WorkProduct'],
+                    testcase: ['WorkProduct']
+                },
+                storeConfig: {
+                    parentTypes: parentTypes,
+                    childTypes: ['Defect', 'Task', 'TestCase'],
+                    filters: [this.context.getTimeboxScope().getQueryFilter()],
+                    sorters: [{
+                        property: Rally.data.Ranker.getRankField(treeGridModel),
+                        direction: 'ASC'
+                    }],
+                    childLevelSorters: [{
+                        property: Rally.data.Ranker.getRankField(treeGridModel),
+                        direction: 'ASC'
+                    },{
+                        property: 'TaskIndex',
+                        direction: 'ASC'
+                    }],
+                    fetch: ['ObjectID', 'Tasks', 'Defects', 'TestCases']
+                },
+                treeColumnRenderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
+                    store = store.treeStore || store;
+                    return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);
+                },
+                columnCfgs: columns ? this._getGridColumns(columns) : null,
+                defaultColumnCfgs: this._getGridColumns(),
+                pageResetMessages: [Rally.app.Message.timeboxScopeChange],
+                isLeaf: Rally.apps.iterationtrackingboard.IsLeafHelper.isLeaf,
+                getIcon: function(record) {
+                    return '';
+                },
+                enableColumnFiltering: this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
+                disableColumnMenus: !this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
+                showSummary: true,
+                enableRanking: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled
+            });
             return gridConfig;
         },
 
         _getGridColumns: function(columns) {
-            var context = this.getContext(),
-                result = ['FormattedID', 'Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion'];
+            var result = ['FormattedID', 'Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion'];
 
-            if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
-                if (columns) {
-                    result = columns;
-                }
-                _.pull(result, 'FormattedID');
+            if (columns) {
+                result = columns;
             }
+            _.pull(result, 'FormattedID');
 
             return result;
         },
@@ -315,15 +307,8 @@
             });
         },
 
-        _getFieldPickerDisplayNames: function(context, compositeModel, treeGridModel) {
-            var models;
-
-            if (context.isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID') && !Ext.isEmpty(treeGridModel)) {
-                models = treeGridModel.getArtifactComponentModels();
-            } else {
-                models = compositeModel.getArtifactComponentModels();
-            }
-
+        _getFieldPickerDisplayNames: function(context, treeGridModel) {
+            var models = treeGridModel.getArtifactComponentModels();
             return _.pluck(models, 'displayName');
         },
 
@@ -336,11 +321,8 @@
                     return _.contains(topLevelModelNames, modelName);
                 }),
                 compositeModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(availableTopLevelModels, this.getContext()),
-                treeGridModel;
-
-            if (this.getContext().isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
                 treeGridModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(_.values(models), this.getContext());
-            }
+
             this._addGridBoard(compositeModel, treeGridModel);
         },
 
