@@ -233,7 +233,7 @@
                     autoLoad: context.isFeatureEnabled('F4359_FILTER') ? false : true
                 },
                 columnCfgs: this._getGridColumns(),
-                enableBulkEdit: context.isFeatureEnabled('EXT4_GRID_BULK_EDIT'),
+                enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 stateId: stateId,
                 stateful: true,
                 height: treeGridHeight

@@ -129,7 +129,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(@app.down('#fieldpickerbtn').isVisible()).toBe true
 
   it 'should enable bulk edit when toggled on', ->
-    @stubFeatureToggle ['EXT4_GRID_BULK_EDIT', 'ITERATION_TRACKING_BOARD_GRID_TOGGLE']
+    @stubFeatureToggle ['BETA_TRACKING_EXPERIENCE', 'ITERATION_TRACKING_BOARD_GRID_TOGGLE']
     @createApp().then =>
       @toggleToGrid()
       expect(@app.down('#gridBoard').getGridOrBoard().enableBulkEdit).toBe true

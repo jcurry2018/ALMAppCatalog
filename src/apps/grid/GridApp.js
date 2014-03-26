@@ -34,7 +34,7 @@
                 columnCfgs: columns,
                 enableColumnHide: false,
                 enableRanking: true,
-                enableBulkEdit: context.isFeatureEnabled("EXT4_GRID_BULK_EDIT"),
+                enableBulkEdit: context.isFeatureEnabled("BETA_TRACKING_EXPERIENCE"),
                 autoScroll: gridAutoScroll,
                 plugins: this._getPlugins(columns),
                 context: this.getContext(),

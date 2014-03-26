@@ -52,7 +52,7 @@
         },
 
         initComponent: function () {
-            var heatmapEnabled = this.getContext().isFeatureEnabled('S58143_ADD_HEATMAP_OPTION_TO_ITERATION_TRACKING_CHART');
+            var heatmapEnabled = this.getContext().isFeatureEnabled('BETA_TRACKING_EXPERIENCE');
             this.chartType = heatmapEnabled ? "heatmap" : this.chartType;
             this.callParent(arguments);
 
