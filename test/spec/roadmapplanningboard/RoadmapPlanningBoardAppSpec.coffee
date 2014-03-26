@@ -56,6 +56,10 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
     @isBrowserSupportedStub = @stub Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp::, '_isSupportedBrowser', =>
       true
+
+    @setBrowserPrefValue = @stub Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp::, '_getBrowserPrefValue', =>
+      true
+
     @timelineStore = Deft.Injector.resolve('timelineStore')
     @roadmapStore = Deft.Injector.resolve('roadmapStore')
     @errorNotifyStub = @stub Rally.ui.notify.Notifier, 'showError'
@@ -171,7 +175,6 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
       "Midori": ["Mozilla/5.0 (X11; U; Linux i686; fr-fr) AppleWebKit/525.1+ (KHTML, like Gecko, Safari/525.1+) midori/1.19", false]
 
     _.each userAgentStrings, ([userAgent, isSupported], displayName) ->
-      #supportedText = if isSupported then  'supported' else 'unsupported'
       it "should state that #{displayName} is #{if isSupported then  'supported' else 'unsupported'}", ->
 
         window.navigator.__defineGetter__ 'userAgent', () -> userAgent

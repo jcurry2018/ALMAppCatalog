@@ -60,6 +60,8 @@
 
             this.isAdmin = userPermissions.isUserAdmin();
 
+            this.lsCacheProvider = Ext.create('Rally.state.LSCacheProvider', {});
+
             this.browserCheck();
 
             Ext.Ajax.on('requestexception', this._onRequestException, this);
@@ -134,14 +136,26 @@
             });
         },
 
+        _getBrowserPrefValue: function () {
+            return this.lsCacheProvider.get('RoadmapBrowserCheckPreference', null);
+        },
+
+        _setBrowserPrefValue: function() {
+            return this.lsCacheProvider.set('RoadmapBrowserCheckPreference', true);
+        },
+
         browserCheck: function() {
             var browserInfo = this._getBrowserInfo();
+            var browserPrefValue = this._getBrowserPrefValue();
 
-            if (!this._isSupportedBrowser(browserInfo)) {
-                Rally.ui.notify.Notifier.showError({
-                    allowHTML: true,
-                    message: browserInfo.displayName + " " + browserInfo.version + ' is not supported. For a better experience, please use a <a target="_blank" href="https://help.rallydev.com/supported-web-browsers">supported browser</a>'
-                });
+            if (!browserPrefValue) {
+                this._setBrowserPrefValue();
+                if (!this._isSupportedBrowser(browserInfo)) {
+                    Rally.ui.notify.Notifier.showError({
+                        allowHTML: true,
+                        message: browserInfo.displayName + " " + browserInfo.version + ' is not supported. For a better experience, please use a <a target="_blank" href="https://help.rallydev.com/supported-web-browsers">supported browser</a>'
+                    });
+                }
             }
         },
 
