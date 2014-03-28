@@ -356,7 +356,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
         Rank: storyRank + 1
 
       @ajax.whenQuerying('artifact').respondWith [userStory2]
-      Rally.environment.getMessageBus().publish Rally.Message.objectCreate, [@createUserStoryRecord userStory2]
+      Rally.environment.getMessageBus().publish Rally.Message.objectCreate, @createUserStoryRecord userStory2
 
       cards = @getVisibleCardNames()
       expect(cards[0].innerHTML).toContain firstStoryName
