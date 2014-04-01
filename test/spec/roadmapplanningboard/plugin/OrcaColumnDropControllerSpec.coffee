@@ -28,7 +28,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       if sourcePlanRecord
         @sourcePlanRecordSaveStub = @stub sourcePlanRecord, 'save', (options) ->
           expect(@dirty).toBeTruthy()
-          options.success.call({cmp: dragData.backlogColumn})
 
       if destPlanRecord and destPlanRecord isnt sourcePlanRecord
         @destPlanRecordSaveStub = @stub destPlanRecord, 'save', () ->
@@ -474,7 +473,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
           @leftCardCount = @leftColumn.getCards().length
           @backlogCardCount = @backlogColumn.getCards().length
           @card = @leftColumn.getCards()[0]
-          @refreshStub = @stub @backlogColumn, 'refresh'
 
           @dragCard
             sourceColumn: @leftColumn
@@ -498,10 +496,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         it 'should call the save method of the left column', ->
           expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
 
-        it 'should refresh column and not rerank', ->
-          expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
-          expect(@refreshStub).toHaveBeenCalledOnce()
-
         it 'should update plan record', ->
           @expectPlanFeaturesToMatchCards(@leftColumn)
 
@@ -511,7 +505,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
           @leftCardCount = @leftColumn.getCards().length
           @backlogCardCount = @backlogColumn.getCards().length
           @card = @leftColumn.getCards()[0]
-          @refreshStub = @stub @backlogColumn, 'refresh'
 
           @dragCard
             sourceColumn: @leftColumn
@@ -532,10 +525,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         it 'should place the card in the correct location', ->
           expect(@backlogColumn.getCards()[2].getId()).toEqual @card.getId()
 
-        it 'should refresh column and not rerank', ->
-         expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
-         expect(@refreshStub).toHaveBeenCalledOnce()
-
         it 'should update plan record', ->
           @expectPlanFeaturesToMatchCards(@leftColumn)
 
@@ -545,7 +534,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
           @leftCardCount = @leftColumn.getCards().length
           @backlogCardCount = @backlogColumn.getCards().length
           @card = @leftColumn.getCards()[2]
-          @refreshStub = @stub @backlogColumn, 'refresh'
 
           @dragCard
             sourceColumn: @leftColumn
@@ -568,10 +556,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
         it 'should call the save method of the left column', ->
           expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
-
-        it 'should refresh column and not rerank', ->
-          expect(@sourcePlanRecordSaveStub).toHaveBeenCalledOnce()
-          expect(@refreshStub).toHaveBeenCalledOnce()
 
         it 'should update plan record', ->
           @expectPlanFeaturesToMatchCards(@leftColumn)

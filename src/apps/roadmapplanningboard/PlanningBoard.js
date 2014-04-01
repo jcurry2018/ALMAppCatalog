@@ -282,6 +282,7 @@
                 types: this.types,
                 typeNames: this.typeNames,
                 planStore: this.timeframePlanStoreWrapper.planStore,
+                enableCrossColumnRanking: false,
                 cls: 'column backlog',
                 cardConfig: {
                     preliminaryEstimateStore: this.preliminaryEstimateStore
@@ -484,6 +485,7 @@
                     timeframeDates: this.isAdmin,
                     deletePlan: this.isAdmin
                 },
+                enableCrossColumnRanking: true,
                 dropControllerConfig: {
                     dragDropEnabled: this.isAdmin
                 },

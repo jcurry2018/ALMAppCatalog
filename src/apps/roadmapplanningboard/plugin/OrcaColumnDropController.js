@@ -84,8 +84,8 @@
             // Remove card from plan column
             planRecord.save({
                 requester: options.column,
-                success: function() {
-                    this.cmp.refresh();
+                callback: function() {
+                    this._afterCardDropComplete(options);
                 },
                 scope: this
             });
