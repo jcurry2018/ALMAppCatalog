@@ -56,6 +56,18 @@
             return [];
         },
 
+        findCardInfo: function () {
+            return null;
+        },
+
+        isMatchingRecord: function () {
+            return false;
+        },
+
+        refresh: function () {
+            return null;
+        },
+
         getHeaderTitle: function () {
             return this.columnHeader.down('#headerTitle');
         }
