@@ -28,7 +28,6 @@
             'Rally.ui.filter.view.OwnerPillFilter',
             'Rally.ui.filter.view.TagPillFilter',
             'Rally.app.Message',
-            'Rally.apps.iterationtrackingboard.IsLeafHelper',
             'Rally.apps.iterationtrackingboard.Column',
             'Rally.clientmetrics.ClientMetricsRecordable'
         ],
@@ -262,7 +261,8 @@
                         property: 'TaskIndex',
                         direction: 'ASC'
                     }],
-                    fetch: ['ObjectID', 'Tasks', 'Defects', 'TestCases']
+                    fetch: ['ObjectID', 'Tasks', 'Defects', 'TestCases'],
+                    enableHierarchy: true
                 },
                 treeColumnRenderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
                     store = store.treeStore || store;
@@ -271,10 +271,6 @@
                 columnCfgs: columns ? this._getGridColumns(columns) : null,
                 defaultColumnCfgs: this._getGridColumns(),
                 pageResetMessages: [Rally.app.Message.timeboxScopeChange],
-                isLeaf: Rally.apps.iterationtrackingboard.IsLeafHelper.isLeaf,
-                getIcon: function(record) {
-                    return '';
-                },
                 enableColumnFiltering: this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
                 disableColumnMenus: !this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
                 showSummary: true,
