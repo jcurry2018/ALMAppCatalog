@@ -8,13 +8,11 @@
         getStoreFilter: function(model) {
             var filters = [];
             Ext.Array.push(filters, this.callParent(arguments));
-            if (model.elementName === 'HierarchicalRequirement') {
-                if (this.context.getSubscription().StoryHierarchyEnabled) {
-                    filters.push({
-                        property: 'DirectChildrenCount',
-                        value: 0
-                    });
-                }
+            if (model.elementName === 'HierarchicalRequirement' && this.context.getSubscription().StoryHierarchyEnabled) {
+                filters.push({
+                    property: 'DirectChildrenCount',
+                    value: 0
+                });
             }
 
             return filters;

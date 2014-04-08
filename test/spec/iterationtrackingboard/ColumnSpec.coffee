@@ -18,12 +18,20 @@ describe 'Rally.apps.iterationtrackingboard.Column', ->
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'iterationtrackingboardcolumn'
 
-  it 'should only show stories with no children', ->
+  it 'should only show stories with no children when querying user story', ->
     storeFilterSpy = @spy(Rally.apps.iterationtrackingboard.Column.prototype, 'getStoreFilter')
     @createColumn()
 
     expect(storeFilterSpy.returnValues[0][1].property).toBe 'DirectChildrenCount'
     expect(storeFilterSpy.returnValues[0][1].value).toBe 0
+
+  it 'should not filter out parents when not querying user story', ->
+    storeFilterSpy = @spy(Rally.apps.iterationtrackingboard.Column.prototype, 'getStoreFilter')
+    @createColumn models: [Rally.test.mock.data.WsapiModelFactory.getDefectModel()]
+
+    for returnValue in storeFilterSpy.returnValues
+      for filter in returnValue
+        expect(filter.property).not.toBe 'DirectChildrenCount'
 
   helpers
     createColumn: (config = {}) ->
