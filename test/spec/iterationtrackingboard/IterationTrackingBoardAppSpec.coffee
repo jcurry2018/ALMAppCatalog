@@ -229,3 +229,47 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then =>
         @toggleToGrid()
         expect(@app.getEl().dom.className).toContain 'grid-toggled'
+
+  describe "summary units", ->
+    helpers
+      createAppWithWorkspaceConfiguration: (workspaceConfig) ->
+        context = Ext.create('Rally.app.Context',
+          initialValues:
+            timebox: Ext.create 'Rally.app.TimeboxScope', record: @mom.getRecord('iteration')
+            project:
+              _ref: @projectRef
+            workspace:
+              WorkspaceConfiguration: workspaceConfig
+
+        )
+        @createApp({ context }).then =>
+          @toggleToGrid()
+
+      getSummaryColumns: ->
+        @app.down('rallytreegrid').summaryColumns
+
+    it "should specify the summary columns", ->
+      @createAppWithWorkspaceConfiguration(TaskUnitName: 'dogecoins').then =>
+        summaryColumns = @getSummaryColumns()
+        expect(summaryColumns.length).toBe(3)
+        expect(summaryColumns[0].field).toBe('PlanEstimate')
+        expect(summaryColumns[0].type).toBe('sum')
+        expect(summaryColumns[1].field).toBe('TaskEstimateTotal')
+        expect(summaryColumns[1].type).toBe('sum')
+        expect(summaryColumns[2].field).toBe('TaskRemainingTotal')
+        expect(summaryColumns[2].type).toBe('sum')
+
+    it "should use the workspace's task unit name", ->
+      @createAppWithWorkspaceConfiguration(TaskUnitName: 'dogecoins').then =>
+        summaryColumns = @getSummaryColumns()
+        expect(summaryColumns[1].units).toBe('dogecoins')
+        expect(summaryColumns[2].units).toBe('dogecoins')
+
+    it "should use the workspace's iteration estimate unit name", ->
+      workspaceConfig =
+        IterationEstimateUnitName: 'shebas'
+        ReleaseEstimateUnitName: 'kitties'
+
+      @createAppWithWorkspaceConfiguration(workspaceConfig).then =>
+        summaryColumns = @getSummaryColumns()
+        expect(summaryColumns[0].units).toBe('shebas')

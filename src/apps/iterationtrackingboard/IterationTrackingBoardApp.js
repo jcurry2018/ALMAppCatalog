@@ -66,10 +66,6 @@
             return fields;
         },
 
-        launch: function() {
-            this.callParent(arguments);
-        },
-
         _addGridBoard: function(compositeModel, treeGridModel) {
             var plugins = ['rallygridboardaddnew'],
                 context = this.getContext();
@@ -274,9 +270,33 @@
                 enableColumnFiltering: this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
                 disableColumnMenus: !this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
                 showSummary: true,
+                summaryColumns: this._getSummaryColumnConfig(),
                 enableRanking: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled
             });
             return gridConfig;
+        },
+
+        _getSummaryColumnConfig: function() {
+            var taskUnitName = this.getContext().getWorkspace().WorkspaceConfiguration.TaskUnitName,
+                planEstimateUnitName = this.getContext().getWorkspace().WorkspaceConfiguration.IterationEstimateUnitName;
+
+            return [
+                {
+                    field: 'PlanEstimate',
+                    type: 'sum',
+                    units: planEstimateUnitName
+                },
+                {
+                    field: 'TaskEstimateTotal',
+                    type: 'sum',
+                    units: taskUnitName
+                },
+                {
+                    field: 'TaskRemainingTotal',
+                    type: 'sum',
+                    units: taskUnitName
+                }
+            ];
         },
 
         _getGridColumns: function(columns) {
