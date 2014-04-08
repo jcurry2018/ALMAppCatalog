@@ -29,6 +29,7 @@
             'Rally.ui.filter.view.TagPillFilter',
             'Rally.app.Message',
             'Rally.apps.iterationtrackingboard.IsLeafHelper',
+            'Rally.apps.iterationtrackingboard.Column',
             'Rally.clientmetrics.ClientMetricsRecordable'
         ],
         mixins: [
@@ -149,6 +150,7 @@
                         {ptype: 'rallyfixedheadercardboard'}
                     ],
                     columnConfig: {
+                        xtype: 'iterationtrackingboardcolumn',
                         additionalFetchFields: ['PortfolioItem'],
                         plugins: [{
                             ptype: 'rallycolumnpolicy',
