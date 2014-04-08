@@ -75,7 +75,7 @@
             var plugins = ['rallygridboardaddnew'],
                 context = this.getContext();
 
-            if (context.isFeatureEnabled('F4359_FILTER')) {
+            if (context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
                 plugins.push({
                     ptype: 'rallygridboardfiltercontrol',
                     filterControlConfig: {
@@ -102,7 +102,7 @@
                 alwaysSelectedValues.push('DragAndDropRank');
             }
 
-            if (!context.isFeatureEnabled('F4359_FILTER')) {
+            if (!context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
                 plugins.push({
                     ptype: 'rallygridboardfilterinfo',
                     isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
@@ -120,7 +120,7 @@
                     ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
             });
 
-            if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS') && !context.isFeatureEnabled('F4359_FILTER')) {
+            if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS') && !context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
                 plugins.push({
                     ptype: 'rallygridboardartifacttypechooser',
                     artifactTypePreferenceKey: 'artifact-types',
@@ -144,7 +144,7 @@
                 plugins: this.gridBoardPlugins,
                 modelNames: modelNames,
                 cardBoardConfig: {
-                    serverSideFiltering: context.isFeatureEnabled('F4359_FILTER'),
+                    serverSideFiltering: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                     plugins: [
                         {ptype: 'rallycardboardprinting', pluginId: 'print'},
                         {ptype: 'rallyfixedheadercardboard'}
@@ -182,7 +182,7 @@
         },
 
         _createOwnerFilterItem: function(context) {
-            var isPillPickerEnabled = context.isFeatureEnabled('S59980_S59981_S60525_FILTER_UI_IMPROVEMENTS'),
+            var isPillPickerEnabled = context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 projectRef = context.getProjectRef();
 
             if (isPillPickerEnabled) {
@@ -206,7 +206,7 @@
         },
 
         _createTagFilterItem: function(context) {
-            var filterUiImprovementsToggleEnabled = context.isFeatureEnabled('S59980_S59981_S60525_FILTER_UI_IMPROVEMENTS');
+            var filterUiImprovementsToggleEnabled = context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE');
             return {
                 xtype: 'rallytagpillfilter',
                 margin: filterUiImprovementsToggleEnabled ? '-15 0 5 0' : '5 0 5 0',
@@ -229,7 +229,7 @@
 
             var gridConfig = {
                 storeConfig: {
-                    autoLoad: context.isFeatureEnabled('F4359_FILTER') ? false : true
+                    autoLoad: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE') ? false : true
                 },
                 columnCfgs: this._getGridColumns(),
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
