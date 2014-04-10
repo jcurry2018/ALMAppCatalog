@@ -24,6 +24,7 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
             'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
+            'Rally.ui.gridboard.plugin.GridBoardExpandAll',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
             'Rally.ui.filter.view.OwnerPillFilter',
@@ -71,11 +72,16 @@
             var plugins = ['rallygridboardaddnew'],
                 context = this.getContext();
 
+            if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
+                plugins.push('rallygridboardexpandall');
+            }
+
             if (context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
                 plugins.push({
                     ptype: 'rallygridboardfiltercontrol',
                     filterControlConfig: {
                         cls: 'small gridboard-filter-control',
+                        margin: '3 10 3 7',
                         stateful: true,
                         stateId: context.getScopedStateId('iteration-tracking-filter-button'),
                         items: [
@@ -108,6 +114,7 @@
 
             plugins.push({
                 ptype: 'rallygridboardfieldpicker',
+                headerPosition: 'left',
                 gridFieldBlackList: ['DisplayColor'],
                 alwaysSelectedValues: alwaysSelectedValues,
                 modelNames: this._getFieldPickerDisplayNames(context, treeGridModel),
@@ -123,6 +130,7 @@
                     showAgreements: true
                 });
             }
+
             this.gridBoardPlugins = plugins;
             this._addGrid(this._getGridConfig(treeGridModel), this._getGridBoardModelNames(context, compositeModel));
         },
