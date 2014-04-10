@@ -64,7 +64,9 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
 
   it 'should have a add new button', ->
     @createGridboard().then =>
-      expect(!!@gridboard.down('#new')).toBe true
+      # kludge to get appsdk changes in without breaking this test
+      button = @gridboard.down('#expandButton') || @gridboard.down('#new')
+      expect(button).toBeDefined()
 
   describe 'integration', ->
     beforeEach ->

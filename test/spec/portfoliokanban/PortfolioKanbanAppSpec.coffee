@@ -68,7 +68,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   it 'should show an Add New button', ->
     @_createApp().then =>
-      expect(Ext.query('.add-new a').length).toBe 1
+      expect(Ext.query('.add-new a.new').length).toBe 1
 
   it 'should not show an Add New button without proper permissions', ->
     @stub Rally.environment.getContext().getPermissions(), 'isProjectEditor', -> false
