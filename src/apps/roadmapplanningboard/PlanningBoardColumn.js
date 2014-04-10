@@ -164,6 +164,7 @@
                     xtype: 'rallyparentfilter',
                     modelType: this.typeNames.parent.typePath,
                     modelName: this.typeNames.parent.name,
+                    prependFilterFieldWithFormattedId: true,
                     storeConfig: {
                         context: {
                             project: null
