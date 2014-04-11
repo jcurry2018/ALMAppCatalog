@@ -6,11 +6,6 @@
     float: right;
 }
 
-.portfolio-kanban .rui-leftright {
-    border-bottom: 1px dotted #c6c6c6;
-    padding-right: 10px;
-}
-
 .portfolio-kanban .readyIndicator {
     visibility: hidden;
 }
@@ -26,7 +21,7 @@
     font-family: ProximaNovaSemiBold, Helvetica, Arial;
     font-weight: normal;
     float: right;
-    margin: 3px 10px 6px 0;
+    margin: 1px 10px 6px 0;
 }
 
 .portfolio-kanban .showPolicies  label {

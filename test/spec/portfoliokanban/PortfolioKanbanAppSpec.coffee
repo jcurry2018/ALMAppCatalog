@@ -5,6 +5,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
   helpers
     _createApp: (settings) ->
       globalContext = Rally.environment.getContext()
+      type: Rally.util.Ref.getRelativeUri(@feature._ref)
       context = Ext.create 'Rally.app.Context',
         initialValues:
           project:globalContext.getProject()
@@ -34,6 +35,10 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       @click(css: '.progress-bar-container.field-' + fieldName).then =>
         @waitForVisible(css: '.percentDonePopover')
 
+    waitForAppReady: ->
+      readyStub = @stub()
+      Rally.environment.getMessageBus().subscribe Rally.Message.piKanbanBoardReady, readyStub
+      @waitForCallback readyStub
 
   beforeEach ->
     Rally.environment.getContext().context.subscription.Modules = ['Rally Portfolio Manager']
@@ -43,17 +48,23 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @feature = Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemFeature')
 
     @typeRequest = @ajax.whenQuerying('typedefinition').respondWith [
-      @feature
-      @initiative
       @theme
+      @initiative
+      @feature
     ]
 
-    @ajax.whenQuerying('state').respondWith [
-      '_type': "State"
-      'Name': "Column1"
-      '_ref': '/state/1'
-      'WIPLimit': 4
+    @featureStates = [ _type: 'State', Name: 'FeatureColumn1', _ref: '/feature/state/1', WIPLimit: 4 ]
+    @initiativeStates = [
+      { _type: 'State', Name: 'InitiativeColumn1', _ref: '/initiative/state/1', WIPLimit: 1 }
+      { _type: 'State', Name: 'InitiativeColumn2', _ref: '/initiative/state/2', WIPLimit: 2 }
     ]
+    @themeStates = [
+      { _type: 'State', Name: 'ThemeColumn1', _ref: '/theme/state/1', WIPLimit: 1 }
+      { _type: 'State', Name: 'ThemeColumn2', _ref: '/theme/state/2', WIPLimit: 2 }
+      { _type: 'State', Name: 'ThemeColumn3', _ref: '/theme/state/3', WIPLimit: 2 }
+    ]
+
+    @ajax.whenQuerying('state').respondWith @featureStates
 
   afterEach ->
     if @app?
@@ -64,7 +75,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   it 'shows help component', ->
     @_createApp().then =>
-      expect(@app).toHaveHelpComponent()
+      expect(@app.gridboard).toHaveHelpComponent()
 
   it 'should show an Add New button', ->
     @_createApp().then =>
@@ -77,26 +88,17 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   it 'shows ShowPolicies checkbox', ->
     @_createApp().then =>
-      expect(@app.down('#header').el.down('input[type="button"]')).toHaveCls 'showPoliciesCheckbox'
+      expect(@app.gridboard.down('#header').el.down('input[type="button"]')).toHaveCls 'showPoliciesCheckbox'
+
+  it 'shows a portfolio item type picker', ->
+    @_createApp().then =>
+      expect(@app.piTypePicker.isVisible()).toBe true
 
   it 'creates columns from states', ->
-    @ajax.whenQuerying('state').respondWith([
-      {
-        '_type': "State"
-        'Name': "Column1"
-        '_ref': '/state/1'
-        'WIPLimit': 4
-      },
-      {
-        '_type': "State"
-        'Name': "Column2"
-        '_ref': '/state/2'
-        'WIPLimit': 3
-      }
-    ])
+    @ajax.whenQuerying('state').respondWith @initiativeStates
 
-    @_createApp().then =>
-      expect(@app.cardboard.getColumns().length).toEqual 3
+    @_createApp(type: Rally.util.Ref.getRelativeUri(@initiative._ref)).then =>
+      expect(@app.cardboard.getColumns().length).toEqual @initiativeStates.length + 1
 
   it 'shows message if no states are found', ->
     @ajax.whenQuerying('state').respondWith()
@@ -143,7 +145,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       Owner:
         _ref: '/user/1'
         _refObjectName: 'Name of Owner'
-      State: '/state/1'
+      State: '/feature/state/1'
       Summary:
         Discussion:
           Count: 1
@@ -162,7 +164,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       Owner:
         _ref: '/user/1'
         _refObjectName: 'Name of Owner'
-      State: '/state/1'
+      State: '/feature/state/1'
 
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
 
@@ -183,6 +185,27 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       expect(loadSpy.callCount).toBe 0
       expect(@app.down('#bodyContainer').getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
 
+  describe 'when the type is changed', ->
+    
+    beforeEach ->
+      @ajax.whenQuerying('state').respondWith(@initiativeStates)
+      
+      @_createApp(type: Rally.util.Ref.getRelativeUri(@initiative._ref)).then =>
+        @ajax.whenQuerying('state').respondWith(@themeStates)
+        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@theme._ref))
+        @waitForAppReady()
+
+    it 'should update the type path in the filter info', ->
+      expect(@app.filterInfo.typePath).toBe @theme.Name
+
+    it 'should update the cardboard types', ->
+      expect(@app.cardboard.types).toEqual [ @theme.TypePath ]
+
+    it 'should refresh the cardboard with columns matching the states of the new type', ->
+      expect(@app.cardboard.getColumns().length).toBe @themeStates.length + 1
+      _.each @app.cardboard.getColumns().slice(1), (column, index) =>
+        expect(column.value).toBe '/theme/state/' + (index + 1)
+
   describe 'settings', ->
     it 'should contain a query setting', ->
       @_createApp().then =>
@@ -193,19 +216,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
         query: '(Name = "abc")'
       ).then =>
         expect(@getAppStore()).toHaveFilter 'Name', '=', 'abc'
-
-    it 'should contain a type setting', ->
-      @_createApp().then =>
-        expect(@app).toHaveSetting 'type'
-
-    it 'should use type setting to filter board', ->
-      @_createApp(
-        type: Rally.util.Ref.getRelativeUri(@initiative._ref)
-      ).then =>
-        expect(@typeRequest).toBeWsapiRequestWith
-          filters: [
-            property: 'ObjectID', operator: '=', value: @initiative.ObjectID
-          ]
 
     it 'loads type with ordinal of 1 if no type setting is provided', ->
       @_createApp().then =>

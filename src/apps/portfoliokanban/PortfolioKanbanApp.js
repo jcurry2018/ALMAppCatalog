@@ -11,6 +11,8 @@
             'Rally.data.util.PortfolioItemHelper',
             'Rally.apps.portfoliokanban.PortfolioKanbanCard',
             'Rally.apps.portfoliokanban.PortfolioKanbanPolicy',
+            'Rally.ui.gridboard.plugin.GridBoardAddNew',
+            'Rally.ui.gridboard.GridBoard',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.cardboard.Column',
             'Rally.ui.cardboard.CardBoard',
@@ -20,7 +22,8 @@
             'Rally.ui.AddNew',
             'Rally.ui.LeftRight',
             'Rally.util.Help',
-            'Rally.util.Test'
+            'Rally.util.Test',
+            'Deft.Deferred'
         ],
         layout: 'auto',
         appName: 'Portfolio Kanban',
@@ -53,40 +56,59 @@
         ],
 
         launch: function () {
-            if (Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
-                Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
-                    typeRef: this.getSetting('type'),
-                    defaultToLowest: true,
-                    context: this.getContext().getDataContext(),
-                    success: function (record) {
-                        this.currentType = record;
-
-                        this._drawHeader();
-                        this._loadCardboard();
-                    },
-                    scope: this
-                });
-            } else {
+            if (!Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
                 this.down('#bodyContainer').add({
                     xtype: 'container',
                     html: '<div class="rpm-turned-off" style="padding: 50px; text-align: center;">You do not have RPM enabled for your subscription</div>'
                 });
 
                 this._publishContentUpdated();
+                return;
             }
+
+            this._createPITypePicker().then({
+                success: function (currentType) {
+                    this.currentType = currentType;
+                    this._loadCardboard();
+                },
+                scope: this
+            });
         },
 
-        getSettingsFields: function() {
+        _createPITypePicker: function () {
+            if (this.piTypePicker) {
+                this.piTypePicker.destroy();
+            }
+
+            var deferred = new Deft.Deferred();
+
+            this.piTypePicker = Ext.create('Rally.ui.combobox.PortfolioItemTypeComboBox', {
+                value: this.getSetting('type'),
+                context: this.getContext(),
+                listeners: {
+                    change: this._onTypeChange,
+                    ready: {
+                        fn: function (picker) {
+                            deferred.resolve(picker.getSelectedType());
+                        },
+                        single: true
+                    },
+                    scope: this
+                }
+            });
+
+            return deferred.promise;
+        },
+
+        getSettingsFields: function () {
             return [
                 {
                     type: 'project'
                 },
                 {
-                    type: 'type'
-                },
-                {
                     type: 'fields',
                     config: {
+                        modelTypes: [this.currentType.get('TypePath')],
                         shouldRespondToScopeChange: false  //optimization because need to wait for type picker to re-load on scope change before reloading fields
                     }
                 },
@@ -105,8 +127,8 @@
             ];
         },
 
-        onDestroy: function() {
-            if(this._percentDonePopover) {
+        onDestroy: function () {
+            if (this._percentDonePopover) {
                 this._percentDonePopover.destroy();
                 delete this._percentDonePopover;
             }
@@ -115,15 +137,13 @@
         },
 
         _drawHeader: function () {
-            var header = this.down('#header');
+            var header = this.gridboard.getHeader();
 
             if(header) {
-                if (Rally.environment.getContext().getPermissions().isProjectEditor(this.getContext().getProject()._ref)) {
-                    header.getLeft().add(this._buildAddNewComponent());
-                }
                 header.getRight().add([
                     this._buildHelpComponent(),
                     this._buildShowPolicies(),
+                    this.piTypePicker,
                     this._buildFilterInfo()
                 ]);
             }
@@ -190,26 +210,24 @@
          * @param columns
          */
         _drawCardboard: function (columns) {
-            if (columns) {
-                this._showColumns(columns);
+            if (!this.rendered) {
+                this.on('afterrender', Ext.bind(this._drawCardboard, this, [columns]), this, {single: true});
+                return;
             }
-            else {
+
+            this._showColumns(columns);
+
+            if (!columns || columns.length === 0) {
                 this._showNoColumns();
+                this._onBoardLoad();
             }
         },
 
         _showColumns: function (columns) {
-            var cardboard = this.down('#cardboard'),
-                filters = [
-                    {
-                        property: 'PortfolioItemType',
-                        value: this.currentType.get('_ref')
-                    }
-                ];
-
-            if (cardboard) {
-                cardboard.destroy();
-            }
+            var filters = [{
+                property: 'PortfolioItemType',
+                value: this.currentType.get('_ref')
+            }];
 
             if (this.getSetting('query')) {
                 try {
@@ -251,33 +269,77 @@
             columnConfig.additionalFetchFields.push('Discussion');
             cardConfig.fields.push('Discussion');
 
-            cardboard = this.cardboard = Ext.widget('rallycardboard', {
-                types: [this.currentType.get('TypePath')],
-                context: this.getContext(),
-                itemId: 'cardboard',
-                attribute: 'State',
-                columns: columns,
-                ddGroup: this.currentType.get('TypePath'),
-                cls: 'cardboard',
-                columnConfig: columnConfig,
-                cardConfig: cardConfig,
-                storeConfig: {
-                    filters: filters,
-                    context: this.context.getDataContext()
-                },
-                listeners: {
-                    load: this._onBoardLoad,
-                    cardupdated: this._publishContentUpdatedNoDashboardLayout,
-                    scope: this
-                },
+            var currentTypePath = this.currentType.get('TypePath');
 
-                loadDescription: 'Portfolio Kanban',
-                loadMask: false
-            });
+            if (this.gridboard) {
+                this.gridboard.modelNames = [currentTypePath];
 
-            this.down('#bodyContainer').add(cardboard);
+                if (this.cardboard.filterCollection) {
+                    this.cardboard.filterCollection.clearAllFilters();
+                }
+
+                this.cardboard.refresh({
+                    columns: columns,
+                    ddGroup: currentTypePath,
+                    types: [currentTypePath],
+                    storeConfig: {
+                        filters: filters,
+                        context: this.context.getDataContext()
+                    }
+                });
+            } else {
+                this.gridboard = Ext.create('Rally.ui.gridboard.GridBoard', {
+                    itemId: 'gridboard',
+                    toggleState: 'board',
+                    modelNames: [currentTypePath],
+                    context: this.getContext(),
+                    plugins: [
+                        'rallygridboardaddnew'
+                    ],
+                    listeners: {
+                        toggle: this._gridBoardToggle,
+                        scope: this
+                    },
+                    cardBoardConfig: {
+                        attribute: 'State',
+                        columns: columns,
+                        ddGroup: currentTypePath,
+                        cls: 'cardboard',
+                        columnConfig: columnConfig,
+                        cardConfig: cardConfig,
+                        storeConfig: {
+                            filters: filters,
+                            context: this.context.getDataContext()
+                        },
+                        listeners: {
+                            load: this._onBoardLoad,
+                            cardupdated: this._publishContentUpdatedNoDashboardLayout,
+                            scope: this
+                        },
+                        loadDescription: 'Portfolio Kanban',
+                        loadMask: false
+                    }
+                });
+
+                this.down('#bodyContainer').add(this.gridboard);
+                this._drawHeader();
+            }
+        },
+
+        _onTypeChange: function (picker) {
+            var newType = picker.getSelectedType();
+
+            if (newType && this.currentType && newType.get('_ref') !== this.currentType.get('_ref')) {
+                this.currentType = newType;
+                this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
+                this.filterInfo.typePath = newType.get('Name');
+                this._loadCardboard();
+            }
+        },
+
+        _gridBoardToggle: function (toggleState, gridOrBoard) {
+            this.cardboard = toggleState === 'board' ? gridOrBoard : null;
             this.setLoading({ id: this.getMaskId() });
-
             this._renderPolicies();
         },
 
@@ -379,14 +441,6 @@
 
         },
 
-        _buildAddNewComponent: function () {
-            return Ext.create('Rally.ui.AddNew', {
-                context: this.getContext().getDataContext(),
-                recordTypes: [this.currentType.get('TypePath')],
-                fieldLabel: 'New ' + this.currentType.get('Name')
-            });
-        },
-
         _buildHelpComponent: function (config) {
             return Ext.create('Ext.Component', Ext.apply({
                 cls: 'help-field ' + Rally.util.Test.toBrowserTestCssClass('portfolio-kanban-help-container'),
@@ -397,13 +451,15 @@
         },
 
         _buildFilterInfo: function () {
-            return Ext.create('Rally.ui.tooltip.FilterInfo', {
+            this.filterInfo = Ext.create('Rally.ui.tooltip.FilterInfo', {
                 projectName: this.getSetting('project') && this.getContext().get('project').Name || 'Following Global Project Setting',
                 typePath: this.currentType.get('Name'),
                 scopeUp: this.getSetting('projectScopeUp'),
                 scopeDown: this.getSetting('projectScopeDown'),
                 query: this.getSetting('query')
             });
+
+            return this.filterInfo;
         },
 
         _publishContentUpdated: function () {
