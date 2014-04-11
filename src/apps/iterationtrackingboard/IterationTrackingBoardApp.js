@@ -23,6 +23,7 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
+            'Rally.ui.grid.plugin.TreeGridExpandAll',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
             'Rally.ui.filter.view.OwnerPillFilter',
@@ -126,6 +127,7 @@
                     showAgreements: true
                 });
             }
+
             this.gridBoardPlugins = plugins;
             this._addGrid(this._getGridConfig(treeGridModel), this._getGridBoardModelNames(context, compositeModel));
         },
@@ -220,7 +222,8 @@
                 stateString = 'iteration-tracking-treegrid',
                 stateId = context.getScopedStateId(stateString),
                 header = this.items.getAt(0),
-                treeGridHeight =  this.container.getSize().height;
+                treeGridHeight =  this.container.getSize().height,
+                plugins = [];
 
             if (header){
                 treeGridHeight -= header.getHeight();
@@ -237,6 +240,10 @@
                 height: treeGridHeight
             };
 
+            if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
+                plugins.push('rallytreegridexpandall');
+            }
+
             var parentTypes = ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'];
             Ext.apply(gridConfig, {
                 xtype: 'rallytreegrid',
@@ -246,6 +253,7 @@
                     task: ['WorkProduct'],
                     testcase: ['WorkProduct']
                 },
+                plugins: plugins,
                 storeConfig: {
                     parentTypes: parentTypes,
                     childTypes: ['Defect', 'Task', 'TestCase'],
