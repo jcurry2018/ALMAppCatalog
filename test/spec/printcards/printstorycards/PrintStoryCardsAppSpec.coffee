@@ -12,7 +12,7 @@ describe 'Rally.apps.printcards.printstorycards.PrintStoryCardsApp', ->
     @ajax.whenQuerying('userstory').respondWith @stories
 
   afterEach ->
-    Rally.test.destroyComponentsOfQuery 'printstorycardsapp'
+    Rally.test.destroyComponentsOfQuery 'printstorycards'
 
   it 'should have class="pb" after each group of 4 cards', ->
     numBreaks = (@stories.length/4)|0

@@ -12,7 +12,7 @@ describe 'Rally.apps.printcards.printtaskcards.PrintTaskCardsApp', ->
     @ajax.whenQuerying('task').respondWith @tasks
 
   afterEach ->
-    Rally.test.destroyComponentsOfQuery 'printtaskcardsapp'
+    Rally.test.destroyComponentsOfQuery 'printtaskcards'
 
   it 'should have class="pb" after each group of 4 cards', ->
     numBreaks = (@tasks.length/4)|0
