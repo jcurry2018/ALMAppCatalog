@@ -233,34 +233,12 @@
                 height: treeGridHeight
             };
 
-            var parentTypes = ['HierarchicalRequirement', 'Defect', 'DefectSuite', 'TestSet'];
             Ext.apply(gridConfig, {
                 xtype: 'rallytreegrid',
                 model: treeGridModel,
-                parentFieldNames: {
-                    defect: ['Requirement', 'DefectSuite'],
-                    task: ['WorkProduct'],
-                    testcase: ['WorkProduct']
-                },
-                plugins: [],
-                storeConfig: {
-                    parentTypes: parentTypes,
-                    childTypes: ['Defect', 'Task', 'TestCase'],
-                    filters: [this.context.getTimeboxScope().getQueryFilter()],
-                    sorters: [{
-                        property: Rally.data.Ranker.getRankField(treeGridModel),
-                        direction: 'ASC'
-                    }],
-                    childLevelSorters: [{
-                        property: Rally.data.Ranker.getRankField(treeGridModel),
-                        direction: 'ASC'
-                    },{
-                        property: 'TaskIndex',
-                        direction: 'ASC'
-                    }],
-                    fetch: ['ObjectID', 'Tasks', 'Defects', 'TestCases'],
-                    enableHierarchy: true
-                },
+                parentTypes: ['hierarchicalrequirement', 'defect', 'defectsuite', 'testset'],
+                enableHierarchy: true,
+                filters: [this.context.getTimeboxScope().getQueryFilter()],
                 treeColumnRenderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
                     store = store.treeStore || store;
                     return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);

@@ -212,7 +212,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     it 'should include test sets', ->
       @createApp().then =>
         @toggleToGrid()
-        expect(@app.down('rallytreegrid').getStore().parentTypes).toContain 'TestSet'
+        expect(@app.down('rallytreegrid').getStore().parentTypes).toContain 'testset'
 
   describe 'toggle grid/board cls to ensure overflow-y gets set for fixed header plugin', ->
     it 'should add board-toggled class to app on initial load in board view', ->
