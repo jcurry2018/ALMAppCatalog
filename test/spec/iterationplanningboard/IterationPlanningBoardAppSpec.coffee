@@ -323,7 +323,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @ajax.whenCreating('userstory').respondWith([storyData])
       @ajax.whenQuerying('artifact').respondWith [storyData]
 
-      addNewHelper = new Helpers.AddNewHelper '.planning-board'
+      addNewHelper = new Helpers.AddNewHelper this, '.planning-board'
       addNewHelper.inlineAdd('Story 3').then =>
         expect(@getVisibleCardNames()[0].innerHTML).toContain 'Story 3'
 
@@ -333,7 +333,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
 
-      addNewHelper = new Helpers.AddNewHelper '.planning-board'
+      addNewHelper = new Helpers.AddNewHelper this, '.planning-board'
       addNewHelper.addWithDetails('foo').then ->
         expect(editorOpenedStub).toHaveBeenCalledOnce()
 

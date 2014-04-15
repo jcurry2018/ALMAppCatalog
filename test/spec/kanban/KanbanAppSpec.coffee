@@ -53,7 +53,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
   it 'should not schedule a new item in an iteration', ->
     @createApp().then =>
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
-      addNewHelper = new Helpers.AddNewHelper '.kanban'
+      addNewHelper = new Helpers.AddNewHelper this, '.kanban'
       addNewHelper.addWithDetails('foo').then =>
         expect(editorOpenedStub).toHaveBeenCalledOnce()
         expect(editorOpenedStub.getCall(0).args[1].iteration).toBe 'u'
@@ -61,7 +61,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
   it 'should set group by field to first column value', ->
     @createApp().then =>
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
-      addNewHelper = new Helpers.AddNewHelper '.kanban'
+      addNewHelper = new Helpers.AddNewHelper this, '.kanban'
       addNewHelper.addWithDetails('foo').then =>
         expect(editorOpenedStub).toHaveBeenCalledOnce()
         expect(editorOpenedStub.getCall(0).args[1][@app.getSetting('groupByField')]).toBe @app.cardboard.getColumns()[0].getValue()
@@ -71,7 +71,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       groupByField: 'KanbanState'
     ).then =>
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
-      addNewHelper = new Helpers.AddNewHelper '.kanban'
+      addNewHelper = new Helpers.AddNewHelper this, '.kanban'
       addNewHelper.addWithDetails('foo').then =>
         expect(editorOpenedStub).toHaveBeenCalledOnce()
         groupByField = "c_#{@app.getSetting('groupByField')}"
