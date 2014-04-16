@@ -22,7 +22,7 @@ describe 'Rally.apps.printcards.printtaskcards.PrintTaskCardsApp', ->
   it 'should remove cards after changing iteration', ->
     @createApp().then =>
       expect(@app.down('#cards').getEl().query('.artifact').length).toBe @tasks.length
-      @ajax.whenQuerying('userstory').respondWith []
+      @ajax.whenQuerying('task').respondWith []
 
       @clickLeftTimeboxButton().then =>
         expect(@app.down('#cards').getEl().query('.artifact').length).toBe 0
