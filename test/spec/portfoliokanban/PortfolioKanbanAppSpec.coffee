@@ -3,7 +3,7 @@ Ext = window.Ext4 || window.Ext
 describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   helpers
-    _createApp: (settings) ->
+    _createApp: (settings, hideFilterInfo = "false") ->
       globalContext = Rally.environment.getContext()
       type: Rally.util.Ref.getRelativeUri(@feature._ref)
       context = Ext.create 'Rally.app.Context',
@@ -16,6 +16,10 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       options =
         context: context,
         renderTo: 'testDiv'
+        appContainer:
+          panelDef:
+            panelConfigs:
+              hideFilterOnPortfolioKanban: hideFilterInfo
 
       options.settings = settings if settings?
 
@@ -110,6 +114,11 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp().then =>
       expect(@app.getEl().down('.filterInfo') instanceof Ext.Element).toBeTruthy()
 
+  it 'does not display a filter icon when panel config "true"', ->
+    @_createApp(null, "true").then =>
+      expect(@app.getEl().down('.filterInfo')).toBeFalsy()
+
+
   it 'shows project setting label if following a specific project scope', ->
     @_createApp(
       project: '/project/431439'
@@ -194,9 +203,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
         @ajax.whenQuerying('state').respondWith(@themeStates)
         @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@theme._ref))
         @waitForAppReady()
-
-    it 'should update the type path in the filter info', ->
-      expect(@app.filterInfo.typePath).toBe @theme.Name
 
     it 'should update the cardboard types', ->
       expect(@app.cardboard.types).toEqual [ @theme.TypePath ]
