@@ -49,3 +49,8 @@
 .portfolio-kanban .help-field {
     float: right;
 }
+
+.portfolio-kanban .field-picker-btn {
+    height: 22px;
+    margin: 3px 0 0 5px;
+}

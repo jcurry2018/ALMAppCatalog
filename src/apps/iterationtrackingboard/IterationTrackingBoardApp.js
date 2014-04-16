@@ -111,7 +111,6 @@
                 gridFieldBlackList: ['DisplayColor'],
                 alwaysSelectedValues: alwaysSelectedValues,
                 modelNames: this._getFieldPickerDisplayNames(context, treeGridModel),
-                showInBoardMode: true,
                 boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
                     ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
             });

@@ -30,11 +30,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     _getTextsForElements: (cssQuery) ->
       Ext.Array.map(@app.getEl().query(cssQuery), (el) -> el.innerHTML).join('__')
 
-    _createAppAndWaitForVisible: (callback) ->
-      @_createApp(project: '/project/431439')
-      @waitForVisible(css: '.progress-bar-container.field-PercentDoneByStoryCount').then =>
-        callback()
-
     _clickAndWaitForVisible: (fieldName) ->
       @click(css: '.progress-bar-container.field-' + fieldName).then =>
         @waitForVisible(css: '.percentDonePopover')
@@ -195,10 +190,10 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       expect(@app.down('#bodyContainer').getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
 
   describe 'when the type is changed', ->
-    
+
     beforeEach ->
       @ajax.whenQuerying('state').respondWith(@initiativeStates)
-      
+
       @_createApp(type: Rally.util.Ref.getRelativeUri(@initiative._ref)).then =>
         @ajax.whenQuerying('state').respondWith(@themeStates)
         @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@theme._ref))
@@ -235,10 +230,17 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       @_createApp().then =>
         expect(@app.cardboard.getContext()).toBe @app.getContext()
 
-    it 'should have a project setting', ->
-      @_createApp().then =>
-        expect(@app).toHaveSetting 'fields'
-
     helpers
       getAppStore: ->
         @app.cardboard.getColumns()[0].store
+
+    describe 'field picker', ->
+      it 'should show', ->
+        @_createApp().then =>
+          expect(@app.down('#fieldpickerbtn').isVisible()).toBe true
+
+      it 'should have use the legacy field setting if available', ->
+        @_createApp(
+          fields: 'Field1,Field2'
+        ).then =>
+          expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['Field1','Field2']

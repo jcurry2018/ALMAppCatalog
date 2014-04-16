@@ -66,7 +66,6 @@
                 'rallygridboardaddnew',
                 {
                     ptype: 'rallygridboardfieldpicker',
-                    showInBoardMode: true,
                     headerPosition: 'left',
                     boardFieldDefaults: ['PreliminaryEstimate', 'Discussions', 'UserStories', 'Name'],
                     gridFieldBlackList: ['DragAndDropRank', 'DisplayColor'],

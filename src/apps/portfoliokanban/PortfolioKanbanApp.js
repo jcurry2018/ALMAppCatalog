@@ -12,6 +12,7 @@
             'Rally.apps.portfoliokanban.PortfolioKanbanCard',
             'Rally.apps.portfoliokanban.PortfolioKanbanPolicy',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
+            'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.cardboard.Column',
@@ -106,13 +107,6 @@
                     type: 'project'
                 },
                 {
-                    type: 'fields',
-                    config: {
-                        modelTypes: [this.currentType.get('TypePath')],
-                        shouldRespondToScopeChange: false  //optimization because need to wait for type picker to re-load on scope change before reloading fields
-                    }
-                },
-                {
                     type: 'query',
                     config: {
                         plugins: [
@@ -139,7 +133,7 @@
         _drawHeader: function () {
             var header = this.gridboard.getHeader();
 
-            if(header) {
+            if (header) {
                 header.getRight().add([
                     this._buildHelpComponent(),
                     this._buildShowPolicies(),
@@ -239,36 +233,6 @@
                 }
             }
 
-            var columnConfig = {
-                xtype: 'rallycardboardcolumn',
-                cardLimit: 50,
-                drawFooter: Ext.emptyFn,
-                enableWipLimit: true
-            };
-
-            var cardConfig = {
-                xtype: 'rallyportfoliokanbancard',
-                editable: true,
-                showColorIcon: true
-            };
-
-            var fields = this.getSetting('fields');
-
-            if (fields) {
-                columnConfig.additionalFetchFields = fields.split(',');
-                cardConfig.fields = fields.split(',').sort();
-            } else {
-                columnConfig.additionalFetchFields = [];
-                cardConfig.fields = Rally.apps.portfoliokanban.PortfolioKanbanCard.defaultFields;
-            }
-
-            if (Ext.Array.intersect(cardConfig.fields, ['PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount']).length > 0) {
-                columnConfig.additionalFetchFields = Ext.Array.merge(cardConfig.fields, ['PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount']);
-            }
-
-            columnConfig.additionalFetchFields.push('Discussion');
-            cardConfig.fields.push('Discussion');
-
             var currentTypePath = this.currentType.get('TypePath');
 
             if (this.gridboard) {
@@ -293,8 +257,42 @@
                     toggleState: 'board',
                     modelNames: [currentTypePath],
                     context: this.getContext(),
+                    addNewPluginConfig: {
+                        style: {
+                            'float': 'left'
+                        }
+                    },
                     plugins: [
-                        'rallygridboardaddnew'
+                        'rallygridboardaddnew',
+                        {
+                            ptype: 'rallygridboardfieldpicker',
+                            boardFieldBlackList: [
+                                'ObjectID',
+                                'Description',
+                                'DisplayColor',
+                                'FormattedID',
+                                'Name',
+                                'Notes',
+                                'Ready',
+                                'AcceptedLeafStoryCount',
+                                'AcceptedLeafStoryPlanEstimateTotal',
+                                'DirectChildrenCount',
+                                'LeafStoryCount',
+                                'LeafStoryPlanEstimateTotal',
+                                'Rank',
+                                'DragAndDropRank',
+                                'UnEstimatedLeafStoryCount',
+                                'CreationDate',
+                                'Subscription',
+                                'Workspace',
+                                'Changesets',
+                                'Discussion',
+                                'LastUpdateDate',
+                                'Owner'
+                            ],
+                            boardFieldDefaults: this.getSetting('fields').split(','),
+                            headerPosition: 'left'
+                        }
                     ],
                     listeners: {
                         toggle: this._gridBoardToggle,
@@ -305,8 +303,19 @@
                         columns: columns,
                         ddGroup: currentTypePath,
                         cls: 'cardboard',
-                        columnConfig: columnConfig,
-                        cardConfig: cardConfig,
+                        columnConfig: {
+                            xtype: 'rallycardboardcolumn',
+                            additionalFetchFields: ['Discussion'],
+                            cardLimit: 50,
+                            drawFooter: Ext.emptyFn,
+                            enableWipLimit: true
+                        },
+                        cardConfig: {
+                            xtype: 'rallyportfoliokanbancard',
+                            editable: true,
+                            fields: Rally.apps.portfoliokanban.PortfolioKanbanCard.defaultFields.concat('Discussion'),
+                            showColorIcon: true
+                        },
                         storeConfig: {
                             filters: filters,
                             context: this.context.getDataContext()
