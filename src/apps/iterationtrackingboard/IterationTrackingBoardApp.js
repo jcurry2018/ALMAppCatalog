@@ -23,6 +23,7 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
+            'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
             'Rally.ui.filter.view.OwnerPillFilter',
@@ -242,6 +243,7 @@
                     task: ['WorkProduct'],
                     testcase: ['WorkProduct']
                 },
+                plugins: [],
                 storeConfig: {
                     parentTypes: parentTypes,
                     childTypes: ['Defect', 'Task', 'TestCase'],
@@ -273,6 +275,11 @@
                 summaryColumns: this._getSummaryColumnConfig(),
                 enableRanking: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled
             });
+
+            if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
+                gridConfig.plugins.push('rallytreegridexpandedrowpersistence');
+            }
+
             return gridConfig;
         },
 
