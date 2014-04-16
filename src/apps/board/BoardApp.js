@@ -8,8 +8,6 @@
             'Rally.apps.board.Settings',
             'Rally.ui.cardboard.CardBoard'
         ],
-        layout: 'fit',
-
         config: {
             defaultSettings: {
                 type: 'HierarchicalRequirement',
@@ -24,6 +22,7 @@
         launch: function() {
             this.add({
                 xtype: 'rallycardboard',
+                margin: '10px 0 0 0',
                 types: [this.getSetting('type')],
                 attribute: this.getSetting('groupByField'),
                 context: this.getContext(),
