@@ -16,7 +16,7 @@
 
 .iterationtrackingboard .header {
     line-height: normal;
-    padding: 5px 5px 2px 5px;
+    padding: 5px;
 }
 
 .iterationtrackingboard .header .add-new {
@@ -40,10 +40,6 @@
 .iterationtrackingboard .gridboard-filter-control {
     height: 22px;
     margin: 3px 0px 0px 5px;
-}
-
-.iterationtrackingboard .rui-leftright {
-    margin-bottom: 10px;
 }
 
 .settings-no-grid {
