@@ -234,6 +234,7 @@
                 storeConfig: {
                     autoLoad: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE') ? false : true
                 },
+                plugins: [],
                 columnCfgs: this._getGridColumns(),
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 stateId: stateId,
