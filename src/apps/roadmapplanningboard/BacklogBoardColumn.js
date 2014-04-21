@@ -20,8 +20,7 @@
                 property: 'ActualEndDate',
                 operator: '=',
                 value: 'null'
-            },
-            enableAutoPaging: true
+            }
         },
 
         getColumnIdentifier: function () {

@@ -36,7 +36,8 @@
                     fields: this.getSetting('fields').split(',')
                 },
                 columnConfig: {
-                    cardLimit: this.getSetting('pageSize')
+                    cardLimit: this.getSetting('pageSize'),
+                    enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')
                 },
                 loadMask: true
             });

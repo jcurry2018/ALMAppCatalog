@@ -65,6 +65,7 @@
         },
 
         refresh: function () {
+            this.fireEvent('ready', this);
             return null;
         },
 

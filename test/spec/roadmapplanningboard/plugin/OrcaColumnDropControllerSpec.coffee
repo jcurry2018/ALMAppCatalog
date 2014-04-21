@@ -35,9 +35,17 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
       options.destColumnDropController.onCardDropped dragData, options.destIndex
 
-    _createColumn: (options, shouldRender) ->
-      target = 'testDiv' if shouldRender
+    _createColumn: (type, options) ->
+      loadStub = @stub()
+      Ext.merge options,
+        listeners:
+          load: loadStub
+      column = Ext.create type, options
+      @waitForCallback(loadStub).then =>
+        column
 
+    _createPlanningColumn: (options, shouldRender = true) ->
+      target = 'testDiv' if shouldRender
       options =
         store: Ext.create 'Ext.data.Store',
           extend: 'Ext.data.Store'
@@ -60,7 +68,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
           child:
             name: 'Feature'
 
-      Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', options
+      @_createColumn 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', options
 
     expectPlanFeaturesToMatchCards: (column) ->
       features = column.planRecord.get('features')
@@ -79,12 +87,15 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
     plan = planStore.getById('513617ecef8623df1391fefc')
     features = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.featureStoreData
+    columns = []
+
     @leftColumnOptions =
       plan: plan
       timeframe: timeframeStore.getById(plan.get('timeframe').id)
       data: Rally.test.mock.ModelObjectMother.getRecords 'PortfolioItemFeature',
         values: features.slice(0,3)
-    @leftColumn = @_createColumn(@leftColumnOptions)
+
+    columns.push @_createPlanningColumn(@leftColumnOptions).then (@leftColumn) =>
 
     plan = planStore.getById('513617f7ef8623df1391fefd')
     @rightColumnOptions =
@@ -92,9 +103,10 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       timeframe: timeframeStore.getById(plan.get('timeframe').id)
       data: Rally.test.mock.ModelObjectMother.getRecords 'PortfolioItemFeature',
         values: features.slice(5,7)
-    @rightColumn = @_createColumn(@rightColumnOptions)
 
-    @backlogColumn = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
+    columns.push @_createPlanningColumn(@rightColumnOptions).then (@rightColumn) =>
+
+    columns.push @_createColumn('Rally.apps.roadmapplanningboard.BacklogBoardColumn',
       store: secondFeatureStore
       planStore: planStore
       lowestPIType: 'PortfolioItem/Feature'
@@ -104,16 +116,18 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       typeNames:
         child:
           name: 'Feature'
-
-    @leftColumnDropController = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
-    @leftColumnDropController.init(@leftColumn)
-    @rightColumnDropController = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
-    @rightColumnDropController.init(@rightColumn)
-    @backlogColumnDropController = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
-    @backlogColumnDropController.init(@backlogColumn)
+    ).then (@backlogColumn) =>
 
     @ajaxRequest = @stub Ext.Ajax, 'request', (options) ->
       options.success.call(options.scope)
+
+    Deft.Promise.all(columns).then =>
+      @leftColumnDropController = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
+      @leftColumnDropController.init(@leftColumn)
+      @rightColumnDropController = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
+      @rightColumnDropController.init(@rightColumn)
+      @backlogColumnDropController = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
+      @backlogColumnDropController.init(@backlogColumn)
 
   afterEach ->
     Deft.Injector.reset()
@@ -126,23 +140,23 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
   describe 'when drag and drop is disabled', ->
     it 'should not have a drop target', ->
-      column = @_createColumn(@leftColumnOptions, true)
-      controller = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController',
-        dragDropEnabled: false
-      controller.init(column)
-      column.fireEvent('ready')
+      @_createPlanningColumn(@leftColumnOptions, true).then (column) =>
+        controller = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController',
+          dragDropEnabled: false
+        controller.init(column)
+        column.fireEvent('ready')
 
-      expect(controller.dropTarget).toBeUndefined()
+        expect(controller.dropTarget).toBeUndefined()
 
   describe 'when drag and drop is enabled', ->
     it 'should have a drop target', ->
-      column = @_createColumn(@rightColumnOptions, true)
-      controller = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController',
-        dragDropEnabled: true
-      controller.init(column)
-      column.fireEvent('ready')
+      @_createPlanningColumn(@rightColumnOptions, true).then (column) =>
+        controller = Ext.create 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController',
+          dragDropEnabled: true
+        controller.init(column)
+        column.fireEvent('ready')
 
-      expect(controller.dropTarget).toBeDefined()
+        expect(controller.dropTarget).toBeDefined()
 
   describe 'when drag and drop ranking', ->
     describe 'within a backlog', ->
@@ -156,6 +170,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
         expect(@recordSaveStub.lastCall.args[0].params.rankAbove).toContain '1010'
 
       it 'should send rankBelow when card is dragged lower than top of the column', ->
+        debugger
         @dragCard
           sourceColumn: @backlogColumn
           destColumnDropController: @backlogColumnDropController

@@ -307,8 +307,8 @@
                             xtype: 'rallycardboardcolumn',
                             additionalFetchFields: ['Discussion'],
                             cardLimit: 50,
-                            drawFooter: Ext.emptyFn,
-                            enableWipLimit: true
+                            enableWipLimit: true,
+                            enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')
                         },
                         cardConfig: {
                             xtype: 'rallyportfoliokanbancard',
@@ -347,7 +347,6 @@
 
         _gridBoardToggle: function (toggleState, gridOrBoard) {
             this.cardboard = toggleState === 'board' ? gridOrBoard : null;
-            this.setLoading({ id: this.getMaskId() });
             this._renderPolicies();
         },
 
@@ -357,7 +356,6 @@
 
         _onBoardLoad: function (cardboard) {
             this._publishContentUpdated();
-            this.setLoading(false);
             Rally.environment.getMessageBus().publish(Rally.Message.piKanbanBoardReady);
         },
 

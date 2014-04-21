@@ -66,6 +66,7 @@
                 columnConfig: {
                     xtype: 'iterationplanningboardappplanningcolumn',
                     additionalFetchFields: ['PortfolioItem'],
+                    enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
                     storeConfig : {
                         fetch: ['Parent', 'Requirement']
                     }
@@ -95,10 +96,18 @@
         },
 
         _getColumnConfigs: function(timeboxes) {
+            // Note: Leave backlog card limit as undefined if infinite scroll is enabled.
+            // When removing the infinite scroll toggle, card limit should probably be removed from here completely
+            var backlogCardLimit;
+
+            if (!this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')) {
+                backlogCardLimit = Ext.isIE ? 25 : 100;
+            }
+
             var columns = [{
                 xtype: 'iterationplanningboardappbacklogcolumn',
                 flex: this._hasTimeboxes() ? 1 : 1/3,
-                cardLimit: Ext.isIE ? 25 : 100,
+                cardLimit: backlogCardLimit,
                 columnHeaderConfig: {
                     headerTpl: 'Backlog'
                 }

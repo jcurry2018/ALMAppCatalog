@@ -171,6 +171,7 @@
                         headerTpl: column || 'None'
                     },
                     cardLimit: this.getSetting('pageSize'),
+                    enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
                     listeners: {
                         invalidfilter: {
                             fn: this._onInvalidFilter,
@@ -223,8 +224,6 @@
                 listeners: {
                     beforecarddroppedsave: this._onBeforeCardSaved,
                     load: this._onBoardLoad,
-                    filter: this._onBoardFilter,
-                    filtercomplete: this._onBoardFilterComplete,
                     cardupdated: this._publishContentUpdatedNoDashboardLayout,
                     scope: this
                 },
@@ -342,14 +341,6 @@
             this._publishContentUpdated();
             this.setLoading(false);
             this._initializeChosenTypes();
-        },
-
-        _onBoardFilter: function() {
-            this.setLoading(true);
-        },
-
-        _onBoardFilterComplete: function() {
-            this.setLoading(false);
         },
 
         _initializeChosenTypes: function() {
