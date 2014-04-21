@@ -25,6 +25,7 @@
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
             'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
             'Rally.ui.gridboard.plugin.GridBoardExpandAll',
+            'Rally.ui.gridboard.plugin.GridBoardCustomView',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
             'Rally.ui.filter.view.OwnerPillFilter',
@@ -121,6 +122,10 @@
                 boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
                     ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
             });
+
+            if (context.isFeatureEnabled('ITERATION_TRACKING_CUSTOM_VIEWS')) {
+                plugins.push('rallygridboardcustomview');
+            }
 
             if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS') && !context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
                 plugins.push({
