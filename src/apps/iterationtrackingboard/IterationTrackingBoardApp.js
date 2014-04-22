@@ -116,7 +116,32 @@
             plugins.push({
                 ptype: 'rallygridboardfieldpicker',
                 headerPosition: 'left',
-                gridFieldBlackList: ['DisplayColor'],
+                gridFieldBlackList: [
+                    'ObjectID',
+                    'Description',
+                    'DisplayColor',
+                    'Notes',
+                    'Subscription',
+                    'Workspace',
+                    'Changesets',
+                    'RevisionHistory',
+                    'Children'
+                ],
+                boardFieldBlackList: [
+                    'ObjectID',
+                    'Description',
+                    'DisplayColor',
+                    'Notes',
+                    'Rank',
+                    'DragAndDropRank',
+                    'Subscription',
+                    'Workspace',
+                    'Changesets',
+                    'RevisionHistory',
+                    'PortfolioItemType',
+                    'StateChangedDate',
+                    'Children'
+                ],
                 alwaysSelectedValues: alwaysSelectedValues,
                 modelNames: this._getFieldPickerDisplayNames(context, treeGridModel),
                 boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
