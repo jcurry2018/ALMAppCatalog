@@ -69,6 +69,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       stub
 
   beforeEach ->
+    @defaultToggleState = Rally.ui.gridboard.GridBoard.prototype.toggleState
+    Rally.ui.gridboard.GridBoard.prototype.toggleState = 'board' # tests assume board is default view
+
     @ajax.whenReading('project').respondWith {
       TeamMembers: []
       Editors: []
@@ -80,6 +83,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   afterEach ->
     @app?.destroy()
+    Rally.ui.gridboard.GridBoard.prototype.toggleState = @defaultToggleState
 
   it 'resets view on scope change', ->
     @createApp().then =>
