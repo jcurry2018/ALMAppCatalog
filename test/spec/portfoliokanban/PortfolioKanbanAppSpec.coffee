@@ -76,6 +76,10 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp().then =>
       expect(@app.gridboard).toHaveHelpComponent()
 
+  it 'does not show help component when panel config "true"', ->
+    @_createApp(null, "true").then =>
+      expect(@app.gridboard).not.toHaveHelpComponent()
+
   it 'should show an Add New button', ->
     @_createApp().then =>
       expect(Ext.query('.add-new a.new').length).toBe 1

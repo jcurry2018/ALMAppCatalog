@@ -448,6 +448,11 @@
         },
 
         _buildHelpComponent: function (config) {
+
+            if (this.appContainer.panelDef.panelConfigs.hideFilterOnPortfolioKanban === 'true') {
+                return null;
+            }
+
             return Ext.create('Ext.Component', Ext.apply({
                 cls: 'help-field ' + Rally.util.Test.toBrowserTestCssClass('portfolio-kanban-help-container'),
                 renderTpl: Rally.util.Help.getIcon({
