@@ -5,6 +5,7 @@ Ext.require [
   'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp'
   'Rally.apps.roadmapplanningboard.SplashContainer'
   'Rally.test.mock.ModelObjectMother'
+  'Rally.util.BrowserValidation'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
@@ -54,11 +55,12 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
-    @isBrowserSupportedStub = @stub Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp::, '_isSupportedBrowser', =>
-      true
 
-    @setBrowserPrefValue = @stub Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp::, '_getBrowserPrefValue', =>
-      true
+    @isPreferenceSet = true
+    @isSupportedBrowser = true
+
+    @stub Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp::, '_getBrowserPrefValue', => @isPreferenceSet
+    @stub Rally.util.BrowserValidation, 'isSupported', => @isSupported
 
     @timelineStore = Deft.Injector.resolve('timelineStore')
     @roadmapStore = Deft.Injector.resolve('roadmapStore')
@@ -154,30 +156,39 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
 
         expect(@app.getEl().getHTML()).toContain 'temporarily unavailable'
 
-  describe '_isSupportedBrowser', ->
-    beforeEach ->
-      @isBrowserSupportedStub.restore()
+  describe 'unsupported browser flair', ->
+    helpers
+      assertFlairNotDisplayed: ->
+        expect(@errorNotifyStub).not.toHaveBeenCalled()
 
-    userAgentStrings =
-      "Chrome 29": ["Mozilla/5.0 (X11; CrOS i686 4319.74.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36", false]
-      "Chrome 33": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36", true]
-      "Chrome No Version": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari/537.36", false]
-      "IE 10": ["Mozilla/5.0 (compatible; MSIE 10.6; Windows NT 6.1; Trident/5.0; InfoPath.2; SLCC1; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; .NET CLR 2.0.50727) 3gpp-gba UNTRUSTED/1.0", true]
-      "IE 8": ["Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; GTB7.4; InfoPath.2; SV1; .NET CLR 3.3.69573; WOW64; en-US)", false]
-      "Opera": ["Mozilla/5.0 (Windows NT 6.0; rv:2.0) Gecko/20100101 Firefox/4.0 Opera 12.14", false]
-      "Mac_Safari 6": ["Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25", true]
-      "Mac_Safari 5": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2", false]
-      "Firefox 28": ["Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/28.0", true]
-      "Firefox 25": ["Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0", false]
-      "Firefox No Version": ["Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/", false]
-      "Empty String": ["", false]
-      "Random Gibberish": ["fiwuehfwieufhweiufhweiuf", false]
-      "Midori": ["Mozilla/5.0 (X11; U; Linux i686; fr-fr) AppleWebKit/525.1+ (KHTML, like Gecko, Safari/525.1+) midori/1.19", false]
+      assertFlairDisplayed: ->
+        expect(@errorNotifyStub).toHaveBeenCalledOnce()
+        expect(@errorNotifyStub.lastCall.args[0].message).toContain 'is not supported'
 
-    _.each userAgentStrings, ([userAgent, isSupported], displayName) ->
-      it "should state that #{displayName} is #{if isSupported then  'supported' else 'unsupported'}", ->
+    describe 'when preference is set', ->
+      beforeEach ->
+        @isPreferenceSet = true
 
-        window.navigator.__defineGetter__ 'userAgent', () -> userAgent
+      it 'should not display for supported browser', ->
+        @isSupported = true
+        @createApp().then =>
+          @assertFlairNotDisplayed()
 
-        browserInfo = Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp::_getBrowserInfo()
-        expect(Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp::_isSupportedBrowser browserInfo).toBe isSupported
+      it 'should not display for unsupported browser', ->
+        @isSupported = false
+        @createApp().then =>
+          @assertFlairNotDisplayed()
+
+    describe 'when preference is not set', ->
+      beforeEach ->
+        @isPreferenceSet = false
+
+      it 'should not display for supported browser', ->
+        @isSupported = true
+        @createApp().then =>
+          @assertFlairNotDisplayed()
+
+      it 'should display for unsupported browser', ->
+        @isSupported = false
+        @createApp().then =>
+          @assertFlairDisplayed()

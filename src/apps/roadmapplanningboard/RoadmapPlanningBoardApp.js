@@ -1,3 +1,4 @@
+
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
@@ -12,7 +13,8 @@
             'Rally.apps.roadmapplanningboard.util.TimelineRoadmapStoreWrapper',
             'Rally.apps.roadmapplanningboard.util.UserPermissions',
             'Rally.apps.roadmapplanningboard.util.RoadmapGenerator',
-            'Rally.clientmetrics.ClientMetricsRecordable'
+            'Rally.clientmetrics.ClientMetricsRecordable',
+            'Rally.util.BrowserValidation'
         ],
         cls: 'roadmapPlanningBoardApp',
         componentCls: 'app',
@@ -145,64 +147,18 @@
         },
 
         browserCheck: function() {
-            var browserInfo = this._getBrowserInfo();
-            var browserPrefValue = this._getBrowserPrefValue();
+            var browserInfo = Rally.util.BrowserValidation.getCurrentBrowserInfo();
 
-            if (!browserPrefValue) {
+            if (!this._getBrowserPrefValue()) {
                 this._setBrowserPrefValue();
-                if (!this._isSupportedBrowser(browserInfo)) {
+
+                if (!Rally.util.BrowserValidation.isSupported(browserInfo)) {
                     Rally.ui.notify.Notifier.showError({
                         allowHTML: true,
                         message: browserInfo.displayName + " " + browserInfo.version + ' is not supported. For a better experience, please use a <a target="_blank" href="https://help.rallydev.com/supported-web-browsers">supported browser</a>'
                     });
                 }
             }
-        },
-
-        _getBrowserInfo: function () {
-            var userAgent = window.navigator.userAgent;
-            var name;
-            var version;
-            var displayName;
-            var browserRegex = userAgent.match(/(Chrome|Firefox)\/\d+/g) || userAgent.match(/Safari\/\d+/g) || userAgent.match(/MSIE \d+/g);
-
-            try {
-                if (browserRegex) {
-                    name = browserRegex[0].match(/[a-zA-Z]+/g)[0];
-                    displayName = name === 'MSIE' ? 'IE' : name;
-
-                    if (name === 'Safari') {
-                        name = userAgent.match(/Macintosh;/g) ? 'Mac_Safari' : 'Win_Safari';
-                        version = userAgent.match(/Version\/\d+/g)[0].match(/\d+/g)[0];
-                    } else {
-                        version = browserRegex[0].match(/\d+/g)[0];
-                    }
-                }
-            }
-
-            catch (e) {
-                name = "Unknown";
-            }
-
-            finally {
-                return {
-                    name: name || 'Unknown',
-                    displayName: displayName,
-                    version: version
-                };
-            }
-        },
-
-        _isSupportedBrowser: function (browserInfo) {
-            var supportedBrowserVersions = {
-                Chrome: 32,
-                Firefox: 27,
-                Mac_Safari: 6,
-                Win_Safari: 4,
-                MSIE: 9
-            };
-
-            return browserInfo.name !== 'Unknown' && browserInfo.version && browserInfo.version >= supportedBrowserVersions[browserInfo.name];
         },
 
         _displayError: function(message) {
