@@ -338,12 +338,12 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
         expect(editorOpenedStub).toHaveBeenCalledOnce()
 
   it 'should display a newly created story ranked at the bottom of the column', ->
-    storyRank = 1000
+    storyRank = 'aaaa'
     firstStoryName = 'Story 1'
     userStory1 =
       Iteration: @getIteration1(),
       Name: firstStoryName
-      Rank: storyRank
+      DragAndDropRank: storyRank
 
     @ajax.whenQuerying('artifact').respondWith(userStory1)
 
@@ -353,7 +353,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
         Iteration: @getIteration1(),
         Name: secondStoryName
         ObjectID: 2,
-        Rank: storyRank + 1
+        DragAndDropRank: 'bbbb'
 
       @ajax.whenQuerying('artifact').respondWith [userStory2]
       Rally.environment.getMessageBus().publish Rally.Message.objectCreate, @createUserStoryRecord userStory2
