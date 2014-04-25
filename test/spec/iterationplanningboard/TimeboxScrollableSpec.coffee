@@ -3,7 +3,6 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn'
   'Rally.apps.iterationplanningboard.TimeboxScrollable'
-  'Rally.util.Array'
 ]
 
 describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
@@ -48,7 +47,7 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
   it 'should scroll forward when the forward button is clicked', ->
     @createBoard().then =>
       @scrollForwards().then =>
-        expect(@plugin.getLastVisibleScrollableColumn().timeboxRecords).toBe (Rally.util.Array.last @bucketedIterationRecords)
+        expect(@plugin.getLastVisibleScrollableColumn().timeboxRecords).toBe (_.last @bucketedIterationRecords)
 
   it 'should scroll backwards when the back button is clicked', ->
     @createBoard().then =>
@@ -100,8 +99,8 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
   it 'should render newly visible column in right-most column when scrolling forwards', ->
     @createBoard().then =>
       @scrollForwards().then =>
-        expect(@plugin.getLastVisibleScrollableColumn().getColumnHeaderCell().dom).toBe (Rally.util.Array.last @getColumnHeaderCells())
-        expect(@plugin.getLastVisibleScrollableColumn().getContentCell().dom).toBe (Rally.util.Array.last @getColumnContentCells())
+        expect(@plugin.getLastVisibleScrollableColumn().getColumnHeaderCell().dom).toBe (_.last @getColumnHeaderCells())
+        expect(@plugin.getLastVisibleScrollableColumn().getContentCell().dom).toBe (_.last @getColumnContentCells())
 
   it 'should render newly visible column in left-most column when scrolling backwards', ->
     @createBoard().then =>
@@ -164,7 +163,7 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
           getFirstVisibleScrollableColumn: ->
             @cmp.getColumns()[0]
           getLastVisibleScrollableColumn: ->
-            Rally.util.Array.last @cmp.getColumns()
+            _.last @cmp.getColumns()
           getScrollableColumns: ->
             @cmp.getColumns()
         ]

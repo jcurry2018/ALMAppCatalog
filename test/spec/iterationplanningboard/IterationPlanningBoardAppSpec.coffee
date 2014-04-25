@@ -3,7 +3,6 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.ui.cardboard.CardBoard'
   'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser'
-  'Rally.util.Array'
   'Rally.util.DateTime'
 ]
 
@@ -479,7 +478,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       startingAt: new Date
     ).then =>
       @click(className: 'scroll-forwards').then =>
-        @assertColumnIsFor Rally.util.Array.last(@iterationData), Rally.util.Array.last(@getTimeboxColumns())
+        @assertColumnIsFor _.last(@iterationData), _.last(@getTimeboxColumns())
 
   it 'should have a default card fields setting', ->
     @createApp().then =>
