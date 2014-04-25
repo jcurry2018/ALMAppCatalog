@@ -1,29 +1,26 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.test.helpers.CardBoard'
+]
+
 describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   helpers
-    _createApp: (settings, hideFilterInfo = "false") ->
-      globalContext = Rally.environment.getContext()
-      type: Rally.util.Ref.getRelativeUri(@feature._ref)
-      context = Ext.create 'Rally.app.Context',
-        initialValues:
-          project:globalContext.getProject()
-          workspace:globalContext.getWorkspace()
-          user:globalContext.getUser()
-          subscription:globalContext.getSubscription()
-
-      options =
-        context: context,
+    _createApp: (config, hideFilterInfo = 'false') ->
+      @app = Ext.create 'Rally.apps.portfoliokanban.PortfolioKanbanApp', Ext.merge
+        context: Ext.create 'Rally.app.Context',
+          initialValues:
+            project: Rally.environment.getContext().getProject()
+            workspace: Rally.environment.getContext().getWorkspace()
+            user: Rally.environment.getContext().getUser()
+            subscription: Rally.environment.getContext().getSubscription(),
         renderTo: 'testDiv'
         appContainer:
           panelDef:
             panelConfigs:
               hideFilterOnPortfolioKanban: hideFilterInfo
-
-      options.settings = settings if settings?
-
-      @app = Ext.create('Rally.apps.portfoliokanban.PortfolioKanbanApp', options)
+      , config
 
       @waitForComponentReady @app
 
@@ -77,7 +74,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       expect(@app.gridboard).toHaveHelpComponent()
 
   it 'does not show help component when panel config "true"', ->
-    @_createApp(null, "true").then =>
+    @_createApp({}, 'true').then =>
       expect(@app.gridboard).not.toHaveHelpComponent()
 
   it 'should show an Add New button', ->
@@ -100,7 +97,10 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
   it 'creates columns from states', ->
     @ajax.whenQuerying('state').respondWith @initiativeStates
 
-    @_createApp(type: Rally.util.Ref.getRelativeUri(@initiative._ref)).then =>
+    @_createApp(
+      settings:
+        type: Rally.util.Ref.getRelativeUri(@initiative._ref)
+    ).then =>
       expect(@app.cardboard.getColumns().length).toEqual @initiativeStates.length + 1
 
   it 'shows message if no states are found', ->
@@ -120,7 +120,8 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   it 'shows project setting label if following a specific project scope', ->
     @_createApp(
-      project: '/project/431439'
+      settings:
+        project: '/project/431439'
     ).then =>
       @app.down('rallyfilterinfo').tooltip.show()
 
@@ -193,12 +194,27 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       expect(loadSpy.callCount).toBe 0
       expect(@app.down('#bodyContainer').getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
 
+  it 'should be able to scroll forwards', ->
+    @_createApp(
+      renderTo: Rally.test.helpers.CardBoard.smallContainerForScrolling()
+    ).then =>
+      Rally.test.helpers.CardBoard.scrollForwards @app.down('rallycardboard'), @
+
+  it 'should be able to scroll backwards', ->
+    @_createApp(
+      renderTo: Rally.test.helpers.CardBoard.smallContainerForScrolling()
+    ).then =>
+      Rally.test.helpers.CardBoard.scrollBackwards @app.down('rallycardboard'), @
+
   describe 'when the type is changed', ->
 
     beforeEach ->
       @ajax.whenQuerying('state').respondWith(@initiativeStates)
 
-      @_createApp(type: Rally.util.Ref.getRelativeUri(@initiative._ref)).then =>
+      @_createApp(
+        settings:
+          type: Rally.util.Ref.getRelativeUri(@initiative._ref)
+      ).then =>
         @ajax.whenQuerying('state').respondWith(@themeStates)
         @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@theme._ref))
         @waitForAppReady()
@@ -218,7 +234,8 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
     it 'should use query setting to filter board', ->
       @_createApp(
-        query: '(Name = "abc")'
+        settings:
+          query: '(Name = "abc")'
       ).then =>
         expect(@getAppStore()).toHaveFilter 'Name', '=', 'abc'
 
@@ -245,6 +262,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
       it 'should have use the legacy field setting if available', ->
         @_createApp(
-          fields: 'Field1,Field2'
+          settings:
+            fields: 'Field1,Field2'
         ).then =>
           expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['Field1','Field2']

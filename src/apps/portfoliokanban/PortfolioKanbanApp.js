@@ -15,6 +15,7 @@
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
+            'Rally.ui.cardboard.plugin.Scrollable',
             'Rally.ui.cardboard.Column',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.Card',
@@ -304,8 +305,12 @@
                     },
                     cardBoardConfig: {
                         attribute: 'State',
-                        columns: columns,
-                        ddGroup: currentTypePath,
+                        cardConfig: {
+                            xtype: 'rallyportfoliokanbancard',
+                            editable: true,
+                            fields: Rally.apps.portfoliokanban.PortfolioKanbanCard.defaultFields.concat('Discussion'),
+                            showColorIcon: true
+                        },
                         cls: 'cardboard',
                         columnConfig: {
                             xtype: 'rallycardboardcolumn',
@@ -314,23 +319,25 @@
                             enableWipLimit: true,
                             enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')
                         },
-                        cardConfig: {
-                            xtype: 'rallyportfoliokanbancard',
-                            editable: true,
-                            fields: Rally.apps.portfoliokanban.PortfolioKanbanCard.defaultFields.concat('Discussion'),
-                            showColorIcon: true
-                        },
-                        storeConfig: {
-                            filters: filters,
-                            context: this.context.getDataContext()
-                        },
+                        columns: columns,
+                        ddGroup: currentTypePath,
                         listeners: {
                             load: this._onBoardLoad,
                             cardupdated: this._publishContentUpdatedNoDashboardLayout,
                             scope: this
                         },
                         loadDescription: 'Portfolio Kanban',
-                        loadMask: false
+                        loadMask: false,
+                        plugins: [
+                            {
+                                ptype: 'rallyscrollablecardboard',
+                                containerEl: this.getEl()
+                            }
+                        ],
+                        storeConfig: {
+                            filters: filters,
+                            context: this.context.getDataContext()
+                        }
                     }
                 });
 

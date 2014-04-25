@@ -3,10 +3,10 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.ui.report.StandardReport',
   'Rally.apps.kanban.KanbanApp',
-  'Rally.util.Array',
   'Rally.util.Element',
   'Rally.ui.notify.Notifier',
-  'Rally.app.Context'
+  'Rally.app.Context',
+  'Rally.test.helpers.CardBoard'
 ]
 
 describe 'Rally.apps.kanban.KanbanApp', ->
@@ -299,24 +299,15 @@ describe 'Rally.apps.kanban.KanbanApp', ->
 
   it 'should be able to scroll forwards', ->
     @createApp({},
-      renderTo: @createSmallContainer()
+      renderTo: Rally.test.helpers.CardBoard.smallContainerForScrolling()
     ).then =>
-      indexOfLastVisibleColumn = Ext.Array.indexOf(@app.down('rallycardboard').getColumns(), Rally.util.Array.last @app.down('rallycardboard').getVisibleColumns())
-      columnToShow = @app.down('rallycardboard').getColumns()[indexOfLastVisibleColumn + 1]
-      expect(columnToShow.hidden).toBe true
-      @click(className: 'scroll-forwards').then =>
-        expect(columnToShow.hidden).toBe false
+      Rally.test.helpers.CardBoard.scrollForwards @app.down('rallycardboard'), @
 
   it 'should be able to scroll backwards', ->
     @createApp({},
-      renderTo: @createSmallContainer()
+      renderTo: Rally.test.helpers.CardBoard.smallContainerForScrolling()
     ).then =>
-      columnToShow = @app.down('rallycardboard').getColumns()[0]
-      expect(columnToShow.hidden).toBe false
-      @click(className: 'scroll-forwards').then =>
-        expect(columnToShow.hidden).toBe true
-        @click(className: 'scroll-backwards').then =>
-          expect(columnToShow.hidden).toBe false
+      Rally.test.helpers.CardBoard.scrollBackwards @app.down('rallycardboard'), @
 
   it 'should have correct icons on cards', ->
     @createApp().then =>
@@ -345,11 +336,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         renderTo: options.renderTo || 'testDiv'
 
       @waitForComponentReady @app
-
-    createSmallContainer: ->
-      Ext.get('testDiv').createChild
-        style:
-          width: '500px'
 
     assertPolicyCmpConfig: (settingsKey, policy) ->
       column = @app.down('rallycardboard').getColumns()[0]
