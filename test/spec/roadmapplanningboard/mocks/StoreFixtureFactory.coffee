@@ -117,6 +117,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
     DirectChildrenCount: 39
+    DragAndDropRank: 'a'
   ,
     ObjectID: "1001"
     _refObjectUUID: "F1001"
@@ -129,6 +130,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
     DirectChildrenCount: 39
+    DragAndDropRank: 'b'
   ,
     ObjectID: "1002"
     _refObjectUUID: "F1002"
@@ -141,6 +143,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
     DirectChildrenCount: 39
+    DragAndDropRank: 'c'
   ,
     ObjectID: "1003"
     _refObjectUUID: "F1003"
@@ -153,6 +156,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
     DirectChildrenCount: 39
+    DragAndDropRank: 'd'
   ,
     ObjectID: "1004"
     _refObjectUUID: "F1004"
@@ -165,6 +169,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
     DirectChildrenCount: 39
+    DragAndDropRank: 'e'
   ,
     ObjectID: "1005"
     _refObjectUUID: "F1005"
@@ -177,6 +182,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
     DirectChildrenCount: 39
+    DragAndDropRank: 'f'
   ,
     ObjectID: "1006"
     _refObjectUUID: "F1006"
@@ -189,6 +195,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
     DirectChildrenCount: 39
+    DragAndDropRank: 'g'
   ,
     ObjectID: "1007"
     _refObjectUUID: "F1007"
@@ -201,6 +208,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
     DirectChildrenCount: 39
+    DragAndDropRank: 'h'
   ,
     ObjectID: "1008"
     _refObjectUUID: "F1008"
@@ -213,6 +221,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
     DirectChildrenCount: 39
+    DragAndDropRank: 'i'
   ,
     ObjectID: "1009"
     _refObjectUUID: "F1009"
@@ -225,6 +234,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
     LeafStoryCount: 42
     DirectChildrenCount: 39
+    DragAndDropRank: 'j'
   ]
 
   getFeatureStoreFixture: ->
