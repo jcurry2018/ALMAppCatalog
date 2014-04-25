@@ -38,7 +38,7 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
     @userStoryModel = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
 
     @ajax.whenQuerying('typedefinition').respondWith [
-      Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemStrategy')
+      Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemProject')
     ]
     
   afterEach ->
@@ -46,8 +46,8 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
 
 
   it 'test draws portfolio tree', ->
-    interceptor = @ajax.whenQuerying('PortfolioItem/Strategy').respondWith [
-      {FormattedID: 'S1', ObjectID: '1', Name: 'Strategy 1'}
+    interceptor = @ajax.whenQuerying('PortfolioItem/Project').respondWith [
+      {FormattedID: 'S1', ObjectID: '1', Name: 'Project 1'}
     ]
 
     @_createApp().then =>
@@ -57,7 +57,7 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
 
 
   it 'test filter info displayed', ->
-    @ajax.whenQuerying('PortfolioItem/Strategy').respondWith()
+    @ajax.whenQuerying('PortfolioItem/Project').respondWith()
 
     @_createApp().then =>
 
@@ -66,7 +66,7 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
     
 
   it 'test project setting label is shown if following a specific project scope', ->
-    @ajax.whenQuerying('PortfolioItem/Strategy').respondWith()
+    @ajax.whenQuerying('PortfolioItem/Project').respondWith()
 
     @_createApp(
       project: '/project/431439'
@@ -100,7 +100,7 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
     
 
   it 'test help component is shown', ->
-    @ajax.whenQuerying('PortfolioItem/Strategy').respondWith()
+    @ajax.whenQuerying('PortfolioItem/Project').respondWith()
 
     @_createApp().then =>
       expect(@app).toHaveHelpComponent()
