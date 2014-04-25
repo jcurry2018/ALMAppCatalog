@@ -37,6 +37,10 @@
             }
         },
 
+        mixins: [
+          "Rally.clientmetrics.ClientMetricsRecordable"
+        ],
+
         clientMetrics: [
             {
                 method: '_showHelp',
@@ -357,6 +361,7 @@
         _onBoardLoad: function (cardboard) {
             this._publishContentUpdated();
             Rally.environment.getMessageBus().publish(Rally.Message.piKanbanBoardReady);
+            this.recordComponentReady();
         },
 
         _showNoColumns: function () {
