@@ -13,11 +13,6 @@
             'Rally.apps.portfoliokanban.PortfolioKanbanPolicy',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
-            'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
-            'Rally.ui.filter.view.OwnerPillFilter',
-            'Rally.ui.filter.view.TagPillFilter',
-            'Rally.ui.gridboard.plugin.GridBoardTagFilter',
-            'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.cardboard.plugin.Scrollable',
@@ -227,16 +222,6 @@
             }
         },
 
-        _createFilterItem: function(typeName, config) {
-            return Ext.apply({
-                xtype: typeName,
-                margin: '-15 0 5 0',
-                showPills: true,
-                showClear: true
-            }, config);
-        },
-
-
         _showColumns: function (columns) {
             var filters = [{
                 property: 'PortfolioItemType',
@@ -268,7 +253,7 @@
                     types: [currentTypePath],
                     storeConfig: {
                         filters: filters,
-                        context: this.getContext().getDataContext()
+                        context: this.context.getDataContext()
                     }
                 });
             } else {
@@ -284,23 +269,6 @@
                     },
                     plugins: [
                         'rallygridboardaddnew',
-                        {
-                            ptype: 'rallygridboardfiltercontrol',
-                            filterControlConfig: {
-                                cls: 'small gridboard-filter-control',
-                                margin: '3 10 3 7',
-                                stateful: true,
-                                stateId: this.getContext().getScopedStateId('portfolio-kanban-filter-button'),
-                                items: [
-                                    this._createFilterItem('rallyownerpillfilter', {
-                                        filterChildren: false,
-                                        project: this.getContext().getProjectRef(),
-                                        showPills: false
-                                    }),
-                                    this._createFilterItem('rallytagpillfilter', {remoteFilter: true})
-                                ]
-                            }
-                        },
                         {
                             ptype: 'rallygridboardfieldpicker',
                             boardFieldBlackList: [
