@@ -345,7 +345,8 @@
                 success: function(models) {
                     this._onModelLoad(models, topLevelModelNames);
                 },
-                scope: this
+                scope: this,
+                requester: this
             });
         },
 
