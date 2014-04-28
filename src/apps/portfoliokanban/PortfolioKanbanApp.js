@@ -62,6 +62,9 @@
         ],
 
         launch: function () {
+            if (this.appContainer.panelDef.panelConfigs.hideFilterOnPortfolioKanban === 'true') {
+                this.appContainer.ownerCt.disableResizer();
+            }
             if (!Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
                 this.down('#bodyContainer').add({
                     xtype: 'container',
@@ -69,6 +72,7 @@
                 });
 
                 this._publishContentUpdated();
+
                 return;
             }
 

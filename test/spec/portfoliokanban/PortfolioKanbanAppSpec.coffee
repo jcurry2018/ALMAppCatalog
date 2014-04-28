@@ -8,6 +8,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   helpers
     _createApp: (config, hideFilterInfo = 'false') ->
+      @disableResizerSpy = @spy()
       @app = Ext.create 'Rally.apps.portfoliokanban.PortfolioKanbanApp', Ext.merge
         context: Ext.create 'Rally.app.Context',
           initialValues:
@@ -17,6 +18,8 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
             subscription: Rally.environment.getContext().getSubscription(),
         renderTo: 'testDiv'
         appContainer:
+          ownerCt:
+            disableResizer: @disableResizerSpy
           panelDef:
             panelConfigs:
               hideFilterOnPortfolioKanban: hideFilterInfo
@@ -117,6 +120,9 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp(null, "true").then =>
       expect(@app.getEl().down('.filterInfo')).toBeFalsy()
 
+  it 'disables the resizer of the panel when panel config "true"', ->
+    @_createApp(null, "true").then =>
+      expect(@disableResizerSpy).toHaveBeenCalledOnce()
 
   it 'shows project setting label if following a specific project scope', ->
     @_createApp(
