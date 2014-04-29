@@ -92,7 +92,7 @@ These apps are built using [App SDK 1](https://help.rallydev.com/app-sdk) and ea
 
 The following links will be helpful when developing apps:
 
-* [Getting Started](https://help.rallydev.com/apps/2.0rc1/doc/#!/guide/getting_started)
-* [Rally App Builder](https://help.rallydev.com/apps/2.0rc1/doc/#!/guide/app_builder)
-* [App SDK 2.0rc2 API Docs](https://help.rallydev.com/apps/2.0rc1/doc/)
+* [Getting Started](https://help.rallydev.com/apps/2.0rc2/doc/#!/guide/getting_started)
+* [Rally App Builder](https://help.rallydev.com/apps/2.0rc2/doc/#!/guide/app_builder)
+* [App SDK 2.0rc2 API Docs](https://help.rallydev.com/apps/2.0rc2/doc/)
 
