@@ -13,31 +13,31 @@
             var cardboard;
             var that = this;
             var checkBoxes = [];
-        
+
             this._createLayout = function(element) {
-        
+
                 rally.sdk.ui.AppHeader.showPageTools(true);
                 rally.sdk.ui.AppHeader.setHelpTopic("236");
-        
+
                 var headerDiv = document.createElement("div");
                 element.appendChild(headerDiv);
-        
+
                 var controlDiv = document.createElement("div");
                 dojo.addClass(controlDiv, "controlContainer");
                 headerDiv.appendChild(controlDiv);
-        
+
                 var checkBoxContainerDiv = document.createElement("div");
                 dojo.addClass(checkBoxContainerDiv, "typeFilterContainer");
                 controlDiv.appendChild(checkBoxContainerDiv);
-        
+
                 var showSpan = document.createElement("span");
                 showSpan.appendChild(document.createTextNode("Show:"));
                 checkBoxContainerDiv.appendChild(showSpan);
-        
+
                 var userStoriesSpan = document.createElement("span");
                 userStoriesSpan.id = "userStories";
                 checkBoxContainerDiv.appendChild(userStoriesSpan);
-        
+
                 var userStoriesCheckBox = new rally.sdk.ui.basic.Checkbox({
                     showLabel: true,
                     label: "User Stories",
@@ -47,11 +47,11 @@
                 });
                 checkBoxes.push(userStoriesCheckBox);
                 userStoriesCheckBox.display(userStoriesSpan);
-        
+
                 var defectsSpan = document.createElement("span");
                 defectsSpan.id = "defects";
                 checkBoxContainerDiv.appendChild(defectsSpan);
-        
+
                 var defectsCheckBox = new rally.sdk.ui.basic.Checkbox({
                     showLabel: true,
                     label: "Defects",
@@ -60,11 +60,11 @@
                 });
                 checkBoxes.push(defectsCheckBox);
                 defectsCheckBox.display(defectsSpan);
-        
+
                 var defectSuitesSpan = document.createElement("span");
                 defectSuitesSpan.id = "defectSuites";
                 checkBoxContainerDiv.appendChild(defectSuitesSpan);
-        
+
                 var defectSuitesCheckBox = new rally.sdk.ui.basic.Checkbox({
                     showLabel: true,
                     label: "Defect Suites",
@@ -73,41 +73,41 @@
                 });
                 checkBoxes.push(defectSuitesCheckBox);
                 defectSuitesCheckBox.display(defectSuitesSpan);
-        
+
                 var clearDiv = document.createElement("div");
                 dojo.addClass(clearDiv, "clearFloats");
                 headerDiv.appendChild(clearDiv);
-        
+
                 var kanbanBoard = document.createElement("div");
                 kanbanBoard.id = "cardBoard";
                 dojo.addClass(kanbanBoard, "cardBoard");
                 element.appendChild(kanbanBoard);
-        
-        
+
+
                 //Wire up events
                 dojo.forEach(checkBoxes, function(checkBox) {
                     checkBox.addEventListener("onChange", that._refreshBoard);
                 });
-        
+
             };
-        
+
             this._numericSort = function(o1, o2) {
                 var key1, key2;
-        
+
                 rally.forEach(o1, function(value1, keyorig1) {
                     key1 = parseFloat(keyorig1);
                 });
                 rally.forEach(o2, function(value2, keyorig2) {
                     key2 = parseFloat(keyorig2);
                 });
-        
+
                 if (key1 === key2) {
                     return 0;
                 }
-        
+
                 return key1 < key2 ? -1 : 1;
             };
-        
+
             this._getColumns = function() {
                 var columns = [];
                 rally.forEach(sizes, function(label, size) {
@@ -115,41 +115,42 @@
                     columnObj[size] = { displayValue: label };
                     columns.push(columnObj);
                 });
-        
+
                 columns = columns.sort(that._numericSort);
                 return columns;
             };
-        
+
             this._getItems = function(callback) {
-        
+
                 //Build types based on checkbox selections
+                var panelContext = rally.sdk.util.Context.getPanelContext();
                 var queries = [];
                 dojo.forEach(checkBoxes, function(checkBox) {
                     if (checkBox.getChecked()) {
-                        var queryObj = {
-                            key: checkBox.getValue(),
+                        var queryObj = {key:checkBox.getValue(),
                             type: checkBox.getValue(),
                             fetch: "Name,FormattedID,Owner,ObjectID,Rank,PlanEstimate,Children,Ready,Blocked",
-                            query: new rally.sdk.util.Query('ScheduleState < Accepted'),
+                            query: "(ScheduleState < Accepted)",
                             order: "Rank"
                         };
+                        if(panelContext.timeboxFilter) {
+                            queryObj.query = "(" + queryObj.query + " AND " + panelContext.timeboxFilter.query.toString() + ")";
+                        }
                         if(checkBox.getValue() === 'HierarchicalRequirement') {
-                            queryObj.query = queryObj.query.and('Children.ObjectID = null');
+                            queryObj.query = "(" + queryObj.query + " AND (Children.ObjectID = null))";
                         }
                         queries.push(queryObj);
                     }
                 });
-        
+
                 function bucketItems(results) {
                     var items = [];
                     rally.forEach(queries, function(query) {
                         if (results[query.key]) {
-                            rally.forEach(results[query.key], function(item) {
-                                items = items.concat(item);
-                            });
+                            items = items.concat(results[query.key]);
                         }
                     });
-        
+
                     var columns = dojo.clone(cardboard.getColumns());
                     columns.shift();
                     rally.forEach(items, function(item) {
@@ -167,7 +168,7 @@
                                     }
                                 }
                             });
-        
+
                             if (!bucketed) {
                                 item.PlanEstimate = columns[columns.length - 1].getColumnValue();
                             }
@@ -175,13 +176,13 @@
                     });
                     callback(items);
                 }
-        
+
                 rallyDataSource.find(queries, bucketItems);
             };
-        
+
             this._refreshBoard = function() {
                 var columns = that._getColumns();
-        
+
                 var cardboardConfig = {
                     types: [],
                     attribute: "PlanEstimate",
@@ -192,14 +193,14 @@
                     order: "Rank",
                     enableRanking: false
                 };
-        
+
                 //Build types based on checkbox selections
                 dojo.forEach(checkBoxes, function(checkBox) {
                     if (checkBox.getChecked()) {
                         cardboardConfig.types.push(checkBox.getValue());
                     }
                 });
-        
+
                 if (!cardboard) {
                     if (cardboardConfig.types.length === 0) {
                         checkBoxes[0].setChecked(true);
@@ -216,46 +217,50 @@
                     cardboard.refresh(cardboardConfig);
                 }
             };
-        
+
             this.display = function(element) {
                 var settingsDialog = new EstimationBoardSettings(rallyDataSource);
-        
+
                 //Build app layout
                 this._createLayout(element);
-        
+
                 //Refresh board
                 this._refreshBoard();
             };
+
+            this.refresh = function() {
+                this._refreshBoard();
+            };
         }
-    /**
+        /**
          Copyright (c) 2011  Rally Software Development Corp.  All rights reserved
          */
-        
+
         EstimationBoardSettings = function(rallyDataSource, sizes, prefs) {
             rally.sdk.ComponentBase.call(this);
-        
+
             var that = this;
             var accessors = [], deleteLinkConnections = [];
             var dialog, projectPrefRef, sizesObject;
             var validationDiv = dojo.byId("validationErrors");
-        
+
             that.show = function() {
                 if (dialog) {
                     dialog.show();
                     that._alignSettingsDialog();
                 }
             };
-        
+
             that.hide = function() {
                 if (dialog) {
                     dialog.hide();
                 }
             };
-        
+
             that._saveComplete = function() {
                 window.location.reload();
             };
-        
+
             that._getValues = function() {
                 var values = {fieldInfos:{}};
                 rally.forEach(accessors, function(value) {
@@ -263,14 +268,14 @@
                 });
                 return values;
             };
-        
+
             that._storeValues = function(callback) {
                 var pref;
-        
+
                 function errorCallback(results) {
                     rally.Logger.warn(results);
                 }
-        
+
                 if (!projectPrefRef) {
                     pref = {
                         Name: "EstimationBoard/Settings",
@@ -286,7 +291,7 @@
                     rallyDataSource.preferences.update(pref, callback, errorCallback);
                 }
             };
-        
+
             that.validateSizes = function() {
                 var validationErrors = [], uniqueEstimates = [], uniqueColumns = [];
                 rally.forEach(accessors, function(value) {
@@ -331,7 +336,7 @@
                 }
                 return validationErrors.length === 0;
             };
-        
+
             that._addControlToRow = function(row, divId, control, containerCss) {
                 var td = document.createElement("td");
                 var div = document.createElement("div");
@@ -345,7 +350,7 @@
                 }
                 row.appendChild(td);
             };
-        
+
             that.deleteTableRow = function(fieldName) {
                 dojo.byId(fieldName).parentNode.removeChild(dojo.byId(fieldName));  //remove size's form row
                 dojo.forEach(accessors, function(value, i) {
@@ -354,24 +359,24 @@
                     }
                 });
             };
-        
+
             that._createTableRow = function(size) {
                 var fieldName = size.label ? size.label : "new_" + new Date();
                 var row = document.createElement("tr");
                 row.id = fieldName;
-        
+
                 var labelTextBox = new rally.sdk.ui.basic.TextBox({rememberValue:false, value:size.label});
                 that._addControlToRow(row, fieldName + "-labelTextBox", labelTextBox, "labelTextBoxContainer");
-        
+
                 var isNoPlanEstimateRow = size.planEstimate === 0 || size.planEstimate === "0";
                 var planEstimateTextBox = new rally.sdk.ui.basic.TextBox({rememberValue:false, value:size.planEstimate, readOnly: isNoPlanEstimateRow});
                 that._addControlToRow(row, fieldName + "-planEstimateTextBox", planEstimateTextBox, "planEstimateTextBoxContainer");
-        
+
                 if (!isNoPlanEstimateRow) {
                     var deleteLink = "<a href='' id='" + fieldName + "DeleteLink'>Delete</a>";
                     that._addControlToRow(row, fieldName + "-deleteLink", deleteLink, "deleteLinkContainer");
                 }
-        
+
                 var accessor = {
                     field:fieldName,
                     get: function() {
@@ -388,7 +393,7 @@
                 accessors.push(accessor);
                 return row;
             };
-        
+
             that.restrictDialogHeight = function() {
                 //restrict size of dialog to prevent scrolling issues when a field has A LOT of attributes
                 dojo.query(".dijitDialog").forEach(function(node) {
@@ -398,17 +403,17 @@
                     });
                 });
             };
-        
+
             that.displaySaveCancelFeatures = function() {
                 var buttonContainer = dojo.query(".buttonContainer")[0];
-        
+
                 var saveButton = new rally.sdk.ui.basic.Button({text:"Save", value:"Save"});
                 saveButton.display(buttonContainer, function() {
                     if (that.validateSizes()) {
                         that._storeValues(that._saveComplete);
                     }
                 });
-        
+
                 var cancelLink = "<a href='' id='cancelLink'>Cancel</a>";
                 dojo.place(cancelLink, buttonContainer);
                 dojo.connect(dojo.byId('cancelLink'), "onclick", function(event) {
@@ -416,20 +421,20 @@
                     dialog.hide();
                     dojo.stopEvent(event);
                 });
-        
+
             };
-        
+
             that.getValidEvents = function() {
                 return {onHide:"onHide"};
             };
-        
+
             that.displayDialog = function() {
                 if (dialog) {
                     return;
                 }
-        
+
                 dojo.byId("settingsDialogDiv").style.visibility = "visible";
-        
+
                 dialog = new rally.sdk.ui.basic.Dialog({
                     id : new Date().toString(),
                     title: "Configure Settings for Estimation Board",
@@ -444,10 +449,10 @@
                 dialog.display();
                 that._alignSettingsDialog();
                 that.displaySaveCancelFeatures();
-        
+
                 that.restrictDialogHeight();
             };
-        
+
             that.connectDeleteLinkHandlers = function() {
                 dojo.forEach(deleteLinkConnections, dojo.disconnect);
                 dojo.forEach(dojo.query(".deleteLinkContainer"), function(deleteContainer) {
@@ -461,7 +466,7 @@
                 });
                 that.displayDialog();
             };
-        
+
             that.displayUnits = function() {
                 function displayRetrievedUnits(results) {
                     if (results && results.units[0]) {
@@ -470,13 +475,13 @@
                     }
                     that.connectDeleteLinkHandlers();
                 }
-        
+
                 rallyDataSource.find({
                     key: "units",
                     type: "WorkspaceConfiguration",
                     fetch: "IterationEstimateUnitName"}, displayRetrievedUnits);
             };
-        
+
             that.displayAddLink = function() {
                 dojo.byId("addLinkCell").innerHTML = "<a href='' id='addLink'>Add <img src='/slm/analytics/images/plus-196b89-gr.png'></a>";
                 dojo.connect(dojo.byId('addLink'), "onclick", function(event) {
@@ -492,28 +497,28 @@
                 });
                 that.displayUnits();
             };
-        
+
             that._alignSettingsDialog = function() {
                 var dialogContainer = dojo.query(".dijitDialog");
                 if (dialogContainer.length > 0) {
                     dojo.style(dialogContainer[0], 'top', '10px');
                 }
             };
-        
+
             that._setPreferenceValues = function(values) {
                 sizesObject = {};
                 rally.forEach(values.fieldInfos, function(size) {
                     sizesObject[size.planEstimate] = {label: size.label, planEstimate: size.planEstimate};
                 });
             };
-        
+
             that._setDefaultValues = function() {
                 sizesObject = {};
                 rally.forEach(sizes, function(sizeValue, sizeKey) {
                     sizesObject[sizeKey] = {label: sizeValue, planEstimate: sizeKey};
                 });
             };
-        
+
             that._retrievePreferences = function(/*function*/callback) {
                 var projectPref;
                 if (prefs && prefs.length) {
@@ -536,40 +541,40 @@
                     callback({});
                 }
             };
-        
+
             that._numericSort = function(o1, o2) {
                 var key1 = parseFloat(o1.planEstimate);
                 var key2 = parseFloat(o2.planEstimate);
-        
+
                 if (key1 === key2) {
                     return 0;
                 }
-        
+
                 return key1 < key2 ? -1 : 1;
             };
-        
+
             that.display = function() {
                 function createForm() {
                     accessors = [];
                     var rowArr = [];
-        
+
                     //to ensure correct order, we push objects into an array and then apply a custom numeric sort
                     rally.forEach(sizesObject, function(size1) {
                         rowArr.push(size1);
                     });
                     rowArr = rowArr.sort(that._numericSort);
-        
+
                     rally.forEach(rowArr, function(size2) {
                         var row = that._createTableRow(size2);
                         dojo.byId("settingsTableBody").appendChild(row);
                     });
-        
+
                     that.displayAddLink();
                 }
-        
+
                 that._retrievePreferences(createForm);
             };
-        
+
         };
 
     </script>
@@ -580,73 +585,73 @@
             margin-top: 0;
             margin-bottom: 0;
         }
-        
+
         .appHeader {
             position: relative;
         }
-        
+
         .controlContainer {
             margin-top: 10px;
             margin-right: 20px;
             float: right;
         }
-        
+
         .board {
             clear: both;
         }
-        
+
         /*settings dialog styles */
         a img {
             border: 0;
         }
-        
+
         .buttonContainer span,
         .buttonContainer a {
             vertical-align: middle;
         }
-        
+
         .dijitTooltipContents {
             font-size: 9.5px;
         }
-        
+
         .labelTextBoxContainer .dijitTextBox {
             width: 110px;
         }
-        
+
         .planEstimateTextBoxContainer .dijitTextBox {
             width: 50px;
         }
-        
+
         .hide {
             display: none;
         }
-        
+
         .tableHeaderRow {
             font-weight: bold;
             text-align: left;
         }
-        
+
         #addLinkCell img {
             vertical-align: bottom;
         }
-        
+
         #columnNameTd {
             width: 80px;
         }
-        
+
         #planEstimateTd {
             width: 55px;
         }
-        
+
         #settingsDialogDiv {
             visibility: hidden;
         }
-        
+
         #settingsTable {
             clear: right;
             margin: 10px 25px 10px 25px;
         }
-        
+
         #units {
             font-weight: normal;
         }
@@ -659,6 +664,7 @@
         projectOid = projectOid.indexOf("__") !== -1 ? "723030" : projectOid;
         var workspaceOid = '__WORKSPACE_OID__';
         workspaceOid = workspaceOid.indexOf("__") !== -1 ? "722746" : workspaceOid;
+        var estimationBoard;
 
         function onLoad() {
             var rallyDataSource = new rally.sdk.data.RallyDataSource(
@@ -668,7 +674,7 @@
                     '__PROJECT_SCOPING_DOWN__');
             rallyDataSource.projectOid = projectOid;
 
-            var settings, estimationBoard, sizes, prefs;
+            var settings, sizes, prefs;
 
             //get pref settings exist, use them otherwise use default settings
             function processPref(results) {
@@ -711,6 +717,10 @@
                 estimationBoard = new EstimationBoard(rallyDataSource, settingsShow, sizes);
                 estimationBoard.display(dojo.body());
             }
+        }
+
+        function onDashboardPageTimeboxFilterChanged() {
+            estimationBoard.refresh();
         }
 
         rally.addOnLoad(onLoad);
