@@ -152,14 +152,6 @@
                 plugins.push('rallygridboardcustomview');
             }
 
-            if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS') && !context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
-                plugins.push({
-                    ptype: 'rallygridboardartifacttypechooser',
-                    artifactTypePreferenceKey: 'artifact-types',
-                    showAgreements: true
-                });
-            }
-
             this.gridBoardPlugins = plugins;
             this._addGrid(this._getGridConfig(treeGridModel), this._getGridBoardModelNames(context, compositeModel));
         },
