@@ -89,6 +89,10 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp().then =>
       expect(Ext.query('.add-new a').length).toBe 0
 
+  it 'shows a filter button', ->
+    @_createApp().then =>
+      expect(Ext.query('.gridboard-filter-control').length).toBe 1
+
   it 'shows ShowPolicies checkbox', ->
     @_createApp().then =>
       expect(@app.gridboard.down('#header').el.down('input[type="button"]')).toHaveCls 'showPoliciesCheckbox'
