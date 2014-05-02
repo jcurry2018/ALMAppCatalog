@@ -149,11 +149,102 @@
             });
 
             if (context.isFeatureEnabled('ITERATION_TRACKING_CUSTOM_VIEWS')) {
-                plugins.push('rallygridboardcustomview');
+                plugins.push(this._getCustomViewConfig());
             }
 
             this.gridBoardPlugins = plugins;
             this._addGrid(this._getGridConfig(treeGridModel), this._getGridBoardModelNames(context, compositeModel));
+        },
+
+        _getCustomViewConfig: function() {
+            return {
+                ptype: 'rallygridboardcustomview',
+                stateId: 'iteration-tracking-board-app',
+
+                defaultGridViews: [{
+                    model: ['UserStory', 'Defect'],
+                    name: 'Defect Status',
+                    state: {
+                        cmpState: {
+                            columns: [
+                                'Name',
+                                'State',
+                                'Discussion',
+                                'Priority',
+                                'Severity',
+                                'FoundIn',
+                                'FixedIn',
+                                'Owner'
+                            ]
+                        },
+                        filterState: {
+                            filter: {
+                                thingswithdefects: {
+                                    isActiveFilter: false,
+                                    itemId: 'thingswithdefects',
+                                    queryString: '((Defects.ObjectID != null) OR (Priority != null))'
+                                }
+                            }
+                        }
+                    }
+                }, {
+                    model: ['UserStory', 'Defect', 'TestSet', 'DefectSuite'],
+                    name: 'Task Status',
+                    state: {
+                        cmpState: {
+                            columns: [
+                                'Name',
+                                'State',
+                                'PlanEstimate',
+                                'TaskEstimate',
+                                'ToDo',
+                                'Discussions',
+                                'Owner'
+                            ]
+                        },
+                        filterState: {
+                            filter: {
+                                thingswithtasks: {
+                                    isActiveFilter: false,
+                                    itemId: 'thingswithtasks',
+                                    queryString: '(Tasks.ObjectID != null)'
+                                }
+                            }
+                        }
+                    }
+                }],
+
+                defaultBoardViews: [{
+                    model: ['UserStory', 'Defect'],
+                    name: 'Defect Status',
+                    state: {
+                        cmpState: {},
+                        filterState: {
+                            filter: {
+                                thingswithdefects: {
+                                    isActiveFilter: false,
+                                    itemId: 'thingswithdefects',
+                                    queryString: '((Defects.ObjectID != null) OR (Priority != null))'
+                                }
+                            }
+                        }
+                    }
+                }, {
+                    model: ['UserStory', 'Defect', 'TestSet', 'DefectSuite'],
+                    name: 'Task Status',
+                    state: {
+                        filterState: {
+                            filter: {
+                                thingswithtasks: {
+                                    isActiveFilter: false,
+                                    itemId: 'thingswithtasks',
+                                    queryString: '(Tasks.ObjectID != null)'
+                                }
+                            }
+                        }
+                    }
+                }]
+            };
         },
 
         _addGrid: function(gridConfig, modelNames){
