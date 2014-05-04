@@ -157,15 +157,16 @@
         },
 
         _getCustomViewConfig: function() {
-            return {
+            var customViewConfig = {
                 ptype: 'rallygridboardcustomview',
                 stateId: 'iteration-tracking-board-app',
 
                 defaultGridViews: [{
-                    model: ['UserStory', 'Defect'],
+                    model: ['UserStory', 'Defect', 'DefectSuite'],
                     name: 'Defect Status',
                     state: {
                         cmpState: {
+                            expandAfterApply: true,
                             columns: [
                                 'Name',
                                 'State',
@@ -179,9 +180,9 @@
                         },
                         filterState: {
                             filter: {
-                                thingswithdefects: {
+                                defectstatusview: {
                                     isActiveFilter: false,
-                                    itemId: 'thingswithdefects',
+                                    itemId: 'defectstatusview',
                                     queryString: '((Defects.ObjectID != null) OR (Priority != null))'
                                 }
                             }
@@ -192,6 +193,7 @@
                     name: 'Task Status',
                     state: {
                         cmpState: {
+                            expandAfterApply: true,
                             columns: [
                                 'Name',
                                 'State',
@@ -204,47 +206,51 @@
                         },
                         filterState: {
                             filter: {
-                                thingswithtasks: {
+                                taskstatusview: {
                                     isActiveFilter: false,
-                                    itemId: 'thingswithtasks',
+                                    itemId: 'taskstatusview',
                                     queryString: '(Tasks.ObjectID != null)'
-                                }
-                            }
-                        }
-                    }
-                }],
-
-                defaultBoardViews: [{
-                    model: ['UserStory', 'Defect'],
-                    name: 'Defect Status',
-                    state: {
-                        cmpState: {},
-                        filterState: {
-                            filter: {
-                                thingswithdefects: {
-                                    isActiveFilter: false,
-                                    itemId: 'thingswithdefects',
-                                    queryString: '((Defects.ObjectID != null) OR (Priority != null))'
                                 }
                             }
                         }
                     }
                 }, {
-                    model: ['UserStory', 'Defect', 'TestSet', 'DefectSuite'],
-                    name: 'Task Status',
+                    model: ['UserStory', 'Defect', 'TestSet'],
+                    name: 'Test Status',
                     state: {
+                        cmpState: {
+                            expandAfterApply: true,
+                            columns: [
+                                'Name',
+                                'State',
+                                'Discussions',
+                                'LastVerdict',
+                                'LastBuild',
+                                'LastRun',
+                                'ActiveDefects',
+                                'Priority',
+                                'Owner'
+                            ]
+                        },
                         filterState: {
                             filter: {
-                                thingswithtasks: {
+                                teststatusview: {
                                     isActiveFilter: false,
-                                    itemId: 'thingswithtasks',
-                                    queryString: '(Tasks.ObjectID != null)'
+                                    itemId: 'teststatusview',
+                                    queryString: '(TestCases.ObjectID != null)'
                                 }
                             }
                         }
                     }
                 }]
             };
+
+            customViewConfig.defaultBoardViews = _.cloneDeep(customViewConfig.defaultGridViews);
+            _.each(customViewConfig.defaultBoardViews, function(view) {
+                delete view.state.cmpState;
+            });
+
+            return customViewConfig;
         },
 
         _addGrid: function(gridConfig, modelNames){
