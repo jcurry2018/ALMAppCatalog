@@ -560,7 +560,7 @@
                 if (rowConfig.message) {
                     var message = rowConfig.message;
                     if (rowConfig.learnMore) {
-                        message += ' <a href="http://www.rallydev.com/help/iteration-summary#' + rowConfig.learnMore +
+                        message += ' <a href="https://help.rallydev.com/iteration-summary#' + rowConfig.learnMore +
                                 '" title="Learn More" target="_blank" class="learnMore">Learn More</a>';
                     }
                     items.push({
