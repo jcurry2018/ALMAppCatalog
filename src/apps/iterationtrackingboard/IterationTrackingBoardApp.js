@@ -119,6 +119,9 @@
                         {ptype: 'rallycardboardprinting', pluginId: 'print'},
                         {ptype: 'rallyfixedheadercardboard'}
                     ],
+                    storeConfig: {
+                        useShallowFetch: true
+                    },
                     columnConfig: {
                         xtype: 'iterationtrackingboardcolumn',
                         additionalFetchFields: ['PortfolioItem'],

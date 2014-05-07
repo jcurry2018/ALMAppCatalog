@@ -101,40 +101,6 @@
             this.callParent(arguments);
         },
 
-        getAllFetchFields: function () {
-            var originalFetchFields = this.callParent(arguments);
-            var updatedFetchFields = [];
-
-            _.each(originalFetchFields, function (field) {
-                updatedFetchFields = updatedFetchFields.concat(this._getFetchFields(field));
-            }, this);
-
-            return _.uniq(updatedFetchFields);
-        },
-
-        _getFetchFields: function (fieldName) {
-            var customFieldConfig = this.cardConfig && this.cardConfig.customFieldConfig && this.cardConfig.customFieldConfig[fieldName];
-            var fetchFields = [];
-
-            if (customFieldConfig && customFieldConfig.fetch) {
-                 _.each(customFieldConfig.fetch, function (field) {
-                    field = _.isObject(field) ? field : { name: field };
-                    var properties = field.properties || [];
-
-                    if (this.storeConfig.useShallowFetch && properties.length) {
-                        fetchFields.push(field.name + '[' + properties.join(';')  + ']');
-                    } else {
-                        fetchFields.push(field.name);
-                        fetchFields = fetchFields.concat(properties);
-                    }
-                }, this);
-            } else {
-                fetchFields.push(fieldName);
-            }
-
-            return fetchFields;
-        },
-
         _createFilterButton: function () {
             return Ext.create('Rally.ui.filter.view.FilterButton', {
                 cls: 'medium columnfilter',
