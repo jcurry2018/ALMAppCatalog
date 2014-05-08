@@ -13,7 +13,7 @@
             'Rally.apps.roadmapplanningboard.PlanningBoard'
         ],
 
-        cls: 'roadmap-board',
+        cls: 'rui-gridboard roadmap-board',
 
         toggleState: 'board',
         stateId: 'roadmapgridboard',
@@ -104,24 +104,6 @@
             };
 
             this.callParent(arguments);
-        },
-
-        afterRender: function() {
-            this.callParent(arguments);
-            var headerHeight = this.getHeader().getHeight();
-            var boardHeight  = this.getHeight() - headerHeight;
-            if(!boardHeight) {
-                boardHeight = this._getOwnerHeight() - headerHeight;
-            }
-            this.getGridOrBoard().setHeight(boardHeight);
-        },
-
-        _getOwnerHeight: function() {
-            var owner = this.ownerCt;
-            if(!owner && Rally.BrowserTest) {
-                return Ext.getBody().down('#testDiv').getHeight();
-            }
-            return this.ownerCt.getHeight();
         },
 
         _initialFilter: function (component, filters) {

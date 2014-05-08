@@ -8,7 +8,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   helpers
     _createApp: (config, hideFilterInfo = 'false') ->
-      @disableResizerSpy = @spy()
       @app = Ext.create 'Rally.apps.portfoliokanban.PortfolioKanbanApp', Ext.merge
         context: Ext.create 'Rally.app.Context',
           initialValues:
@@ -18,8 +17,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
             subscription: Rally.environment.getContext().getSubscription(),
         renderTo: 'testDiv'
         appContainer:
-          ownerCt:
-            disableResizer: @disableResizerSpy
           panelDef:
             panelConfigs:
               hideFilterOnPortfolioKanban: hideFilterInfo
@@ -124,10 +121,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp(null, "true").then =>
       expect(@app.getEl().down('.filterInfo')).toBeFalsy()
 
-  it 'disables the resizer of the panel when panel config "true"', ->
-    @_createApp(null, "true").then =>
-      expect(@disableResizerSpy).toHaveBeenCalledOnce()
-
   it 'shows project setting label if following a specific project scope', ->
     @_createApp(
       settings:
@@ -202,7 +195,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
     @_createApp().then =>
       expect(loadSpy.callCount).toBe 0
-      expect(@app.down('#bodyContainer').getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
+      expect(@app.getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
 
   it 'should be able to scroll forwards', ->
     @_createApp(
@@ -276,3 +269,39 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
             fields: 'Field1,Field2'
         ).then =>
           expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['Field1','Field2']
+
+  describe 'when inside a full page panel', ->
+
+    beforeEach ->
+      @addMatchers
+        toBeApproximately: (expected, allowedDelta) ->
+          @message = -> "Expected #{@actual} to be approximately #{expected} ± #{allowedDelta}."
+          Math.abs(@actual - expected) <= allowedDelta
+
+      @content = Ext.create 'Ext.container.Container',
+        height: '100%'
+
+      @footer = Ext.create 'Ext.Component',
+        id: 'footer'
+        style:
+          backgroundColor: 'magenta'
+          fontFamily: 'Comic Sans'
+          textAlign: 'center'
+        height: 100
+        html: 'RICHARD WAS HERE, BITCHES!'
+
+      Ext.create 'Ext.container.Container',
+        items: [ @content, @footer ]
+        cls: 'full-page-panel'
+        renderTo: 'testDiv'
+
+    it 'should size the app to fill the page', ->
+      @stub Rally.util.Window, 'getHeight', -> 1000
+      @_createApp(renderTo: @content.getEl()).then =>
+        expect(@app.cardboard.getHeight()).toBeApproximately 900 - @app.cardboard.getY(), 5
+        expect(@footer.getEl().getY() + @footer.getEl().getHeight()).toBeApproximately 1000, 5 + Ext.getScrollbarSize().height
+
+    it 'should not size the cardboard height smaller than 400 pixels', ->
+      @stub Rally.util.Window, 'getHeight', -> 300
+      @_createApp(renderTo: @content.getEl()).then =>
+        expect(@app.cardboard.getHeight()).toBe 400

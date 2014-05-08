@@ -202,19 +202,7 @@
                 }
             }, config);
 
-            if (!this.getHeight()) {
-                boardConfig.height = this._computeFullPagePanelContentAreaHeight();
-            }
-
             this.add(boardConfig);
-        },
-
-        _computeFullPagePanelContentAreaHeight: function() {
-            var content = Ext.getBody().down('#content');
-            if (!content && Rally.BrowserTest) {
-                return Ext.getBody().down('#testDiv').getHeight();
-            }
-            return content.getHeight() - content.down('.page').getHeight();
         },
 
         _onRequestException: function(connection, response, requestOptions) {
@@ -222,7 +210,6 @@
             var el = this.getEl();
 
             if (requester === this && el) {
-                this.setHeight(this._computeFullPagePanelContentAreaHeight());
                 el.mask('Roadmap planning is <strong>temporarily unavailable</strong>, please try again in a few minutes.', "roadmap-service-unavailable-error");
             }
         },

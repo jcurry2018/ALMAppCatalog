@@ -64,6 +64,10 @@
             return false;
         },
 
+        isVisible: function () {
+            return true;
+        },
+
         refresh: function () {
             this.fireEvent('ready', this);
             return null;

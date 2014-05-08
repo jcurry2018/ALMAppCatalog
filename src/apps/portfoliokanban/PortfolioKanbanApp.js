@@ -20,6 +20,7 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
+            'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.cardboard.plugin.Scrollable',
             'Rally.ui.cardboard.Column',
             'Rally.ui.cardboard.CardBoard',
@@ -54,24 +55,9 @@
             }
         ],
 
-        items: [
-            {
-                xtype: 'rallyleftright',
-                itemId: 'header'
-            },
-            {
-                xtype: 'container',
-                itemId: 'bodyContainer',
-                width: '100%'
-            }
-        ],
-
         launch: function () {
-            if (this.appContainer.panelDef.panelConfigs.hideFilterOnPortfolioKanban === 'true') {
-                this.appContainer.ownerCt.disableResizer();
-            }
             if (!Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
-                this.down('#bodyContainer').add({
+                this.add({
                     xtype: 'container',
                     html: '<div class="rpm-turned-off" style="padding: 50px; text-align: center;">You do not have RPM enabled for your subscription</div>'
                 });
@@ -347,7 +333,6 @@
                             fields: Rally.apps.portfoliokanban.PortfolioKanbanCard.defaultFields.concat('Discussion'),
                             showColorIcon: true
                         },
-                        cls: 'cardboard',
                         columnConfig: {
                             xtype: 'rallycardboardcolumn',
                             additionalFetchFields: ['Discussion'],
@@ -368,7 +353,8 @@
                             {
                                 ptype: 'rallyscrollablecardboard',
                                 containerEl: this.getEl()
-                            }
+                            },
+                            { ptype: 'rallyfixedheadercardboard' }
                         ],
                         storeConfig: {
                             filters: filters,
@@ -377,7 +363,7 @@
                     }
                 });
 
-                this.down('#bodyContainer').add(this.gridboard);
+                this.add(this.gridboard);
                 this._drawHeader();
             }
         },
@@ -477,6 +463,8 @@
                     column.fireEvent('hidepolicy');
                 }
             });
+
+            this.cardboard.fireEvent('headersizechanged');
         },
 
         _buildShowPolicies: function () {
