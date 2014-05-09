@@ -84,13 +84,6 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
     @createApp().then =>
       expect(@planningBoard.timeline.getId()).toBe @timelineStore.first().getId()
 
-  it 'should define board height based on app height', ->
-    @createApp(false, {height: 1000}).then =>
-      #test range as jasmine does not like to render html the same with local and test server
-      boardHeight = @planningBoard.getHeight()
-      expect(boardHeight >= 950).toBe true
-      expect(boardHeight <= 1000).toBe true
-
   it 'should notify of error if the timeline store fails to load', ->
     @stub @timelineStore, 'load', ->
       deferred = new Deft.promise.Deferred()
