@@ -386,8 +386,6 @@
                 enableRanking: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled,
                 columnCfgs: null, //must set this to null to offset default behaviors in the gridboard
                 defaultColumnCfgs: this._getGridColumns(),
-                enableColumnFiltering: this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
-                disableColumnMenus: !this.getContext().isFeatureEnabled('TREE_GRID_COLUMN_FILTERING'),
                 showSummary: true,
                 summaryColumns: this._getSummaryColumnConfig(),
                 treeColumnRenderer: function (value, metaData, record, rowIdx, colIdx, store, view) {
