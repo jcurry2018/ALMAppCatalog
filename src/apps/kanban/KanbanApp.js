@@ -76,7 +76,8 @@
             return Rally.apps.kanban.Settings.getFields({
                 shouldShowColumnLevelFieldPicker: this._shouldShowColumnLevelFieldPicker(),
                 defaultCardFields: this.getSetting('cardFields'),
-                isDndWorkspace: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled
+                isDndWorkspace: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled,
+                showPageSize: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')
             });
         },
 
@@ -170,7 +171,6 @@
                     columnHeaderConfig: {
                         headerTpl: column || 'None'
                     },
-                    cardLimit: this.getSetting('pageSize'),
                     enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
                     listeners: {
                         invalidfilter: {
@@ -241,7 +241,8 @@
                 loadMask: false,
                 storeConfig: {
                     context: this.getContext().getDataContext(),
-                    pageSize: this.getSetting('pageSize'),
+                    // pageSize config can be removed with ENABLE_INFINITE_SCROLL_ALL_BOARDS toggle, because we can use the default value
+                    pageSize: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS') ? 15 : this.getSetting('pageSize'),
                     filters: this.getSetting('query') ?
                         [Rally.data.QueryFilter.fromQueryString(this.getSetting('query'))] : []
                 }

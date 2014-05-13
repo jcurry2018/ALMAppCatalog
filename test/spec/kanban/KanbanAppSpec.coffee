@@ -148,7 +148,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
     @createApp(pageSize: 2).then =>
       expect(@app.down('rallycardboard').storeConfig.pageSize).toBe 2
       _.each @app.down('rallycardboard').getColumns(), (column) ->
-        expect(column.cardLimit).toBe 2
+        expect(column.store.pageSize).toBe 2
 
   it 'should filter the board when a type checkbox is clicked', ->
     @createApp().then =>

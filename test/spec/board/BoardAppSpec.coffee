@@ -59,7 +59,13 @@ describe 'Rally.apps.board.BoardApp', ->
     @createApp(pageSize: 1).then =>
       expect(@_getBoard().getStoreConfig().pageSize).toBe 1
       _.each @_getBoard().getColumns(), (column) ->
-        expect(column.cardLimit).toBe 1
+        expect(column.store.pageSize).toBe 1
+
+  it 'defaults to a pageSize of 25', ->
+    @createApp().then =>
+      expect(@_getBoard().getStoreConfig().pageSize).toBe 25
+      _.each @_getBoard().getColumns(), (column) ->
+        expect(column.store.pageSize).toBe 25
 
   it 'passes the filters to the board', ->
     query = '(Name contains foo)'

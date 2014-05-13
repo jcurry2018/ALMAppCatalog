@@ -26,7 +26,6 @@
             timeframePlanStoreWrapper: undefined,
             timeframeRecord: undefined,
             planRecord: undefined,
-            cardLimit: 200,
             dateFormat: 'M j',
             pointFields: ['RefinedEstimate', 'PreliminaryEstimate']
         },
@@ -39,6 +38,7 @@
                     sorterFn: Ext.bind(this._sortPlan, this)
                 }
             ];
+            this.config.storeConfig.pageSize = 200;
             this.callParent([this.config]);
         },
 
