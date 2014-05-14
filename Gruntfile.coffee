@@ -189,6 +189,9 @@ module.exports = (grunt) ->
 
               # Jasmine overrides
               "#{appsdk_path}/test/support/jasmine/jasmine-html-overrides.js"
+
+              # Deft overrides
+              "#{appsdk_path}/test/support/deft/deft-overrides.js"
             ]
           )()
           styles: [
