@@ -5,7 +5,6 @@ Ext.require [
 ]
 
 describe 'Rally.apps.teamboard.TeamBoardApp', ->
-
   helpers
     assertFieldsShownOnCard: (fieldNames) ->
       cardEl = @cardboard().getColumns()[0].getCards()[0].getEl()
@@ -86,28 +85,28 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
       headerHtml = @cardboard().getColumns()[0].getHeaderTitle().getEl().down('.columnTpl').getHTML()
       Assert.contains headerHtml, @projectRecords[0].get('_refObjectName')
 
-  it 'should show OfficeLocation and Phone on the cards by default', ->
-    @createApp(
-      appConfig:
-        renderTo: 'testDiv'
-    ).then =>
-      @assertFieldsShownOnCard ['OfficeLocation', 'Phone']
+  describe 'card fields', ->
+    helpers
+      createAppWithCardFields: (cardFields, isAdmin = true) ->
+        @createApp
+          appConfig:
+            renderTo: 'testDiv'
+            settings:
+              cardFields: cardFields
+          isAdmin: isAdmin
 
-  it 'should show the chosen card fields on the cards', ->
-    @createApp(
-      appConfig:
-        renderTo: 'testDiv'
-        settings:
-          cardFields: 'EmailAddress,OnpremLdapUsername'
-    ).then =>
-      @assertFieldsShownOnCard ['EmailAddress', 'OnpremLdapUsername']
+    it 'should be OfficeLocation and Phone by default', ->
+      @createAppWithCardFields().then =>
+        @assertFieldsShownOnCard ['OfficeLocation', 'Phone']
 
-  it 'should not show card fields not visible to non-admins when user is a non-admin', ->
-    @createApp(
-      appConfig:
-        renderTo: 'testDiv'
-        settings:
-          cardFields: 'EmailAddress,OnpremLdapUsername'
-      isAdmin: false
-    ).then =>
-      @assertFieldsShownOnCard ['EmailAddress']
+    it 'should allow no fields to be shown', ->
+      @createAppWithCardFields(null).then =>
+        @assertFieldsShownOnCard []
+
+    it 'should be the chosen card fields', ->
+      @createAppWithCardFields('EmailAddress,OnpremLdapUsername').then =>
+        @assertFieldsShownOnCard ['EmailAddress', 'OnpremLdapUsername']
+
+    it 'should not show card fields not visible to non-admins when user is a non-admin', ->
+      @createAppWithCardFields('EmailAddress,OnpremLdapUsername', false).then =>
+        @assertFieldsShownOnCard ['EmailAddress']

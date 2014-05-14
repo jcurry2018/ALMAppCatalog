@@ -15,7 +15,7 @@
             };
 
             if(teamOids){
-                config.filters = Rally.data.QueryFilter.or(Ext.Array.map(teamOids.toString().split(','), function(teamOid) {
+                config.filters = Rally.data.wsapi.Filter.or(Ext.Array.map(teamOids.toString().split(','), function(teamOid) {
                     return {
                         property: 'ObjectID',
                         operator: '=',
