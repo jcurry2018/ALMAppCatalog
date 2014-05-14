@@ -14,6 +14,8 @@
             'Rally.apps.roadmapplanningboard.util.TimelineViewModel'
         ],
 
+        mixins: [ 'Rally.apps.roadmapplanningboard.mixin.CollapsableHeaderContainer' ],
+
         config: {
             startDateField: 'startDate',
             endDateField: 'endDate',
@@ -207,11 +209,17 @@
             });
         },
 
+        _drawCollapsableContainer: function() {
+            if (!this.collapsableContainer) {
+                this.collapsableContainer = this.getColumnHeader().add(this._getCollapsableHeaderContainerConfig());
+            }
+        },
+
         _drawDateRange: function () {
             if (this.dateRange) {
                 this.dateRange.update(this.getDateHeaderTplData());
             } else {
-                this.dateRange = this.getHeaderTitle().add({
+                this.dateRange = this.collapsableContainer.add({
                     xtype: 'component',
                     cls: 'timeframeDatesContainer',
                     tpl: "<div class='timeframeDates {clickableClass}'>{formattedDate}</div>",
@@ -244,7 +252,7 @@
                 this.progressBar.update(this.getHeaderTplData());
                 this._afterProgressBarRender();
             } else {
-                this.progressBar = this.getColumnHeader().add({
+                this.progressBar = this.collapsableContainer.add({
                     xtype: 'container',
                     tpl: [
                         '<div class="progress-bar-background">',
@@ -321,13 +329,10 @@
 
         _drawTheme: function () {
             if (!this.theme && this.planRecord) {
-                this.theme = this.getColumnHeader().add({
+                this.theme = this.collapsableContainer.add({
                     xtype: 'roadmapthemeheader',
                     record: this.planRecord,
-                    editable: this.editPermissions.theme,
-                    style: {
-                        display: this.ownerCardboard.showTheme ? '' : 'none' // DE18305 - using style.display instead of hidden because Ext won't render children that are hidden
-                    }
+                    editable: this.editPermissions.theme
                 });
             }
         },
@@ -441,12 +446,14 @@
 
         _updateHeader: function () {
             if (!this.destroying && this.rendered) {
+                this._drawCollapsableContainer();
                 this._drawDateRange();
                 this._drawProgressBar();
                 this._drawTheme();
                 this._drawHeaderButtons();
             }
         },
+
 
         _getDateRange: function () {
             var formattedEndDate, formattedStartDate;

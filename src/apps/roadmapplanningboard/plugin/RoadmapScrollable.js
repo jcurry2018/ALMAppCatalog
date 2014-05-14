@@ -305,7 +305,6 @@
         },
 
         _renderButtons: function () {
-            this.cmp.drawThemeToggle();
             this.drawAddNewColumnButton();
             this._afterScroll();
         },
@@ -325,11 +324,10 @@
         },
 
         _sizeButtonToColumnHeader: function(button, column){
-            var columnHeaderHeight = column.getHeaderTitle().getHeight() - 30;
-
+            var columnHeaderHeight = column.getHeaderTitle().getHeight() - 22;
             button.getEl()
                 .setHeight(columnHeaderHeight)
-                .setStyle('margin-top', '28px');
+                .setStyle('margin-top', '16px');
         },
 
         getFirstVisibleScrollableColumn: function () {

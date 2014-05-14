@@ -10,16 +10,24 @@
         requires: [
             'Rally.data.util.PortfolioItemHelper',
             'Rally.ui.cardboard.plugin.FixedHeader',
+            'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable',
             'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
             'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
             'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
             'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper',
             'Rally.apps.roadmapplanningboard.util.PlanGenerator',
             'Rally.ui.Button',
-            'Rally.ui.grid.TreeGrid'
+            'Rally.ui.grid.TreeGrid',
+            'Rally.data.PreferenceManager'
         ],
 
         cls: 'roadmap-board cardboard',
+
+        statics: {
+            PREFERENCE_NAME: 'roadmapplanningboard.header.expanded'
+        },
+
+        plugins: [{ptype: 'rallyfixedheadercardboard'}, {ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 3}],
 
         config: {
             roadmap: null,
@@ -117,24 +125,19 @@
 
             /**
              * @cfg {Boolean}
-             * Toggle whether the theme is expanded or collapsed
+             * Toggle whether the header is expanded or collapsed
              */
-            showTheme: true,
+            showHeader: true,
 
             /**
              * @cfg {Object} Object containing Names and TypePaths of the lowest level portfolio item (eg: 'Feature') and optionally its parent (eg: 'Initiative')
              */
-            typeNames: {},
-
-            /**
-             * @cfg {Number} The duration of the theme slide animation in milliseconds
-             */
-            slideDuration: 250
+            typeNames: {}
         },
 
         clientMetrics: [
             {
-                method: '_toggleThemes',
+                method: '_toggleHeaders',
                 descriptionProperty: '_getClickAction'
             }
         ],
@@ -197,8 +200,13 @@
         onModelsRetrieved: function (callback) {
             return this._loadColumnData().then({
                 success: function () {
-                    this.buildColumns();
-                    callback.call(this);
+                    this._readPreference().then({
+                        success: function () {
+                            this.buildColumns();
+                            callback.call(this);
+                        },
+                        scope: this
+                    });
                 },
                 scope: this
             });
@@ -258,7 +266,7 @@
                 this.firstLoad = false;
             }
 
-            this.drawThemeToggle();
+            this.drawHeaderToggle();
             this.drawAddNewColumnButton();
         },
 
@@ -323,48 +331,85 @@
         },
 
         /**
-         * Draws the theme toggle buttons to show/hide the themes
+         * Draws the toggle button to expand/collapse the headers
          */
-        drawThemeToggle: function () {
-            this._destroyThemeButton();
+        drawHeaderToggle: function () {
+            this._destroyHeaderButton();
 
-            this.themeToggleButton = Ext.create('Rally.ui.Button', {
-                cls: 'theme-button',
+            this.headerToggleButton = Ext.create('Rally.ui.Button', {
+                cls: 'header-toggle-button',
                 listeners: {
-                    click: this._toggleThemes,
+                    click: this._toggleHeaders,
                     scope: this
-                }
+                },
+                renderTo: Ext.getBody().down('.fixed-header-card-board-header-container')
             });
 
-            _.last(this.getColumns()).getColumnHeader().insert(2, this.themeToggleButton);
-
-            this._updateThemeButton();
+            this._updateHeaderToggleButton();
         },
 
-        _toggleThemes: function () {
-            this.showTheme = !this.showTheme;
-            this.themeToggleButton.hide();
-            this._updateThemeButton();
-            this._updateThemeContainers().then({
+        _addHeaderToggleTooltip: function(content) {
+            if (this.headerToggleTooltip) {
+                this.headerToggleTooltip.destroy();
+            }
+
+            this.headerToggleTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
+                target: this.headerToggleButton.getEl(),
+                showDelay: 1000,
+                html: '<span>' + content + '</span>',
+                anchorOffset: 6,
+                mouseOffset: [0, -8]
+            });
+        },
+
+        _toggleHeaders: function () {
+            this.showHeader = !this.showHeader;
+            this.headerToggleButton.hide();
+            this._updateHeaderToggleButton();
+            this._updateHeaderContainers().then({
                 success: function () {
                     this.fireEvent('headersizechanged');
                 },
                 scope: this
             });
+            this._savePreference(this.showHeader);
         },
 
-        _updateThemeButton: function () {
-            this.themeToggleButton.removeCls(['theme-button-collapse', 'theme-button-expand']);
+        _savePreference: function(val) {
+            var settings = {},
+                name = Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME;
 
-            if(this.showTheme) {
-                this.themeToggleButton.setIconCls('icon-chevron-up');
-                this.themeToggleButton.addCls('theme-button-collapse');
+            settings[name] = val;
+            return Rally.data.PreferenceManager.update({
+                settings: settings,
+                filterByUser: true,
+                filterByName: name
+            });
+        },
+
+        _readPreference: function() {
+            return Rally.data.PreferenceManager.load({
+                filterByUser: true,
+                filterByName: Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME
+            }).then({
+                success: function (result) {
+                    var name = Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME;
+                    this.showHeader = !result.hasOwnProperty(name) || result[name] === 'true';
+                },
+                scope: this
+            });
+        },
+
+        _updateHeaderToggleButton: function () {
+            if(this.showHeader) {
+                this._addHeaderToggleTooltip('Collapse header');
+                this.headerToggleButton.setIconCls('icon-chevron-up');
             } else {
-                this.themeToggleButton.setIconCls('icon-chevron-down');
-                this.themeToggleButton.addCls('theme-button-expand');
+                this._addHeaderToggleTooltip('Expand header');
+                this.headerToggleButton.setIconCls('icon-chevron-down');
             }
 
-            this.themeToggleButton.show();
+            this.headerToggleButton.show();
         },
 
         _addNewColumn: function (options) {
@@ -413,36 +458,31 @@
             var column = this.addColumn(columnConfig, this.getColumns().length);
             this.renderColumn(column, columnEls);
 
-            this.drawThemeToggle();
+            this.drawHeaderToggle();
             this.drawAddNewColumnButton();
 
             return column;
         },
 
-        _updateThemeContainers: function () {
-            var themeContainers = _.map(this.getEl().query('.theme_container'), Ext.get);
-            var promises = _.map(themeContainers, this._toggleThemeContainer, this);
+        _updateHeaderContainers: function () {
+            var headerContainers = _.map(this.getEl().query('.roadmap-header-collapsable'), Ext.get);
+            var promises = _.map(headerContainers, this._toggleHeaderContainer, this);
 
             return Deft.Promise.all(promises);
         },
 
-        _toggleThemeContainer: function (el) {
+        _toggleHeaderContainer: function (el) {
             var deferred = new Deft.Deferred();
 
-            el.addCls('theme-transitioning');
-
-            var slide = this.showTheme ? el.slideIn : el.slideOut;
-
-            slide.call(el, 't', {
-                duration: this.slideDuration,
+            el.removeCls('header-collapsed');
+            el.animate({
+                duration: this.showHeader ? 1000 : 250,
+                to: {
+                    height: this.showHeader ? '100%' : '0',
+                    opacity: this.showHeader ? 1.0 : 0
+                },
                 listeners: {
-                    afteranimate: function () {
-                        el.removeCls('theme-transitioning');
-
-                        if(!this.showTheme) {
-                            el.setStyle('display', 'none'); // OMG Ext. Y U SUCK?
-                        }
-
+                    afteranimate: function() {
                         deferred.resolve();
                     },
                     scope: this
@@ -453,13 +493,13 @@
         },
 
         destroy: function () {
-            this._destroyThemeButton();
+            this._destroyHeaderButton();
             this.callParent(arguments);
         },
 
-        _destroyThemeButton: function () {
-            if(this.themeToggleButton) {
-                this.themeToggleButton.destroy();
+        _destroyHeaderButton: function () {
+            if(this.headerToggleButton) {
+                this.headerToggleButton.destroy();
             }
         },
 
@@ -575,7 +615,7 @@
         },
 
         _getClickAction: function () {
-            return 'Themes toggled from [' + !this.showTheme + '] to [' + this.showTheme + ']';
+            return 'Roadmap header expansion toggled from [' + !this.showHeader + '] to [' + this.showHeader + ']';
         },
 
         _refreshBacklog: function () {

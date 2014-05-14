@@ -5,9 +5,9 @@
         extend: 'Ext.Component',
         alias: 'widget.cardboardplaceholdercolumn',
 
-        requires: [
-            'Rally.ui.cardboard.ColumnHeader'
-        ],
+        requires: [ 'Rally.ui.cardboard.ColumnHeader' ],
+
+        mixins: [ 'Rally.apps.roadmapplanningboard.mixin.CollapsableHeaderContainer' ],
 
         afterRender: function () {
             this.drawHeader();
@@ -24,20 +24,18 @@
             this.columnHeader = Ext.widget(Ext.merge(config, this.columnHeaderConfig));
 
             // Add a couple of containers to match the structure of the timeframe planning column header
-            this.columnHeader.add({
-                xtype: 'container',
+            this.columnHeader.add(this._getCollapsableHeaderContainerConfig(this._getTemplateConfig()));
+        },
+
+        _getTemplateConfig: function() {
+            return {
                 tpl: [
-                    '<div class="progress-bar-background"></div>'
-                ],
-                data: {}
-            });
-            this.columnHeader.add({
-                xtype: 'container',
-                tpl: [
+                    '<div class="timeframeDatesContainer"></div>',
+                    '<div class="progress-bar-background"></div>',
                     '<div class="theme_container"></div>'
                 ],
                 data: {}
-            });
+            };
         },
 
         getColumnHeader: function() {

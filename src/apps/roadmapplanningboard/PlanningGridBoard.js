@@ -8,7 +8,6 @@
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFeedback',
-            'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.apps.roadmapplanningboard.PlanningBoard'
         ],
@@ -42,9 +41,7 @@
             /**
              * @cfg {Boolean} If the user is an admin
              */
-            isAdmin: false,
-
-            cardboardPlugins: []
+            isAdmin: false
         },
 
         initComponent: function () {
@@ -95,12 +92,7 @@
                 types: this.modelNames,
                 typeNames: this.typeNames,
                 firstLoad: this.firstLoad,
-                attribute: 'Name',
-                plugins: [
-                    {
-                        ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 3
-                    }
-                ].concat(this.cardboardPlugins)
+                attribute: 'Name'
             };
 
             this.callParent(arguments);

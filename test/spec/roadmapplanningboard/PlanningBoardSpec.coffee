@@ -4,6 +4,7 @@ Ext.require [
   'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
   'Rally.apps.roadmapplanningboard.PlanningBoard'
   'Rally.env.Context'
+  'Rally.data.PreferenceManager'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
@@ -17,6 +18,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
         renderTo: 'testDiv'
         types: ['PortfolioItem/Feature']
         context: Rally.environment.getContext()
+        plugins: []
       , config
 
       if includeTypeNames
@@ -32,27 +34,19 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       else
         @waitForComponentReady(@cardboard)
 
-    clickCollapse: ->
+    toggleExpansion: ->
       collapseStub = @stub()
       @cardboard.on 'headersizechanged', collapseStub
-      @click(css: '.theme-button-collapse').then =>
+      @click(css: '.header-toggle-button').then =>
         @once
           condition: ->
             collapseStub.called
 
-    clickExpand: ->
-      expandStub = @stub()
-      @cardboard.on 'headersizechanged', expandStub
-      @click(css: '.theme-button-expand').then =>
-        @once
-          condition: ->
-            expandStub.called
-
     clickAddNewButton: ->
       @click(css: '.scroll-button.right')
 
-    getThemeElements: ->
-      _.map(@cardboard.getEl().query('.theme_container'), Ext.get)
+    getCollapsableHeaderElements: ->
+      _.map(@cardboard.getEl().query('.roadmap-header-collapsable'), Ext.get)
 
     getTimeframePlanningColumns: ->
       _.where @cardboard.getColumns(), xtype: 'timeframeplanningcolumn', @
@@ -67,6 +61,14 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       stub = @stub Rally.env.Context::, 'isFeatureEnabled'
       stub.withArgs(toggle).returns(true) for toggle in toggles
       stub
+
+    stubExpandStatePreference: (state) ->
+      @stub Rally.data.PreferenceManager, 'load', ->
+        deferred = new Deft.promise.Deferred()
+        result = {}
+        result[Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME] = state
+        deferred.resolve result
+        deferred.promise
 
 
   beforeEach ->
@@ -119,7 +121,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   it 'should have three visible planning columns', ->
     @createCardboard().then =>
-
       expect(@cardboard.getColumns()[1].getColumnHeader().getHeaderValue()).toBe "Q1"
       expect(@cardboard.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
       expect(@cardboard.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
@@ -262,36 +263,56 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
         it 'should contain a single timeframe column', ->
           expect(@getTimeframePlanningColumns().length).toBe 1
 
-  describe 'theme container interactions', ->
+  describe 'collapsable header interactions', ->
 
-    it 'should show expanded themes when the board is created', ->
+    it 'should call the preference manager to get the initial expansion state of the header', ->
+      loadStub = @stubExpandStatePreference 'false'
       @createCardboard().then =>
-        _.each @getThemeElements(), (element) =>
-          expect(element.isVisible()).toBe true
+        _.each @getCollapsableHeaderElements(), =>
+          expect(loadStub).toHaveBeenCalled()
+
+    it 'should show expanded header when the board is created', ->
+      @createCardboard().then =>
+        _.each @getCollapsableHeaderElements(), (element) =>
+          expect(element.getHeight() > 0).toBe true
           expect(element.query('.field_container').length).toBe 1
 
-    it 'should collapse themes when the theme collapse button is clicked', ->
+    it 'should show a collapsed header when the board is created with the toggle indication a collapsed state', ->
+      @stubExpandStatePreference 'false'
       @createCardboard().then =>
-        @clickCollapse().then =>
-          _.each @getThemeElements(), (element) =>
-            expect(element.isVisible()).toBe false
+        _.each @getCollapsableHeaderElements(), (element) =>
+          expect(element.getHeight()).toBe 0
 
-    it 'should expand themes when the theme expand button is clicked', ->
-      @createCardboard(showTheme: false).then =>
-        @clickExpand().then =>
-          _.each @getThemeElements(), (element) =>
-            expect(element.isVisible()).toBe true
+    it 'should collapse header when the theme collapse button is clicked', ->
+      @createCardboard(plugins: [ptype: 'rallyfixedheadercardboard']).then =>
+        @toggleExpansion().then =>
+          _.each @getCollapsableHeaderElements(), (element) =>
+            expect(element.getHeight()).toBe 0
+
+    it 'should expand header when the theme expand button is clicked', ->
+      @stubExpandStatePreference 'false'
+      @createCardboard(plugins: [ptype: 'rallyfixedheadercardboard']).then =>
+        @toggleExpansion().then =>
+          _.each @getCollapsableHeaderElements(), (element) =>
+            expect(element.getHeight() > 0).toBe true
             expect(element.query('.field_container').length).toBe 1
 
-    it 'should return client metrics message when collapse button is clicked', ->
-      @createCardboard().then =>
-        @clickCollapse().then =>
-          expect(@cardboard._getClickAction()).toEqual("Themes toggled from [true] to [false]")
+    it 'should return client metrics message when toggle button is clicked and header is expanded', ->
+      @createCardboard(plugins: [ptype: 'rallyfixedheadercardboard']).then =>
+        @toggleExpansion().then =>
+          expect(@cardboard._getClickAction()).toEqual("Roadmap header expansion toggled from [true] to [false]")
 
-    it 'should return client metrics message when expand button is clicked', ->
-      @createCardboard(showTheme: false).then =>
-        @clickExpand().then =>
-          expect(@cardboard._getClickAction()).toEqual("Themes toggled from [false] to [true]")
+    it 'should return client metrics message when expand button is clicked and header is collapsed', ->
+      @stubExpandStatePreference 'false'
+      @createCardboard(plugins: [ptype: 'rallyfixedheadercardboard']).then =>
+        @toggleExpansion().then =>
+          expect(@cardboard._getClickAction()).toEqual("Roadmap header expansion toggled from [false] to [true]")
+
+    it 'should save a preference when toggle button is clicked', ->
+      updateSpy = @spy Rally.data.PreferenceManager, 'update'
+      @createCardboard(plugins: [ptype: 'rallyfixedheadercardboard']).then =>
+        @toggleExpansion().then =>
+          expect(updateSpy).toHaveBeenCalled()
 
   describe 'permissions', ->
 

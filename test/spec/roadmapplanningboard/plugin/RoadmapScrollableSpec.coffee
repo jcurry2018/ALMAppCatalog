@@ -5,6 +5,7 @@ Ext.require [
   'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable'
   'Rally.apps.roadmapplanningboard.PlanningBoard'
   'Rally.apps.roadmapplanningboard.AppModelFactory'
+  'Rally.data.PreferenceManager'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
@@ -78,7 +79,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
           renderTo: 'testDiv'
 
           plugins: [
-            ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: config.timeframeColumnCount
+            {ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: config.timeframeColumnCount}
+            {ptype: 'rallyfixedheadercardboard'}
           ]
 
           slideDuration: 10
@@ -104,10 +106,10 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     getColumnContentCells: ->
       @cardboard.getEl().query('td.card-column')
 
-    clickTheme: ->
+    clickHeaderToggle: ->
       collapseStub = @stub()
       @cardboard.on 'headersizechanged', collapseStub
-      @click(css: '.theme-button').then =>
+      @click(css: '.header-toggle-button').then =>
         @once
           condition: ->
             collapseStub.called
@@ -115,8 +117,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     clickAddNewButton: ->
       @click(css: '.scroll-button.right')
 
-    getThemeElements: ->
-      _.map(@cardboard.getEl().query('.theme_container'), Ext.get)
+    getCollapsableHeaderElements: ->
+      _.map(@cardboard.getEl().query('.roadmap-header-collapsable'), Ext.get)
 
     assertButtonIsInColumnHeader: (button, column) ->
       expect(column.getColumnHeader().getEl().getById(button.getEl().id)).not.toBeNull()
@@ -155,6 +157,13 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     getIndexFromTestId: (testId) ->
       @getColumnByTestId(testId).index
 
+    stubExpandStatePreference: (state) ->
+      @stub Rally.data.PreferenceManager, 'load', ->
+        deferred = new Deft.promise.Deferred()
+        result = {}
+        result[Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME] = state
+        deferred.resolve result
+        deferred.promise
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -540,54 +549,56 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         @scrollForwards().then =>
           expect(@plugin.getFirstVisibleScrollableColumn().timeframeRecord.getId()).toEqual '2'
 
-  describe 'theme container interactions', ->
+  describe 'header toggle interactions', ->
 
     describe 'when scrolling backward', ->
 
-      it 'should show expanded themes', ->
+      it 'should show expanded headers', ->
         @createCardboard().then =>
           @scrollBackwards().then =>
-            _.each @getThemeElements(), (element) =>
-              expect(element.isVisible()).toBe true
+            _.each @getCollapsableHeaderElements(), (element) =>
+              expect(element.getHeight() > 0).toBe true
               expect(element.query('.field_container').length).toBe 1
 
-      it 'should collapse themes when the theme collapse button is clicked', ->
+      it 'should collapse headers when the header collapse button is clicked', ->
         @createCardboard().then =>
           @scrollBackwards().then =>
-            @clickTheme().then =>
-              _.each @getThemeElements(), (element) =>
-                expect(element.isVisible()).toBe false
+            @clickHeaderToggle().then =>
+              _.each @getCollapsableHeaderElements(), (element) =>
+                expect(element.getHeight()).toBe 0
 
-      it 'should expand themes when the theme expand button is clicked', ->
-        @createCardboard(showTheme: false).then =>
+      it 'should expand headers when the header expand button is clicked', ->
+        @stubExpandStatePreference 'false'
+        @createCardboard().then =>
           @scrollBackwards().then =>
-            @clickTheme().then =>
-              _.each @getThemeElements(), (element) =>
-                expect(element.isVisible()).toBe true
+            @clickHeaderToggle().then =>
+              _.each @getCollapsableHeaderElements(), (element) =>
+                expect(element.getHeight() > 0).toBe true
                 expect(element.query('.field_container').length).toBe 1
 
     describe 'when scrolling forward', ->
 
-      it 'should show expanded themes', ->
+      it 'should show expanded headers', ->
         @createCardboard().then =>
           @scrollForwards().then =>
-            _.each @getThemeElements(), (element) =>
-              expect(element.isVisible()).toBe true
+            _.each @getCollapsableHeaderElements(), (element) =>
+              expect(element.getHeight() > 0).toBe true
               expect(element.query('.field_container').length).toBe 1
 
-      it 'should collapse themes when the theme collapse button is clicked', ->
+      it 'should collapse headers when the header collapse button is clicked', ->
         @createCardboard().then =>
           @scrollForwards().then =>
-            @clickTheme().then =>
-              _.each @getThemeElements(), (element) =>
-                expect(element.isVisible()).toBe false
+            @clickHeaderToggle().then =>
+              _.each @getCollapsableHeaderElements(), (element) =>
+                expect(element.getHeight()).toBe 0
 
-      it 'should expand themes when the theme expand button is clicked', ->
-        @createCardboard(showTheme: false).then =>
+      it 'should expand headers when the header expand button is clicked', ->
+        @stubExpandStatePreference 'false'
+        @createCardboard().then =>
           @scrollForwards().then =>
-            @clickTheme().then =>
-              _.each @getThemeElements(), (element) =>
-                expect(element.isVisible()).toBe true
+            @clickHeaderToggle().then =>
+              _.each @getCollapsableHeaderElements(), (element) =>
+                expect(element.getHeight() > 0).toBe true
                 expect(element.query('.field_container').length).toBe 1
 
   describe '#_onColumnDateRangeChange', ->

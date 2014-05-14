@@ -92,21 +92,23 @@
 }
 
 .roadmap-board .column-container .column-header .column-header-title {
+  width: auto;
+  margin-right: 50px;
+  margin-left: 50px;
   padding: 0;
-  height: 80px;
+  height: 40px;
 }
 
 .roadmap-board .column-container .column-header .column-header-title > span {
   position: relative;
-  padding: 15px 8px 8px 8px;
-  min-height: 82px;
+  padding: 15px 8px 0 8px;
 }
 
 .roadmap-board .planning-column .column-header .column-header-title .header-button-container {
   display: none;
   position: absolute;
-  right: 0;
-  bottom: 0;
+  right: -26px;
+  bottom: -2px;
   padding: 0;
   margin: 0px 8px 4px 8px;
 }
@@ -234,8 +236,9 @@
 }
 
 .roadmap-board .planning-column .timeframeDatesContainer {
-  margin: 0 auto 1px auto;
+  margin: 0 auto 8px auto;
   width: 125px;
+  height: 19px;
 }
 
 .roadmap-board .first-card-column {
@@ -280,6 +283,7 @@
 
 .roadmap-board .column-container .fixed-header-card-board-header-container {
   border-bottom: 1px dotted #c0c0c0;
+  position: relative;
 }
 
 .roadmap-board .theHeader .card-column {
@@ -288,6 +292,7 @@
 
 .roadmap-board .column-container .column-header {
   font-size: 10pt;
+  min-height: 55px;
 }
 
 .roadmap-board .column-container .column-header .columnTpl {
@@ -376,36 +381,33 @@
   visibility: hidden !important;
 }
 
-.roadmap-board .theme-button {
+.roadmap-board .header-toggle-button {
   color: #C0C0C0;
   font-size: 20px;
   position: absolute;
   right: 0;
+  bottom: -21px;
+  background: #fff;
+  border-left: 1px dotted #b3b3b3 !important;
+  border-bottom: 1px dotted #b3b3b3 !important;
+  border-top: 1px solid #fff !important;
+  border-right: 1px dotted  #b3b3b3 !important;
+  border-radius: 0;
   z-index: 100;
   padding: 3px 7px 0px 3px;
 }
 
-.roadmap-board .theme-button-collapse {
-  border: none;
-  background-color: transparent;
+.roadmap-board .header-collapsed {
+  display: none;
 }
 
-.roadmap-board .theme-button-collapse:hover {
+.roadmap-board .header-toggle-button:hover {
   color: #444;
 }
 
-.roadmap-board .theme-button-expand {
-  background-color: #424242;
-  border-radius: 0 0 0 5px;
-}
-
-.roadmap-board .theme-button .x4-btn-icon-el {
+.roadmap-board .header-toggle-button .x4-btn-icon-el {
   position: absolute;
   top: -4px;
-}
-
-.roadmap-board .theme-button-expand:hover {
-  color: #FFFFFF;
 }
 
 .roadmap-board .scroll-button {

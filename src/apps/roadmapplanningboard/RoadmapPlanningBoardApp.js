@@ -32,17 +32,7 @@
 
             addNewConfig: {
                 ignoredRequiredFields: ['Name', 'Project', 'ScheduleState', 'State']
-            },
-
-            /**
-             * @cfg cardboardPlugins {Array}
-             * Extra plugins that should be added to the cardboard
-             */
-            cardboardPlugins: [
-                {
-                    ptype: 'rallyfixedheadercardboard'
-                }
-            ]
+            }
         },
 
         launch: function() {
@@ -195,7 +185,6 @@
                 isAdmin: this.isAdmin,
                 typeNames: this.typeNames,
                 modelNames: this.types,
-                cardboardPlugins: this.cardboardPlugins,
                 listeners: {
                     load: this._onLoad,
                     scope: this
