@@ -34,9 +34,9 @@
                 }
             }, this);
 
-            this.subscribe(Rally.Message.objectCreate, this._onObjectChange, this);
-            this.subscribe(Rally.Message.objectUpdate, this._onObjectChange, this);
-            this.subscribe(Rally.Message.objectDestroy, this._onObjectChange, this);
+            this.subscribe(this, Rally.Message.objectCreate, this._onObjectChange, this);
+            this.subscribe(this, Rally.Message.objectUpdate, this._onObjectChange, this);
+            this.subscribe(this, Rally.Message.objectDestroy, this._onObjectChange, this);
 
             this.callParent(arguments);
         },
