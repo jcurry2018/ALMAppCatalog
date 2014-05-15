@@ -324,7 +324,7 @@
         },
 
         _sizeButtonToColumnHeader: function(button, column){
-            var columnHeaderHeight = column.getHeaderTitle().getHeight() - 22;
+            var columnHeaderHeight = column.getHeaderTitle().getHeight() - 17;
             button.getEl()
                 .setHeight(columnHeaderHeight)
                 .setStyle('margin-top', '16px');
