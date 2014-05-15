@@ -482,6 +482,9 @@
                 },
                 listeners: {
                     afteranimate: function() {
+                        if (!this.showHeader) {
+                            el.addCls('header-collapsed');
+                        }
                         deferred.resolve();
                     },
                     scope: this
