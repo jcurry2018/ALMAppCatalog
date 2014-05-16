@@ -12,6 +12,7 @@
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
+            'Rally.ui.gridboard.plugin.BoardPolicyDisplayable',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.cardboard.PolicyContainer',
             'Rally.ui.cardboard.CardBoard',
@@ -121,9 +122,16 @@
                 },
                 'rallygridboardaddnew',
                 {
+                    ptype: 'rallyboardpolicydisplayable',
+                    prefKey: 'kanbanAgreementsChecked',
+                    checkboxConfig: {
+                        boxLabel: 'Agreements'
+                    }
+                },
+                {
                     ptype: 'rallygridboardartifacttypechooser',
                     artifactTypePreferenceKey: 'artifact-types',
-                    showAgreements: true
+                    showAgreements: false
                 },
                 'rallygridboardtagfilter'
             ];

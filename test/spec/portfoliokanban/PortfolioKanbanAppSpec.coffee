@@ -90,10 +90,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp().then =>
       expect(Ext.query('.gridboard-filter-control').length).toBe 1
 
-  it 'shows ShowPolicies checkbox', ->
-    @_createApp().then =>
-      expect(@app.gridboard.down('#header').el.down('input[type="button"]')).toHaveCls 'showPoliciesCheckbox'
-
   it 'shows a portfolio item type picker', ->
     @_createApp().then =>
       expect(@app.piTypePicker.isVisible()).toBe true

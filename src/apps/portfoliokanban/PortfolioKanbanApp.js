@@ -14,6 +14,7 @@
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
+            'Rally.ui.gridboard.plugin.BoardPolicyDisplayable',
             'Rally.ui.filter.view.OwnerPillFilter',
             'Rally.ui.filter.view.TagPillFilter',
             'Rally.ui.gridboard.plugin.GridBoardTagFilter',
@@ -136,7 +137,6 @@
             if (header) {
                 header.getRight().add([
                     this._buildHelpComponent(),
-                    this._buildShowPolicies(),
                     this.piTypePicker,
                     this._buildFilterInfo()
                 ]);
@@ -319,6 +319,14 @@
                             ],
                             boardFieldDefaults: this.getSetting('fields').split(','),
                             headerPosition: 'left'
+                        },
+                        {
+                            ptype: 'rallyboardpolicydisplayable',
+                            prefKey: 'piKanbanPolicyChecked',
+                            checkboxConfig: {
+                                boxLabel: 'Show Policies',
+                                margin: '2 5 5 5'
+                            }
                         }
                     ],
                     listeners: {
@@ -381,7 +389,6 @@
 
         _gridBoardToggle: function (toggleState, gridOrBoard) {
             this.cardboard = toggleState === 'board' ? gridOrBoard : null;
-            this._renderPolicies();
         },
 
         getMaskId: function () {
@@ -452,36 +459,6 @@
             });
 
             return columns;
-        },
-
-        _renderPolicies: function () {
-            var showPoliciesCheckbox = this.down("#showPoliciesCheckbox");
-
-            Ext.each(this.cardboard.getColumns(), function (column) {
-                if (showPoliciesCheckbox.getValue()) {
-                    column.fireEvent('showpolicy');
-                } else {
-                    column.fireEvent('hidepolicy');
-                }
-            });
-
-            this.cardboard.fireEvent('headersizechanged');
-        },
-
-        _buildShowPolicies: function () {
-            return Ext.widget('checkbox', {
-                cls: 'showPolicies',
-                itemId: 'showPoliciesCheckbox',
-                fieldCls: 'showPoliciesCheckbox',
-                boxLabel: "Show Policies",
-                listeners: {
-                    change: {
-                        fn: this._renderPolicies,
-                        scope: this
-                    }
-                }
-            });
-
         },
 
         _buildHelpComponent: function (config) {
