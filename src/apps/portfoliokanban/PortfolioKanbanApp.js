@@ -284,7 +284,7 @@
                                 items: [
                                     this._createFilterItem('rallyownerpillfilter', {
                                         filterChildren: false,
-                                        project: this.getContext().getProjectRef(),
+                                        project: this.getContext().getProject(),
                                         showPills: false
                                     }),
                                     this._createFilterItem('rallytagpillfilter', {remoteFilter: true})

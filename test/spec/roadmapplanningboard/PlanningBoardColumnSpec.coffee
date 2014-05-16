@@ -15,9 +15,9 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
         cardConfig:
           preliminaryEstimateStore: Deft.Injector.resolve('preliminaryEstimateStore')
         context:
+          getProject: -> Rally.environment.getContext().getProject()
           getScopedStateId: (stateId) -> stateId
-          getWorkspace: () ->
-            _refObjectUUID: '84f98b22-69a3-441b-a70a-96679aeccc20'
+          getWorkspace: -> _refObjectUUID: '84f98b22-69a3-441b-a70a-96679aeccc20'
         listeners:
           ready: ->
             Rally.BrowserTest.publishComponentReady @

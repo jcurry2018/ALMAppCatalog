@@ -12,7 +12,9 @@
             'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController',
             'Rally.ui.filter.view.FilterButton',
             'Rally.ui.filter.view.CustomQueryFilter',
-            'Rally.ui.filter.view.ParentFilter'
+            'Rally.ui.filter.view.ParentFilter',
+            'Rally.ui.filter.view.OwnerPillFilter',
+            'Rally.ui.filter.view.TagPillFilter'
         ],
 
         parentFilter: null,
@@ -117,6 +119,15 @@
             });
         },
 
+        _createPillFilterItem: function(typeName, config) {
+            return Ext.apply({
+                xtype: typeName,
+                margin: '-15 0 5 0',
+                showPills: true,
+                showClear: true
+            }, config);
+        },
+
         _getFilterItems: function () {
             var filterItems = [];
 
@@ -134,10 +145,15 @@
                 });
             }
 
-            filterItems.push({
-                xtype: 'rallycustomqueryfilter',
-                filterHelpId: 194
-            });
+            filterItems.push(
+                this._createPillFilterItem('rallyownerpillfilter', {
+                    filterChildren: false,
+                    project: this.context.getProject(),
+                    showPills: false
+                }),
+                this._createPillFilterItem('rallytagpillfilter', {remoteFilter: true}),
+                { xtype: 'rallycustomqueryfilter', filterHelpId: 194 }
+            );
 
             return filterItems;
         },
