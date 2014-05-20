@@ -9,7 +9,9 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFeedback',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
-            'Rally.apps.roadmapplanningboard.PlanningBoard'
+            'Rally.apps.roadmapplanningboard.PlanningBoard',
+            'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable',
+            'Rally.apps.roadmapplanningboard.plugin.RoadmapCollapsableFixedHeader'
         ],
 
         cls: 'rui-gridboard roadmap-board',
@@ -92,7 +94,11 @@
                 types: this.modelNames,
                 typeNames: this.typeNames,
                 firstLoad: this.firstLoad,
-                attribute: 'Name'
+                attribute: 'Name',
+                plugins: [
+                    { ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 3 },
+                    { ptype: 'rallyroadmapcollapsableheader' }
+                ]
             };
 
             this.callParent(arguments);

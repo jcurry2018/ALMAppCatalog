@@ -9,8 +9,6 @@
 
         requires: [
             'Rally.data.util.PortfolioItemHelper',
-            'Rally.ui.cardboard.plugin.FixedHeader',
-            'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable',
             'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
             'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
             'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
@@ -27,12 +25,11 @@
             PREFERENCE_NAME: 'roadmapplanningboard.header.expanded'
         },
 
-        plugins: [{ptype: 'rallyfixedheadercardboard'}, {ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 3}],
-
         config: {
             roadmap: null,
             timeline: null,
             isAdmin: false,
+            showHeader: true,
             storeConfig: {
                 useShallowFetch: true,
                 enablePostGet: true
@@ -123,23 +120,10 @@
             dropNotAllowed: "planningBoard",
 
             /**
-             * @cfg {Boolean}
-             * Toggle whether the header is expanded or collapsed
-             */
-            showHeader: true,
-
-            /**
              * @cfg {Object} Object containing Names and TypePaths of the lowest level portfolio item (eg: 'Feature') and optionally its parent (eg: 'Initiative')
              */
             typeNames: {}
         },
-
-        clientMetrics: [
-            {
-                method: '_toggleHeaders',
-                descriptionProperty: '_getClickAction'
-            }
-        ],
 
         initComponent: function () {
             this.timeframePlanStoreWrapper = Ext.create('Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', {
@@ -199,13 +183,8 @@
         onModelsRetrieved: function (callback) {
             return this._loadColumnData().then({
                 success: function () {
-                    this._readPreference().then({
-                        success: function () {
-                            this.buildColumns();
-                            callback.call(this);
-                        },
-                        scope: this
-                    });
+                    this.buildColumns();
+                    callback.call(this);
                 },
                 scope: this
             });
@@ -265,7 +244,6 @@
                 this.firstLoad = false;
             }
 
-            this.drawHeaderToggle();
             this.drawAddNewColumnButton();
         },
 
@@ -329,88 +307,6 @@
             return record;
         },
 
-        /**
-         * Draws the toggle button to expand/collapse the headers
-         */
-        drawHeaderToggle: function () {
-            this._destroyHeaderButton();
-
-            this.headerToggleButton = Ext.create('Rally.ui.Button', {
-                cls: 'header-toggle-button',
-                listeners: {
-                    click: this._toggleHeaders,
-                    scope: this
-                },
-                renderTo: Ext.getBody().down('.fixed-header-card-board-header-container')
-            });
-
-            this._updateHeaderToggleButton();
-        },
-
-        _addHeaderToggleTooltip: function(content) {
-            if (this.headerToggleTooltip) {
-                this.headerToggleTooltip.destroy();
-            }
-
-            this.headerToggleTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
-                target: this.headerToggleButton.getEl(),
-                showDelay: 1000,
-                html: '<span>' + content + '</span>',
-                anchorOffset: 6,
-                mouseOffset: [0, -8]
-            });
-        },
-
-        _toggleHeaders: function () {
-            this.showHeader = !this.showHeader;
-            this.headerToggleButton.hide();
-            this._updateHeaderToggleButton();
-            this._updateHeaderContainers().then({
-                success: function () {
-                    this.fireEvent('headersizechanged');
-                },
-                scope: this
-            });
-            this._savePreference(this.showHeader);
-        },
-
-        _savePreference: function(val) {
-            var settings = {},
-                name = Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME;
-
-            settings[name] = val;
-            return Rally.data.PreferenceManager.update({
-                settings: settings,
-                filterByUser: true,
-                filterByName: name
-            });
-        },
-
-        _readPreference: function() {
-            return Rally.data.PreferenceManager.load({
-                filterByUser: true,
-                filterByName: Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME
-            }).then({
-                success: function (result) {
-                    var name = Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME;
-                    this.showHeader = !result.hasOwnProperty(name) || result[name] === 'true';
-                },
-                scope: this
-            });
-        },
-
-        _updateHeaderToggleButton: function () {
-            if(this.showHeader) {
-                this._addHeaderToggleTooltip('Collapse header');
-                this.headerToggleButton.setIconCls('icon-chevron-up');
-            } else {
-                this._addHeaderToggleTooltip('Expand header');
-                this.headerToggleButton.setIconCls('icon-chevron-down');
-            }
-
-            this.headerToggleButton.show();
-        },
-
         _addNewColumn: function (options) {
             options = options || {};
 
@@ -457,52 +353,13 @@
             var column = this.addColumn(columnConfig, this.getColumns().length);
             this.renderColumn(column, columnEls);
 
-            this.drawHeaderToggle();
             this.drawAddNewColumnButton();
 
             return column;
         },
 
-        _updateHeaderContainers: function () {
-            var headerContainers = _.map(this.getEl().query('.roadmap-header-collapsable'), Ext.get);
-            var promises = _.map(headerContainers, this._toggleHeaderContainer, this);
-
-            return Deft.Promise.all(promises);
-        },
-
-        _toggleHeaderContainer: function (el) {
-            var deferred = new Deft.Deferred();
-
-            el.removeCls('header-collapsed');
-            el.animate({
-                duration: this.showHeader ? 1000 : 250,
-                to: {
-                    height: this.showHeader ? '100%' : '0',
-                    opacity: this.showHeader ? 1.0 : 0
-                },
-                listeners: {
-                    afteranimate: function() {
-                        if (!this.showHeader) {
-                            el.addCls('header-collapsed');
-                        }
-                        deferred.resolve();
-                    },
-                    scope: this
-                }
-            });
-
-            return deferred.promise;
-        },
-
         destroy: function () {
-            this._destroyHeaderButton();
             this.callParent(arguments);
-        },
-
-        _destroyHeaderButton: function () {
-            if(this.headerToggleButton) {
-                this.headerToggleButton.destroy();
-            }
         },
 
         _addColumnFromTimeframeAndPlan: function (timeframe, plan) {
@@ -614,10 +471,6 @@
             var endsBeforeNextTimeframe = !nextTimeframe || (currentColumn.timeframeRecord.get('endDate') < nextTimeframe.get('endDate'));
 
             return !startsAfterPreviousTimeframe || !endsBeforeNextTimeframe;
-        },
-
-        _getClickAction: function () {
-            return 'Roadmap header expansion toggled from [' + !this.showHeader + '] to [' + this.showHeader + ']';
         },
 
         _refreshBacklog: function () {

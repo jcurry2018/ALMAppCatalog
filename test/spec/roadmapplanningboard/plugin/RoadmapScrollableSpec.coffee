@@ -80,7 +80,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
 
           plugins: [
             {ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: config.timeframeColumnCount}
-            {ptype: 'rallyfixedheadercardboard'}
           ]
 
           slideDuration: 10
@@ -106,19 +105,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     getColumnContentCells: ->
       @cardboard.getEl().query('td.card-column')
 
-    clickHeaderToggle: ->
-      collapseStub = @stub()
-      @cardboard.on 'headersizechanged', collapseStub
-      @click(css: '.header-toggle-button').then =>
-        @once
-          condition: ->
-            collapseStub.called
-
     clickAddNewButton: ->
       @click(css: '.scroll-button.right')
-
-    getCollapsableHeaderElements: ->
-      _.map(@cardboard.getEl().query('.roadmap-header-collapsable'), Ext.get)
 
     assertButtonIsInColumnHeader: (button, column) ->
       expect(column.getColumnHeader().getEl().getById(button.getEl().id)).not.toBeNull()
@@ -319,7 +307,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
 
     it 'should fill in all columns if none are provided', ->
       @createCardboard(timeframeColumnCount: 3, presentColumnCount: 0, pastColumnCount: 0).then =>
-        debugger
         expect(@plugin.getScrollableColumns().length).toBe 3
 
   describe 'add new column button', ->
@@ -548,58 +535,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(pastColumnCount: 0, presentColumnCount: 2, timeframeColumnCount: 1).then =>
         @scrollForwards().then =>
           expect(@plugin.getFirstVisibleScrollableColumn().timeframeRecord.getId()).toEqual '2'
-
-  describe 'header toggle interactions', ->
-
-    describe 'when scrolling backward', ->
-
-      it 'should show expanded headers', ->
-        @createCardboard().then =>
-          @scrollBackwards().then =>
-            _.each @getCollapsableHeaderElements(), (element) =>
-              expect(element.getHeight() > 0).toBe true
-              expect(element.query('.field_container').length).toBe 1
-
-      it 'should collapse headers when the header collapse button is clicked', ->
-        @createCardboard().then =>
-          @scrollBackwards().then =>
-            @clickHeaderToggle().then =>
-              _.each @getCollapsableHeaderElements(), (element) =>
-                expect(element.getHeight()).toBe 0
-
-      it 'should expand headers when the header expand button is clicked', ->
-        @stubExpandStatePreference 'false'
-        @createCardboard().then =>
-          @scrollBackwards().then =>
-            @clickHeaderToggle().then =>
-              _.each @getCollapsableHeaderElements(), (element) =>
-                expect(element.getHeight() > 0).toBe true
-                expect(element.query('.field_container').length).toBe 1
-
-    describe 'when scrolling forward', ->
-
-      it 'should show expanded headers', ->
-        @createCardboard().then =>
-          @scrollForwards().then =>
-            _.each @getCollapsableHeaderElements(), (element) =>
-              expect(element.getHeight() > 0).toBe true
-              expect(element.query('.field_container').length).toBe 1
-
-      it 'should collapse headers when the header collapse button is clicked', ->
-        @createCardboard().then =>
-          @scrollForwards().then =>
-            @clickHeaderToggle().then =>
-              _.each @getCollapsableHeaderElements(), (element) =>
-                expect(element.getHeight()).toBe 0
-
-      it 'should expand headers when the header expand button is clicked', ->
-        @stubExpandStatePreference 'false'
-        @createCardboard().then =>
-          @scrollForwards().then =>
-            @clickHeaderToggle().then =>
-              _.each @getCollapsableHeaderElements(), (element) =>
-                expect(element.getHeight() > 0).toBe true
-                expect(element.query('.field_container').length).toBe 1
 
   describe '#_onColumnDateRangeChange', ->
 
