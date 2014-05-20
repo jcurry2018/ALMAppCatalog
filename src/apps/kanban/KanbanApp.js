@@ -43,8 +43,6 @@
         },
 
         launch: function() {
-            this.setLoading();
-
             Rally.data.ModelFactory.getModel({
                 type: 'UserStory',
                 success: this._onStoryModelRetrieved,
