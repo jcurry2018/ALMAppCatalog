@@ -226,6 +226,16 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       _.each @app.cardboard.getColumns().slice(1), (column, index) =>
         expect(column.value).toBe '/theme/state/' + (index + 1)
 
+    it 'should display policy header if Show Policies previously checked', ->
+      policyCheckbox = this.app.gridboard.getPlugin('boardPolicyDisplayable')
+      expect(policyCheckbox.isChecked()).toBe false
+      expect(_.every(_.invoke(Ext.ComponentQuery.query('#policyHeader'), 'isVisible', true))).toBe false
+      @click(policyCheckbox.getControlCmp().getEl()).then =>
+        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@feature._ref))
+        @waitForAppReady().then =>
+          expect(_.every(_.invoke(Ext.ComponentQuery.query('#policyHeader'), 'isVisible', true))).toBe true
+
+
   describe 'settings', ->
     it 'should contain a query setting', ->
       @_createApp().then =>
