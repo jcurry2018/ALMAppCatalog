@@ -346,7 +346,8 @@
                             xtype: 'rallycardboardcolumn',
                             additionalFetchFields: ['Discussion'],
                             enableWipLimit: true,
-                            enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')
+                            enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
+                            collapsible: this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS')
                         },
                         columns: columns,
                         ddGroup: currentTypePath,

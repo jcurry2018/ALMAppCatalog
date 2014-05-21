@@ -5,7 +5,7 @@
         extend: 'Ext.Component',
         alias: 'widget.cardboardplaceholdercolumn',
 
-        requires: [ 'Rally.ui.cardboard.ColumnHeader' ],
+        requires: [ 'Rally.ui.cardboard.Column', 'Rally.ui.cardboard.ColumnHeader' ],
 
         mixins: [ 'Rally.apps.roadmapplanningboard.mixin.CollapsableHeaderContainer' ],
 
@@ -73,6 +73,10 @@
 
         getHeaderTitle: function () {
             return this.columnHeader.down('#headerTitle');
+        },
+
+        getMinWidth: function () {
+            return Rally.ui.cardboard.Column.prototype.getMinWidth();
         }
 
     });
