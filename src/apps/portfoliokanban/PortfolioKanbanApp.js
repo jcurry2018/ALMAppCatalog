@@ -143,10 +143,10 @@
             }
         },
 
-        _loadCardboard: function (policyPluginCmpCfg) {
+        _loadCardboard: function () {
             this._loadStates({
                 success: function (states) {
-                    var columns = this._createColumns(states, policyPluginCmpCfg);
+                    var columns = this._createColumns(states);
                     if (this.rendered) {
                         this._drawCardboard(columns);
                     } else {
@@ -322,7 +322,6 @@
                         },
                         {
                             ptype: 'rallyboardpolicydisplayable',
-                            pluginId: 'boardPolicyDisplayable',
                             prefKey: 'piKanbanPolicyChecked',
                             checkboxConfig: {
                                 boxLabel: 'Show Policies',
@@ -379,20 +378,12 @@
         },
 
         _onTypeChange: function (picker) {
-            var policyCfg,
-                policyPlugin,
-                newType = picker.getSelectedType();
+            var newType = picker.getSelectedType();
 
             if (newType && this.currentType && newType.get('_ref') !== this.currentType.get('_ref')) {
                 this.currentType = newType;
                 this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
-                policyPlugin = this.gridboard.getPlugin('boardPolicyDisplayable');
-                if (policyPlugin) {
-                    policyCfg = {
-                        hidden: !policyPlugin.isChecked()
-                    };
-                }
-                this._loadCardboard(policyCfg);
+                this._loadCardboard();
             }
         },
 
@@ -423,19 +414,10 @@
          * @private
          * @return columns for the cardboard, as a map with keys being the column name.
          */
-        _createColumns: function (states, policyPluginCmpCfg) {
+        _createColumns: function (states) {
             if (!states.length) {
                 return undefined;
             }
-
-            var columnPolicyPlugin = {
-                ptype: 'rallycolumnpolicy',
-                policyCmpConfig: Ext.merge({
-                    xtype: 'rallyportfoliokanbanpolicy',
-                    hidden: true,
-                    title: 'Exit Policy'
-                }, policyPluginCmpCfg || {})
-            };
 
             var columns = [
                 {
@@ -443,7 +425,14 @@
                         headerTpl: 'No Entry'
                     },
                     value: null,
-                    plugins: [columnPolicyPlugin]
+                    plugins: [{
+                        ptype: 'rallycolumnpolicy',
+                        policyCmpConfig: {
+                            xtype: 'rallyportfoliokanbanpolicy',
+                            hidden: true,
+                            title: 'Exit Policy'
+                        }
+                    }]
                 }
             ];
 
@@ -457,11 +446,15 @@
                         fieldToDisplay: 'Name',
                         editable: false
                     },
-                    plugins: [Ext.merge(columnPolicyPlugin, {
+                    plugins: [{
+                        ptype: 'rallycolumnpolicy',
                         policyCmpConfig: {
-                            stateRecord: state
+                            xtype: 'rallyportfoliokanbanpolicy',
+                            hidden: true,
+                            stateRecord: state,
+                            title: 'Exit Policy'
                         }
-                    })]
+                    }]
                 });
             });
 
