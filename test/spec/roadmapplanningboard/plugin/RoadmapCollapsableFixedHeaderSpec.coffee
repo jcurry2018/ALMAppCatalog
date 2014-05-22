@@ -35,6 +35,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapCollapsableFixedHeader',
         typeNames:
             child:
               name: 'Feature'
+        height: 500
 
       @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard', config
 

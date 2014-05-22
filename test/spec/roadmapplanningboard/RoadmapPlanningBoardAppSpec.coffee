@@ -15,6 +15,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
         alreadyGotIt: true
         expectSplash: false
         isAdmin: true
+        height: 1000
         context: Ext.create 'Rally.app.Context',
           initialValues:
             Ext.merge

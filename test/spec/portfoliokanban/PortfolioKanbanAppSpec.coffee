@@ -16,6 +16,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
             user: Rally.environment.getContext().getUser()
             subscription: Rally.environment.getContext().getSubscription(),
         renderTo: 'testDiv'
+        height: 500
         appContainer:
           dashboard:
             isFullPageApp: isFullPageApp
@@ -277,38 +278,14 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
         ).then =>
           expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['Field1','Field2']
 
-  describe 'when inside a full page panel', ->
+  describe 'sizing', ->
+    it 'should set an initial gridboard height', ->
+      @_createApp().then =>
+        expect(@app.down('rallygridboard').getHeight()).toBe @app.getHeight()
 
-    beforeEach ->
-      @addMatchers
-        toBeApproximately: (expected, allowedDelta) ->
-          @message = -> "Expected #{@actual} to be approximately #{expected} ± #{allowedDelta}."
-          Math.abs(@actual - expected) <= allowedDelta
-
-      @content = Ext.create 'Ext.container.Container',
-        height: '100%'
-
-      @footer = Ext.create 'Ext.Component',
-        id: 'footer'
-        style:
-          backgroundColor: 'magenta'
-          fontFamily: 'Comic Sans'
-          textAlign: 'center'
-        height: 100
-        html: 'RICHARD WAS HERE, BITCHES!'
-
-      Ext.create 'Ext.container.Container',
-        items: [ @content, @footer ]
-        cls: 'full-page-panel'
-        renderTo: 'testDiv'
-
-    it 'should size the app to fill the page', ->
-      @stub Rally.util.Window, 'getHeight', -> 1000
-      @_createApp(renderTo: @content.getEl()).then =>
-        expect(@app.cardboard.getHeight()).toBeApproximately 900 - @app.cardboard.getY(), 5
-        expect(@footer.getEl().getY() + @footer.getEl().getHeight()).toBeApproximately 1000, 5 + Ext.getScrollbarSize().height
-
-    it 'should not size the cardboard height smaller than 400 pixels', ->
-      @stub Rally.util.Window, 'getHeight', -> 300
-      @_createApp(renderTo: @content.getEl()).then =>
-        expect(@app.cardboard.getHeight()).toBe 400
+    it 'should update the board height', ->
+      @_createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        currentHeight = gridBoard.getHeight()
+        @app.setHeight @app.getHeight() + 10
+        expect(gridBoard.getHeight()).toBe currentHeight + 10

@@ -17,6 +17,6 @@
       "ReleaseBurnDownApp.js"
    ],
    "css": [
-      "../Charts.css"
+      "../Charts.less"
    ]
 }

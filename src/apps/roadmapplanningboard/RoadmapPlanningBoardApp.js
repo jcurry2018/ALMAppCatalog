@@ -16,8 +16,8 @@
             'Rally.clientmetrics.ClientMetricsRecordable',
             'Rally.util.BrowserValidation'
         ],
-        cls: 'roadmapPlanningBoardApp',
-        componentCls: 'app',
+        cls: 'roadmap-planning-board',
+        autoScroll: false,
         mixins: [
             'Rally.clientmetrics.ClientMetricsRecordable'
         ],
@@ -188,10 +188,18 @@
                 listeners: {
                     load: this._onLoad,
                     scope: this
-                }
+                },
+                height: this.getHeight()
             }, config);
 
             this.add(boardConfig);
+        },
+
+        setHeight: function(height) {
+            this.callParent(arguments);
+            if(this.down('#gridboard')) {
+                this.down('#gridboard').setHeight(height);
+            }
         },
 
         _onRequestException: function(connection, response, requestOptions) {

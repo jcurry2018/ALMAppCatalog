@@ -11,6 +11,6 @@
       "ProjectCFDApp.js"
    ],
    "css": [
-      "../../Charts.css"
+      "../../Charts.less"
    ]
 }

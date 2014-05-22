@@ -1,3 +1,7 @@
+.portfolio-kanban {
+    overflow-y: hidden;
+}
+
 .portfolio-kanban .no-type-text {
     text-align: center;
 }

@@ -34,7 +34,7 @@
             'Rally.util.Test',
             'Deft.Deferred'
         ],
-        layout: 'auto',
+        autoScroll: false,
         appName: 'Portfolio Kanban',
 
         cls: 'portfolio-kanban',
@@ -370,11 +370,19 @@
                             filters: filters,
                             context: this.context.getDataContext()
                         }
-                    }
+                    },
+                    height: this.getHeight()
                 });
 
                 this.add(this.gridboard);
                 this._drawHeader();
+            }
+        },
+
+       setHeight: function(height) {
+            this.callParent(arguments);
+            if(this.gridboard) {
+                this.gridboard.setHeight(height);
             }
         },
 

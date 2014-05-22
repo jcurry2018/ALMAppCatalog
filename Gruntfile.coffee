@@ -59,6 +59,7 @@ module.exports = (grunt) ->
 
   appFiles = 'src/apps/**/*.js'
   specFiles = 'test/spec/**/*Spec.coffee'
+  cssFiles = 'src/apps/**/*.{css,less}'
 
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
@@ -96,7 +97,7 @@ module.exports = (grunt) ->
 
     "regex-check":
       x4:
-        src: [appFiles, specFiles]
+        src: [appFiles, specFiles, cssFiles]
         options:
           pattern: /x4-/g
       almglobals:
@@ -223,9 +224,11 @@ module.exports = (grunt) ->
     less:
       options:
         yuicompress: true
+        modifyVars:
+          prefix: 'x4-'
       build:
         files:
-          'build/resources/css/catalog-all.css': ['src/apps/**/*.{css,less}']
+          'build/resources/css/catalog-all.css': [cssFiles]
 
     copy:
       images:
@@ -265,7 +268,7 @@ module.exports = (grunt) ->
         options:
           spawn: false
       styles:
-        files: 'src/apps/**/*.{css,less}'
+        files: cssFiles
         tasks: ['css']
 
     nexus:

@@ -12,6 +12,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   helpers
     createApp: (config)->
+      @stub(Rally.apps.iterationtrackingboard.StatsBanner::, 'getHeight').returns 0
       now = new Date(1384305300 * 1000);
       tomorrow = Rally.util.DateTime.add(now, 'day', 1)
       nextDay = Rally.util.DateTime.add(tomorrow, 'day', 1)
@@ -35,9 +36,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
                 DragDropRankingEnabled: true
         ),
         renderTo: 'testDiv'
+        height: 400
       , config))
 
-      @setGridBoardHeightStub = @stub(@app, '_setGridBoardHeight')
       @waitForComponentReady(@app)
 
     getIterationFilter: ->
@@ -86,14 +87,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     @app?.destroy()
     Rally.ui.gridboard.GridBoard.prototype.toggleState = @defaultToggleState
 
-  it 'should set height on gridboard', ->
-    @createApp().then =>
-      @waitForCallback(@setGridBoardHeightStub).then =>
-        expect(@setGridBoardHeightStub).toHaveBeenCalledOnce()
-
   it 'resets view on scope change', ->
     @createApp().then =>
-      removeStub = @stub(@app, 'remove')
+      removeSpy = @spy(@app, 'remove')
 
       newScope = Ext.create('Rally.app.TimeboxScope',
         record: new @IterationModel @iterationData[1]
@@ -101,11 +97,25 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       @app.onTimeboxScopeChange newScope
 
-      @waitForCallback(removeStub).then =>
-        expect(removeStub).toHaveBeenCalledOnce()
-        expect(removeStub).toHaveBeenCalledWith 'gridBoard'
+      expect(removeSpy).toHaveBeenCalledTwice()
+      expect(removeSpy).toHaveBeenCalledWith 'statsBanner'
+      expect(removeSpy).toHaveBeenCalledWith 'gridBoard'
 
-        expect(@app.down('#gridBoard')).toBeDefined()
+      expect(@app.down('#gridBoard')).toBeDefined()
+      expect(@app.down('#statsBanner')).toBeDefined()
+
+  it 'should add the stats banner', ->
+    @createApp().then =>
+      statsBanner = @app.down '#statsBanner'
+      expect(statsBanner).not.toBeNull()
+      expect(statsBanner.getContext()).toBe @app.getContext()
+
+  it 'should resize the grid board when stats banner is toggled', ->
+    @createApp().then =>
+      statsBanner = @app.down '#statsBanner'
+      setHeightSpy = @spy @app.down('rallygridboard'), 'setHeight'
+      statsBanner.setHeight 40
+      @waitForCallback(setHeightSpy)
 
   it 'fires contentupdated event after board load', ->
     contentUpdatedHandlerStub = @stub()
@@ -260,3 +270,17 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createAppWithWorkspaceConfiguration(workspaceConfig).then =>
         summaryColumns = @getSummaryColumns()
         expect(summaryColumns[0].units).toBe('shebas')
+
+  describe 'sizing', ->
+    it 'should set an initial gridboard height', ->
+      @createApp().then =>
+        expect(@app.down('rallygridboard').getHeight()).toBe @app.getAvailableGridBoardHeight()
+
+    it 'should update the grid or board height', ->
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        setHeightSpy = @spy gridBoard, 'setHeight'
+        currentHeight = gridBoard.getHeight()
+        @app.setHeight @app.getHeight() + 10
+        @waitForCallback(setHeightSpy).then =>
+          expect(gridBoard.getHeight()).toBe currentHeight + 10

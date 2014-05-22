@@ -43,11 +43,7 @@
                     models: this.getSetting('types').split(','),
                     filters: this._getFilters(),
                     pageSize: pageSize,
-                    sorters: Rally.data.util.Sorter.sorters(this.getSetting('order')),
-                    listeners: {
-                        load: this._updateAppContainerSize,
-                        scope: this
-                    }
+                    sorters: Rally.data.util.Sorter.sorters(this.getSetting('order'))
                 },
                 pagingToolbarCfg: {
                     pageSizes: [pageSize]
@@ -90,19 +86,6 @@
 
         _getFetchOnlyFields:function(){
             return ['LatestDiscussionAgeInMinutes'];
-        },
-
-        _updateAppContainerSize: function() {
-            if (this.appContainer) {
-                var grid = this.down('rallygrid');
-                grid.el.setHeight('auto');
-                grid.body.setHeight('auto');
-                grid.view.el.setHeight('auto');
-                this.setSize({height: grid.getHeight() + _.reduce(grid.getDockedItems(), function(acc, item) {
-                    return acc + item.getHeight() + item.el.getMargin('tb');
-                }, 0)});
-                this.appContainer.setPanelHeightToAppHeight();
-            }
         },
 
         _getColumns: function(fetch){
