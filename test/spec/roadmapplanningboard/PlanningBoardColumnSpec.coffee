@@ -238,11 +238,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
     beforeEach ->
       @columnConfig.fields = ['PreliminaryEstimate','UserStories']
-      @columnConfig.cardConfig =
-        fieldMappings:
-          PreliminaryEstimate: [
-            { name: 'PreliminaryEstimate', properties: ['Value', 'Name'] }
-          ]
 
     describe 'with shallowFetch enabled', ->
 

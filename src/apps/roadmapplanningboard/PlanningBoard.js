@@ -37,51 +37,6 @@
             cardConfig: {
                 editable: true,
                 skipDefaultFields: true,
-                fieldMappings: {
-                    // Note: These additional fields are added by ALM when using a standard fetch
-                    // They need to be explicitly added to the fetch params when using a shallow fetch
-                    // TODO: These additional fields should eventually be moved into some sort of shallow fetch builder/decorator in the SDK
-                    PercentDoneByStoryPlanEstimate: [
-                        'PercentDoneByStoryPlanEstimate',
-                        'PercentDoneByStoryCount',
-                        'LeafStoryCount',
-                        'LeafStoryPlanEstimateTotal',
-                        'ActualEndDate',
-                        'PlannedStartDate',
-                        'PlannedEndDate',
-                        'AcceptedLeafStoryPlanEstimateTotal',
-                        'AcceptedLeafStoryCount',
-                        'UnEstimatedLeafStoryCount',
-                        'Notes',
-                        'PortfolioItemTypeOrdinal',
-                        'LateChildCount',
-                        'Release'
-                    ],
-                    PercentDoneByStoryCount: [
-                        'PercentDoneByStoryPlanEstimate',
-                        'PercentDoneByStoryCount',
-                        'LeafStoryCount',
-                        'LeafStoryPlanEstimateTotal',
-                        'ActualEndDate',
-                        'PlannedStartDate',
-                        'PlannedEndDate',
-                        'AcceptedLeafStoryPlanEstimateTotal',
-                        'AcceptedLeafStoryCount',
-                        'UnEstimatedLeafStoryCount',
-                        'Notes',
-                        'PortfolioItemTypeOrdinal',
-                        'LateChildCount',
-                        'Release'
-                    ],
-                    PreliminaryEstimate: [
-                        { name: 'PreliminaryEstimate', properties: ['Value', 'Name'] },
-                        'Name', 'Value'
-                    ],
-                    UserStories: [
-                        'LeafStoryPlanEstimateTotal',
-                        'DirectChildrenCount'
-                    ]
-                },
                 customFieldConfig: {
                     UserStories: {
                         popoverConfig: {
