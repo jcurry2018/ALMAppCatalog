@@ -41,7 +41,7 @@
 
         config: {
             defaultSettings: {
-                fields: 'PercentDoneByStoryCount'
+                fields: 'PercentDoneByStoryCount,UserStories'
             }
         },
 
