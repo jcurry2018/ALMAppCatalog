@@ -468,12 +468,7 @@
         },
 
         _buildHelpComponent: function (config) {
-
-            if (this.appContainer.panelDef.panelConfigs.hideFilterOnPortfolioKanban === 'true') {
-                return null;
-            }
-
-            return Ext.create('Ext.Component', Ext.apply({
+            return this.appContainer.dashboard.isFullPageApp ? null : Ext.create('Ext.Component', Ext.apply({
                 cls: 'help-field ' + Rally.util.Test.toBrowserTestCssClass('portfolio-kanban-help-container'),
                 renderTpl: Rally.util.Help.getIcon({
                     id: 265
@@ -482,16 +477,12 @@
         },
 
         _buildFilterInfo: function () {
-            if (this.appContainer.panelDef.panelConfigs.hideFilterOnPortfolioKanban === 'true') {
-                this.filterInfo = null;
-            } else {
-                this.filterInfo = Ext.create('Rally.ui.tooltip.FilterInfo', {
-                    projectName: this.getSetting('project') && this.getContext().get('project').Name || 'Following Global Project Setting',
-                    scopeUp: this.getSetting('projectScopeUp'),
-                    scopeDown: this.getSetting('projectScopeDown'),
-                    query: this.getSetting('query')
-                });
-            }
+            this.filterInfo = this.appContainer.dashboard.isFullPageApp ? null : Ext.create('Rally.ui.tooltip.FilterInfo', {
+                projectName: this.getSetting('project') && this.getContext().get('project').Name || 'Following Global Project Setting',
+                scopeUp: this.getSetting('projectScopeUp'),
+                scopeDown: this.getSetting('projectScopeDown'),
+                query: this.getSetting('query')
+            });
 
             return this.filterInfo;
         },
