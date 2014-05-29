@@ -94,7 +94,7 @@
             var context = this.getContext(),
                 config = {
                     models: this.modelNames,
-                    autoLoad: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE') ? false : true,
+                    autoLoad: !context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                     remoteSort: true,
                     root: {expanded: true},
                     filters: [context.getTimeboxScope().getQueryFilter()],
@@ -193,19 +193,32 @@
             }
 
             if (context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
-                plugins.push({
-                    ptype: 'rallygridboardfiltercontrol',
-                    filterControlConfig: {
-                        cls: 'small gridboard-filter-control',
-                        margin: '3 10 3 7',
-                        stateful: true,
-                        stateId: context.getScopedStateId('iteration-tracking-filter-button'),
+                var filterControlConfig = {
+                    cls: 'small gridboard-filter-control',
+                    context: context,
+                    margin: '3 10 3 7',
+                    stateful: true,
+                    stateId: context.getScopedStateId('iteration-tracking-filter-button')
+                };
+
+                if (context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP')) {
+                    _.merge(filterControlConfig, {
+                        customFilterPopoverEnabled: true,
+                        modelNames: this.modelNames
+                    });
+                } else {
+                    _.merge(filterControlConfig, {
                         items: [
                             this._createOwnerFilterItem(context),
                             this._createTagFilterItem(context),
                             this._createModelFilterItem(context)
                         ]
-                    }
+                    });
+                }
+
+                plugins.push({
+                    ptype: 'rallygridboardfiltercontrol',
+                    filterControlConfig: filterControlConfig
                 });
             } else {
                 plugins.push('rallygridboardownerfilter');
@@ -220,7 +233,7 @@
             if (!context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
                 plugins.push({
                     ptype: 'rallygridboardfilterinfo',
-                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
+                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')),
                     stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
                 });
             }

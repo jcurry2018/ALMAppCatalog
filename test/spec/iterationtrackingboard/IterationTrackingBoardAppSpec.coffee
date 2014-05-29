@@ -284,3 +284,23 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @app.setHeight @app.getHeight() + 10
         @waitForCallback(setHeightSpy).then =>
           expect(gridBoard.getHeight()).toBe currentHeight + 10
+
+  describe 'custom filter popover toggle', ->
+
+    beforeEach ->
+      @featureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
+      @featureEnabledStub.withArgs('BETA_TRACKING_EXPERIENCE').returns true
+
+    it 'uses the CustomFilter popover if the USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP toggle is enabled', ->
+      @featureEnabledStub.withArgs('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP').returns(true)
+      @createApp().then =>
+        @click(id: @app.down('rallyfilterbutton').getId()).then ->
+          popover = Ext.ComponentQuery.query('rallycustomfilterpopover')[0]
+          expect(popover).toBeDefined()
+
+    it 'does not use the CustomFilter popover if the USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP toggle is disabled', ->
+      @featureEnabledStub.withArgs('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP').returns(false)
+      @createApp().then =>
+        @click(id: @app.down('rallyfilterbutton').getId()).then ->
+          popover = Ext.ComponentQuery.query('rallyfilterpopover')[0]
+          expect(popover).toBeDefined()
