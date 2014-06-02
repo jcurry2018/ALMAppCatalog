@@ -54,6 +54,25 @@
                 }
             }
 
+            this.tooltip = Ext.create('Rally.ui.tooltip.StateToolTip', {
+                target: this.getEl(),
+                listeners: {
+                    beforeshow: function(tooltip) {
+                        var triggerEl = Ext.get(tooltip.triggerElement);
+                        var stateValue = triggerEl.getAttribute('state-data');
+                        if (stateValue) {
+                            tooltip.update(stateValue);
+                        }
+                    },
+                    scope: this
+                }
+            });
+
+        },
+
+        onDestroy: function() {
+            this.tooltip.destroy();
+            this.callParent(arguments);
         },
 
         _drawHeader: function(){

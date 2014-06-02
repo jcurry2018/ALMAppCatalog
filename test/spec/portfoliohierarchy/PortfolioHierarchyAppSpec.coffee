@@ -63,8 +63,6 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
 
       expect(@app.getEl().down('.filterInfo')).toBeInstanceOf Ext.Element
 
-    
-
   it 'test project setting label is shown if following a specific project scope', ->
     @ajax.whenQuerying('PortfolioItem/Project').respondWith()
 
@@ -136,6 +134,27 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
     @_createApp().then =>
       tree = @app.down('rallytree')
       expect(tree.workspace._ref).toBe Rally.environment.getContext().getWorkspace()._ref
+
+  it 'should add tooltip to schedule state read-only view for user story', ->
+    @_createApp().then =>
+      tooltip = @app.tooltip
+      expect(tooltip).not.toBeUndefined
+
+      Ext.create 'Ext.Component',
+        html: '<div class="schedule-state" state-data="Defined"</div>'
+        renderTo: 'testDiv'
+      tooltip.triggerElement = Ext.getBody().down('.schedule-state')
+      tooltipUpdate = @spy tooltip, 'update'
+      tooltip.show()
+
+      expect(tooltipUpdate.callCount).toBe 1
+      expect(tooltipUpdate.calledWith('Defined')).toBeTruthy()
+
+  it 'should destroy tooltip when app is destroyed', ->
+    @_createApp().then =>
+      destroyTooltip = @spy @app.tooltip, 'destroy'
+      @app.destroy()
+      expect(destroyTooltip.callCount).toBe 1
 
   describe 'should add boolean indicating if should call plan service for use in appsdk components lame lame lame', ->
     it 'should not retrieve data from plan service', ->
