@@ -12,7 +12,6 @@
              */
             planStore: null,
 
-            filterable: true,
             columnHeaderConfig: {
                 headerTpl: 'Backlog'
             },

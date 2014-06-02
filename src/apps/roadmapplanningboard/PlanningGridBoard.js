@@ -7,6 +7,10 @@
         requires: [
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
+            'Rally.ui.filter.view.CustomQueryFilter',
+            'Rally.ui.filter.view.ParentFilter',
+            'Rally.ui.filter.view.OwnerPillFilter',
+            'Rally.ui.filter.view.TagPillFilter',
             'Rally.ui.gridboard.plugin.GridBoardFeedback',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.apps.roadmapplanningboard.PlanningBoard',
@@ -61,8 +65,19 @@
                 },
                 fieldLabel: 'New ' + this.typeNames.child.name
             };
+
             this.plugins = [
                 'rallygridboardaddnew',
+                {
+                    ptype: 'rallygridboardfiltercontrol',
+                    filterControlConfig: {
+                        cls: 'small gridboard-filter-control',
+                        margin: '3 10 3 7',
+                        stateful: true,
+                        stateId: this.context.getScopedStateId('roadmapplanningboard-filter-button'),
+                        items: this._getFilterItems()
+                    }
+                },
                 {
                     ptype: 'rallygridboardfieldpicker',
                     headerPosition: 'left',
@@ -104,28 +119,43 @@
             this.callParent(arguments);
         },
 
-        _initialFilter: function (component, filters) {
-            component.on('filter', this._onFilter, this);
-            this._applyFilter(filters);
-            this.config.storeConfig.autoLoad = true;
-            this.loadStore();
+        _createPillFilterItem: function(typeName, config) {
+            return Ext.apply({
+                xtype: typeName,
+                margin: '-15 0 5 0',
+                showPills: true,
+                showClear: true
+            }, config);
         },
 
-        _onFilter: function (component, filters) {
-            this._applyFilter(filters);
-            this.refresh(this.config);
-        },
+        _getFilterItems: function () {
+            var filterItems = [];
 
-        _applyFilter: function (filters) {
-            this.queryFilter = filters[0];
-
-            if (this.queryFilter) {
-                this.filterButton.removeCls('secondary');
-                this.filterButton.addCls('primary');
-            } else {
-                this.filterButton.removeCls('primary');
-                this.filterButton.addCls('secondary');
+            if (this.typeNames.parent) {
+                filterItems.push({
+                    xtype: 'rallyparentfilter',
+                    modelType: this.typeNames.parent.typePath,
+                    modelName: this.typeNames.parent.name,
+                    prependFilterFieldWithFormattedId: true,
+                    storeConfig: {
+                        context: {
+                            project: null
+                        }
+                    }
+                });
             }
+
+            filterItems.push(
+                this._createPillFilterItem('rallyownerpillfilter', {
+                    filterChildren: false,
+                    project: this.context.getProject(),
+                    showPills: false
+                }),
+                this._createPillFilterItem('rallytagpillfilter', {remoteFilter: true}),
+                { xtype: 'rallycustomqueryfilter', filterHelpId: 194 }
+            );
+
+            return filterItems;
         },
 
         /**
