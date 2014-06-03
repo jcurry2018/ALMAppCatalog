@@ -257,7 +257,7 @@
                 alwaysSelectedValues: alwaysSelectedValues,
                 modelNames: this.modelNames,
                 boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
-                    ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
+                    ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']
             });
 
             if (context.isFeatureEnabled('ITERATION_TRACKING_CUSTOM_VIEWS')) {
