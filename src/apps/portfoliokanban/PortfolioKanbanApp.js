@@ -20,6 +20,7 @@
             'Rally.ui.gridboard.plugin.GridBoardTagFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.GridBoard',
+            'Rally.ui.cardboard.plugin.CollapsibleColumns',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.cardboard.plugin.Scrollable',
@@ -346,8 +347,7 @@
                             xtype: 'rallycardboardcolumn',
                             additionalFetchFields: ['Discussion'],
                             enableWipLimit: true,
-                            enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
-                            collapsible: this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS')
+                            enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')
                         },
                         columns: columns,
                         ddGroup: currentTypePath,
@@ -449,7 +449,7 @@
                         headerTpl: 'No Entry'
                     },
                     value: null,
-                    plugins: [defaultColumnPolicyPlugin]
+                    plugins: [defaultColumnPolicyPlugin].concat(this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS') ? ['rallycardboardcollapsiblecolumns'] : [])
                 }
             ];
 
@@ -466,9 +466,9 @@
                         fieldToDisplay: 'Name',
                         editable: false
                     },
-                    plugins: [stateColumnPolicyPlugin]
+                    plugins: [stateColumnPolicyPlugin].concat(this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS') ? ['rallycardboardcollapsiblecolumns'] : [])
                 });
-            });
+            }, this);
 
             return columns;
         },
