@@ -5,15 +5,16 @@
    "sdk": "x",
    "javascript": [
       "../DateMixin.js",
-      "BurnDownCalculator.js",
-      "BurnDownChart.js",
-      "../settings/SettingsChangeMixin.js",
+      "../IntegrationHeaders.js",
       "../settings/RadioGroupSetting.js",
       "../settings/ChartDisplayTypePicker.js",
+      "../settings/SettingsChangeMixin.js",
       "../settings/DataTypePicker.js",
       "../settings/TimeboxPicker.js",
       "BurnDownSettings.js",
+      "BurnDownChart.js",
       "BurnDownApp.js",
+      "BurnDownCalculator.js",
       "ReleaseBurnDownApp.js"
    ],
    "css": [

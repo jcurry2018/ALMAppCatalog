@@ -5,11 +5,11 @@
    "sdk": "x",
    "javascript": [
       "TimeboxCardBoard.js",
-      "TimeboxScrollable.js",
       "IterationPlanningBoardBacklogColumn.js",
       "IterationPlanningBoardColumnProgressBar.js",
       "IterationPlanningBoardColumn.js",
       "TimeboxGridBoard.js",
+      "TimeboxScrollable.js",
       "IterationPlanningBoardApp.js"
    ],
    "css": [

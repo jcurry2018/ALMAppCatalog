@@ -14,3 +14,4 @@ target/
 _SpecRunner.html
 appcatalog.version
 *.sublime-workspace
+temp/

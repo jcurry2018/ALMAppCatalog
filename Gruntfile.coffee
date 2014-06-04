@@ -24,7 +24,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'default', ['build']
   grunt.registerTask 'sanity', ['check', 'jshint']
   grunt.registerTask 'css', ['less', 'copy:images', 'replace:imagepaths']
-  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'nexus:deps', 'coffee', 'sanity', 'css', 'sencha', 'assemble', 'copy:apphtml']
+  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'nexus:deps', 'coffee', 'sanity', 'css', 'sencha:buildapps', 'assemble', 'copy:apphtml']
 
   grunt.registerTask 'nexus:__createartifact__', 'Internal task to create and publish the nexus artifact', ['version', 'nexus:push:publish', 'clean:target']
   grunt.registerTask 'nexus:deploy', 'Deploys to nexus', ['build', 'nexus:__createartifact__']
@@ -49,6 +49,7 @@ module.exports = (grunt) ->
   maps = grunt.option 'maps' || false
 
   appsdk_path = 'lib/sdk'
+  ext_path = 'lib/ext/4.2.2'
   served_paths = [path.resolve(__dirname)]
   if process.env.APPSDK_PATH
     appsdk_path = path.join process.env.APPSDK_PATH, 'rui'
@@ -67,7 +68,7 @@ module.exports = (grunt) ->
     buildVersion: version
 
     clean:
-      build: ['build/', 'src/apps/**/*.html']
+      build: ['build/', 'src/apps/**/*.html', 'temp/']
       test: ['test/gen', '_SpecRunner.html', '.webdriver']
       dependencies: ['lib/', 'bin/sencha/']
       target: ['target/']
@@ -293,17 +294,33 @@ module.exports = (grunt) ->
           publish: [{ id: 'com.rallydev.js:app-catalog:tgz', version: '<%= buildVersion %>', path: 'target/' }]
 
     sencha:
-      cmd: "./bin/sencha/#{if process.platform is 'darwin' then 'mac' else 'linux'}/sencha"
-      args: [
-        if debug then '-d' else ''
-        '-s lib/ext/4.2.2'
-        'compile'
-        "-classpath=#{appsdk_path}/builds/sdk-dependencies-debug.js,#{appsdk_path}/src,src/apps"
-        'exclude -all and'
-        'include -file src/apps and'
-        'concat build/catalog-all-debug.js and'
-        'concat -compress build/catalog-all.js'
-      ]
+      options:
+        cmd: "./bin/sencha/#{if process.platform is 'darwin' then 'mac' else 'linux'}/sencha"
+      buildapps:
+        options:
+          args: [
+            if debug then '-d' else ''
+            "-s #{ext_path}"
+            'compile'
+            "-classpath=#{appsdk_path}/builds/sdk-dependencies-debug.js,#{appsdk_path}/src,src/apps"
+            'exclude -all and'
+            'include -file src/apps and'
+            'concat build/catalog-all-debug.js and'
+            'concat -compress build/catalog-all.js'
+          ]
+      appmanifest:
+        options:
+          args:[
+            "-s #{ext_path}"
+            'compile'
+            "-classpath=#{appsdk_path}/builds/sdk-dependencies-debug.js,#{appsdk_path}/src,src/apps"
+            'exclude -all and'
+            "union -r -file #{grunt.option('app')} and"
+            "exclude -file #{appsdk_path}/builds/sdk-dependencies-debug.js and"
+            "exclude -file #{appsdk_path}/src and"
+            'exclude -namespace Ext and'
+            "metadata -f -t {0} -o temp/#{grunt.option('app')}/appManifest -json -b #{grunt.option('app')}"
+          ]
 
     assemble:
       options:
