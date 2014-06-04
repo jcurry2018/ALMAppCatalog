@@ -8,18 +8,12 @@
             "Rally.ui.datetime.TimeFrame"
         ],
 
-        app: undefined, // Parent RallyApp instance
-
-        constructor: function () {
-            this._parseConstructorParams.apply(this, arguments);
-            this.callParent(arguments);
+        config: {
+            app: undefined // Parent RallyApp instance
         },
 
-        _parseConstructorParams: function() {
-            if (!arguments[0].app) {
-                throw 'Missing parent application in ChartSettings';
-            }
-            this.app = arguments[0].app;
+        constructor: function (config) {
+            this.mergeConfig(config);
         },
 
         _getTimeFrame: function () {
@@ -35,7 +29,7 @@
             return {
                 xtype: 'rallychartssettingsstatefieldpicker',
                 name: 'stateField',
-                settings: this.app.getSettings()
+                settings: this.config.app.getSettings()
             };
         },
 

@@ -9,13 +9,14 @@
 }
 
 .blocked-work-app li.list-item {
+    border-top: 1px solid #c6c6c6;
+    clear: left;
+    color: #333;
+    font-family: NotoSansBold, Helvetica, Arial;
+    font-weight: normal;
     list-style-type: none;
     padding-top: 5px;
     padding-left: 6px;
-    color: #333;
-    font-weight: bold;
-    border-top: 1px solid #c6c6c6;
-    clear: left;
 }
 
 .blocked-work-app li.first {
@@ -68,7 +69,8 @@
 }
 
 .blocked-work-app li.list-item .profileLink {
-    font-weight: bold;
+    font-family: NotoSansBold, Helvetica, Arial;
+    font-weight: normal;
 }
 
 .blocked-work-app .show-more-ct {

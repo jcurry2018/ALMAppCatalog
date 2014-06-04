@@ -20,7 +20,7 @@
                 {
                     name: 'groupByField',
                     xtype: 'rallyfieldcombobox',
-                    model: 'UserStory',
+                    model: Ext.identityFn('UserStory'),
                     margin: '10px 0 0 0',
                     fieldLabel: 'Group By',
                     listeners: {
@@ -62,12 +62,18 @@
             ];
 
             if (!config.shouldShowColumnLevelFieldPicker) {
+                var fieldBlackList = ['DefectStatus', 'TaskStatus', 'DisplayColor', 'DragAndDropRank', 'Rank'];
+
+                if (config.isDndWorkspace === false) {
+                    _.pull(fieldBlackList, 'Rank');
+                }
+
                 items.push({
                     name: 'cardFields',
                     fieldLabel: 'Card Fields',
                     xtype: 'rallyfieldpicker',
                     modelTypes: ['userstory', 'defect'],
-                    fieldBlackList: ['DefectStatus', 'TaskStatus', 'DisplayColor', 'DragAndDropRank', 'Rank'],
+                    fieldBlackList: fieldBlackList,
                     alwaysSelectedValues: alwaysSelectedValues,
                     listeners: {
                         selectionchange: function(picker) {
@@ -83,7 +89,7 @@
                     }
                 });
             }
-
+            
             items.push(
                 {
                     name: 'hideReleasedCards',
@@ -98,8 +104,12 @@
                         fieldLabel: '',
                         margin: '5 0 10 80'
                     }
-                },
-                {
+                }
+            );
+
+            if (config.shouldShowPageSize) {
+                // can be removed with toggle ENABLE_INFINITE_SCROLL_ALL_BOARDS
+                items.push({
                     name: 'pageSize',
                     xtype: 'rallynumberfield',
                     plugins: ['rallyfieldvalidationui'],
@@ -110,11 +120,13 @@
                     allowBlank: false,
                     validateOnChange: false,
                     validateOnBlur: false
-                },
+                });
+            }
+
+            items.push(
                 {
                     type: 'query'
-                }
-            );
+                });
 
             return items;
         }

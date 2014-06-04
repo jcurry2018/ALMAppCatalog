@@ -2,11 +2,31 @@
    "name": "Iteration Tracking Board",
    "className": "Rally.apps.iterationtrackingboard.IterationTrackingBoardApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0rc2",
+   "sdk": "2.0rc3",
    "javascript": [
+      "Column.js",
+      "statsbanner/BannerWidget.js",
+      "statsbanner/Gauge.js",
+      "statsbanner/PlannedVelocity.js",
+      "statsbanner/TimeboxEnd.js",
+      "statsbanner/Defects.js",
+      "statsbanner/Accepted.js",
+      "statsbanner/Tasks.js",
+      "statsbanner/iterationprogresscharts/IterationProgressMixin.js",
+      "statsbanner/iterationprogresscharts/IterationProgressChart.js",
+      "statsbanner/iterationprogresscharts/BurndownChart.js",
+      "statsbanner/iterationprogresscharts/CumulativeFlowChart.js",
+      "statsbanner/iterationprogresscharts/PieChart.js",
+      "statsbanner/iterationprogresscharts/MinimalPieChart.js",
+      "statsbanner/IterationProgressDialogChartToggle.js",
+      "statsbanner/IterationProgressDialog.js",
+      "statsbanner/IterationProgress.js",
+      "statsbanner/CollapseExpand.js",
+      "StatsBanner.js",
       "IterationTrackingBoardApp.js"
    ],
    "css": [
-      "IterationTrackingBoardApp.css"
+      "StatsBanner.less",
+      "IterationTrackingBoardApp.less"
    ]
 }

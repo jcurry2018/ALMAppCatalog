@@ -57,8 +57,15 @@ describe 'Rally.apps.board.BoardApp', ->
 
   it 'passes the page size to the board', ->
     @createApp(pageSize: 1).then =>
-
       expect(@_getBoard().getStoreConfig().pageSize).toBe 1
+      _.each @_getBoard().getColumns(), (column) ->
+        expect(column.store.pageSize).toBe 1
+
+  it 'defaults to a pageSize of 25', ->
+    @createApp().then =>
+      expect(@_getBoard().getStoreConfig().pageSize).toBe 25
+      _.each @_getBoard().getColumns(), (column) ->
+        expect(column.store.pageSize).toBe 25
 
   it 'passes the filters to the board', ->
     query = '(Name contains foo)'
@@ -70,7 +77,7 @@ describe 'Rally.apps.board.BoardApp', ->
 
   it 'scopes the board to the current timebox scope', ->
     @createApp({}, context:
-      timebox: @_createIterationRecord()
+      timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
     ).then =>
 
       expect(@_getBoard().getStoreConfig().filters.length).toBe 1
@@ -80,7 +87,7 @@ describe 'Rally.apps.board.BoardApp', ->
   it 'scopes the board to the current timebox scope and specified query filter', ->
     query = '(Name contains foo)'
     @createApp({query: query}, context:
-        timebox: @_createIterationRecord()
+        timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
     ).then =>
 
       expect(@_getBoard().getStoreConfig().filters.length).toBe 2
@@ -99,7 +106,7 @@ describe 'Rally.apps.board.BoardApp', ->
     )
 
     @createApp({}, context:
-      timebox: @_createIterationRecord()
+      timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
     ).then =>
 
       refreshSpy = @spy(@_getBoard(), 'refresh')
@@ -107,11 +114,7 @@ describe 'Rally.apps.board.BoardApp', ->
         Ext.create('Rally.app.TimeboxScope', record: newTimebox))
 
       @once(condition: -> refreshSpy.calledOnce).then =>
-
-        filters = refreshSpy.getCall(0).args[0].storeConfig.filters
-        expect(filters.length).toBe 1
-        expect(filters[0].toString())
-          .toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
+        expect(refreshSpy.getCall(0).args[0].storeConfig).toOnlyHaveFilterStrings [@app.getContext().getTimeboxScope().getQueryFilter().toString()]
 
   it 'returns settings fields with correct context', ->
     @createApp().then =>

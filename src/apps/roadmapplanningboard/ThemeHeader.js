@@ -6,10 +6,11 @@
         alias: 'widget.roadmapthemeheader',
         cls: 'theme_container',
         requires: [
-            'Rally.ui.detail.FieldContainer'
+            'Rally.ui.field.ClickToEditFieldContainer'
         ],
         config: {
-            record: undefined
+            record: undefined,
+            editable: true
         },
         initComponent: function () {
             this.callParent(arguments);
@@ -18,20 +19,22 @@
             });
         },
         getCardboardComponent: function () {
-            if(this.container !== null && this.container.parent('.cardboard') !== null) {
+            if (this.container && this.container.parent('.cardboard')) {
                 return Ext.getCmp(this.container.parent('.cardboard').id);
             }
         },
+        _getEmptyText: function () {
+            return this.editable ? '+ Add theme' : '';
+        },
         _createThemeContainer: function () {
-            var field, record;
+            var record = this.record;
+            var field = this.record.getField('theme');
 
-            record = this.record;
-            field = this.record.getField('theme');
-            this.themeContainer = Ext.create('Rally.ui.detail.FieldContainer', {
+            this.themeContainer = Ext.create('Rally.ui.field.ClickToEditFieldContainer', {
                 record: record,
                 field: field,
                 cls: 'field_container',
-                clickToEdit: true,
+                clickToEdit: this.editable,
                 completeOnEnter: false,
                 autoDestroy: true,
                 listeners: {
@@ -66,7 +69,7 @@
                 if (themeValue) {
                     themeClass.push('setTheme');
                 } else {
-                    themeValue = '+ Add theme';
+                    themeValue = themeHeader._getEmptyText();
                     themeClass.push('unsetTheme');
                 }
                 viewComponentHeight = 0;
@@ -102,10 +105,11 @@
                 this.editor = Ext.create('Ext.form.field.TextArea', {
                     name: field.name,
                     value: record.get(field.name),
-                    emptyText: '+ Add theme',
+                    emptyText: themeHeader._getEmptyText(),
                     width: '100%',
                     grow: true,
-                    growMin: 20
+                    growMin: 17,
+                    growAppend: '\n'
                 });
                 this.editor.on('autosize', function () {
 
@@ -126,7 +130,7 @@
                     }
                     this.editor.on('select', this._fireFieldUpdated, this);
                     this.editor.on('blur', this._fireFieldUpdated, this);
-                    return this.editor.focus();
+                    this.editor.focus();
                 }
             };
         }

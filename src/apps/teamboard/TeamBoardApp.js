@@ -58,10 +58,10 @@
                 attribute: 'TeamMemberships',
                 cardConfig: {
                     xtype: 'rallyteamboardcard',
-                    fields: Ext.Array.filter(this.getSetting('cardFields').split(','), function(field){
+                    fields: this.getSetting('cardFields') ? Ext.Array.filter(this.getSetting('cardFields').split(','), function(field){
                         return Rally.environment.getContext().getPermissions().isWorkspaceOrSubscriptionAdmin() ||
-                                Ext.Array.contains(this.self.ATTRIBUTES_VISIBLE_TO_WS_NON_ADMIN_USERS, field);
-                    }, this)
+                            Ext.Array.contains(this.self.ATTRIBUTES_VISIBLE_TO_WS_NON_ADMIN_USERS, field);
+                    }, this) : []
                 },
                 context: this.getContext(),
                 columns: Ext.Array.map(teams, function(team) {

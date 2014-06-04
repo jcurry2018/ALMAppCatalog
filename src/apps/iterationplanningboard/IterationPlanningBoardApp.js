@@ -14,8 +14,7 @@
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardManageIterations',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
-            'Rally.util.Array'
+            'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
         cls: 'planning-board',
@@ -63,6 +62,7 @@
                 xtype: 'iterationplanningboardapptimeboxgridboard',
                 context: this.getContext(),
                 modelNames: this.modelNames,
+                toggleState: 'board',
                 plugins: plugins,
                 cardBoardConfig: {
                     cardConfig: {
@@ -90,7 +90,7 @@
                                 return this.getScrollableColumns()[0];
                             },
                             getLastVisibleScrollableColumn: function(){
-                                return Rally.util.Array.last(this.getScrollableColumns());
+                                return _.last(this.getScrollableColumns());
                             },
                             getScrollableColumns: function(){
                                 return Ext.Array.slice(this.cmp.getColumns(), 1, this.cmp.getColumns().length);

@@ -10,7 +10,7 @@
         requires: [
             'Rally.data.util.PortfolioItemHelper',
             'Rally.ui.notify.Notifier',
-            'Rally.data.QueryFilter',
+            'Rally.data.wsapi.Filter',
             'Rally.util.Help',
             'Rally.util.Test'
         ],
@@ -54,6 +54,25 @@
                 }
             }
 
+            this.tooltip = Ext.create('Rally.ui.tooltip.StateToolTip', {
+                target: this.getEl(),
+                listeners: {
+                    beforeshow: function(tooltip) {
+                        var triggerEl = Ext.get(tooltip.triggerElement);
+                        var stateValue = triggerEl.getAttribute('state-data');
+                        if (stateValue) {
+                            tooltip.update(stateValue);
+                        }
+                    },
+                    scope: this
+                }
+            });
+
+        },
+
+        onDestroy: function() {
+            this.tooltip.destroy();
+            this.callParent(arguments);
         },
 
         _drawHeader: function(){
@@ -95,6 +114,8 @@
             return Ext.create('Rally.ui.tree.PortfolioTree', {
                 stateful: true,
                 stateId: this.getAppId() + 'rallyportfoliotree',
+                workspace: this.getContext().getWorkspace(),
+                shouldRetrievePlanData: !!Rally.environment.getContext().isFeatureEnabled("ROADMAP_PLANNING_PAGE"),
                 topLevelModel: typeRecord.get('TypePath'),
                 topLevelStoreConfig: {
                     filters: filters,

@@ -8,14 +8,13 @@
     Ext.define('Rally.apps.iterationplanningboard.TimeboxScrollable', {
         alias: 'plugin.rallytimeboxscrollablecardboard',
         extend: 'Rally.ui.cardboard.plugin.Scrollable',
-        requires:['Rally.util.Array'],
 
         _isBackwardsButtonHidden: function(){
             return this.cmp.scrollableColumnRecords[0] === this.getFirstVisibleScrollableColumn().timeboxRecords;
         },
 
         _isForwardsButtonHidden: function(){
-            return Rally.util.Array.last(this.cmp.scrollableColumnRecords) === this.getLastVisibleScrollableColumn().timeboxRecords;
+            return _.last(this.cmp.scrollableColumnRecords) === this.getLastVisibleScrollableColumn().timeboxRecords;
         },
 
         _scroll: function(forwards){

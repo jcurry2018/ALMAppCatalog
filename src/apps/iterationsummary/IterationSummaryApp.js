@@ -20,7 +20,9 @@
         appName: 'Iteration Summary',
         cls: 'iteration-summary-app',
         scopeType: 'iteration',
-
+        mixins: [
+            'Rally.clientmetrics.ClientMetricsRecordable'
+        ],
         clientMetrics: [
             {
                 method: '_onEditLinkClick',
@@ -42,17 +44,29 @@
             DEFINED_STATE: "Defined"
         },
 
+        supportsUnscheduled: false,
+
         initComponent: function() {
             this.callParent(arguments);
             this.subscribe(this, Rally.Message.objectDestroy, this._refreshApp, this);
             this.subscribe(this, Rally.Message.objectCreate, this._refreshApp, this);
             this.subscribe(this, Rally.Message.objectUpdate, this._refreshApp, this);
+            this.subscribe(this, Rally.Message.bulkUpdate, this._onBulkUpdate, this);
+        },
+
+        _shouldUpdate: function(record) {
+            return this.getContext().getTimeboxScope().getRecord() &&
+                Ext.Array.contains(['defect', 'hierarchicalrequirement', 'testset', 'defectsuite', 'testcase'], record.get('_type').toLowerCase());
+        },
+
+        _onBulkUpdate: function(records) {
+            if(_.any(records, this._shouldUpdate, this)) {
+                this._addContent();
+            }
         },
 
         _refreshApp: function(record) {
-            var types = ['defect', 'hierarchicalrequirement', 'testset', 'defectsuite', 'testcase'];
-
-            if (Ext.Array.contains(types, record.get('_type').toLowerCase())) {
+            if(this._shouldUpdate(record)) {
                 this._addContent();
             }
         },
@@ -60,6 +74,10 @@
         onScopeChange: function(scope) {
             delete this._tzOffset;
             this._addContent();
+        },
+
+        onNoAvailableTimeboxes: function() {
+            this._checkAndDestroy('#dataContainer');
         },
 
         _isHsOrTeamEdition: function() {
@@ -82,8 +100,10 @@
             var deferred = Ext.create('Deft.Deferred');
 
             if (!Ext.isDefined(this._tzOffset)) {
+                this.recordLoadBegin({description: 'calculating timebox info'});
                 Rally.environment.getIoProvider().httpGet({
-                    url: Rally.environment.getServer().getWsapiUrl() + '/iteration.js?includeSchema=true&pagesize=1&fetch=Name',
+                    requester: this,
+                    url: Rally.environment.getServer().getWsapiUrl() + '/iteration?includeSchema=true&pagesize=1&fetch=Name',
                     success: function(results) {
                         if (results.Schema.properties.EndDate.format.tzOffset !== undefined) {
                             this._tzOffset = results.Schema.properties.EndDate.format.tzOffset / 60;
@@ -91,6 +111,7 @@
                             this._tzOffset = 0;
                         }
                         this.timeBoxInfo = this._determineTimeBoxInfo(this._tzOffset);
+                        this.recordLoadEnd();
                         deferred.resolve();
                     },
                     scope: this
@@ -104,14 +125,16 @@
         getScheduleStates: function() {
             var deferred = Ext.create('Deft.Deferred');
 
+            this.recordLoadBegin({description: 'getting schedule states'});
             if (!Ext.isDefined(this._scheduleStates)) {
                 Rally.data.ModelFactory.getModel({
                     type: 'UserStory',
                     context: this.getContext().getDataContext(),
                     success: function(model) {
                         model.getField('ScheduleState').getAllowedValueStore().load({
+                            requester: this,
                             callback: function(records, operation, success) {
-                                this._scheduleStates = Ext.Array.map(records, function(record) {
+                                this._scheduleStates = _.map(records, function(record) {
                                     return record.get('StringValue');
                                 });
                                 deferred.resolve(this._scheduleStates);
@@ -124,7 +147,10 @@
             } else {
                 deferred.resolve(this._scheduleStates);
             }
-            return deferred.promise;
+            return deferred.promise.always(function(obj) {
+                this.recordLoadEnd();
+                return obj;
+            }, this);
         },
 
         _addContent: function(scope) {
@@ -132,9 +158,7 @@
 
             return this.calculateTimeboxInfo().then({
                 success: function() {
-                    if (this.down('#dataContainer')) {
-                        this.down('#dataContainer').destroy();
-                    }
+                    this._checkAndDestroy('#dataContainer');
 
                     this.add({
                         xtype: 'container',
@@ -161,7 +185,7 @@
                                 itemId: 'stats'
                             },
                             {
-                                xtype: 'container',
+                                xtype: 'component',
                                 cls: 'edit',
                                 renderTpl: new Ext.XTemplate('<a class="editLink" href="#">Edit iteration...</a>'),
                                 renderSelectors: { editLink: '.editLink' },
@@ -209,12 +233,20 @@
             };
         },
 
+        _checkAndDestroy: function(itemId) {
+            if (this.down(itemId)) {
+                this.down(itemId).destroy();
+            }
+        },
+
         _getStatusRowData: function() {
-            this.results = {};
             var queryObjects = {
                 hierarchicalrequirement: 'Defects:summary[State],TestCases:summary[LastVerdict],PlanEstimate,AcceptedDate,ScheduleState',
                 defect: 'TestCases:summary[LastVerdict],PlanEstimate,AcceptedDate,ScheduleState'
             };
+            this.results = {};
+
+            this.recordLoadBegin({description: 'getting status row data'});
 
             if (!this._isHsOrTeamEdition()) {
                 Ext.apply(queryObjects, {
@@ -238,6 +270,7 @@
                                 filters: [this.getContext().getTimeboxScope().getQueryFilter()],
                                 limit: Infinity,
                                 autoLoad: true,
+                                requester: this,
                                 listeners: {
                                     load: function(store, data) {
                                         this.results[store.model.prettyTypeName] = data;
@@ -251,12 +284,12 @@
                     }, this);
 
                     if (loadPromises.length === 0) {
-                        if (Rally.BrowserTest) {
-                            Rally.BrowserTest.publishComponentReady(this);
-                        }
+                        this.recordLoadEnd();
+                        this.recordComponentReady();
                     } else {
                         Deft.Promise.all(loadPromises).then({
                             success: function() {
+                                this.recordLoadEnd();
                                 this._displayStatusRows();
                             },
                             scope: this
@@ -502,15 +535,14 @@
             return this._getAcceptanceConfigObject().then({
                 success: function(acceptanceConfigObject) {
                     this.down('#stats').suspendLayouts();
+                    this.down('#stats').removeAll();
                     this._displayStatusRow(acceptanceConfigObject);
                     this._displayStatusRow(this._getDefectsConfigObject());
                     if (!this._isHsOrTeamEdition()) {
                         this._displayStatusRow(this._getTestsConfigObject());
                     }
                     this.down('#stats').resumeLayouts(true);
-                    if (Rally.BrowserTest) {
-                        Rally.BrowserTest.publishComponentReady(this);
-                    }
+                    this.recordComponentReady();
                 },
                 scope: this
             });
@@ -528,7 +560,7 @@
                 if (rowConfig.message) {
                     var message = rowConfig.message;
                     if (rowConfig.learnMore) {
-                        message += ' <a href="http://www.rallydev.com/help/iteration-summary#' + rowConfig.learnMore +
+                        message += ' <a href="https://help.rallydev.com/iteration-summary#' + rowConfig.learnMore +
                                 '" title="Learn More" target="_blank" class="learnMore">Learn More</a>';
                     }
                     items.push({

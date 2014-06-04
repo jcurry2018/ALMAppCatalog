@@ -12,6 +12,7 @@
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
+            'Rally.ui.gridboard.plugin.BoardPolicyDisplayable',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.cardboard.PolicyContainer',
             'Rally.ui.cardboard.CardBoard',
@@ -23,13 +24,7 @@
         appName: 'Kanban',
 
         settingsScope: 'project',
-
-        items: [
-            {
-                xtype: 'container',
-                itemId: 'bodyContainer'
-            }
-        ],
+        useTimeboxScope: true,
 
         config: {
             defaultSettings: {
@@ -49,8 +44,6 @@
         },
 
         launch: function() {
-            this.setLoading();
-
             Rally.data.ModelFactory.getModel({
                 type: 'UserStory',
                 success: this._onStoryModelRetrieved,
@@ -81,8 +74,21 @@
         getSettingsFields: function() {
             return Rally.apps.kanban.Settings.getFields({
                 shouldShowColumnLevelFieldPicker: this._shouldShowColumnLevelFieldPicker(),
-                defaultCardFields: this.getSetting('cardFields')
+                defaultCardFields: this.getSetting('cardFields'),
+                isDndWorkspace: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled,
+                showPageSize: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')
             });
+        },
+
+        /**
+         * Called when any timebox scope change is received.
+         * @protected
+         * @param {Rally.app.TimeboxScope} timeboxScope The new scope
+         */
+        onTimeboxScopeChange: function(timeboxScope) {
+            this.callParent(arguments);
+            this.gridboard.destroy();
+            this.launch();
         },
 
         _shouldShowColumnLevelFieldPicker: function() {
@@ -102,7 +108,7 @@
                 cardboardConfig.columns = this._getColumnConfig(columnSetting);
             }
 
-            this.gridboard = this.down('#bodyContainer').add(this._getGridboardConfig(cardboardConfig));
+            this.gridboard = this.add(this._getGridboardConfig(cardboardConfig));
 
             this.cardboard = this.gridboard.getGridOrBoard();
         },
@@ -116,9 +122,16 @@
                 },
                 'rallygridboardaddnew',
                 {
+                    ptype: 'rallyboardpolicydisplayable',
+                    prefKey: 'kanbanAgreementsChecked',
+                    checkboxConfig: {
+                        boxLabel: 'Agreements'
+                    }
+                },
+                {
                     ptype: 'rallygridboardartifacttypechooser',
                     artifactTypePreferenceKey: 'artifact-types',
-                    showAgreements: true
+                    showAgreements: false
                 },
                 'rallygridboardtagfilter'
             ];
@@ -132,6 +145,8 @@
 
             return {
                 xtype: 'rallygridboard',
+                stateful: false,
+                toggleState: 'board',
                 cardBoardConfig: cardboardConfig,
                 plugins: plugins,
                 context: this.getContext(),
@@ -162,7 +177,7 @@
                     columnHeaderConfig: {
                         headerTpl: column || 'None'
                     },
-                    cardLimit: 100,
+                    enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
                     listeners: {
                         invalidfilter: {
                             fn: this._onInvalidFilter,
@@ -215,8 +230,6 @@
                 listeners: {
                     beforecarddroppedsave: this._onBeforeCardSaved,
                     load: this._onBoardLoad,
-                    filter: this._onBoardFilter,
-                    filtercomplete: this._onBoardFilterComplete,
                     cardupdated: this._publishContentUpdatedNoDashboardLayout,
                     scope: this
                 },
@@ -234,7 +247,8 @@
                 loadMask: false,
                 storeConfig: {
                     context: this.getContext().getDataContext(),
-                    pageSize: this.getSetting('pageSize'),
+                    // pageSize config can be removed with ENABLE_INFINITE_SCROLL_ALL_BOARDS toggle, because we can use the default value
+                    pageSize: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS') ? 15 : this.getSetting('pageSize'),
                     filters: this.getSetting('query') ?
                         [Rally.data.QueryFilter.fromQueryString(this.getSetting('query'))] : []
                 }
@@ -336,14 +350,6 @@
             this._initializeChosenTypes();
         },
 
-        _onBoardFilter: function() {
-            this.setLoading(true);
-        },
-
-        _onBoardFilterComplete: function() {
-            this.setLoading(false);
-        },
-
         _initializeChosenTypes: function() {
             var artifactsPref = this.gridboard.artifactTypeChooserPlugin.artifactsPref;
             var allowedArtifacts = this.gridboard.getHeader().getRight().query('checkboxfield');
@@ -371,6 +377,16 @@
             params[groupByFieldName] = this.cardboard.getColumns()[0].getValue();
         },
 
+        _onBeforeCardSaved: function(column, card, type) {
+            var columnSetting = this._getColumnSetting();
+            if (columnSetting) {
+                var setting = columnSetting[column.getValue()];
+                if (setting && setting.scheduleStateMapping) {
+                    card.getRecord().set('ScheduleState', setting.scheduleStateMapping);
+                }
+            }
+        },
+
         _publishContentUpdated: function() {
             this.fireEvent('contentupdated');
             if (Rally.BrowserTest) {
@@ -380,16 +396,6 @@
 
         _publishContentUpdatedNoDashboardLayout: function() {
             this.fireEvent('contentupdated', {dashboardLayout: false});
-        },
-
-        _onBeforeCardSaved: function(column, card, type) {
-            var columnSetting = this._getColumnSetting();
-            if (columnSetting) {
-                var setting = columnSetting[column.getValue()];
-                if (setting && setting.scheduleStateMapping) {
-                    card.getRecord().set('ScheduleState', setting.scheduleStateMapping);
-                }
-            }
         }
     });
 })();

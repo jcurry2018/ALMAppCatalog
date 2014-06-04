@@ -8,11 +8,16 @@
     Ext.define('Rally.apps.iterationplanningboard.IterationPlanningBoardColumnProgressBar', {
         extend: 'Ext.Component',
         alias: 'widget.rallyiterationplanningboardcolumnprogressbar',
-
-        renderTpl: Ext.create('Rally.ui.renderer.template.progressbar.TimeboxProgressBarTemplate', {
-            height: '14px',
-            width: '80%'
-        }),
+        requires: [
+            'Rally.ui.renderer.template.progressbar.TimeboxProgressBarTemplate'
+        ],
+        constructor: function() {
+            this.renderTpl = Ext.create('Rally.ui.renderer.template.progressbar.TimeboxProgressBarTemplate', {
+                height: '14px',
+                width: '80%'
+            });
+            this.callParent(arguments);
+        },
 
         update: function() {
             var html = this.renderTpl.apply(this._getRenderData());

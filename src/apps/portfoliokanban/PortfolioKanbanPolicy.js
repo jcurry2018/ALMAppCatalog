@@ -36,7 +36,7 @@
 
         _drawNotApplicable: function() {
             this.add({
-                xtype: 'container',
+                xtype: 'component',
                 renderTpl: '<div class="policyContent">Not Applicable</div>'
             });
         },

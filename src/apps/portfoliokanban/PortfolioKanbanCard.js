@@ -24,6 +24,41 @@
 
         },
 
+        config: {
+            customFieldConfig: {
+                UserStories: {
+                    fetch: ['UserStories', 'LeafStoryPlanEstimateTotal', 'LeafStoryCount'],
+                    popoverConfig: {
+                        placement: ['bottom', 'right', 'left', 'top'],
+                        listViewConfig: {
+                            addNewConfig: {
+                                showAddWithDetails: false
+                            },
+                            gridConfig: {
+                                columnCfgs: [
+                                    'FormattedID',
+                                    'Name',
+                                    'Release',
+                                    'Iteration',
+                                    {
+                                        dataIndex: 'ScheduleState', // 'dataIndex' is the actual field name
+                                        text: 'State' // 'text' is the display name
+                                    },
+                                    {
+                                        dataIndex: 'PlanEstimate',
+                                        editor: {
+                                            decimalPrecision: 0
+                                        }
+                                    },
+                                    'Project'
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
         constructor: function(config) {
             config.fields = Ext.Array.union(config.fields || [], ['StateChangedDate']);
             this.callParent(arguments);

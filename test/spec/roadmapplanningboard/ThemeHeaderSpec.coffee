@@ -9,10 +9,16 @@ Ext.require [
 describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
   helpers
     createCardboard: (config) ->
+      roadmapStore = Deft.Injector.resolve('roadmapStore')
+      timelineStore = Deft.Injector.resolve('timelineStore')
       @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-        roadmapId: '413617ecef8623df1391fabc'
-        _retrieveLowestLevelPI: (callback) -> callback.call(@, Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
+        roadmap: roadmapStore.first()
+        timeline: timelineStore.first()
+        types: ['PortfolioItem/Feature']
         renderTo: 'testDiv'
+        typeNames:
+          child:
+            name: 'Feature'
 
       @waitForComponentReady @cardboard
 
@@ -108,66 +114,70 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
       expect(resizeStub).toHaveBeenCalledOnce()
 
   it 'should save the theme when the theme is changed', ->
-    @createCardboard().then =>
+    if !Ext.isGecko
+      @createCardboard().then =>
 
-      themeHeader = @cardboard.getColumns()[1].getColumnHeader().down('roadmapthemeheader').down('rallydetailfieldcontainer')
-      record = themeHeader.record
-      @saveStub = @stub record, 'save'
+        themeHeader = @cardboard.getColumns()[1].getColumnHeader().down('roadmapthemeheader')
+        record = themeHeader.record
+        @saveStub = @stub record, 'save'
 
-      themeHeader.goToEditMode()
-      themeHeader.editor.setValue 'My Theme'
-      themeHeader.editor.blur()
-      themeHeader.goToViewMode()
+        themeHeader.themeContainer.goToEditMode()
+        textField = themeHeader.themeContainer.down('textareafield')
+        textField.setValue 'My Theme'
+        textField.blur()
+        themeHeader.themeContainer.goToViewMode()
 
-      expect(@saveStub).toHaveBeenCalledOnce()
-      expect(record.get('theme')).toBe 'My Theme'
+        expect(@saveStub).toHaveBeenCalledOnce()
+        expect(record.get('theme')).toBe 'My Theme'
 
   it 'should fire headersizechanged when editor mode switches back to view mode',  ->
-    @createCardboard().then =>
-      # TODO - srly, wtf?
-      themeHeader = @cardboard.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
-      themeHeader.themeContainer.goToEditMode()
-      textField = themeHeader.themeContainer.down('textareafield')
-      textField.setValue 'Updated theme'
+    if !Ext.isGecko
+      @createCardboard().then =>
+        # TODO - srly, wtf?
+        themeHeader = @cardboard.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
+        themeHeader.themeContainer.goToEditMode()
+        textField = themeHeader.themeContainer.down('textareafield')
+        textField.setValue 'Updated theme'
 
-      # Allows us to verify whether headersizechanged was fired
-      resizeStub = sinon.stub()
-      @cardboard.on 'headersizechanged', resizeStub
+        # Allows us to verify whether headersizechanged was fired
+        resizeStub = sinon.stub()
+        @cardboard.on 'headersizechanged', resizeStub
 
-      # fieldContainer's refresh uses a defer - use afterDraw stub to push our checks and cleanup past the defer
-      afterDrawStub = sinon.stub()
-      themeHeader.themeContainer.afterDraw = afterDrawStub
+        # fieldContainer's refresh uses a defer - use afterDraw stub to push our checks and cleanup past the defer
+        afterDrawStub = sinon.stub()
+        themeHeader.themeContainer.afterDraw = afterDrawStub
 
-      textField.blur()
+        textField.blur()
 
-      @once(
-        condition: ->
-          afterDrawStub.called
-      ).then =>
-        # In IE8, resizeStub may have been called 1 or 2 times (timing-dependent), so just verify it was called
-        expect(resizeStub.called).toBeTruthy()
+        @once(
+          condition: ->
+            afterDrawStub.called
+        ).then =>
+          # In IE8, resizeStub may have been called 1 or 2 times (timing-dependent), so just verify it was called
+          expect(resizeStub.called).toBeTruthy()
 
   it 'should not fire headersizechanged until editor has been deleted', ->
-    @createCardboard().then =>
+    if !Ext.isGecko
+      @createCardboard().then =>
 
-      themeHeader = @cardboard.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
+        themeHeader = @cardboard.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
 
-      themeHeader.themeContainer.goToEditMode()
-      textField = themeHeader.themeContainer.down('textareafield')
-      textField.setValue 'Updated theme'
+        themeHeader.themeContainer.goToEditMode()
+        textField = themeHeader.themeContainer.down('textareafield')
+        textField.setValue 'Updated theme'
 
-      # Sorry! -- expectation lexically ordered before action so that we can verify precise timing of setEditMode() and headersizechanged
-      @cardboard.on 'headersizechanged', ->
-        expect(themeHeader.themeContainer.getEditMode()).toBeFalsy()
+        # Sorry! -- expectation lexically ordered before action so that we can verify precise timing of setEditMode() and headersizechanged
+        @cardboard.on 'headersizechanged', ->
+          expect(themeHeader.themeContainer.getEditMode()).toBeFalsy()
 
-      # fieldContainer's refresh uses a defer - use afterDraw stub to push our checks and cleanup past the defer
-      afterDrawStub = sinon.stub()
-      themeHeader.themeContainer.afterDraw = afterDrawStub
+        # fieldContainer's refresh uses a defer - use afterDraw stub to push our checks and cleanup past the defer
+        afterDrawStub = sinon.stub()
+        themeHeader.themeContainer.afterDraw = afterDrawStub
 
-      textField.blur()
+        textField.blur()
 
-      @once(
-        condition: ->
-          afterDrawStub.called
-      ).then =>
-        @cardboard.destroy()
+        @once(
+          condition: ->
+            afterDrawStub.called
+        ).then =>
+          @cardboard.destroy()

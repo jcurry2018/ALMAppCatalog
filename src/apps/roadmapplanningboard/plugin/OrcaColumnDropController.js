@@ -5,120 +5,96 @@
         extend: 'Rally.ui.cardboard.plugin.ColumnDropController',
         alias: 'plugin.orcacolumndropcontroller',
 
+        config: {
+            dragDropEnabled: true
+        },
+
         init: function (column) {
             this.callParent(arguments);
             this.cmp = column;
         },
 
-        _addDropTarget: function () {
-            var column = this.cmp;
-            this.dropTarget = Ext.create('Rally.apps.roadmapplanningboard.OrcaColumnDropTarget', this.getDndContainer(), {
-                ddGroup: column.ddGroup,
-                column: column
-            });
-            return this.dropTarget;
+        mayDrop: function (cards) {
+            return this.dragDropEnabled;
         },
 
         canDragDropCard: function (card) {
-            return true;
+            return this.mayDrop() && this.callParent(arguments);
         },
 
-        onCardDropped: function (dragData, index) {
-            var relativeRank, relativeRecord, type;
+        handleBeforeCardDroppedSave: function (options) {
+            var sourceIsBacklog = this._isBacklogColumn(options.sourceColumn);
+            var destIsBacklog = this._isBacklogColumn(options.column);
+            var draggingWithinBacklog = sourceIsBacklog && destIsBacklog;
 
-            var card = dragData.card;
-            var record = card.getRecord();
-            var sourceColumn = dragData.column;
-            var sourceIndex = sourceColumn.findCardInfo(record).index;
-            var params = {};
-            var column = this.cmp;
-            var records = column.getRecords();
-            var backlogColumn = (!sourceColumn.planRecord && !column.planRecord);
-
-            // Do default action if this is a backlog column
-            if (backlogColumn) {
-                this.callParent(arguments);
-                return;
+            if (!destIsBacklog) {
+                options.index = this._getMappedIndex(options);
             }
 
-            if (column.mayRank() && isNaN(index)) {
-                index = records.length;
+            if (this.canDragDropCard(options.card) && !draggingWithinBacklog) {
+                options.card.removeCls(this.self.cardDraggableCls);
             }
-            if (records.length && column.mayRank() && (sourceColumn === column || column.enableCrossColumnRanking)) {
-                if (index === 0) {
-                    relativeRecord = records[index];
-                    relativeRank = 'rankAbove';
-                } else {
-                    relativeRecord = records[index - 1];
-                    relativeRank = 'rankBelow';
-                }
 
-                params[relativeRank] = Rally.util.Ref.getRelativeUri(relativeRecord.getUri());
+            if(draggingWithinBacklog) {
+                return this.callParent(arguments);
+            } else if (sourceIsBacklog) {
+                return this._moveOutOfBacklog(options);
+            } else if (destIsBacklog) {
+                return this._moveIntoBacklog(options);
+            } else {
+                return this._moveFromColumnToColumn(options);
             }
-            this._addDroppedCard(sourceColumn, card, relativeRecord, relativeRank);
-            type = sourceColumn === column ? "reorder" : "move";
+        },
 
-            var options = {
-                card: card,
-                params: params,
-                record: record,
-                sourceColumn: sourceColumn,
-                sourceIndex: sourceIndex,
-                column: column,
-                records: column.getRecords(),
-                relativeRank: relativeRank,
-                relativeRecord: relativeRecord
-            };
-            if (column.fireEvent("beforecarddroppedsave", column, card, type) !== false) {
-                if (!sourceColumn.planRecord) {
-                    return this._moveOutOfBacklog(options);
-                } else if (!column.planRecord) {
-                    return this._moveIntoBacklog(options);
-                } else {
-                    return this._moveFromColumnToColumn(options);
-                }
+        _isBacklogColumn: function(column) {
+            return !column.planRecord;
+        },
+
+        /**
+         * Calculate the index to insert a new feature in the features array.
+         * This could be different than the index in the the cards array.
+         * @param {Rally.ui.cardboard.Card[]} cards
+         * @param {Number} destCardIndex
+         * @returns {Number}
+         * @private
+         */
+        _getMappedIndex: function (options) {
+            var features = this._getFilteredFeatures(options.column.planRecord, options.card.getRecord());
+
+            var cardToInsertBefore = options.column.getCards()[options.index + 1];
+            if (!cardToInsertBefore) {
+                return features.length;
             }
+
+            // find the index of the record in planRecord Feature
+            return _.findIndex(features, function (feature) {
+                return cardToInsertBefore.getRecord().get('_refObjectUUID') === feature.id;
+            });
+        },
+
+        getRefForRelativeRecord: function (relativeRecord) {
+            return this._getFeatureRef(relativeRecord);
         },
 
         _moveIntoBacklog: function (options) {
-
             var planRecord = options.sourceColumn.planRecord;
 
-            planRecord.set('features', _.filter(planRecord.get('features'), function (feature) {
-                return feature.id !== '' + options.record.getId();
-            }));
+            this._removeFeature(planRecord, options.record);
 
             // Remove card from plan column
             planRecord.save({
                 requester: options.column,
+                callback: function() {
+                    this._afterCardDropComplete(options);
+                },
                 scope: this
             });
-
-            // Rank card on backlog column
-            if (options.column.fireEvent('beforecarddroppedsave', options.column, options.card)) {
-                options.record.save({
-                    requester: options.column,
-                    callback: function (updatedRecord, operation) {
-                        if (operation.success) {
-                            return this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, "move");
-                        } else {
-                            return this._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
-                        }
-                    },
-                    scope: this,
-                    params: options.params
-                });
-            }
         },
 
         _moveOutOfBacklog: function (options) {
-
             var planRecord = options.column.planRecord;
 
-            planRecord.set('features', planRecord.get('features').concat({
-                id: options.record.getId().toString(),
-                ref: options.record.getUri()
-            }));
+            this._addFeature(planRecord, options.record, options.index);
 
             planRecord.save({
                 success: function () {
@@ -127,46 +103,83 @@
                 failure: function (response, opts) {
                     return this._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
                 },
+                callback: function () {
+                    this._afterCardDropComplete(options);
+                },
                 requester: options.column,
                 scope: this,
                 params: options.params
             });
         },
 
-        _moveFromColumnToColumn: function (options) {
-
+        _moveFromColumnToColumn: function(options) {
+            var context = this.cmp.context || Rally.environment.getContext();
             var srcPlanRecord = options.sourceColumn.planRecord;
             var destPlanRecord = options.column.planRecord;
 
-            srcPlanRecord.set('features', _.filter(srcPlanRecord.get('features'), function (feature) {
-                return feature.id !== '' + options.record.getId();
-            }));
-            destPlanRecord.get('features').push({
-                id: options.record.getId().toString(),
-                ref: options.record.getUri()
-            });
+            this._removeFeature(srcPlanRecord, options.record);
+            this._addFeature(destPlanRecord, options.record, options.index);
 
-            return Ext.Ajax.request({
+            Ext.Ajax.request({
                 method: 'POST',
                 withCredentials: true,
                 url: this._constructUrl(srcPlanRecord.get('roadmap'), srcPlanRecord.getId(), destPlanRecord.getId()),
                 jsonData: {
-                    id: options.record.getId() + '',
-                    ref: options.record.getUri()
+                    id: options.record.get('_refObjectUUID'),
+                    ref: this._getFeatureRef(options.record)
                 },
-                success: function () {
-                    var type;
-
-                    type = options.sourceColumn === options.column ? "reorder" : "move";
-                    srcPlanRecord.dirty = false; // Make sure the record is clean
-                    return this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, type);
+                success: function() {
+                    srcPlanRecord.commit();
+                    if (srcPlanRecord !== destPlanRecord) {
+                        destPlanRecord.commit();
+                    }
+                    return this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
                 },
-                failure: function (response, opts) {
-                    return this._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
+                failure: function(response, opts) {
+                    return this._onDropSaveFailure(options, response);
+                },
+                callback: function() {
+                    this._afterCardDropComplete(options);
                 },
                 scope: this,
-                params: options.params
+                params: Ext.apply({ workspace: context.getWorkspace()._refObjectUUID}, options.params)
             });
+        },
+
+        _onDropSaveFailure: function (options, operation) {
+            this.cmp.ownerCardboard.refresh({rebuildBoard: true});
+        },
+
+        _afterCardDropComplete: function (options) {
+            this.addDragDropHandle(options.card);
+        },
+
+        _removeFeature: function (planRecord, featureRecord) {
+            planRecord.set('features', this._getFilteredFeatures(planRecord, featureRecord));
+        },
+
+        _getFilteredFeatures: function (planRecord, featureRecord) {
+            return _.reject(planRecord.get('features'), function (feature) {
+                return feature.id === featureRecord.get('_refObjectUUID');
+            });
+        },
+
+        _getFeatureRef: function(featureRecord) {
+            var featureId = featureRecord.get('_refObjectUUID');
+            return '/' + featureRecord.getRef().reference.type  + '/' + featureId;
+        },
+
+        _addFeature: function (planRecord, featureRecord, index) {
+            var features = _.clone(planRecord.get('features'));
+
+            var featureId = featureRecord.get('_refObjectUUID');
+
+            features.splice(index, 0, {
+                id: featureId,
+                ref: this._getFeatureRef(featureRecord)
+            });
+
+            planRecord.set('features', features);
         },
 
         _constructUrl: function (roadmap, sourceId, destinationId) {
@@ -175,76 +188,6 @@
                 destinationId: destinationId,
                 roadmap: roadmap
             });
-        },
-
-        _onDropSaveSuccess: function (column, sourceColumn, card, updatedRecord, type) {
-            if (column) {
-                return column.fireEvent('aftercarddroppedsave', this, card, type);
-            }
-        },
-
-        _onDropSaveFailure: function (column, sourceColumn, record, card, sourceIndex, errorSource) {
-            if (errorSource.error && errorSource.error.errors && errorSource.error.errors.length) {
-                Rally.ui.notify.Notifier.showError({
-                    message: errorSource.error.errors[0]
-                });
-            }
-            return sourceColumn.addCard(card, sourceIndex, true);
-        },
-
-        _addDragZone: function () {
-            var column;
-
-            column = this.cmp;
-            this._dragZone = Ext.create('Ext.dd.DragZone', this.getDndContainer(), {
-                ddGroup: column.ddGroup,
-
-                onBeforeDrag: function (data, e) {
-                    var avatar;
-
-                    avatar = Ext.fly(this.dragElId);
-                    avatar.setWidth(data.targetWidth);
-                    return column.fireEvent('cardpickedup', data.card);
-                },
-                proxy: Ext.create('Ext.dd.StatusProxy', {
-                    animRepair: true,
-                    shadow: false,
-                    dropNotAllowed: "cardboard"
-                }),
-
-                getDragData: function (e) {
-                    var avatar, dragEl, sourceEl;
-
-                    dragEl = e.getTarget('.drag-handle', 10);
-                    if (dragEl) {
-                        sourceEl = e.getTarget('.rui-card', 10) || e.getTarget('.rui-card-slim', 10);
-                        avatar = sourceEl.cloneNode(true);
-                        avatar.id = Ext.id();
-                        return {
-                            targetWidth: Ext.fly(sourceEl).getWidth(),
-                            ddel: avatar,
-                            sourceEl: sourceEl,
-                            repairXY: Ext.fly(sourceEl).getXY(),
-                            card: Ext.ComponentManager.get(sourceEl.id),
-                            column: column
-                        };
-                    }
-                },
-
-                getRepairXY: function () {
-                    return this.dragData.repairXY;
-                }
-            });
-        },
-
-        destroy: function () {
-            if (this._dragZone) {
-                this._dragZone.destroy();
-                if (this._dragZone.proxy) {
-                    this._dragZone.proxy.destroy();
-                }
-            }
-            return this.callParent(arguments);
         }
     });
 

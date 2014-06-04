@@ -33,6 +33,11 @@
                 pickerAlign: 'tl-bl',
                 selectedTextLabel: 'Selected Teams',
                 selectionKey: 'ObjectID',
+                storeLoadOptions: {
+                    params: {
+                        order: 'Name ASC'
+                    }
+                },
                 width: 300
             };
         },

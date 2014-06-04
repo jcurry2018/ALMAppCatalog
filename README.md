@@ -2,7 +2,7 @@
 
 A collection of extensible apps from Rally's [App Catalog](https://help.rallydev.com/app-catalog).
 
-2.0rc2 release - [Download](https://github.com/RallyApps/app-catalog/releases/download/2.0rc2/2.0rc2.zip)
+2.0rc3 release - [Download](https://github.com/RallyApps/app-catalog/releases/download/2.0rc3/2.0rc3.zip)
 
 ## License
 
@@ -11,14 +11,12 @@ Copyright (c) Rally Software Development Corp. 2013 Distributed under the MIT Li
 ## Contents
 
 ### SDK 2 Apps
-These apps are built using [App SDK 2.0rc2](https://help.rallydev.com/apps/2.0rc1/doc/).
+These apps are built using [App SDK 2.0rc3](https://help.rallydev.com/apps/2.0rc3/doc/).
 
 * [Blocked Work](https://help.rallydev.com/blocked-work) - [[src](src/apps/blockedwork)]
 * Custom Board - [[src](src/apps/board)]
 * [Custom Grid](https://help.rallydev.com/custom-grid) - [[src](src/apps/grid)]
 * [Defect Summary Matrix](https://help.rallydev.com/defect-summary-matrix) - [[src](src/apps/defectsummarymatrix)]
-* Item Detail - [[src](src/apps/itemdetail)]
-* Iteration Burndown - [[src](src/apps/charts/iterationburndownminimal)]
 * [Iteration Planning Board](https://help.rallydev.com/iteration-planning-board) - [[src](src/apps/iterationplanningboard)]
 * [Iteration Summary](https://help.rallydev.com/iteration-summary) - [[src](src/apps/iterationsummary)]
 * [Iteration Tracking Board](https://help.rallydev.com/iteration-tracking-board) - [[src](src/apps/iterationtrackingboard)]
@@ -27,9 +25,13 @@ These apps are built using [App SDK 2.0rc2](https://help.rallydev.com/apps/2.0rc
 * Portfolio CFD - [[src](src/apps/charts/rpm/cfd)]
 * [Portfolio Hierarchy](https://help.rallydev.com/portfolio-hierarchy) - [[src](src/apps/portfoliohierarchy)]
 * [Portfolio Kanban Board](https://help.rallydev.com/portfolio-kanban-board) - [[src](src/apps/portfoliokanban)]
+* Print Story Cards - [[src](src/apps/printcards/printstorycards)]
+* Print Task Cards - [[src](src/apps/printcards/printtaskcards)]
 * Project CFD - [[src](src/apps/charts/cfd/project)]
 * [Recent Activity](https://help.rallydev.com/recent-activity) - [[src](src/apps/recentactivity)]
 * Release Burndown - [[src](src/apps/charts/burndown)]
+* Release Summary - [[src](src/apps/releasesummary)]
+* [Roadmap Planning Board](https://help.rallydev.com/plan-roadmaps) - [[src](src/apps/roadmapplanningboard)]
 * [Story Hierarchy](https://help.rallydev.com/story-hierarchy) - [[src](src/apps/storyhierarchy)]
 * Team Board - [[src](src/apps/teamboard)]
 * [Tip of the Day](https://help.rallydev.com/tip-day) - [[src](src/apps/tipoftheday)]
@@ -92,7 +94,6 @@ These apps are built using [App SDK 1](https://help.rallydev.com/app-sdk) and ea
 
 The following links will be helpful when developing apps:
 
-* [Getting Started](https://help.rallydev.com/apps/2.0rc2/doc/#!/guide/getting_started)
-* [Rally App Builder](https://help.rallydev.com/apps/2.0rc2/doc/#!/guide/app_builder)
-* [App SDK 2.0rc2 API Docs](https://help.rallydev.com/apps/2.0rc2/doc/)
-
+* [Getting Started](https://help.rallydev.com/apps/2.0rc3/doc/#!/guide/getting_started)
+* [Rally App Builder](https://help.rallydev.com/apps/2.0rc3/doc/#!/guide/app_builder)
+* [App SDK 2.0rc3 API Docs](https://help.rallydev.com/apps/2.0rc3/doc/)

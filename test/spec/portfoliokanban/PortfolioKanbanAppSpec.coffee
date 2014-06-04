@@ -1,54 +1,66 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.test.helpers.CardBoard'
+]
+
 describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   helpers
-
-    _createApp: (settings) ->
-      globalContext = Rally.environment.getContext()
-      context = Ext.create 'Rally.app.Context',
-        initialValues:
-          project:globalContext.getProject()
-          workspace:globalContext.getWorkspace()
-          user:globalContext.getUser()
-          subscription:globalContext.getSubscription()
-
-      options =
-        context: context,
+    _createApp: (config, isFullPageApp = false) ->
+      @app = Ext.create 'Rally.apps.portfoliokanban.PortfolioKanbanApp', Ext.merge
+        context: Ext.create 'Rally.app.Context',
+          initialValues:
+            project: Rally.environment.getContext().getProject()
+            workspace: Rally.environment.getContext().getWorkspace()
+            user: Rally.environment.getContext().getUser()
+            subscription: Rally.environment.getContext().getSubscription(),
         renderTo: 'testDiv'
-
-      options.settings = settings if settings?
-
-      @app = Ext.create('Rally.apps.portfoliokanban.PortfolioKanbanApp', options)
+        height: 500
+        appContainer:
+          dashboard:
+            isFullPageApp: isFullPageApp
+      , config
 
       @waitForComponentReady @app
 
     _getTextsForElements: (cssQuery) ->
       Ext.Array.map(@app.getEl().query(cssQuery), (el) -> el.innerHTML).join('__')
 
-    _createAppAndWaitForVisible: (callback) ->
-      @_createApp(project: '/project/431439')
-      @waitForVisible(css: '.progress-bar-container.field-PercentDoneByStoryCount').then =>
-        callback()
-
     _clickAndWaitForVisible: (fieldName) ->
       @click(css: '.progress-bar-container.field-' + fieldName).then =>
         @waitForVisible(css: '.percentDonePopover')
 
+    waitForAppReady: ->
+      readyStub = @stub()
+      Rally.environment.getMessageBus().subscribe Rally.Message.piKanbanBoardReady, readyStub
+      @waitForCallback readyStub
 
   beforeEach ->
-
     Rally.environment.getContext().context.subscription.Modules = ['Rally Portfolio Manager']
 
-    @ajax.whenQuerying('typedefinition').respondWith([
-      {
-        '_ref':'/typedefinition/1'
-        ObjectID:'1'
-        Ordinal:1
-        Name:'Feature'
-        TypePath:'PortfolioItem/Feature'
-      }
-    ])
+    @theme = Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemTheme')
+    @initiative = Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemInitiative')
+    @feature = Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemFeature')
+
+    @typeRequest = @ajax.whenQuerying('typedefinition').respondWith [
+      @theme
+      @initiative
+      @feature
+    ]
+
+    @featureStates = [ _type: 'State', Name: 'FeatureColumn1', _ref: '/feature/state/1', WIPLimit: 4 ]
+    @initiativeStates = [
+      { _type: 'State', Name: 'InitiativeColumn1', _ref: '/initiative/state/1', WIPLimit: 1 }
+      { _type: 'State', Name: 'InitiativeColumn2', _ref: '/initiative/state/2', WIPLimit: 2 }
+    ]
+    @themeStates = [
+      { _type: 'State', Name: 'ThemeColumn1', _ref: '/theme/state/1', WIPLimit: 1 }
+      { _type: 'State', Name: 'ThemeColumn2', _ref: '/theme/state/2', WIPLimit: 2 }
+      { _type: 'State', Name: 'ThemeColumn3', _ref: '/theme/state/3', WIPLimit: 2 }
+    ]
+
+    @ajax.whenQuerying('state').respondWith @featureStates
 
   afterEach ->
     if @app?
@@ -57,90 +69,60 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
       @app.destroy()
 
-
-  it 'should create popover when the progress bar is clicked', ->
-    @ajax.whenQuerying('state').respondWith([
-      {
-      '_type': "State"
-      'Name': "Column1"
-      '_ref': '/state/1'
-      'WIPLimit': 4
-      }
-    ])
-    feature =
-      ObjectID: 878
-      _ref: '/portfolioitem/feature/878'
-      FormattedID: 'F1'
-      Name: 'Name of first PI'
-      Owner:
-        _ref: '/user/1'
-        _refObjectName: 'Name of Owner'
-      State: '/state/1'
-      Summary:
-        Discussion:
-          Count: 1
-
-    @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
-
-    @_createAppAndWaitForVisible =>
-      @_clickAndWaitForVisible('PercentDoneByStoryCount').then =>
-        expect(Ext.select('.percentDonePopover').elements.length).toEqual(1)
-
-  it 'loads type with ordinal of 1 if no type setting is provided', ->
-
-    @_createApp().then (app) =>
-
-      expect(app.currentType.get('_ref')).toEqual '/typedefinition/1'
-      expect(app.currentType.get('Name')).toEqual 'Feature'
-
   it 'shows help component', ->
-    @_createApp().then (app) =>
+    @_createApp().then =>
+      expect(@app.gridboard).toHaveHelpComponent()
 
-      expect(@app.down('#header').getEl().down('.rally-help-icon').dom.innerHTML).toContain 'Help &amp; Training'
+  it 'does not show help component when is full page app', ->
+    @_createApp({}, true).then =>
+      expect(@app.gridboard).not.toHaveHelpComponent()
 
-  it 'shows ShowPolicies checkbox', ->
-    @_createApp().then (app) =>
+  it 'should show an Add New button', ->
+    @_createApp().then =>
+      expect(Ext.query('.add-new a.new').length).toBe 1
 
-      expect(@app.down('#header').el.down('input[type="button"]')).toHaveCls 'showPoliciesCheckbox'
+  it 'should not show an Add New button without proper permissions', ->
+    @stub Rally.environment.getContext().getPermissions(), 'isProjectEditor', -> false
+    @_createApp().then =>
+      expect(Ext.query('.add-new a').length).toBe 0
+
+  it 'shows a filter button', ->
+    @_createApp().then =>
+      expect(Ext.query('.gridboard-filter-control').length).toBe 1
+
+  it 'shows a portfolio item type picker', ->
+    @_createApp().then =>
+      expect(@app.piTypePicker.isVisible()).toBe true
 
   it 'creates columns from states', ->
-    @ajax.whenQuerying('state').respondWith([
-      {
-        '_type': "State"
-        'Name': "Column1"
-        '_ref': '/state/1'
-        'WIPLimit': 4
-      },
-      {
-        '_type': "State"
-        'Name': "Column2"
-        '_ref': '/state/2'
-        'WIPLimit': 3
-      }
-    ])
+    @ajax.whenQuerying('state').respondWith @initiativeStates
 
-    @_createApp(type:'/typedefinition/1').then =>
-      expect(@app.down('rallycardboard').getColumns().length).toEqual 3
+    @_createApp(
+      settings:
+        type: Rally.util.Ref.getRelativeUri(@initiative._ref)
+    ).then =>
+      expect(@app.cardboard.getColumns().length).toEqual @initiativeStates.length + 1
 
   it 'shows message if no states are found', ->
     @ajax.whenQuerying('state').respondWith()
 
-    @_createApp().then (app) =>
-
+    @_createApp().then =>
       expect(@app.el.dom.textContent).toContain "This Type has no states defined."
 
   it 'displays filter icon', ->
-    @_createApp().then (app) =>
+    @_createApp().then =>
+      expect(@app.getEl().down('.filterInfo') instanceof Ext.Element).toBeTruthy()
 
-      expect(app.getEl().down('.filterInfo') instanceof Ext.Element).toBeTruthy()
+  it 'does not display a filter icon when panel config "true"', ->
+    @_createApp(null, "true").then =>
+      expect(@app.getEl().down('.filterInfo')).toBeFalsy()
 
   it 'shows project setting label if following a specific project scope', ->
-
     @_createApp(
-      project: '/project/431439'
-    ).then (app) =>
-
-      app.down('rallyfilterinfo').tooltip.show()
+      settings:
+        project: '/project/431439'
+    ).then =>
+      @app.down('rallyfilterinfo').tooltip.show()
 
       tooltipContent = Ext.get Ext.query('.filterInfoTooltip')[0]
 
@@ -155,23 +137,14 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       }
     ])
 
-    @_createApp().then (app) =>
-
-      app.down('rallyfilterinfo').tooltip.show()
+    @_createApp().then =>
+      @app.down('rallyfilterinfo').tooltip.show()
 
       tooltipContent = Ext.get Ext.query('.filterInfoTooltip')[0]
 
       expect(tooltipContent.dom.textContent).toContain 'Following Global Project Setting'
 
   it 'shows Discussion on Card', ->
-    @ajax.whenQuerying('state').respondWith([
-      {
-        '_type': "State"
-        'Name': "Column1"
-        '_ref': '/state/1'
-        'WIPLimit': 4
-      }
-    ])
     feature =
       ObjectID: 878
       _ref: '/portfolioitem/feature/878'
@@ -180,25 +153,17 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       Owner:
         _ref: '/user/1'
         _refObjectName: 'Name of Owner'
-      State: '/state/1'
+      State: '/feature/state/1'
       Summary:
         Discussion:
           Count: 1
 
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
 
-    @_createApp().then (app) =>
-      expect(app.down('rallycardboard').getColumns()[1].getCards()[0].getEl().down('.status-field.Discussion')).not.toBeNull()
+    @_createApp().then =>
+      expect(@app.cardboard.getColumns()[1].getCards()[0].getEl().down('.status-field.Discussion')).not.toBeNull()
 
   it 'displays mandatory fields on the cards', ->
-    @ajax.whenQuerying('state').respondWith([
-      {
-        '_type': "State"
-        'Name': "Column1"
-        '_ref': '/state/1'
-        'WIPLimit': 4
-      }
-    ])
     feature =
       ObjectID: 878
       _ref: '/portfolioitem/feature/878'
@@ -207,20 +172,18 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       Owner:
         _ref: '/user/1'
         _refObjectName: 'Name of Owner'
-      State: '/state/1'
+      State: '/feature/state/1'
 
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
 
-    @_createApp().then (app) =>
-
+    @_createApp().then =>
       expect(@_getTextsForElements('.field-content')).toContain feature.Name
       expect(@_getTextsForElements('.id')).toContain feature.FormattedID
-      expect(app.getEl().query('.Owner .rui-field-value')[0].title).toContain feature.Owner._refObjectName
+      expect(@app.getEl().query('.Owner .rui-field-value')[0].title).toContain feature.Owner._refObjectName
 
   it 'creates loading mask with unique id', ->
-    @_createApp().then (app) =>
-
-      expect(app.getMaskId()).toBe('btid-portfolio-kanban-board-load-mask-' + app.id)
+    @_createApp().then =>
+      expect(@app.getMaskId()).toBe('btid-portfolio-kanban-board-load-mask-' + @app.id)
 
   it 'should display an error message if you do not have RPM turned on ', ->
     Rally.environment.getContext().context.subscription.Modules = []
@@ -228,4 +191,101 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
     @_createApp().then =>
       expect(loadSpy.callCount).toBe 0
-      expect(@app.down('#bodyContainer').getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
+      expect(@app.getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
+
+  it 'should be able to scroll forwards', ->
+    @_createApp(
+      renderTo: Rally.test.helpers.CardBoard.smallContainerForScrolling()
+    ).then =>
+      Rally.test.helpers.CardBoard.scrollForwards @app.down('rallycardboard'), @
+
+  it 'should be able to scroll backwards', ->
+    @_createApp(
+      renderTo: Rally.test.helpers.CardBoard.smallContainerForScrolling()
+    ).then =>
+      Rally.test.helpers.CardBoard.scrollBackwards @app.down('rallycardboard'), @
+
+  describe 'when the type is changed', ->
+
+    beforeEach ->
+      @ajax.whenQuerying('state').respondWith(@initiativeStates)
+
+      @_createApp(
+        settings:
+          type: Rally.util.Ref.getRelativeUri(@initiative._ref)
+      ).then =>
+        @ajax.whenQuerying('state').respondWith(@themeStates)
+        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@theme._ref))
+        @waitForAppReady()
+
+    it 'should update the cardboard types', ->
+      expect(@app.cardboard.types).toEqual [ @theme.TypePath ]
+
+    it 'should refresh the cardboard with columns matching the states of the new type', ->
+      expect(@app.cardboard.getColumns().length).toBe @themeStates.length + 1
+      _.each @app.cardboard.getColumns().slice(1), (column, index) =>
+        expect(column.value).toBe '/theme/state/' + (index + 1)
+
+    it 'should display policy header if Show Policies previously checked', ->
+      policyCheckbox = this.app.gridboard.getPlugin('boardPolicyDisplayable')
+      expect(policyCheckbox.isChecked()).toBe false
+      expect(_.every(_.invoke(Ext.ComponentQuery.query('#policyHeader'), 'isVisible', true))).toBe false
+      @click(css: '.agreements-checkbox input').then =>
+        expect(policyCheckbox.isChecked()).toBe true
+        afterColumnRenderStub = @stub()
+        @app.gridboard.getGridOrBoard().on('aftercolumnrender', afterColumnRenderStub)
+        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@feature._ref))
+        @waitForCallback(afterColumnRenderStub).then =>
+          expect(_.every(_.invoke(Ext.ComponentQuery.query('#policyHeader'), 'isVisible', true))).toBe true
+
+  describe 'settings', ->
+    it 'should contain a query setting', ->
+      @_createApp().then =>
+        expect(@app).toHaveSetting 'query'
+
+    it 'should use query setting to filter board', ->
+      @_createApp(
+        settings:
+          query: '(Name = "abc")'
+      ).then =>
+        expect(@getAppStore()).toHaveFilter 'Name', '=', 'abc'
+
+    it 'loads type with ordinal of 1 if no type setting is provided', ->
+      @_createApp().then =>
+        expect(@getAppStore()).toHaveFilter 'PortfolioItemType', '=', Rally.util.Ref.getRelativeUri(@feature._ref)
+
+    it 'should have a project setting', ->
+      @_createApp().then =>
+        expect(@app).toHaveSetting 'project'
+
+    it 'should pass app scoping information to cardboard', ->
+      @_createApp().then =>
+        expect(@app.cardboard.getContext()).toBe @app.getContext()
+
+    helpers
+      getAppStore: ->
+        @app.cardboard.getColumns()[0].store
+
+    describe 'field picker', ->
+      it 'should show', ->
+        @_createApp().then =>
+          expect(@app.down('#fieldpickerbtn').isVisible()).toBe true
+
+      it 'should have use the legacy field setting if available', ->
+        @_createApp(
+          settings:
+            fields: 'Field1,Field2'
+        ).then =>
+          expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['Field1','Field2']
+
+  describe 'sizing', ->
+    it 'should set an initial gridboard height', ->
+      @_createApp().then =>
+        expect(@app.down('rallygridboard').getHeight()).toBe @app.getHeight()
+
+    it 'should update the board height', ->
+      @_createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        currentHeight = gridBoard.getHeight()
+        @app.setHeight @app.getHeight() + 10
+        expect(gridBoard.getHeight()).toBe currentHeight + 10

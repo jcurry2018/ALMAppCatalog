@@ -6,37 +6,23 @@
         cls: "portfolio-cfd-app",
         
         requires: [
-            'Rally.ui.chart.Chart'
+            'Rally.ui.chart.Chart',
+            'Rally.apps.charts.Colors',
+            'Rally.apps.charts.IntegrationHeaders'
         ],
 
         help: {
             cls: 'portfolio-cfd-help-container',
             id: 274
         },
+        integrationHeaders : {
+            name: 'Portfolio Item CFD'
+        },
 
         chartComponentConfig: {
             xtype: "rallychart",
 
-            updateBeforeRender: function () {
-                var calcConfig = this.calculatorConfig,
-                    chartColors = this.chartColors;
-
-                var scheduleStatesLength = calcConfig.scheduleStates.length,
-                    firstScheduleState = calcConfig.scheduleStates[0],
-                    lastScheduleState = calcConfig.scheduleStates[scheduleStatesLength - 1];
-
-                var firstColor = chartColors[0],
-                    lastColor = chartColors[chartColors.length - 1],
-                    firstCustomColor = '#B3B79A',
-                    secondCustomColor = '#5C9ACB';
-
-                if (firstScheduleState !== "Defined" && firstColor !== firstCustomColor) {
-                    chartColors.unshift(firstCustomColor);
-                }
-                if (lastScheduleState !== "Accepted" && lastColor !== secondCustomColor) {
-                    chartColors.push(secondCustomColor);
-                }
-            },
+            chartColors: Ext.create("Rally.apps.charts.Colors").cumulativeFlowColors(),
 
             queryErrorMessage: "No data to display.<br /><br />Most likely, stories are either not yet available or started for this portfolio item.",
             aggregationErrorMessage: "No data to display.<br /><br />Check the data type setting for displaying data based on count versus plan estimate.",
@@ -96,8 +82,6 @@
                     },
                     area: {
                         stacking: 'normal',
-                        lineColor: '#666666',
-                        lineWidth: 2,
                         marker: {
                             enabled: false
                         }

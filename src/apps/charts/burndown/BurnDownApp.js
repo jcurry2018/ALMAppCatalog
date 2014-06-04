@@ -9,13 +9,15 @@
         requires: [
             'Rally.apps.charts.burndown.BurnDownSettings',
             'Rally.data.wsapi.Store',
+            'Rally.util.Help',
             'Rally.ui.combobox.IterationComboBox',
-            'Rally.ui.combobox.ReleaseComboBox'
+            'Rally.ui.combobox.ReleaseComboBox',
+            'Rally.apps.charts.IntegrationHeaders',
+            'Rally.apps.charts.burndown.BurnDownChart'
         ],
 
         mixins: [
-            'Rally.apps.charts.DateMixin',
-            'Rally.apps.charts.burndown.BurnDownChart'
+            'Rally.apps.charts.DateMixin'
         ],
 
         cls: 'burndown-app',
@@ -33,8 +35,20 @@
         },
 
         scopeObject: undefined,
-        
+
         customScheduleStates: ['Accepted'],	// a reasonable default
+
+        config: {
+            defaultSettings: {
+                showLabels: true,
+                chartAggregationType: undefined,
+                chartDisplayType: undefined,
+                chartTimebox: undefined,
+                title: ''
+            }
+        },
+
+        chartComponentConfig: undefined,
 
         getSettingsFields: function () {
             this.chartSettings = this.chartSettings || Ext.create('Rally.apps.charts.burndown.BurnDownSettings', {
@@ -57,6 +71,10 @@
                     return;
                 }
             }
+
+            this.chartComponentConfig = Ext.create('Rally.apps.charts.burndown.BurnDownChart', this).defaultChartComponentConfig();
+
+            Ext.create('Rally.apps.charts.IntegrationHeaders',this).applyTo(this.chartComponentConfig.storeConfig);
 
             this._addHelpComponent();
             this._loadUserStoryModel();
@@ -137,7 +155,7 @@
         },
 
         _loadTimeboxes: function() {
-            var timeboxStore = Ext.create('Rally.data.wsapi.Store', {
+            Ext.create('Rally.data.wsapi.Store', {
                 model: this.scopeObject._type,
                 filters: [
                     {
@@ -156,16 +174,17 @@
                         value: Rally.util.DateTime.toIsoString(this._getScopeObjectEndDate(), true)
                     }
                 ],
-                context: {
-                    workspace: this.getContext().getWorkspaceRef(),
-                    project: this.getContext().getProjectRef()
-                },
+                context: this.getContext().getDataContext(),
                 fetch: ['ObjectID'],
-                limit: Infinity
+                limit: Infinity,
+                autoLoad: true,
+                listeners: {
+                    load: function (store, records) {
+                        this._getTimeboxesInScope(store, records);
+                    },
+                    scope: this
+                }
             });
-
-            timeboxStore.on('load', this._getTimeboxesInScope, this);
-            timeboxStore.load();
         },
 
         _onScopeObjectLoaded: function (record) {
@@ -192,7 +211,7 @@
             this.scopeObject = record.data;
         },
 
-        _getTimeboxesInScope: function (store) {
+        _getTimeboxesInScope: function (store, records) {
             var storeConfig = this.chartComponentConfig.storeConfig;
             var type = Ext.String.capitalize(this._getScopeType());
             var oids = [];
@@ -226,10 +245,14 @@
 
         },
 
+        _getNow: function() {
+            return new Date();
+        },
+
         _addDateBoundsToCalculator: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
             var endDate = this._getScopeObjectEndDate();
-            var now = new Date();
+            var now = this._getNow();
             calcConfig.startDate = Rally.util.DateTime.toIsoString(this._getScopeObjectStartDate(), true);
             if(now > this._getScopeObjectStartDate() && now < this._getScopeObjectEndDate()) {
                 endDate = now;
@@ -277,7 +300,7 @@
 
         _fetchIterations: function () {
             var store = Ext.create('Rally.data.wsapi.Store', {
-                model: 'Iteration',
+                model: Ext.identityFn('Iteration'),
                 filters: [
                     {
                         property: 'StartDate',
@@ -340,21 +363,33 @@
                 axis.plotLines.push(this._getPlotLine(categories, uniqueIterations[uniqueIterations.length - 1], true));
             }
         },
+        _buildLabelText: function(iteration) {
+            var labelSetting = this.getSetting("showLabels");
+
+            var text = '';
+            if (labelSetting) {
+                text = iteration.Name || '';
+            }
+            return text;
+        },
 
         _getPlotBand: function (categories, iteration, shouldColorize) {
             var startDate = this.dateStringToObject(iteration.StartDate);
             var endDate = this.dateStringToObject(iteration.EndDate);
 
+            var label =   {
+                    text: this._buildLabelText( iteration ),
+                    align: 'center',
+                    rotation: 0,
+                    y: -7
+            };
+
             return {
                 color: shouldColorize ? '#F2FAFF' : '#FFFFFF',
                 from: this._getNearestWorkday(categories, startDate),
                 to: this._getNearestWorkday(categories, endDate),
-                label: {
-                    text: iteration.Name,
-                    align: 'center',
-                    rotation: 0,
-                    y: -7
-                }
+
+                label: label
             };
         },
 
@@ -401,7 +436,6 @@
             this._updateChartConfigDateFormat();
             this._updateChartConfigWorkdays();
             var chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
-
 
             this.add(chartComponentConfig);
             this.down('rallychart').on('snapshotsAggregated', this._onSnapshotDataReady, this);
@@ -620,7 +654,7 @@
 
         _getScopeObjectStartDate: function () {
             if (!this.scopeObject) {
-                return new Date();
+                return this._getNow();
             } else if (this.scopeObject._type === 'release') {
                 return this.scopeObject.ReleaseStartDate;
             } else {
@@ -630,7 +664,7 @@
 
         _getScopeObjectEndDate: function () {
             if (!this.scopeObject) {
-                return new Date();
+                return this._getNow();
             } else if (this.scopeObject._type === 'release') {
                 return this.scopeObject.ReleaseDate;
             } else {
@@ -694,7 +728,7 @@
                 });
             }
         },
-        
+
         _wrapRecords: function(records) {
             return Ext.create("Ext.data.JsonStore", {
                 fields: ["_ref", "StringValue"],

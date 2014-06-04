@@ -21,7 +21,8 @@
         modelTypes: [
             'plan',
             'roadmap',
-            'timeframe'
+            'timeframe',
+            'timeline'
         ],
 
         getPlanModel: function () {
@@ -58,9 +59,23 @@
                         type: 'int'
                     },
                     {
-                        name: 'timeframe'
+                        name: 'timeframe',
+                        serialize: function (record) {
+                            // Do some special serialization of the timeframe, we must have the ref and the id.
+                            // Turns out this is very hard to get using an Ext.Writer
+                            if (record.isModel) {
+                                return {
+                                    id: record.getId(),
+                                    ref: record.get('ref')
+                                };
+                            }
+
+                            return record;
+                        }
                     },
                     {
+                        // This has to be a plain ol' JSON object in order to play nice with the url pattern given to the proxy,
+                        // thank you Ext and your awesome handling of Model relationships
                         name: 'roadmap'
                     },
                     {
@@ -72,10 +87,6 @@
                         defaultValue: true
                     }
                 ],
-                hasOne: {
-                    name: 'timeframe',
-                    model: this.getTimeframeModel().$className
-                },
                 proxy: {
                     type: 'roadmap',
                     url: Rally.environment.getContext().context.services.planning_service_url + '/roadmap/{roadmap.id}/plan/{id}'
@@ -106,13 +117,10 @@
                         type: 'string'
                     },
                     {
-                        name: 'plans'
+                        name: 'plans',
+                        serialize: this._getRecordCollectionSerializer()
                     }
                 ],
-                hasMany: {
-                    name: 'plans',
-                    model: this.getPlanModel().$className
-                },
                 proxy: {
                     type: 'roadmap',
                     url: Rally.environment.getContext().context.services.planning_service_url + '/roadmap'
@@ -156,13 +164,13 @@
                         type: 'string'
                     },
                     {
-                        name: 'start',
+                        name: 'startDate',
                         type: 'date',
                         dateFormat: 'Y-m-d\\TH:i:s\\Z',
                         convert: this._normalizeDate
                     },
                     {
-                        name: 'end',
+                        name: 'endDate',
                         type: 'date',
                         dateFormat: 'Y-m-d\\TH:i:s\\Z',
                         convert: this._normalizeDate
@@ -179,10 +187,6 @@
                 proxy: {
                     type: 'roadmap',
                     url: Rally.environment.getContext().context.services.timeline_service_url + '/timeline/{timeline.id}/timeframe/{id}'
-                },
-                belongsTo: {
-                    model: 'Rally.apps.roadmapplanningboard.TimelineModel',
-                    foreignKey: 'timelineId'
                 }
             });
             return this.timeframeModel;
@@ -211,7 +215,8 @@
                     },
                     {
                         name: 'timeframes',
-                        type: 'collection'
+                        type: 'collection',
+                        serialize: this._getRecordCollectionSerializer()
                     }
                 ],
                 proxy: {
@@ -220,6 +225,30 @@
                 }
             });
             return this.timelineModel;
+        },
+
+        _serializeRecordCollection: function (values, parentRecord) {
+            var _this = this;
+
+            return _.map(values, function(record) {
+                return _this._serializeRecord(record);
+            });
+        },
+
+        _serializeRecord: function (record) {
+            if (record.isModel) {
+                return record.getProxy().getWriter().getRecordData(record);
+            }
+
+            return record.data || record;
+        },
+
+        _getRecordCollectionSerializer: function () {
+            var _this = this;
+
+            return function() {
+                return _this._serializeRecordCollection.apply(_this, arguments);
+            };
         }
     }, function () {
         Rally.data.ModelFactory.registerTypes(this.modelTypes, this);

@@ -52,7 +52,7 @@ describe 'Rally.apps.board.Settings', ->
     @createSettings().then =>
       typeCombo = @_getTypeCombo()
 
-      expect(typeCombo.context).toBe @container.getContext()
+      expect(typeCombo.context).toEqual @container.getContext()
 
   it 'refreshes the type combo box when the context changes', ->
     newContext = @_getContext
@@ -86,9 +86,8 @@ describe 'Rally.apps.board.Settings', ->
   it 'displays only writable fields with allowed values in group by combo', ->
     @createSettings().then =>
       Ext.Array.each(@_getGroupByCombo().getStore().getRange(), (record) ->
-        fieldDef = record.get('fieldDefinition')
-        expect(fieldDef.readOnly).toBe false
-        expect(fieldDef.hasAllowedValues()).toBe true
+        attr = record.get('fieldDefinition').attributeDefinition
+        expect(attr && !attr.ReadOnly && attr.Constrained && attr.AttributeType != 'COLLECTION').toBe true
       )
 
   it 'displays the fields picker correctly', ->

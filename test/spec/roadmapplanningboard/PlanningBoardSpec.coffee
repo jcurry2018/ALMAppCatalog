@@ -3,134 +3,148 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
   'Rally.apps.roadmapplanningboard.PlanningBoard'
+  'Rally.env.Context'
+  'Rally.data.PreferenceManager'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   helpers
-    createCardboard: (config) ->
-      @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-        _.extend
-          roadmapId: '413617ecef8623df1391fabc'
-          slideDuration: 10
-          renderTo: 'testDiv'
-        , config
+    createCardboard: (config = {}, expectAsyncError = false, includeTypeNames = true) ->
+      config = _.extend
+        roadmap: @roadmapStore.first()
+        timeline: @timelineStore.first()
+        slideDuration: 10
+        renderTo: 'testDiv'
+        types: ['PortfolioItem/Feature']
+        context: Rally.environment.getContext()
+        plugins: []
+      , config
 
-      @waitForComponentReady(@cardboard)
+      if includeTypeNames
+       config.typeNames =
+         child:
+           name: 'Feature'
 
-    clickCollapse: ->
-      collapseStub = @stub()
-      @cardboard.on 'headersizechanged', collapseStub
-      @click(css: '.themeButtonCollapse').then =>
+      @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard', config
+
+      if(expectAsyncError)
         @once
-          condition: ->
-            collapseStub.called
+          condition: => @errorNotifyStub.calledOnce
+      else
+        @waitForComponentReady(@cardboard)
 
-    clickExpand: ->
-      expandStub = @stub()
-      @cardboard.on 'headersizechanged', expandStub
-      @click(css: '.themeButtonExpand').then =>
-        @once
-          condition: ->
-            expandStub.called
+    clickAddNewButton: ->
+      @click(css: '.scroll-button.right')
 
-    getThemeElements: ->
-      _.map(@cardboard.getEl().query('.theme_container'), Ext.get)
+    getTimeframePlanningColumns: ->
+      _.where @cardboard.getColumns(), xtype: 'timeframeplanningcolumn', @
+
+    deleteLastColumn: ->
+      @cardboard._deleteTimeframePlanningColumn _.last(@cardboard.getColumns())
+
+    deleteColumn: (index) ->
+      @cardboard._deleteTimeframePlanningColumn @cardboard.getColumns()[index]
+
+    stubFeatureToggle: (toggles) ->
+      stub = @stub Rally.env.Context::, 'isFeatureEnabled'
+      stub.withArgs(toggle).returns(true) for toggle in toggles
+      stub
+
+    stubExpandStatePreference: (state) ->
+      @stub Rally.data.PreferenceManager, 'load', ->
+        deferred = new Deft.promise.Deferred()
+        result = {}
+        result[Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME] = state
+        deferred.resolve result
+        deferred.promise
 
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
+    features = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.featureStoreData
+    @errorNotifyStub = @stub Rally.ui.notify.Notifier, 'showError'
+    @roadmapStore = Deft.Injector.resolve('roadmapStore')
+    @timelineStore = Deft.Injector.resolve('timelineStore')
+    @timeframeStore = Deft.Injector.resolve('timeframeStore')
+    @planStore = Deft.Injector.resolve('planStore')
+    @preliminaryEstimateStore = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getPreliminaryEstimateStoreFixture()
+    @ajax.whenQuerying('PortfolioItem/Feature').respondWith(features)
 
-    @ajax.whenQuerying('TypeDefinition').respondWith Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemFeature')
-
-    @ajax.whenQuerying('PortfolioItem/Feature').respondWith([
-                        {
-                            "ObjectID": "1000",
-                            "_ref": '/portfolioitem/feature/1000',
-                            "name": "Android Support",
-                            "refinedEstimate": 4,
-                            "subscriptionId": "1"
-                        },
-                        {
-                            "ObjectID": "1001",
-                            "_ref": '/portfolioitem/feature/1001',
-                            "name": "iOS Support",
-                            "refinedEstimate": 2,
-                            "subscriptionId": "1"
-                        },
-                        {
-                            "ObjectID": "1002",
-                            "_ref": '/portfolioitem/feature/1002',
-                            "name": "HTML 5 Webapp",
-                            "refinedEstimate": 3,
-                            "subscriptionId": "1"
-                        },
-                        {
-                            "ObjectID": "1003",
-                            "_ref": '/portfolioitem/feature/1003',
-                            "name": "Blackberry Native App",
-                            "refinedEstimate": 1,
-                            "subscriptionId": "1"
-                        },
-                        {
-                            "ObjectID": "1004",
-                            "_ref": '/portfolioitem/feature/1004',
-                            "name": "Windows Phone Support",
-                            "refinedEstimate": 3,
-                            "subscriptionId": "2"
-                        },
-                        {
-                            "ObjectID": "1005",
-                            "_ref": '/portfolioitem/feature/1005',
-                            "name": "Ubuntu Phone Application",
-                            "refinedEstimate": 4,
-                            "subscriptionId": "2"
-                        },
-                        {
-                            "ObjectID": "1006",
-                            "_ref": '/portfolioitem/feature/1006',
-                            "name": "Tester's Large Test Card 1",
-                            "refinedEstimate": 13,
-                            "subscriptionId": "2"
-                        },
-                        {
-                            "ObjectID": "1007",
-                            "_ref": '/portfolioitem/feature/1007',
-                            "name": "Tester's Large Test Card 2",
-                            "refinedEstimate": 21,
-                            "subscriptionId": "2"
-                        },
-                        {
-                            "ObjectID": "1008",
-                            "_ref": '/portfolioitem/feature/1008',
-                            "name": "Tester's Large Test Card 3",
-                            "refinedEstimate": 13,
-                            "subscriptionId": "2"
-                        },
-                        {
-                            "ObjectID": "1009",
-                            "_ref": '/portfolioitem/feature/1009',
-                            "name": "Tester's Large Test Card 4",
-                            "refinedEstimate": 8,
-                            "subscriptionId": "2"
-                        }
-                    ])
   afterEach ->
     @cardboard?.destroy()
     Deft.Injector.reset()
 
+
+  it 'should throw an error if typeNames does not include a child property with a name', ->
+    createCardboard = =>
+      @createCardboard({}, false, false)
+
+    expect(createCardboard).toThrow('typeNames must have a child property with a name')
+
+  it 'should notify of error if the timeframe store fails to load', ->
+    @stub @timeframeStore, 'load', ->
+      deferred = new Deft.promise.Deferred()
+      deferred.reject({storeServiceName: 'Timeline'});
+      deferred.promise
+
+    @createCardboard({}, true).then =>
+      expect(@errorNotifyStub.lastCall.args[0]).toEqual
+        message: 'Failed to load: Timeline service data load issue'
+
+  it 'should notify of error if the plan store fails to load', ->
+    @stub @planStore, 'load', ->
+      deferred = new Deft.promise.Deferred()
+      deferred.reject({storeServiceName: 'Planning'});
+      deferred.promise
+
+    @createCardboard({}, true).then =>
+      expect(@errorNotifyStub.lastCall.args[0]).toEqual
+        message: 'Failed to load: Planning service data load issue'
+
   it 'should render with a backlog column', ->
     @createCardboard().then =>
-      backlogColumn = @cardboard.getColumns()[0]
+      backlogColumn = @cardboard.getBacklogColumn()
 
       expect(backlogColumn.getColumnHeader().getHeaderValue()).toBe "Backlog"
 
   it 'should have three visible planning columns', ->
     @createCardboard().then =>
-
       expect(@cardboard.getColumns()[1].getColumnHeader().getHeaderValue()).toBe "Q1"
       expect(@cardboard.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
       expect(@cardboard.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
+
+  it 'should have user story count on the cards if UserStories is a selected card field', ->
+    @createCardboard(cardConfig: fields: ['UserStories']).then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.record.data.UserStories.Count).toBe 3
+
+  it 'should have direct children count on the cards if UserStories is a selected card field', ->
+    @createCardboard(cardConfig: fields: ['UserStories']).then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.record.data.DirectChildrenCount).toBe 39
+          expect(card.getEl().down('.rui-card-content .UserStories .user-story-count').dom.innerHTML).toBe "(39)"
+
+  it 'should have leaf story plan estimate total on the cards if UserStories is a selected card field', ->
+    @createCardboard(cardConfig: fields: ['UserStories']).then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.record.data.LeafStoryPlanEstimateTotal).toBe 3.14
+          expect(card.getEl().down('.rui-card-content .UserStories .user-story-points').dom.innerHTML).toContain "3.14"
+
+  it 'should have parent on the cards', ->
+    @createCardboard(cardConfig: fields: ['Parent']).then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.getEl().down('.rui-card-content .Parent .rui-field-value').dom.innerHTML).toBe "I1: Who's Your Daddy"
+
+  it 'should have preliminary estimate on the cards', ->
+    @createCardboard(cardConfig: fields: ['PreliminaryEstimate']).then =>
+      _.each @cardboard.getColumns(), (column) =>
+        _.each column.getCards(), (card) =>
+          expect(card.getEl().down('.rui-card-right-side .PreliminaryEstimate .rui-field-value').dom.innerHTML).toBe "L"
 
   it 'should have features in the appropriate columns', ->
     @createCardboard().then =>
@@ -138,11 +152,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.getColumns()[2].getCards().length).toBe 2
       expect(@cardboard.getColumns()[3].getCards().length).toBe 0
       expect(@cardboard.getColumns().length).toBe(5)
-
-  it 'should be correctly configured with stores from deft', ->
-    @createCardboard().then =>
-      expect(@cardboard.timeframeStore).toBeTruthy()
-      expect(@cardboard.planStore).toBeTruthy()
 
   it 'should have appropriate plan capacity range', ->
     @createCardboard().then =>
@@ -153,37 +162,175 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       expect(@cardboard.getColumns()[3].getPlanRecord().get('lowCapacity')).toBe 15
       expect(@cardboard.getColumns()[3].getPlanRecord().get('highCapacity')).toBe 25
 
-  it 'attribute should be set to empty', ->
-    @createCardboard().then =>
-      expect(@cardboard.attribute == '').toBeTruthy()
+  describe 'add new column button', ->
 
-  describe 'theme container interactions', ->
+    describe 'when user is admin', ->
 
-    it 'should show expanded themes when the board is created', ->
+      beforeEach ->
+        @createCardboard(isAdmin: true)
+
+      it 'should render', ->
+          expect(@cardboard.addNewColumnButton.rendered).toBeTruthy()
+
+      describe 'when clicked', ->
+
+        beforeEach ->
+          @clickAddNewButton()
+
+        it 'should add a new column', ->
+          expect(@cardboard.getColumns().length).toBe 6
+
+        it 'should make the new column be the last column', ->
+          expect(_.last(@cardboard.getColumns()).columnHeader.down('rallyclicktoeditfieldcontainer').getValue()).toBe 'New Timeframe'
+
+        it 'should put the field in edit mode', ->
+          expect(_.last(@cardboard.getColumns()).columnHeader.down('rallyclicktoeditfieldcontainer').getEditMode()).toBeTruthy()
+
+        it 'should update the timeframe store', ->
+          expect(_.last(@timeframeStore.data.items).get('name')).toBe 'New Timeframe'
+
+        it 'should update the plan store', ->
+          expect(_.last(@planStore.data.items).get('name')).toBe 'New Timeframe'
+
+    describe 'when user is not admin', ->
+      beforeEach ->
+        @createCardboard(isAdmin: false)
+
+      it 'should not render', ->
+        expect(@cardboard.addNewColumnButton).toBeUndefined()
+
+
+  describe 'deleting columns', ->
+
+    it 'should refresh the backlog column if the deleted column had features', ->
+      @createCardboard(isAdmin: true).then =>
+        refreshSpy = @spy @cardboard.getColumns()[0], 'refresh'
+        @deleteColumn 1
+        expect(refreshSpy).toHaveBeenCalledOnce()
+
+    it 'should not refresh the backlog column if the deleted column did not have features', ->
+      @createCardboard(isAdmin: true).then =>
+        refreshSpy = @spy @cardboard.getColumns()[0], 'refresh'
+        @cardboard.getColumns()[1].planRecord.set('features', []);
+        @deleteColumn 1
+        expect(refreshSpy).not.toHaveBeenCalledOnce()
+
+    describe 'deleting all of the columns', ->
+
+      beforeEach ->
+        @createCardboard(isAdmin: true).then =>
+          _.times @planStore.count(), => @deleteColumn(1)
+
+      it 'should contain a single timeframe column', ->
+        expect(@getTimeframePlanningColumns().length).toBe 1
+
+      it 'should add a new empty timeframe column', ->
+        expect(@cardboard.getColumns()[1].planRecord.get('features')).toEqual []
+
+    describe 'deleting newly added columns', ->
+
+      beforeEach ->
+        @createCardboard(isAdmin: true).then =>
+          @cardboard._addNewColumn().then =>
+            @cardboard._addNewColumn().then =>
+              @cardboard._addNewColumn().then =>
+                expect(@planStore.count()).toBe 7
+                # 0: backlog, 1-4: existing columns, 5-7: new columns
+                # delete the 'middle' new column, then the last new column, then the first
+                @deleteColumn(6).then =>
+                  @deleteColumn(6).then =>
+                    @deleteColumn(5)
+
+      it 'should remove the new plans from the plan store', ->
+        expect(@planStore.count()).toBe 4
+
+      describe 'when the remaining columns are deleted', ->
+
+        beforeEach ->
+          _.times @planStore.count(), => @deleteColumn(1)
+
+        it 'should contain a single timeframe column', ->
+          expect(@getTimeframePlanningColumns().length).toBe 1
+
+  describe 'permissions', ->
+
+    describe 'workspace admin', ->
+
+      it 'should set editable permissions for admin', ->
+        @createCardboard(isAdmin: true).then =>
+          columns = @getTimeframePlanningColumns()
+          _.each columns, (column) =>
+            expect(column.editPermissions).toEqual
+              capacityRanges: true
+              theme: true
+              timeframeDates: true
+              deletePlan: true
+            expect(column.dropControllerConfig.dragDropEnabled).toBe true
+            expect(column.columnHeaderConfig.editable).toBe true
+
+
+      it 'should set uneditable permissions for non-admin', ->
+        @createCardboard(isAdmin: false).then =>
+          columns = @getTimeframePlanningColumns()
+          _.each columns, (column) =>
+            expect(column.editPermissions).toEqual
+              capacityRanges: false
+              theme: false
+              timeframeDates: false
+              deletePlan: false
+            expect(column.dropControllerConfig.dragDropEnabled).toBe false
+            expect(column.columnHeaderConfig.editable).toBe false
+
+  describe '#getFirstRecord', ->
+
+    it 'should get the first record in the backlog column', ->
       @createCardboard().then =>
-        _.each @getThemeElements(), (element) =>
-          expect(element.isVisible()).toBe true
-          expect(element.query('.field_container').length).toBe 1
+        expect(@cardboard.getFirstRecord().get('Name')).toBe 'Blackberry Native App'
 
-    it 'should collapse themes when the theme collapse button is clicked', ->
+  describe '#refresh', ->
+    beforeEach ->
+      @config = columnConfig:
+        fields: ['UserStories']
+
       @createCardboard().then =>
-        @clickCollapse().then =>
-          _.each @getThemeElements(), (element) =>
-            expect(element.isVisible()).toBe false
+        @parentRefreshSpy = @spy @cardboard.self.superclass, 'refresh'
 
-    it 'should expand themes when the theme expand button is clicked', ->
-      @createCardboard(showTheme: false).then =>
-        @clickExpand().then =>
-          _.each @getThemeElements(), (element) =>
-            expect(element.isVisible()).toBe true
-            expect(element.query('.field_container').length).toBe 1
+    describe 'without rebuildBoard option', ->
 
-    it 'should return client metrics message when collapse button is clicked', ->
-      @createCardboard().then =>
-        @clickCollapse().then =>
-          expect(@cardboard._getClickAction()).toEqual("Themes toggled from [true] to [false]")
+      beforeEach ->
+        @cardboard.refresh()
 
-    it 'should return client metrics message when expand button is clicked', ->
-      @createCardboard(showTheme: false).then =>
-        @clickExpand().then =>
-          expect(@cardboard._getClickAction()).toEqual("Themes toggled from [false] to [true]")
+      it 'should call the parent refresh', ->
+        expect(@parentRefreshSpy).toHaveBeenCalledOnce()
+
+    describe 'with rebuildBoard option set to true', ->
+
+      beforeEach ->
+        @firstTimeframeColumn = @cardboard.getColumns()[1]
+        @showMaskSpy = @spy @cardboard, 'showMask'
+        @hideMaskSpy = @spy @cardboard, 'hideMask'
+        @loadColumnDataSpy = @spy @cardboard, '_loadColumnData'
+        @buildColumnsSpy = @spy @cardboard, 'buildColumns'
+        @refreshBacklogSpy = @spy @cardboard.getColumns()[0], 'refresh'
+        @cardboard.refresh(rebuildBoard: true)
+
+      it 'should show a mask', ->
+        expect(@showMaskSpy).toHaveBeenCalledWith 'Refreshing the board...'
+
+      it 'should hide the mask when done loading', ->
+        expect(@hideMaskSpy).toHaveBeenCalled()
+
+      it 'should load column data', ->
+        expect(@loadColumnDataSpy).toHaveBeenCalledOnce()
+
+      it 'should build columns after loading data', ->
+        sinon.assert.callOrder @loadColumnDataSpy, @buildColumnsSpy
+
+      it 'should call buildColumns with render set to true', ->
+        expect(@buildColumnsSpy.lastCall.args[0].render).toBe true
+
+      it 'should call buildColumns with firstTimeframe', ->
+        expect(@buildColumnsSpy.lastCall.args[0].firstTimeframe.getId()).toBe @firstTimeframeColumn.timeframeRecord.getId()
+
+      it 'should refresh the backlog after building columns', ->
+        sinon.assert.callOrder @buildColumnsSpy, @refreshBacklogSpy

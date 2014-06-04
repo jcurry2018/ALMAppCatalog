@@ -3,10 +3,10 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.ui.report.StandardReport',
   'Rally.apps.kanban.KanbanApp',
-  'Rally.util.Array',
   'Rally.util.Element',
   'Rally.ui.notify.Notifier',
-  'Rally.app.Context'
+  'Rally.app.Context',
+  'Rally.test.helpers.CardBoard'
 ]
 
 describe 'Rally.apps.kanban.KanbanApp', ->
@@ -53,7 +53,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
   it 'should not schedule a new item in an iteration', ->
     @createApp().then =>
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
-      addNewHelper = new Helpers.AddNewHelper '.kanban'
+      addNewHelper = new Helpers.AddNewHelper this, '.kanban'
       addNewHelper.addWithDetails('foo').then =>
         expect(editorOpenedStub).toHaveBeenCalledOnce()
         expect(editorOpenedStub.getCall(0).args[1].iteration).toBe 'u'
@@ -61,7 +61,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
   it 'should set group by field to first column value', ->
     @createApp().then =>
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
-      addNewHelper = new Helpers.AddNewHelper '.kanban'
+      addNewHelper = new Helpers.AddNewHelper this, '.kanban'
       addNewHelper.addWithDetails('foo').then =>
         expect(editorOpenedStub).toHaveBeenCalledOnce()
         expect(editorOpenedStub.getCall(0).args[1][@app.getSetting('groupByField')]).toBe @app.cardboard.getColumns()[0].getValue()
@@ -71,14 +71,14 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       groupByField: 'KanbanState'
     ).then =>
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
-      addNewHelper = new Helpers.AddNewHelper '.kanban'
+      addNewHelper = new Helpers.AddNewHelper this, '.kanban'
       addNewHelper.addWithDetails('foo').then =>
         expect(editorOpenedStub).toHaveBeenCalledOnce()
         groupByField = "c_#{@app.getSetting('groupByField')}"
         expect(editorOpenedStub.getCall(0).args[1][groupByField]).toBe @app.cardboard.getColumns()[0].getValue()
 
   it 'should show correct fields on cards', ->
-    @createApp({cardFields: 'Name,Defects,Project'}).then =>
+    @createApp(cardFields: 'Name,Defects,Project').then =>
 
       expect(@app.down('rallycardboard').cardConfig.fields).toContain 'Name'
       expect(@app.down('rallycardboard').cardConfig.fields).toContain 'Defects'
@@ -143,6 +143,12 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(columns.length).toBe 2
       expect(columns[0].fields).toEqual @app.getSetting('cardFields').split(',')
       expect(columns[1].fields).toEqual @app.getSetting('cardFields').split(',')
+
+  it 'should show correct number of cards in columns', ->
+    @createApp(pageSize: 2).then =>
+      expect(@app.down('rallycardboard').storeConfig.pageSize).toBe 2
+      _.each @app.down('rallycardboard').getColumns(), (column) ->
+        expect(column.store.pageSize).toBe 2
 
   it 'should filter the board when a type checkbox is clicked', ->
     @createApp().then =>
@@ -209,16 +215,14 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       columns = @app.down('rallycardboard').getColumns()
       lastColumn = columns[columns.length-1]
 
-      expect(lastColumn.storeConfig.filters.length).toBe 1
-      expect(lastColumn.storeConfig.filters[0].property).toBe 'Release'
-      expect(lastColumn.storeConfig.filters[0].value).toBeNull()
+      expect(lastColumn.storeConfig).toOnlyHaveFilters [['Release', '=', null]]
 
   it 'should not exclude items with a release set in the last column', ->
     @createApp(hideReleasedCards: false).then =>
       columns = @app.down('rallycardboard').getColumns()
       lastColumn = columns[columns.length-1]
 
-      expect(lastColumn.storeConfig.filters.length).toBe 0
+      expect(lastColumn.storeConfig).toHaveNoFilters()
 
   it 'should show filter info when following global project', ->
     @createApp().then =>
@@ -295,24 +299,15 @@ describe 'Rally.apps.kanban.KanbanApp', ->
 
   it 'should be able to scroll forwards', ->
     @createApp({},
-      renderTo: @createSmallContainer()
+      renderTo: Rally.test.helpers.CardBoard.smallContainerForScrolling()
     ).then =>
-      indexOfLastVisibleColumn = Ext.Array.indexOf(@app.down('rallycardboard').getColumns(), Rally.util.Array.last @app.down('rallycardboard').getVisibleColumns())
-      columnToShow = @app.down('rallycardboard').getColumns()[indexOfLastVisibleColumn + 1]
-      expect(columnToShow.hidden).toBe true
-      @click(className: 'scroll-forwards').then =>
-        expect(columnToShow.hidden).toBe false
+      Rally.test.helpers.CardBoard.scrollForwards @app.down('rallycardboard'), @
 
   it 'should be able to scroll backwards', ->
     @createApp({},
-      renderTo: @createSmallContainer()
+      renderTo: Rally.test.helpers.CardBoard.smallContainerForScrolling()
     ).then =>
-      columnToShow = @app.down('rallycardboard').getColumns()[0]
-      expect(columnToShow.hidden).toBe false
-      @click(className: 'scroll-forwards').then =>
-        expect(columnToShow.hidden).toBe true
-        @click(className: 'scroll-backwards').then =>
-          expect(columnToShow.hidden).toBe false
+      Rally.test.helpers.CardBoard.scrollBackwards @app.down('rallycardboard'), @
 
   it 'should have correct icons on cards', ->
     @createApp().then =>
@@ -322,8 +317,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(@app.getEl().query('.card-ready-icon').length).toBe 1
       expect(@app.getEl().query('.card-blocked-icon').length).toBe 1
       expect(@app.getEl().query('.card-color-icon').length).toBe 1
-
-
 
   helpers
     createApp: (settings = {}, options = {}, context = {}) ->
@@ -343,11 +336,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         renderTo: options.renderTo || 'testDiv'
 
       @waitForComponentReady @app
-
-    createSmallContainer: ->
-      Ext.get('testDiv').createChild
-        style:
-          width: '500px'
 
     assertPolicyCmpConfig: (settingsKey, policy) ->
       column = @app.down('rallycardboard').getColumns()[0]

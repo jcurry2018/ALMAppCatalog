@@ -38,7 +38,7 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
     @userStoryModel = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
 
     @ajax.whenQuerying('typedefinition').respondWith [
-      Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemStrategy')
+      Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemProject')
     ]
     
   afterEach ->
@@ -46,8 +46,8 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
 
 
   it 'test draws portfolio tree', ->
-    interceptor = @ajax.whenQuerying('PortfolioItem/Strategy').respondWith [
-      {FormattedID: 'S1', ObjectID: '1', Name: 'Strategy 1'}
+    interceptor = @ajax.whenQuerying('PortfolioItem/Project').respondWith [
+      {FormattedID: 'S1', ObjectID: '1', Name: 'Project 1'}
     ]
 
     @_createApp().then =>
@@ -57,16 +57,14 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
 
 
   it 'test filter info displayed', ->
-    @ajax.whenQuerying('PortfolioItem/Strategy').respondWith()
+    @ajax.whenQuerying('PortfolioItem/Project').respondWith()
 
     @_createApp().then =>
 
       expect(@app.getEl().down('.filterInfo')).toBeInstanceOf Ext.Element
 
-    
-
   it 'test project setting label is shown if following a specific project scope', ->
-    @ajax.whenQuerying('PortfolioItem/Strategy').respondWith()
+    @ajax.whenQuerying('PortfolioItem/Project').respondWith()
 
     @_createApp(
       project: '/project/431439'
@@ -100,13 +98,10 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
     
 
   it 'test help component is shown', ->
-    @ajax.whenQuerying('PortfolioItem/Strategy').respondWith()
+    @ajax.whenQuerying('PortfolioItem/Project').respondWith()
 
     @_createApp().then =>
-
-      expect(@app.down('#header').getEl().down('.rally-help-icon').dom.innerHTML).toContain 'Help &amp; Training'
-
-    
+      expect(@app).toHaveHelpComponent()
 
   it 'test empty query string does not create a filter', ->
     @_createApp(
@@ -134,3 +129,42 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
     @_createApp().then =>
       expect(loadSpy.callCount).toBe 0
       expect(@app.down('#bodyContainer').getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
+
+  it 'should set workspace on the tree config', ->
+    @_createApp().then =>
+      tree = @app.down('rallytree')
+      expect(tree.workspace._ref).toBe Rally.environment.getContext().getWorkspace()._ref
+
+  it 'should add tooltip to schedule state read-only view for user story', ->
+    @_createApp().then =>
+      tooltip = @app.tooltip
+      expect(tooltip).not.toBeUndefined
+
+      Ext.create 'Ext.Component',
+        html: '<div class="schedule-state" state-data="Defined"</div>'
+        renderTo: 'testDiv'
+      tooltip.triggerElement = Ext.getBody().down('.schedule-state')
+      tooltipUpdate = @spy tooltip, 'update'
+      tooltip.show()
+
+      expect(tooltipUpdate.callCount).toBe 1
+      expect(tooltipUpdate.calledWith('Defined')).toBeTruthy()
+
+  it 'should destroy tooltip when app is destroyed', ->
+    @_createApp().then =>
+      destroyTooltip = @spy @app.tooltip, 'destroy'
+      @app.destroy()
+      expect(destroyTooltip.callCount).toBe 1
+
+  describe 'should add boolean indicating if should call plan service for use in appsdk components lame lame lame', ->
+    it 'should not retrieve data from plan service', ->
+      @_createApp().then =>
+        tree = @app.down('rallytree')
+        expect(tree.shouldRetrievePlanData).toBe false
+
+    it 'should retrieve data from plan service', ->
+      stub = @stub Rally.env.Context::, 'isFeatureEnabled'
+      stub.withArgs("ROADMAP_PLANNING_PAGE").returns(true)
+      @_createApp().then =>
+        tree = @app.down('rallytree')
+        expect(tree.shouldRetrievePlanData).toBe true

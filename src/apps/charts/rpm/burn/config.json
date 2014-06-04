@@ -2,21 +2,23 @@
    "name": "Portfolio Burn Chart",
    "className": "Rally.apps.charts.rpm.burn.BurnChartApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0rc2",
+   "sdk": "2.0rc3",
    "javascript": [
-      "BurnCalculator.js",
+      "../../Colors.js",
       "../../DateMixin.js",
-      "../../settings/SettingsChangeMixin.js",
+      "../../IntegrationHeaders.js",
       "../../settings/RadioGroupSetting.js",
+      "../../settings/SettingsChangeMixin.js",
       "../../settings/DataTypePicker.js",
       "../../settings/PortfolioDatePicker.js",
       "../../settings/PortfolioItemDataTypePicker.js",
       "../../settings/PortfolioItemPicker.js",
       "../ChartSettings.js",
       "../PortfolioChartAppBase.js",
+      "BurnCalculator.js",
       "BurnChartApp.js"
    ],
    "css": [
-      "../../Charts.css"
+      "../../Charts.less"
    ]
 }

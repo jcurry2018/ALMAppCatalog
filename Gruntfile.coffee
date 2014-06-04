@@ -1,3 +1,4 @@
+# ALM has trouble deploying wars, unlike Russia
 module.exports = (grunt) ->
   serverPort = grunt.option('port') || 8892
   inlinePort = grunt.option('port') || 8893
@@ -21,8 +22,9 @@ module.exports = (grunt) ->
   grunt.loadTasks 'grunt/tasks'
 
   grunt.registerTask 'default', ['build']
+  grunt.registerTask 'sanity', ['check', 'jshint']
   grunt.registerTask 'css', ['less', 'copy:images', 'replace:imagepaths']
-  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'nexus:deps', 'coffee', 'regex-check', 'jshint', 'css', 'sencha', 'assemble', 'copy:apphtml']
+  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'nexus:deps', 'coffee', 'sanity', 'css', 'sencha:buildapps', 'assemble', 'copy:apphtml']
 
   grunt.registerTask 'nexus:__createartifact__', 'Internal task to create and publish the nexus artifact', ['version', 'nexus:push:publish', 'clean:target']
   grunt.registerTask 'nexus:deploy', 'Deploys to nexus', ['build', 'nexus:__createartifact__']
@@ -31,26 +33,34 @@ module.exports = (grunt) ->
   grunt.registerTask 'ci', 'Does a full build, runs tests and deploys to nexus', ['build', 'test:ci', 'nexus:__createartifact__']
 
   grunt.registerTask 'test:__buildjasmineconf__', 'Internal task to build and alter the jasmine conf', ['jasmine:apps:build', 'replace:jasmine']
+  grunt.registerTask 'test:fast', 'Just configs and runs the tests. Does not do any compiling. grunt && grunt watch should be running.', ['test:__buildjasmineconf__', 'express:inline', 'webdriver_jasmine_runner:chrome']
   grunt.registerTask 'test:conf', 'Fetches the deps, compiles coffee and css files, runs jshint and builds the jasmine test config', ['nexus:deps', 'clean:test', 'coffee', 'css', 'test:__buildjasmineconf__']
-  grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:apps']
-  grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome']
-  grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:firefox']
+  grunt.registerTask 'test:fastconf', 'Just builds the jasmine test config', ['test:__buildjasmineconf__']
+  grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:apps']
+  grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome']
+  grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:firefox']
   grunt.registerTask 'test:server', "Starts a Jasmine server at localhost:#{serverPort}, specify a different port with --port=<port>", ['express:server', 'express-keepalive']
-  grunt.registerTask 'test:ci', 'Runs the tests in both firefox and chrome', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome', 'webdriver_jasmine_runner:firefox']
+  grunt.registerTask 'test:ci', 'Runs the tests in both firefox and chrome', ['sanity', 'test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome', 'webdriver_jasmine_runner:firefox']
 
   _ = grunt.util._
   spec = (grunt.option('spec') || grunt.option('jsspec') || '*').replace(/(Spec|Test)$/, '')
   debug = grunt.option 'verbose' || false
   version = grunt.option 'version' || 'dev'
+  maps = grunt.option 'maps' || false
 
   appsdk_path = 'lib/sdk'
+  ext_path = 'lib/ext/4.2.2'
   served_paths = [path.resolve(__dirname)]
   if process.env.APPSDK_PATH
     appsdk_path = path.join process.env.APPSDK_PATH, 'rui'
     served_paths.unshift path.join(appsdk_path, '../..')
 
+  if spec != '*' and grunt.file.expand("test/**/#{spec}+(Spec|Test).+(js|coffee)").length == 0
+    grunt.warn 'The specified spec or jsspec option does not match any test.'
+
   appFiles = 'src/apps/**/*.js'
   specFiles = 'test/spec/**/*Spec.coffee'
+  cssFiles = 'src/apps/**/*.{css,less}'
 
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
@@ -58,7 +68,7 @@ module.exports = (grunt) ->
     buildVersion: version
 
     clean:
-      build: ['build/', 'src/apps/**/*.html']
+      build: ['build/', 'src/apps/**/*.html', 'temp/']
       test: ['test/gen', '_SpecRunner.html', '.webdriver']
       dependencies: ['lib/', 'bin/sencha/']
       target: ['target/']
@@ -88,7 +98,7 @@ module.exports = (grunt) ->
 
     "regex-check":
       x4:
-        src: [appFiles, specFiles]
+        src: [appFiles, specFiles, cssFiles]
         options:
           pattern: /x4-/g
       almglobals:
@@ -99,6 +109,10 @@ module.exports = (grunt) ->
         src: [appFiles, specFiles]
         options:
           pattern: /Ext4\./g
+      consolelogs:
+        src: [appFiles, specFiles]
+        options:
+          pattern: /console\.log/g
 
     express:
       options:
@@ -136,7 +150,7 @@ module.exports = (grunt) ->
           vendor: (->
             if process.env.APPSDK_PATH?
               vendorPaths = [
-                "lib/ext/4.1.1a/ext-all-debug.js"
+                "lib/ext/4.2.2/ext-all-debug.js"
                 "#{appsdk_path}/builds/sdk-dependencies.js"
                 "#{appsdk_path}/src/Ext-more.js"
               ]
@@ -177,11 +191,14 @@ module.exports = (grunt) ->
 
               # Jasmine overrides
               "#{appsdk_path}/test/support/jasmine/jasmine-html-overrides.js"
+
+              # Deft overrides
+              "#{appsdk_path}/test/support/deft/deft-overrides.js"
             ]
           )()
           styles: [
             "#{appsdk_path}/test/support/jasmine/rally-jasmine.css"
-            "#{appsdk_path}/builds/rui/resources/css/rui.css"
+            "#{appsdk_path}/builds/rui/resources/css/rui-all.css"
             "#{appsdk_path}/builds/rui/resources/css/rui-fonts.css"
             "#{appsdk_path}/builds/lib/closure/closure-20130117-r2446.css"
             "#{appsdk_path}/builds/rui/resources/css/lib-closure.css"
@@ -208,9 +225,11 @@ module.exports = (grunt) ->
     less:
       options:
         yuicompress: true
+        modifyVars:
+          prefix: 'x4-'
       build:
         files:
-          'build/resources/css/catalog-all.css': ['src/apps/**/*.css']
+          'build/resources/css/catalog-all.css': [cssFiles]
 
     copy:
       images:
@@ -220,7 +239,7 @@ module.exports = (grunt) ->
       apphtml:
         files: [
           { expand: true, src: ['apps/**/deploy/*.html'], cwd: 'src', dest: 'build/html/', rename: (dest, src) -> "#{dest}#{src.replace('deploy/', '').replace('apps/', '')}" }
-          { expand: true, src: ['src/legacy/*.html'], dest: 'build/html/legacy/', flatten: true }
+          { expand: true, src: ['src/legacy/*.html', 'src/legacy/*.mp3'], dest: 'build/html/legacy/', flatten: true }
         ]
 
     coffee:
@@ -230,6 +249,8 @@ module.exports = (grunt) ->
         src: ['**/*.coffee']
         dest: 'test/gen'
         ext: '.js'
+        options:
+          sourceMap: maps
 
     watch:
       test:
@@ -248,7 +269,7 @@ module.exports = (grunt) ->
         options:
           spawn: false
       styles:
-        files: 'src/apps/**/*.css'
+        files: cssFiles
         tasks: ['css']
 
     nexus:
@@ -273,17 +294,33 @@ module.exports = (grunt) ->
           publish: [{ id: 'com.rallydev.js:app-catalog:tgz', version: '<%= buildVersion %>', path: 'target/' }]
 
     sencha:
-      cmd: "bin/sencha/#{if process.platform is 'darwin' then 'mac' else 'linux'}/sencha"
-      args: [
-        if debug then '-d' else ''
-        '-s lib/ext/4.1.1a'
-        'compile'
-        '-classpath=lib/sdk/builds/sdk-dependencies-debug.js,lib/sdk/src,src/apps'
-        'exclude -all and'
-        'include -file src/apps and'
-        'concat build/catalog-all-debug.js and'
-        'concat -compress build/catalog-all.js'
-      ]
+      options:
+        cmd: "./bin/sencha/#{if process.platform is 'darwin' then 'mac' else 'linux'}/sencha"
+      buildapps:
+        options:
+          args: [
+            if debug then '-d' else ''
+            "-s #{ext_path}"
+            'compile'
+            "-classpath=#{appsdk_path}/builds/sdk-dependencies-debug.js,#{appsdk_path}/src,src/apps"
+            'exclude -all and'
+            'include -file src/apps and'
+            'concat build/catalog-all-debug.js and'
+            'concat -compress build/catalog-all.js'
+          ]
+      appmanifest:
+        options:
+          args:[
+            "-s #{ext_path}"
+            'compile'
+            "-classpath=#{appsdk_path}/builds/sdk-dependencies-debug.js,#{appsdk_path}/src,src/apps"
+            'exclude -all and'
+            "union -r -file #{grunt.option('app')} and"
+            "exclude -file #{appsdk_path}/builds/sdk-dependencies-debug.js and"
+            "exclude -file #{appsdk_path}/src and"
+            'exclude -namespace Ext and'
+            "metadata -f -t {0} -o temp/#{grunt.option('app')}/appManifest -json -b #{grunt.option('app')}"
+          ]
 
     assemble:
       options:
@@ -312,3 +349,4 @@ module.exports = (grunt) ->
   grunt.event.on 'watch', (action, filepath) ->
     changedFiles[filepath] = action
     onChange()
+

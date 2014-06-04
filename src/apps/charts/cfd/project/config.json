@@ -2,8 +2,10 @@
    "name": "Project CFD",
    "className": "Rally.apps.charts.cfd.project.ProjectCFDApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0rc2",
+   "sdk": "2.0rc3",
    "javascript": [
+      "../../Colors.js",
+      "../../IntegrationHeaders.js",
       "../../settings/StateFieldPicker.js",
       "../../settings/ProjectPicker.js",
       "ProjectCFDSettings.js",
@@ -11,6 +13,6 @@
       "ProjectCFDApp.js"
    ],
    "css": [
-      "../../Charts.css"
+      "../../Charts.less"
    ]
 }

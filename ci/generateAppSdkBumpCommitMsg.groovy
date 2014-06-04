@@ -14,7 +14,7 @@ if(prevSdkBuildNumber < newBuildNumber){
     (prevSdkBuildNumber + 1..newBuildNumber).each { buildNumber ->
  	def build = upstreamProject.getBuildByNumber(buildNumber) ?: build.getCause(hudson.model.Cause.UpstreamCause).upstreamRun
        	build.changeSet.each { change ->
-            commitMsg << "sdk commit: ${change.commitId}\n"
+            commitMsg << "sdk commit: RallySoftware/appsdk@${change.commitId}\n"
             commitMsg << "author: ${change.authorName}\n"
             commitMsg << "message: ${change.msg}\n\n"
         }

@@ -2,56 +2,109 @@ Ext = window.Ext4 || window.Ext
 
 describe 'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView', ->
   beforeEach ->
-    @addMatchers
-      toInheritFromXType: (expected) ->
-        _.contains @actual.getXTypes().split('/'), expected
-
     @fakeModel =
       get: ->
-        0
+        null
+      set: ->
+      save: (requester) ->
+
+    @saveSpy = @spy @fakeModel, 'save'
 
     @view = Ext.create 'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView',
-      target: Ext.getBody()
-      controllerConfig:
-        model: @fakeModel
+      target: Ext.get 'testDiv'
+      model: @fakeModel
+
+    @doneButton = @view.down('#capacityDone')
+    @cancelButton = @view.down('#capacityCancel')
+    @destroySpy = @spy @view, 'destroy'
 
   afterEach ->
     @view.destroy()
 
-  it 'is a popover', ->
-    expect(@view).toInheritFromXType('rallypopover')
+  describe 'on load', ->
 
-  it 'contains a low and high number field', ->
-    expect(@view.getLowCapacityField()).toInheritFromXType('numberfield')
-    expect(@view.getHighCapacityField()).toInheritFromXType('numberfield')
+    it 'should set the input values to null when the model values are null', ->
+      expect(@view.lowCapacity.getValue()).toBeNull()
+      expect(@view.highCapacity.getValue()).toBeNull()
 
-  xit 'bubbles blur events up from child components', ->
-    blurStub = @stub()
-    @view.on 'blur', blurStub, @
+  describe 'validation', ->
 
-    @click(@view.getLowCapacityField().getEl().dom).then =>
-      @click(@view.getHighCapacityField().getEl().dom).then =>
-        @once(
-          condition: =>
-            blurStub.called
-        ).then =>
-          expect(blurStub).toHaveBeenCalledOnce()
+    it 'should not be called on change before the done button has been clicked', ->
+      validatorSpy = @spy @view.lowCapacity, 'validator'
+      @view.lowCapacity.setValue(213);
+      expect(validatorSpy).not.toHaveBeenCalled()
 
-  it 'bubbles validitychange events up from child components',  ->
-    validitychangeStub = @stub()
-    @view.on 'validitychange', validitychangeStub, @
+    it 'should call be called on both fields when the done button is clicked', ->
+      lowValidatorSpy = @spy @view.lowCapacity, 'validator'
+      highValidatorSpy = @spy @view.highCapacity, 'validator'
 
-    @sendKeys(@view.getLowCapacityField().getEl().down('input').dom, '4').then =>
-      done = false
+      @click(@doneButton.getEl()).then =>
+        expect(lowValidatorSpy).toHaveBeenCalledOnce()
+        expect(highValidatorSpy).toHaveBeenCalledOnce()
 
-      # The setTimeout is required to account for the validation delay introduced by the checkChangeBuffer property
-      window.setTimeout(=>
-        done = true
-      , 1000)
+  describe 'done button click', ->
 
-      @once(
-        condition: =>
-          done
+    describe 'with an invalid range', ->
 
-      ).then =>
-        expect(validitychangeStub).toHaveBeenCalledOnce()
+      beforeEach ->
+        @view.lowCapacity.setValue(3);
+        @view.highCapacity.setValue(2);
+        @click(@doneButton.getEl()).then =>
+
+      it 'should enable validation on change', ->
+        validatorSpy = @spy @view.lowCapacity, 'validator'
+        @view.lowCapacity.setValue(1);
+        expect(validatorSpy).toHaveBeenCalledOnce()
+
+      it 'should disable the done button', ->
+        expect(@doneButton.isDisabled()).toBe true
+
+      it 'should re-enable the done button when a valid range is entered', ->
+        @view.lowCapacity.setValue(1);
+        expect(@doneButton.isDisabled()).toBe false
+
+    describe 'with a valid range', ->
+
+      beforeEach ->
+        @view.lowCapacity.setValue(2);
+        @view.highCapacity.setValue(3);
+        @click(@doneButton.getEl()).then =>
+
+      it 'should destroy the view', ->
+        expect(@destroySpy).toHaveBeenCalledOnce()
+
+      it 'should save the model', ->
+        expect(@saveSpy).toHaveBeenCalledOnce()
+
+  describe 'cancel button click', ->
+
+    beforeEach ->
+      @click(@cancelButton.getEl()).then =>
+
+    it 'should destroy the view when the cancel button is clicked', ->
+      expect(@destroySpy).toHaveBeenCalledOnce()
+
+    it 'should not fire the save event when the cancel button is clicked', ->
+      expect(@saveSpy).not.toHaveBeenCalled()
+
+  describe '#_validateRange', ->
+
+    it 'should return true if low capacity is less than high capacity', ->
+      @view.lowCapacity.setValue(1)
+      @view.highCapacity.setValue(3)
+      expect(@view._validateRange()).toBe true
+
+    it 'should return true if low capacity is equal high capacity', ->
+      @view.lowCapacity.setValue(3)
+      @view.highCapacity.setValue(3)
+      expect(@view._validateRange()).toBe true
+
+    it 'should return false if low capacity is greater than high capacity', ->
+      @view.lowCapacity.setValue(3)
+      @view.highCapacity.setValue(1)
+      expect(@view._validateRange()).toBe 'Low estimate should not exceed the high estimate'
+
+    it 'should return true if values are null', ->
+      @view.lowCapacity.setValue(null)
+      @view.highCapacity.setValue(null)
+      expect(@view._validateRange()).toBe true

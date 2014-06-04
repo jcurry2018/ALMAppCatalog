@@ -5,8 +5,9 @@
     Ext.define('Rally.apps.roadmapplanningboard.DeftInjector', {
         singleton: true,
         requires: [
+            'Rally.data.Store',
             'Rally.apps.roadmapplanningboard.AppModelFactory',
-            'Rally.apps.roadmapplanningboard.UuidMapper'
+            'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
         ],
         loaded: false,
 
@@ -14,31 +15,37 @@
             if (!this.loaded) {
                 Deft.Injector.configure({
                     timelineStore: {
-                        className: 'Ext.data.Store',
+                        className: 'Rally.data.Store',
                         parameters: [{
                             model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimelineModel()
                         }]
                     },
                     timeframeStore: {
-                        className: 'Ext.data.Store',
+                        className: 'Rally.data.Store',
                         parameters: [{
                             model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel()
                         }]
                     },
                     planStore: {
-                        className: 'Ext.data.Store',
+                        className: 'Rally.data.Store',
                         parameters: [{
                             model: Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel()
                         }]
                     },
                     roadmapStore: {
-                        className: 'Ext.data.Store',
+                        className: 'Rally.data.Store',
                         parameters: [{
                             model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
                         }]
                     },
-                    uuidMapper: {
-                        className: 'Rally.apps.roadmapplanningboard.UuidMapper'
+                    preliminaryEstimateStore: {
+                      className: 'Rally.data.wsapi.Store',
+                      parameters: [{
+                            model: 'PreliminaryEstimate'
+                      }]
+                    },
+                    nextDateRangeGenerator: {
+                        className: 'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
                     }
                 });
             }

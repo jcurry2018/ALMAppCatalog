@@ -116,7 +116,7 @@
 
         _createPortfolioItemStore: function () {
             Ext.create("Rally.data.wsapi.Store", {
-                model: "Portfolio Item",
+                model: Ext.identityFn("Portfolio Item"),
                 filters: [
                     {
                         property: "ObjectID",
@@ -190,7 +190,7 @@
                 storeConfig: {
                     project: null,
                     context: this.requestContext,
-                    fetch: true
+                    fetch: ['ObjectID','Project','WorkSpace','FormattedID','Name','ActualStartDate','PlannedStartDate','ActualEndDate','PlannedEndDate']
                 },
                 gridConfig: {
                     viewConfig: {

@@ -118,6 +118,7 @@
                 if (this.context.getSubscription().StoryHierarchyEnabled) {
                     filters.push({
                         property: 'DirectChildrenCount',
+                        operator: '=',
                         value: 0
                     });
                 }
@@ -125,6 +126,7 @@
                 Ext.Array.push(filters,
                     {
                         property: 'Requirement',
+                        operator: '=',
                         value: null
                     },
                     {

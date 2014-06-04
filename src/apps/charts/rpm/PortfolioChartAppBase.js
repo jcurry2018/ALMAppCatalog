@@ -27,6 +27,9 @@
                 cls: 'header'
             }
         ],
+        integrationHeaders : {
+            name : "Portfolio Chart"
+        },
 
         getSettingsFields: function () {
             return this.chartSettings.getSettingsConfiguration();
@@ -48,6 +51,7 @@
             this._setupUpdateBeforeRender();
 
             this._loadSavedPortfolioItem();
+            Ext.create('Rally.apps.charts.IntegrationHeaders',this).applyTo(this.chartComponentConfig.storeConfig);
         },
 
         _setupChartSettings: function () {
@@ -126,7 +130,7 @@
 
             var portfolioItemRef = this.getSetting(this.PI_SETTING);
             var store = Ext.create("Rally.data.wsapi.Store", {
-                model: "Portfolio Item",
+                model: Ext.identityFn("Portfolio Item"),
                 filters: [
                     {
                         property: "ObjectID",

@@ -5,7 +5,8 @@
         requires: [
             "Rally.apps.charts.settings.ChartDisplayTypePicker",
             "Rally.apps.charts.settings.DataTypePicker",
-            "Rally.apps.charts.settings.TimeboxPicker"
+            "Rally.apps.charts.settings.TimeboxPicker",
+            "Rally.ui.CheckboxField"
         ],
 
         config: {
@@ -16,20 +17,25 @@
             this.mergeConfig(config);
         },
 
-        _buildSettingsComponent: function (type, label) {
+        _buildSettingsComponent: function (type, label, name) {
             var self = this;
 
             var componentAdded = function (cmp) {
                 this.settingsParent = this.settingsParent || self;
             };
 
-            return {
+            var settings = {
                 xtype: type,
                 label: label,
                 listeners: {
                     added: componentAdded
                 }
             };
+            if (name) {
+                settings.name = name;
+                settings.cls = "settings-" + name;
+            }
+            return settings;
         },
 
         _isOnScopedDashboard: function() {
@@ -39,12 +45,13 @@
         getFields: function() {
             var dataTypePicker = this._buildSettingsComponent("chartdatatypepicker", "Data Type"),
                 displayPicker = this._buildSettingsComponent("chartdisplaytypepicker", "Chart Type"),
-                timeboxPicker = this._buildSettingsComponent("charttimeboxpicker", "Level");
+                timeboxPicker = this._buildSettingsComponent("charttimeboxpicker", "Level"),
+                labelNameVisible = this._buildSettingsComponent("rallycheckboxfield", "Show Iteration Labels", 'showLabels');
             
             if(this._isOnScopedDashboard()) {
-                return [dataTypePicker, displayPicker];
+                return [dataTypePicker, displayPicker, labelNameVisible];
             } else {
-                return [timeboxPicker, dataTypePicker, displayPicker];
+                return [timeboxPicker, dataTypePicker, displayPicker, labelNameVisible];
             }
         }
         

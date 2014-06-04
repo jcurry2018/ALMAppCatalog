@@ -5,17 +5,30 @@
         extend: 'Rally.ui.cardboard.Column',
         alias: 'widget.rallyteamcolumn',
         requires: [
-            'Rally.ui.cardboard.plugin.ColumnCardCounter'
+            'Rally.apps.teamboard.TeamBoardDropController',
+            'Rally.apps.teamboard.plugin.TeamBoardUserIterationCapacity',
+            'Rally.apps.teamboard.plugin.TeamBoardWip',
+            'Rally.ui.cardboard.plugin.ColumnCardCounter',
+            'Rally.ui.combobox.IterationComboBox'
         ],
 
         plugins: [
-            {ptype: 'rallycolumncardcounter'}
+            {ptype: 'rallycolumncardcounter'},
+            {ptype: 'rallyteamboardwip'},
+            {ptype: 'rallyteamboarduseriterationcapacity'}
         ],
 
-        initComponent: function(){
+        config: {
+            dropControllerConfig: {
+                ptype: 'rallyteamboarddropcontroller'
+            }
+        },
+
+        initComponent: function() {
             this.callParent(arguments);
 
-            this.on('aftercarddroppedsave', this._onAfterCardDroppedSave, this);
+            this.addEvents('iterationcomboready');
+            this.on('storeload', this._addIterationCombo, this);
         },
 
         assign: function(record){
@@ -34,23 +47,34 @@
             return true;
         },
 
-        doesRecordAttributeMatch: function(record, attribute, value) {
-            return true;
+        _addIterationCombo: function() {
+            this.getColumnHeader().add({
+                xtype: 'container',
+                cls: 'team-board-iteration-section',
+                items: [{
+                    xtype: 'rallyiterationcombobox',
+                    allowNoEntry: true,
+                    listeners: {
+                        ready: this._onIterationComboReady,
+                        scope: this
+                    },
+                    storeConfig: {
+                        context: {
+                            project: this.getValue(),
+                            projectScopeDown: false,
+                            projectScopeUp: false
+                        }
+                    }
+                }]
+            });
         },
 
-        _onAfterCardDroppedSave: function(column, card, type, sourceColumn){
-            card.getRecord().getCollection(this.attribute, {
-                autoLoad: true,
-                limit: Infinity,
-                listeners: {
-                    load: function(store){
-                        store.add(column.getValue());
-                        store.remove(sourceColumn.getValue());
-                        store.sync();
-                    },
-                    scope: this
-                }
-            });
+        _onIterationComboReady: function(combo) {
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
+
+            this.fireEvent('iterationcomboready', this, combo);
         }
     });
 

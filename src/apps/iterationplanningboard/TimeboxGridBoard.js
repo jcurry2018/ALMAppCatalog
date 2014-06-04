@@ -34,9 +34,9 @@
                 }
             }, this);
 
-            this.subscribe(Rally.Message.objectCreate, this._onObjectChange, this);
-            this.subscribe(Rally.Message.objectUpdate, this._onObjectChange, this);
-            this.subscribe(Rally.Message.objectDestroy, this._onObjectChange, this);
+            this.subscribe(this, Rally.Message.objectCreate, this._onObjectChange, this);
+            this.subscribe(this, Rally.Message.objectUpdate, this._onObjectChange, this);
+            this.subscribe(this, Rally.Message.objectDestroy, this._onObjectChange, this);
 
             this.callParent(arguments);
         },
@@ -66,8 +66,10 @@
                 columnConfig: {
                     xtype: 'iterationplanningboardappplanningcolumn',
                     additionalFetchFields: ['PortfolioItem'],
+                    enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
                     storeConfig : {
-                        fetch: ['Parent', 'Requirement']
+                        fetch: ['Parent', 'Requirement'],
+                        pageSize: Ext.isIE ? 25 : 100 // plan estimate rollups use client side data, so we need a lot of cards
                     }
                 },
                 scrollableColumnRecords: this.timeboxes
@@ -95,10 +97,20 @@
         },
 
         _getColumnConfigs: function(timeboxes) {
+            // When removing ENABLE_INFINITE_SCROLL_ALL_BOARDS toggle, backlogPageSize can be removed, because we can use the default value.
+            var backlogPageSize = Ext.isIE ? 25 : 100;
+
+            if (this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')) {
+                backlogPageSize = 15;
+            }
+
             var columns = [{
                 xtype: 'iterationplanningboardappbacklogcolumn',
                 flex: this._hasTimeboxes() ? 1 : 1/3,
-                cardLimit: Ext.isIE ? 25 : 100,
+                enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
+                storeConfig: {
+                    pageSize: backlogPageSize
+                },
                 columnHeaderConfig: {
                     headerTpl: 'Backlog'
                 }
@@ -107,6 +119,7 @@
             Ext.Array.each(timeboxes, function(timeboxRecords) {
                 columns.push({
                     timeboxRecords: timeboxRecords,
+                    enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
                     columnHeaderConfig: {
                         record: timeboxRecords[0],
                         fieldToDisplay: 'Name',

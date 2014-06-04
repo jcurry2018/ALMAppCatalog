@@ -1,6 +1,10 @@
 module.exports = function(grunt) {
 
     var getSdkVersion = function() {
+        if(process.env.APPSDK_SRC_VERSION){
+            return process.env.APPSDK_SRC_VERSION;
+        }
+
         var js_dependencies = grunt.file.readJSON('js_dependencies.json'),
             i, sdkVersion;
 

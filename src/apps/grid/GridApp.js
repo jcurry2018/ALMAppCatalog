@@ -9,79 +9,83 @@
 
         requires: [
             'Rally.data.util.Sorter',
-            'Rally.data.QueryFilter',
+            'Rally.data.wsapi.Filter',
             'Rally.ui.grid.Grid',
+            'Rally.data.ModelFactory',
             'Rally.ui.grid.plugin.PercentDonePopoverPlugin'
         ],
+
+        config: {
+            defaultSettings: {
+                types: 'hierarchicalrequirement'
+            }
+        },
 
         autoScroll: appAutoScroll,
 
         launch: function() {
-            // TODO: need to pass dataScope here
-            Rally.data.ModelFactory.getModel({
-                type: this.getContext().get('objectType'),
-                success: this._createGrid,
-                scope: this
-            });
-        },
-
-        _getFetchOnlyFields:function(){
-            return ['LatestDiscussionAgeInMinutes'];
-        },
-
-        _createGrid: function(model) {
             var context = this.getContext(),
-                pageSize = context.get('pageSize'),
-                fetch = context.get('fetch'),
+                pageSize = this.getSetting('pageSize'),
+                fetch = this.getSetting('fetch'),
                 columns = this._getColumns(fetch);
 
-            var gridConfig = {
+            this.add({
                 xtype: 'rallygrid',
-                model: model,
                 columnCfgs: columns,
                 enableColumnHide: false,
                 enableRanking: true,
-                enableBulkEdit: Rally.environment.getContext().isFeatureEnabled("EXT4_GRID_BULK_EDIT"),
+                enableBulkEdit: context.isFeatureEnabled("BETA_TRACKING_EXPERIENCE"),
                 autoScroll: gridAutoScroll,
                 plugins: this._getPlugins(columns),
+                context: this.getContext(),
                 storeConfig: {
                     fetch: fetch,
-                    sorters: Rally.data.util.Sorter.sorters(context.get('order')),
-                    context: context.getDataContext(),
-                    listeners: {
-                        load: this._updateAppContainerSize,
-                        scope: this
-                    }
+                    models: this.getSetting('types').split(','),
+                    filters: this._getFilters(),
+                    pageSize: pageSize,
+                    sorters: Rally.data.util.Sorter.sorters(this.getSetting('order'))
                 },
                 pagingToolbarCfg: {
                     pageSizes: [pageSize]
                 }
-            };
-            if (pageSize) {
-                pageSize = pageSize - 0;
-                if (!isNaN(pageSize)) {
-                    gridConfig.storeConfig.pageSize = pageSize;
-                }
-            }
-            if (context.get('query')) {
-                gridConfig.storeConfig.filters = [
-                    Rally.data.QueryFilter.fromQueryString(context.get('query'))
-                ];
-            }
-            this.add(gridConfig);
+            });
         },
 
-        _updateAppContainerSize: function() {
-            if (this.appContainer) {
-                var grid = this.down('rallygrid');
-                grid.el.setHeight('auto');
-                grid.body.setHeight('auto');
-                grid.view.el.setHeight('auto');
-                this.setSize({height: grid.getHeight() + _.reduce(grid.getDockedItems(), function(acc, item) {
-                    return acc + item.getHeight() + item.el.getMargin('tb');
-                }, 0)});
-                this.appContainer.setPanelHeightToAppHeight();
+        onTimeboxScopeChange: function(newTimeboxScope) {
+            this.callParent(arguments);
+
+            this.down('rallygrid').filter(this._getFilters(), true, true);
+        },
+
+        _getFilters: function() {
+            var filters = [],
+                query = this.getSetting('query'),
+                timeboxScope = this.getContext().getTimeboxScope();
+            if(query) {
+                try {
+                    query = new Ext.Template(query).apply({
+                        user: Rally.util.Ref.getRelativeUri(this.getContext().getUser())
+                    });
+                } catch(e) {}
+                var filterObj = Rally.data.wsapi.Filter.fromQueryString(query);
+                filterObj.itemId = filterObj.toString();
+                filters.push(filterObj);
             }
+
+            if(timeboxScope && _.every(this.getSetting('types').split(','), this._isSchedulableType, this)) {
+                var timeboxFilterObj = timeboxScope.getQueryFilter();
+                timeboxFilterObj.itemId = timeboxFilterObj.toString();
+                filters.push(timeboxFilterObj);
+            }
+            return filters;
+        },
+
+        _isSchedulableType: function(type) {
+            return _.contains(['hierarchicalrequirement', 'task', 'defect', 'defectsuite', 'testset'], type.toLowerCase());
+        },
+
+        _getFetchOnlyFields:function(){
+            return ['LatestDiscussionAgeInMinutes'];
         },
 
         _getColumns: function(fetch){
@@ -89,7 +93,6 @@
                 return Ext.Array.difference(fetch.split(','), this._getFetchOnlyFields());
             }
             return [];
-
         },
 
         _getPlugins: function(columns) {

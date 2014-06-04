@@ -25,19 +25,6 @@
         // custom properties
         settings: undefined, // Map of initial settings values
 
-        constructor: function() {
-            this._parseConstructorParams.apply(this, arguments);
-            this.callParent();
-        },
-
-        _parseConstructorParams: function() {
-            var args;
-            args = arguments[0];
-            if (!args.settings) {
-                throw 'Missing initial settings in GroupBySettings';
-            }
-            this.settings = args.settings;
-        },
 
         initComponent: function() {
             this.callParent();
@@ -117,10 +104,12 @@
         },
 
         _addStateFieldPicker: function() {
+            var me = this;
             this.add({
                 name: 'stateFieldName',
                 xtype: 'rallyfieldcombobox',
-                model: 'UserStory',
+                value: this.settings.stateFieldName,
+                model: Ext.identityFn('UserStory'),
                 margin: '10px 0 0 0',
                 width: 180,
                 fieldLabel: 'Field',
@@ -129,12 +118,15 @@
                         this.fireEvent('statefieldnameselected', combo.getRecord().get('fieldDefinition'));
                     },
                     ready: function(combo) {
-                        combo.store.filterBy(function(record) {
+                        combo.store.filter({filterFn: function(record) {
                             var attr = record.get('fieldDefinition').attributeDefinition;
                             return attr && !attr.ReadOnly && attr.Constrained && attr.AttributeType !== 'OBJECT' && attr.AttributeType !== 'COLLECTION';
-                        });
+                        }});
+
                         if (combo.getRecord()) {
                             this.fireEvent('statefieldnameready');
+                        } else {
+                            me.fireEvent('ready', me);
                         }
                     }
                 },
@@ -145,7 +137,7 @@
         _addStateValuesPicker: function(fieldName) {
             this.add({
                 xtype: 'rallyfieldvaluecombobox',
-                model: 'UserStory',
+                model: Ext.identityFn('UserStory'),
                 field: fieldName,
                 name: 'stateFieldValues',
                 valueField: "StringValue",
@@ -167,10 +159,10 @@
                 },
                 listConfig: {
                     itemTpl: Ext.create('Ext.XTemplate',
-                        '<div class="x-boundlist-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="stateFieldValue"/> &nbsp;{StringValue}</div>'),
+                        '<div class="statefieldvalue-boundlist-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="stateFieldValue"/> &nbsp;{StringValue}</div>'),
                     listeners:{
                         afterrender: function(){
-                            this.selectedItemCls = Ext.baseCSSPrefix + 'boundlist-selected x-boundlist-selected';
+                            this.selectedItemCls = Ext.baseCSSPrefix + 'boundlist-selected statefieldvalue-boundlist-selected';
                         }
                     }
                 },

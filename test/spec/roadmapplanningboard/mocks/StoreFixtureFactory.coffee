@@ -5,21 +5,21 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
   singleton: true
   
   requires: [
+    'Rally.data.Store'
     'Rally.test.mock.data.WsapiModelFactory'
     'Rally.apps.roadmapplanningboard.AppModelFactory'
   ]
 
   getRoadmapStoreFixture: ->
-
-    @roadmapStoreFixture = Ext.create 'Ext.data.Store',
+    @roadmapStoreFixture = Ext.create 'Rally.data.Store',
       model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
       proxy:
         type: 'memory'
 
       data: [
-          id: "413617ecef8623df1391fabc"
+          id: "roadmap-id-1"
           Name: "My Roadmap"
-          ref: "http://localhost:8090/plan-service/api/plan/413617ecef8623df1391fabc"
+          ref: "http://localhost:8090/plan-service/api/plan/roadmap-id-1"
           plans: [
             id: "513617ecef8623df1391fefc"
           ,
@@ -42,8 +42,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     @roadmapStoreFixture
 
   getPlanStoreFixture: ->
-    
-    @planStoreFixture = Ext.create 'Ext.data.Store',
+    @planStoreFixture = Ext.create 'Rally.data.Store',
       model: Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel()
       proxy:
         type: 'memory'
@@ -55,18 +54,15 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         Name: "Release 1.1"
         theme: "Take over the world!"
         roadmap:
-          id: '413617ecef8623df1391fabc'
+          id: 'roadmap-id-1'
         timeframe:
           id: "2"
         features: [
-          id: "1000"
-          ref: "http://localhost:8080/portfolio-service/feature/1000"
+          id: "F1000"
         ,
-          id: "1001"
-          ref: "http://localhost:8080/portfolio-service/feature/1001"
+          id: "F1001"
         ,
-          id: "1002"
-          ref: "http://localhost:8080/portfolio-service/feature/1002"
+          id: "F1002"
         ]
       ,
         id: "513617f7ef8623df1391fefd"
@@ -78,13 +74,11 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         timeframe:
           id: "3"
         roadmap:
-          id: '413617ecef8623df1391fabc'
+          id: 'roadmap-id-1'
         features: [
-          id: "1005"
-          ref: "http://localhost:8080/portfolio-service/feature/1005"
+          id: "F1005"
         ,
-          id: "1006"
-          ref: "http://localhost:8080/portfolio-service/feature/1006"
+          id: "F1006"
         ]
       ,
         id: "51361807ef8623df1391fefe"
@@ -95,7 +89,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         timeframe:
           id: "4"
         roadmap:
-          id: '413617ecef8623df1391fabc'
+          id: 'roadmap-id-1'
         features: []
       ,
         id: "3"
@@ -111,144 +105,244 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     @planStoreFixture.model.setProxy 'memory'
     @planStoreFixture
 
+  featureStoreData: [
+    ObjectID: "1000"
+    _refObjectUUID: "F1000"
+    _ref: '/portfolioitem/feature/1000'
+    Name: "Android Support"
+    PreliminaryEstimate: {Value: 4,_refObjectName: "L"}
+    RefinedEstimate: 5
+    subscriptionId: "1"
+    Project: {_refObjectName: "My Project"}
+    Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
+    DirectChildrenCount: 39
+    DragAndDropRank: 'a'
+  ,
+    ObjectID: "1001"
+    _refObjectUUID: "F1001"
+    _ref: '/portfolioitem/feature/1001'
+    Name: "iOS Support"
+    PreliminaryEstimate: {Value: 2,_refObjectName: "L"}
+    RefinedEstimate: 4
+    subscriptionId: "1"
+    Project: {_refObjectName: "My Project"}
+    Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
+    DirectChildrenCount: 39
+    DragAndDropRank: 'b'
+  ,
+    ObjectID: "1002"
+    _refObjectUUID: "F1002"
+    _ref: '/portfolioitem/feature/1002'
+    Name: "HTML 5 Webapp"
+    PreliminaryEstimate: {Value: 3,_refObjectName: "L"}
+    RefinedEstimate: 3
+    subscriptionId: "1"
+    Project: {_refObjectName: "My Project"}
+    Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
+    DirectChildrenCount: 39
+    DragAndDropRank: 'c'
+  ,
+    ObjectID: "1003"
+    _refObjectUUID: "F1003"
+    _ref: '/portfolioitem/feature/1003'
+    Name: "Blackberry Native App"
+    PreliminaryEstimate: {Value: 1,_refObjectName: "L"}
+    RefinedEstimate: 2
+    subscriptionId: "1"
+    Project: {_refObjectName: "My Project"}
+    Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
+    DirectChildrenCount: 39
+    DragAndDropRank: 'd'
+  ,
+    ObjectID: "1004"
+    _refObjectUUID: "F1004"
+    _ref: '/portfolioitem/feature/1004'
+    Name: "Windows Phone Support"
+    PreliminaryEstimate: {Value: 3,_refObjectName: "L"}
+    RefinedEstimate: 1
+    subscriptionId: "2"
+    Project: {_refObjectName: "My Project"}
+    Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
+    DirectChildrenCount: 39
+    DragAndDropRank: 'e'
+  ,
+    ObjectID: "1005"
+    _refObjectUUID: "F1005"
+    _ref: '/portfolioitem/feature/1005'
+    Name: "Ubuntu Phone Application"
+    PreliminaryEstimate: {Value: 4,_refObjectName: "L"}
+    RefinedEstimate: 0
+    subscriptionId: "2"
+    Project: {_refObjectName: "My Project"}
+    Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
+    DirectChildrenCount: 39
+    DragAndDropRank: 'f'
+  ,
+    ObjectID: "1006"
+    _refObjectUUID: "F1006"
+    _ref: '/portfolioitem/feature/1006'
+    Name: "Tester's Large Test Card 1"
+    PreliminaryEstimate: {Value: 13,_refObjectName: "L"}
+    RefinedEstimate: 0
+    subscriptionId: "2"
+    Project: {_refObjectName: "My Project"}
+    Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
+    DirectChildrenCount: 39
+    DragAndDropRank: 'g'
+  ,
+    ObjectID: "1007"
+    _refObjectUUID: "F1007"
+    _ref: '/portfolioitem/feature/1007'
+    Name: "Tester's Large Test Card 2"
+    PreliminaryEstimate: {Value: 21,_refObjectName: "L"}
+    RefinedEstimate: 0
+    subscriptionId: "2"
+    Project: {_refObjectName: "My Project"}
+    Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
+    DirectChildrenCount: 39
+    DragAndDropRank: 'h'
+  ,
+    ObjectID: "1008"
+    _refObjectUUID: "F1008"
+    _ref: '/portfolioitem/feature/1008'
+    Name: "Tester's Large Test Card 3"
+    PreliminaryEstimate: {Value: 13,_refObjectName: "L"}
+    RefinedEstimate: 0
+    subscriptionId: "2"
+    Project: {_refObjectName: "My Project"}
+    Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
+    DirectChildrenCount: 39
+    DragAndDropRank: 'i'
+  ,
+    ObjectID: "1009"
+    _refObjectUUID: "F1009"
+    _ref: '/portfolioitem/feature/1009'
+    Name: "Tester's Large Test Card 4"
+    PreliminaryEstimate: {Value: 8,_refObjectName: "L"}
+    RefinedEstimate: 0
+    subscriptionId: "2"
+    Project: {_refObjectName: "My Project"}
+    Parent: {_refObjectName: "Who's Your Daddy", FormattedID: "I1"}
+    LeafStoryCount: 42
+    DirectChildrenCount: 39
+    DragAndDropRank: 'j'
+  ]
+
   getFeatureStoreFixture: ->
-    @featureStoreFixture = Ext.create 'Ext.data.Store',
+    @featureStoreFixture = Ext.create 'Rally.data.wsapi.Store',
       model: Rally.test.mock.data.WsapiModelFactory.getModel 'PortfolioItem/Feature'
       proxy:
         type: 'memory'
 
       data: Rally.test.mock.ModelObjectMother.getRecords 'PortfolioItemFeature',
-        values: [
-          ObjectID: "1000"
-          _ref: '/portfolioitem/feature/1000'
-          Name: "Android Support"
-          PreliminaryEstimate: {Value: 4}
-          subscriptionId: "1"
-        ,
-          ObjectID: "1001"
-          _ref: '/portfolioitem/feature/1001'
-          Name: "iOS Support"
-          PreliminaryEstimate: {Value: 2}
-          subscriptionId: "1"
-        ,
-          ObjectID: "1002"
-          _ref: '/portfolioitem/feature/1002'
-          Name: "HTML 5 Webapp"
-          PreliminaryEstimate: {Value: 3}
-          subscriptionId: "1"
-        ,
-          ObjectID: "1003"
-          _ref: '/portfolioitem/feature/1003'
-          Name: "Blackberry Native App"
-          PreliminaryEstimate: {Value: 1}
-          subscriptionId: "1"
-        ,
-          ObjectID: "1004"
-          _ref: '/portfolioitem/feature/1004'
-          Name: "Windows Phone Support"
-          PreliminaryEstimate: {Value: 3}
-          subscriptionId: "2"
-        ,
-          ObjectID: "1005"
-          _ref: '/portfolioitem/feature/1005'
-          Name: "Ubuntu Phone Application"
-          PreliminaryEstimate: {Value: 4}
-          subscriptionId: "2"
-        ,
-          ObjectID: "1006"
-          _ref: '/portfolioitem/feature/1006'
-          Name: "Tester's Large Test Card 1"
-          PreliminaryEstimate: {Value: 13}
-          subscriptionId: "2"
-        ,
-          ObjectID: "1007"
-          _ref: '/portfolioitem/feature/1007'
-          Name: "Tester's Large Test Card 2"
-          PreliminaryEstimate: {Value: 21}
-          subscriptionId: "2"
-        ,
-          ObjectID: "1008"
-          _ref: '/portfolioitem/feature/1008'
-          Name: "Tester's Large Test Card 3"
-          PreliminaryEstimate: {Value: 13}
-          subscriptionId: "2"
-        ,
-          ObjectID: "1009"
-          _ref: '/portfolioitem/feature/1009'
-          Name: "Tester's Large Test Card 4"
-          PreliminaryEstimate: {Value: 8}
-          subscriptionId: "2"
-        ]
+        values: @featureStoreData
 
     @featureStoreFixture.model.setProxy 'memory'
     @featureStoreFixture
 
+  secondFeatureStoreData: [
+    ObjectID: "1010"
+    _refObjectUUID: "F1010"
+    _ref: '/portfolioitem/feature/1010'
+    Name: "Battlestar Gallactica"
+    PreliminaryEstimate: {Value: 6,_refObjectName: "L"}
+    subscriptionId: "1"
+  ,
+    ObjectID: "1011"
+    _refObjectUUID: "F1011"
+    _ref: '/portfolioitem/feature/1011'
+    Name: "Firefly"
+    PreliminaryEstimate: {Value: 3,_refObjectName: "L"}
+    subscriptionId: "1"
+  ]
+
   getSecondFeatureStoreFixture: ->
-    @secondFeatureStoreFixture = Ext.create 'Ext.data.Store',
+    @secondFeatureStoreFixture = Ext.create 'Rally.data.Store',
       model: Rally.test.mock.data.WsapiModelFactory.getModel 'PortfolioItem/Feature'
       proxy:
         type: 'memory'
       data: Rally.test.mock.ModelObjectMother.getRecords 'PortfolioItemFeature',
-        values:
-          [
-            ObjectID: "1010"
-            _ref: '/portfolioitem/feature/1010'
-            Name: "Battlestar Gallactica"
-            PreliminaryEstimate: {Value: 6}
-            subscriptionId: "1"
-          ,
-            ObjectID: "1011"
-            _ref: '/portfolioitem/feature/1011'
-            Name: "Firefly"
-            PreliminaryEstimate: {Value: 3}
-            subscriptionId: "1"
-          ]
+        values: @secondFeatureStoreData
 
     @secondFeatureStoreFixture.model.setProxy 'memory'
     @secondFeatureStoreFixture
 
+  getPreliminaryEstimateStoreFixture: ->
+    @preliminaryEstimateStoreFixture = Ext.create 'Rally.data.wsapi.Store',
+      model: Rally.test.mock.data.WsapiModelFactory.getModel 'PreliminaryEstimate'
+      proxy:
+        type: 'memory'
+      data: [
+        {Value: 8, _refObjectName: 'L', Name: 'L', Description: 'Large'}
+      ]
+
+    @preliminaryEstimateStoreFixture.model.setProxy 'memory'
+    @preliminaryEstimateStoreFixture
+
   getTimelineStoreFixture: ->
-    @timelineStoreFixture = Ext.create 'Ext.data.Store',
+    @timelineStoreFixture = Ext.create 'Rally.data.Store',
       model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimelineModel()
       proxy:
         type: 'memory'
       data: [
-        id: '1'
+        id: 'timeline-id-1'
+        timeframes: [
+          id: 1
+        ]
       ]
 
+    @timelineStoreFixture.model.setProxy 'memory'
+    @timelineStoreFixture
+
   getTimeframeStoreFixture: ->
-    @timeframeStoreFixture = Ext.create 'Ext.data.Store',
+    @timeframeStoreFixture = Ext.create 'Rally.data.Store',
       model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel()
       proxy:
         type: 'memory'
       data: [
         id: '2'
         name: 'Q1'
-        start: new Date('1/01/2013')
-        end: new Date('3/31/2013')
+        startDate: new Date('1/01/2013')
+        endDate: new Date('3/31/2013')
         timeline:
-          id: '1'
+          id: 'timeline-id-1'
       ,
         id: '3'
         name: 'Q2'
-        start: new Date('4/01/2013')
-        end: new Date('6/30/2013')
+        startDate: new Date('4/01/2013')
+        endDate: new Date('6/30/2013')
         timeline:
-          id: '1'
+          id: 'timeline-id-1'
       ,
         id: '4'
         name: 'Future Planning Period'
-        start: new Date('7/01/2013')
-        end: new Date('6/30/2014')
+        startDate: new Date('7/01/2013')
+        endDate: new Date('6/30/2099')
         timeline:
-          id: '1'
+          id: 'timeline-id-1'
       ,
         id: '7'
         name: ''
-        start: null
-        end: null
+        startDate: null
+        endDate: null
         timeline:
-          id: '1'
+          id: 'timeline-id-1'
+      ,
+        id: '8'
+        name: 'Timeframe not linked to a plan'
+        startDate: new Date('7/01/2014')
+        endDate: new Date('10/31/2014')
+        timeline:
+          id: 'timeline-id-1'
       ]
 
     @timeframeStoreFixture.model.setProxy 'memory'

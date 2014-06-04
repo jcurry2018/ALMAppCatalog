@@ -9,13 +9,15 @@
     Ext.define('Rally.apps.roadmapplanningboard.Proxy', {
         extend: 'Ext.data.proxy.Rest',
         requires: [
-            'Rally.apps.roadmapplanningboard.Writer'
+            'Rally.apps.roadmapplanningboard.Writer',
+            'Rally.apps.roadmapplanningboard.Reader',
+            'Rally.ui.notify.Notifier',
+            'Rally.apps.roadmapplanningboard.util.RequestCollectionHelper'
         ],
         alias: 'proxy.roadmap',
 
         reader: {
-            type: 'json',
-            root: 'results'
+            type: 'roadmap'
         },
 
         writer: {
@@ -23,27 +25,25 @@
             writeAllFields: false
         },
 
-        /**
-         * Attach a workspace uuid to the request. This would naturally go into the buildRequest
-         * method, but that is a sync call. We need to delay the actual request until we have
-         * a uuid. Note this will be deprecated when v3.0 rolls out.
-         */
         doRequest: function (operation, callback, scope) {
-            var uuidMapper = Deft.Injector.resolve('uuidMapper');
+            operation = this._decorateOperation(operation);
+            return this.callParent(arguments);
+        },
 
-            if (operation.params && operation.params.workspace !== undefined) {
-                return this.callParent(arguments);
-            }
-
-            var me = this;
+        /**
+         * Decorate each request operation with params for workspace and project UUIDs.
+         * @param {Object} operation
+         * @returns {Object} operation
+         */
+        _decorateOperation: function(operation) {
             var context = operation.context || Rally.environment.getContext();
 
-            uuidMapper.getUuid(context.getWorkspace()).then(function (uuid) {
-                operation.params = operation.params || {};
-                operation.params.workspace = uuid || '';
+            operation.noQueryScoping = true;
+            operation.params = operation.params || {};
+            operation.params.workspace = context.getWorkspace()._refObjectUUID || '';
+            operation.params.project = context.getProject()._refObjectUUID || '';
 
-                return me.doRequest(operation, callback, scope);
-            });
+            return operation;
         },
 
         /**
@@ -58,9 +58,19 @@
         },
 
         buildRequest: function(operation) {
-            var request = this.callParent(arguments);
+            var request = Rally.apps.roadmapplanningboard.util.RequestCollectionHelper.updateRequestIfCollection(this.callParent(arguments),
+                this._onItemAdded, this._onItemRemoved);
             request.withCredentials = true;
+
             return request;
+        },
+
+        _onItemAdded: function (field, oldValue, newValue, record, request) {
+            request.action = 'create';
+        },
+
+        _onItemRemoved: function (field, oldValue, newValue, record, request) {
+            request.action = 'destroy';
         }
     });
 

@@ -9,14 +9,14 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
     getContext: (initialValues) ->
       globalContext = Rally.environment.getContext()
 
-      Ext.create('Rally.app.Context', {
-        initialValues:Ext.merge({
+      Ext.create 'Rally.app.Context',
+        initialValues:Ext.merge
           project:globalContext.getProject()
           workspace:globalContext.getWorkspace()
           user:globalContext.getUser()
           subscription:globalContext.getSubscription()
-        }, initialValues)
-      })
+          timebox: Ext.create 'Rally.app.TimeboxScope', record: @mom.getRecord 'iteration'
+        , initialValues
 
     createApp: (initialValues) ->
       @container = Ext.create('Ext.Container', {
@@ -28,7 +28,10 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       })
 
       @container.add(app)
-      @waitForComponentReady(app)
+      if app.getContext().getTimeboxScope().getRecord()
+        @waitForComponentReady(app)
+      else
+        @once condition: -> app.down '#unscheduledBlankSlate'
 
     stubApp: (config) ->
       @stubPromiseFunction(Rally.apps.iterationsummary.IterationSummaryApp.prototype, 'getScheduleStates',
@@ -793,7 +796,6 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
           ).then =>
             expect(timeBoxInfoStub.callCount).toBe 2
 
-
   it "refreshes app on objectUpdate of artifacts", ->
     @createApp({}).then (app) =>
       addStub = @stub(app, 'add')
@@ -809,6 +811,34 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       addSpy = @spy(app, 'add')
 
       Rally.environment.getMessageBus().publish(Rally.Message.objectUpdate, @mom.getRecord('Release'))
+
+      expect(addSpy).not.toHaveBeenCalled()
+
+  it "refreshes app on bulkUpdate of artifacts", ->
+    @createApp({}).then (app) =>
+      addStub = @stub(app, 'add')
+
+      messageBus = Rally.environment.getMessageBus()
+      messageBus.publish(Rally.Message.bulkUpdate, @mom.getRecord(type) for type in ['Defect', 'HierarchicalRequirement', 'DefectSuite', 'TestSet', 'TestCase'])
+
+      expect(addStub.callCount).toBe 1
+
+  it "does not refresh app on bulkUpdate of non-artifacts", ->
+    @createApp({}).then (app) =>
+      addSpy = @spy(app, 'add')
+
+      Rally.environment.getMessageBus().publish(Rally.Message.bulkUpdate, @mom.getRecord(type) for type in ['ConversationPost', 'Release'])
+
+      expect(addSpy).not.toHaveBeenCalled()
+
+  it 'does not refresh app on objectUpdate if unscheduled', ->
+    @createApp(timebox: Ext.create 'Rally.app.TimeboxScope',
+      type: 'iteration',
+      record: null
+    ).then (app) =>
+      addSpy = @spy(app, 'add')
+
+      Rally.environment.getMessageBus().publish Rally.Message.objectUpdate, @mom.getRecord 'defect'
 
       expect(addSpy).not.toHaveBeenCalled()
 
@@ -1706,3 +1736,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         expect(configTests.subtitle).toBe "(3 of 9)"
         expect(configTests.status).toBe "error"
         expect(configTests.message).toBe app.self.CURRENT_TESTS_FAILING_MESSAGE
+
+    it 'cleans up app content when no timeboxes available', ->
+      @createApp({}).then (app) =>
+        expect(app.down('#dataContainer')).not.toBeNull()
+        app.onNoAvailableTimeboxes()
+        expect(app.down('#dataContainer')).toBeNull()

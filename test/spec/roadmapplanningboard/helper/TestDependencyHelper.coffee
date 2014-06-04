@@ -1,15 +1,18 @@
 Ext = window.Ext4 || window.Ext
 
+#Need to override injector so not replaced with actual that does not have data
+Ext.define 'Rally.apps.roadmapplanningboard.DeftInjector', singleton: true, init: Ext.emptyFn
 Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
 
   singleton: true
 
   requires: [
     'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory'
+    'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
   ]
+  constructor: (@uuidGenerator = Ext.create('Ext.data.UuidGenerator')) ->
 
   loadDependencies: ->
-
     Rally.test.mock.env.Global.setupEnvironment
       services:
         planning_service_url: 'http://localhost:9999'
@@ -43,9 +46,10 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
         fn: ->
           Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getRoadmapStoreFixture()
 
-      uuidMapper:
+      preliminaryEstimateStore:
         fn: ->
-          getUuid: ->
-              deferred = Ext.create('Deft.promise.Deferred')
-              deferred.resolve('12345678-1234-1234-1234-12345678')
-              deferred.promise
+          Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getPreliminaryEstimateStoreFixture()
+
+      nextDateRangeGenerator:
+        className: 'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
+

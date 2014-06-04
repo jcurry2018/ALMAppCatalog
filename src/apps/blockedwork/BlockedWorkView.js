@@ -86,7 +86,7 @@
                 pageSize: this.showMoreCount,
                 autoLoad: true,
                 requester: this,
-                model: 'Blocker',
+                model: Ext.identityFn('Blocker'),
                 fetch: ['WorkProduct','Project','Name','FormattedID','CreationDate','BlockedBy','BlockedReason','Disabled','ObjectID'],
                 sorters: {
                     property: 'CreationDate',

@@ -68,8 +68,6 @@ function initTaskboard() {
             "iteration": "/iteration:current?fetch=name,objectid&order=StartDate",
             "iterations": "/iterations?fetch=name,objectid&order=StartDate,Name&project=${currentProject}&projectScopeUp=false&projectScopeDown=false" + paging,
 
-            "users": "/users?fetch=displayname,loginname,emailaddress,objectid" + paging,
-
             "tasks": "/tasks?fetch=taskindex,name,objectid,formattedid,owner,blocked,estimate,todo,actuals,state,workproduct&query=(Iteration = ${iteration})" + scoping + paging,
 
             "stories": "/hierarchicalrequirement?fetch=rank,blocked,formattedid,name,objectid,owner,project,schedulestate,taskestimatetotal,taskremainingtotal,taskactualtotal,tasks&order=Rank&query=(Iteration = ${iteration})" + scoping + paging,
@@ -308,6 +306,9 @@ function initTaskboard() {
         this.schemaConfig = {};
         this.viewConfig = viewConfig;
         this.dataSource = new RALLY.toolkit.TaskboardDataSource(query, '__SERVER_URL__');
+
+        // Use a modern version of wsapi so that work items will have user objects rather than the old user name strings
+        this.dataSource.readUrl = '/webservice/1.43/adhoc.js';
         this.view = new RALLY.toolkit.Grid('taskboard', this.viewConfig);
         this.editor = new RALLY.toolkit.Editor();
     };
@@ -460,9 +461,9 @@ function initTaskboard() {
                 if (item.Owner) {
                     var itemOwnerOptionName = me.getOptionNameForUser(item.Owner);
                     if (currentUserOptionName != itemOwnerOptionName &&
-                            me.indexOfOwner(sortedEditors, item.Owner) < 0 &&
-                            me.indexOfOwner(sortedTeamMembers, item.Owner) < 0) {
-                        sortedEditors.push({Label: itemOwnerOptionName, Value: item.Owner.LoginName});
+                            me.indexOfOwner(sortedEditors, item.Owner._ref) < 0 &&
+                            me.indexOfOwner(sortedTeamMembers, item.Owner._ref) < 0) {
+                        sortedEditors.push({Label: itemOwnerOptionName, Value: item.Owner._ref});
                     }
                 }
 
@@ -481,17 +482,17 @@ function initTaskboard() {
         },
 
         getOptionNameForUser: function (user) {
-            return user._refObjectName || user.DisplayName || user.LoginName.split('@')[0];
+            return user._refObjectName;
         },
 
         createOwnerOptionData: function (editors, teamMembers) {
             var ownerOptionData = [];
             var teamMemberOptGroup = {label: "Team Members:", owners: []};
             for (var i = 0; i < teamMembers.length; i++) {
-                var indexOfOwner = this.indexOfOwner(editors, teamMembers[i]);
+                var indexOfOwner = this.indexOfOwner(editors, teamMembers[i].Value);
                 while (indexOfOwner > -1) {
                     editors.splice(indexOfOwner, 1);
-                    indexOfOwner = this.indexOfOwner(editors, teamMembers[i]);
+                    indexOfOwner = this.indexOfOwner(editors, teamMembers[i].Value);
                 }
 
                 teamMemberOptGroup.owners.push(teamMembers[i]);
@@ -510,9 +511,9 @@ function initTaskboard() {
             return ownerOptionData;
         },
 
-        indexOfOwner: function (owners, owner) {
+        indexOfOwner: function (owners, ownerRef) {
             for (var i = 0; i < owners.length; i++) {
-                if (owners[i].Value === owner.Value) {
+                if (owners[i].Value === ownerRef) {
                     return i;
                 }
             }
@@ -525,7 +526,7 @@ function initTaskboard() {
                 props: (showActuals) ? ['Estimate', 'ToDo', 'Actuals', 'Owner', 'State'] : ['Estimate', 'ToDo', 'Owner', 'State'],
                 propertyKeyAccessors: {
                     Owner: function (prop) {
-                        return prop != null ? prop.LoginName : null;
+                        return prop != null ? prop._ref : null;
                     }
                 },
                 propertyValueAccessors: {
@@ -559,16 +560,16 @@ function initTaskboard() {
 
         getEditors: function (item, options, currentOffset, callback) {
             var project = item.WorkProduct.Project;
-            var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
-            var editorUrl = baseUrl + "/project/" + project.ObjectID + "/Editors.js?fetch=DisplayName,EmailAddress,UserName&pagesize=200&start=" + currentOffset;
+            var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/1.43');
+            var editorUrl = baseUrl + "/project/" + project.ObjectID + "/Editors.js?fetch=DisplayName,UserName&pagesize=200&start=" + currentOffset;
             YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleOwnersResponse(item, options, currentOffset, this.getEditors, callback), failure: function () {
             }, scope: this}, null);
         },
 
         getTeamMembers: function (item, options, currentOffset, callback) {
             var project = item.WorkProduct.Project;
-            var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
-            var editorUrl = baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName,EmailAddress,UserName&pagesize=200&start=" + currentOffset;
+            var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/1.43');
+            var editorUrl = baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName,UserName&pagesize=200&start=" + currentOffset;
             YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleOwnersResponse(item, options, currentOffset, this.getTeamMembers, callback), failure: function () {
             }, scope: this}, null);
         },
@@ -577,7 +578,7 @@ function initTaskboard() {
             var me = this;
             if(!me._me) {
                 var project = item.WorkProduct.Project;
-                var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
+                var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/1.43');
                 var userUrl = baseUrl + '/user.js';
                 YAHOO.util.Connect.asyncRequest('GET', userUrl, {
                     success: function(response) {
@@ -600,7 +601,7 @@ function initTaskboard() {
                 var pageSize = 200;
                 for (i = 0; i < results.length; ++i) {
                     var label = results[i].DisplayName || results[i].UserName.split('@')[0];
-                    options.push({Label: label, Value: results[i].UserName});
+                    options.push({Label: label, Value: results[i]._ref});
                 }
 
                 if (currentOffset + pageSize  <= json.QueryResult.TotalResultCount) {
@@ -795,12 +796,10 @@ function initTaskboard() {
                         that.view.removeItem(task);
 
                         if (RALLY.toolkit.insideRally() && parent && parent.RALLY) {
-                            parent.RALLY.util.showDeleteFlair({
+                            parent.RALLY.ui.showDeleteFlair({
+                                artifact: new parent.RALLY.data.SimpleRallyRecord(task),
                                 oid: task.ObjectID,
-                                record: task,
-                                recordName: task.FormattedID + ': ' + task.Name,
                                 restorable: true
-
                             });
                         }
                         that.dataSource.refreshWorkProduct(task.WorkProduct, function (newWorkProduct) {

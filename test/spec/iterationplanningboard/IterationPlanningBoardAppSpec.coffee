@@ -3,7 +3,6 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.ui.cardboard.CardBoard'
   'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser'
-  'Rally.util.Array'
   'Rally.util.DateTime'
 ]
 
@@ -53,15 +52,11 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @app.cardboard
 
     createUserStoryRecord: (options = {}) ->
-      Model = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
-      options._type = 'hierarchicalrequirement'
-      new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 10000)}, options))
+      @mom.getRecord 'userstory', emptyCollections: true, values: Ext.apply({ DirectChildrenCount: 0, Blocked: false, Ready: false, BlockedReason: '' }, options)
 
     createDefectRecord: (options = {}) ->
-      Model = Rally.test.mock.data.WsapiModelFactory.getDefectModel()
-      options._type = 'defect'
-      new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 10000)}, options))
-
+      @mom.getRecord 'defect', emptyCollections: true, values: Ext.apply({ Requirement: null, Blocked: false, Ready: false, BlockedReason: '' }, options)
+      
     getVisibleCards: (type) ->
       additionalClass = if type? then ".#{type}" else ''
       cards = Ext.query "#{@cardSelector}#{additionalClass}"
@@ -75,7 +70,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @click(css: ".#{type}-type-checkbox input").then =>
         once(
           condition: => @getVisibleCards(type).length is expectedVisibleCards
-          description: 'filter to be applied'
+          description: "filter to be applied"
         )
 
     filterByBacklogCustomSearchQuery: (query) ->
@@ -325,9 +320,9 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
         ObjectID: 3
 
       @ajax.whenCreating('userstory').respondWith([storyData])
-      @ajax.whenReading('hierarchicalrequirement', storyData.ObjectID).respondWith([storyData])
+      @ajax.whenQuerying('artifact').respondWith [storyData]
 
-      addNewHelper = new Helpers.AddNewHelper '.planning-board'
+      addNewHelper = new Helpers.AddNewHelper this, '.planning-board'
       addNewHelper.inlineAdd('Story 3').then =>
         expect(@getVisibleCardNames()[0].innerHTML).toContain 'Story 3'
 
@@ -337,20 +332,17 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
 
-      addNewHelper = new Helpers.AddNewHelper '.planning-board'
+      addNewHelper = new Helpers.AddNewHelper this, '.planning-board'
       addNewHelper.addWithDetails('foo').then ->
         expect(editorOpenedStub).toHaveBeenCalledOnce()
 
   it 'should display a newly created story ranked at the bottom of the column', ->
-    storyRank = 1000
+    storyRank = 'aaaa'
     firstStoryName = 'Story 1'
     userStory1 =
       Iteration: @getIteration1(),
-      _ref: '/hierarchicalrequirement/1'
-      _refObjectName: firstStoryName
       Name: firstStoryName
-      ObjectID: 1,
-      Rank: storyRank
+      DragAndDropRank: storyRank
 
     @ajax.whenQuerying('artifact').respondWith(userStory1)
 
@@ -358,15 +350,12 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       secondStoryName = 'Story ranked lower than 1'
       userStory2 =
         Iteration: @getIteration1(),
-        _ref: '/hierarchicalrequirement/2'
-        _refObjectName: secondStoryName
         Name: secondStoryName
         ObjectID: 2,
-        Rank: storyRank + 1
+        DragAndDropRank: 'bbbb'
 
-      @ajax.whenQuerying('artifact').respondWith([userStory1, userStory2])
-      @ajax.whenReading('hierarchicalrequirement', userStory2.ObjectID).respondWith(userStory2)
-      Rally.environment.getMessageBus().publish Rally.Message.objectCreate, [@createUserStoryRecord userStory2]
+      @ajax.whenQuerying('artifact').respondWith [userStory2]
+      Rally.environment.getMessageBus().publish Rally.Message.objectCreate, @createUserStoryRecord userStory2
 
       cards = @getVisibleCardNames()
       expect(cards[0].innerHTML).toContain firstStoryName
@@ -408,7 +397,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @filterByType('hierarchicalrequirement').then =>
         @filterByType('defect').then =>
           @filterByBacklogCustomSearchQuery('A').then =>
-            expect(clearCardsSpy).toHaveBeenCalledOnce()
+            expect(clearCardsSpy).toHaveBeenCalled()
             expect(backlogColumn.getCards(true).length).toBe 2
             expect(backlogColumn.getCards().length).toBe 0
 
@@ -417,6 +406,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       columns = @getColumns()
 
       @filterByType('defect').then =>
+        @ajax.whenQuerying('artifact').respondWith [columns[0].getCards()[0].getRecord().data]
         @filterByBacklogCustomSearchQuery('Story').then =>
           @filterByType('defect').then =>
             expect(columns[0].getCards().length).toBe 1
@@ -488,7 +478,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       startingAt: new Date
     ).then =>
       @click(className: 'scroll-forwards').then =>
-        @assertColumnIsFor Rally.util.Array.last(@iterationData), Rally.util.Array.last(@getTimeboxColumns())
+        @assertColumnIsFor _.last(@iterationData), _.last(@getTimeboxColumns())
 
   it 'should have a default card fields setting', ->
     @createApp().then =>

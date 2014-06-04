@@ -4,7 +4,8 @@
 }
 
 .iteration-summary-app .daysRemaining {
-    font-weight: bold;
+    font-family: NotoSansBold, Helvetica, Arial;
+    font-weight: normal;
 }
 
 .iteration-summary-app .dates {
@@ -53,11 +54,14 @@
 }
 
 .iteration-summary-app .timeboxStatusRow .timeboxStatusDetails .header {
-    font-weight: bold;
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
+    font-weight: normal;
     font-size: 16px;
 }
 
 .iteration-summary-app .timeboxStatusRow .timeboxStatusDetails .subtitle {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
+    font-size: 12px;
     font-weight: normal;
     padding-left: 5px;
 }
