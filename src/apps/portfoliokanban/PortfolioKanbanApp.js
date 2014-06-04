@@ -358,13 +358,10 @@
                         },
                         loadDescription: 'Portfolio Kanban',
                         loadMask: false,
-                        plugins: [
-                            {
+                        plugins: (this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS') ? [] : [{
                                 ptype: 'rallyscrollablecardboard',
                                 containerEl: this.getEl()
-                            },
-                            { ptype: 'rallyfixedheadercardboard' }
-                        ],
+                            }]).concat([{ ptype: 'rallyfixedheadercardboard' }]),
                         storeConfig: {
                             // pageSize config can be removed when we remove ENABLE_INFINITE_SCROLL_ALL_BOARDS toggle, because we can use the default value
                             pageSize: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS') ? 15 : 50,
