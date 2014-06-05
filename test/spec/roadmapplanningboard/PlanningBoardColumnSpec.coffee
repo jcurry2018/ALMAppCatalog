@@ -10,7 +10,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
     createColumn: ->
       target = 'testDiv'
 
-      config = Ext.merge {},
+      @column = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', Ext.merge {},
         store: Deft.Injector.resolve('featureStore')
         cardConfig:
           preliminaryEstimateStore: Deft.Injector.resolve('preliminaryEstimateStore')
@@ -25,8 +25,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
         contentCell: target
         headerCell: target, @columnConfig
         filterCollection: Ext.create 'Rally.data.filter.FilterCollection'
-
-      @column = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', config
       @waitForComponentReady @column
 
   beforeEach ->
@@ -69,7 +67,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
       @column.isMatchingRecord = (record) ->
         record.get('ObjectID') == 1000
-      @column.refresh()
+      @column.refresh store: @column.store
 
       expect(@column.getCards().length).toBe 1
 
@@ -231,7 +229,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
       @createColumn().then =>
         clearSpy = @spy @column.filterCollection, 'clearAllFilters'
-        @column.refresh()
+        @column.refresh store: @column.store
         expect(clearSpy).toHaveBeenCalled()
 
   describe '#getAllFetchFields', ->

@@ -79,7 +79,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
     refreshColumn: ->
       @refreshCount ?= 0
-      @column.refresh()
+      @column.refresh store: @column.store
       @refreshCount++
       @waitForColumnReady @refreshCount + 1
 
