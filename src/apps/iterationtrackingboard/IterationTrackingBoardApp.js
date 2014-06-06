@@ -204,6 +204,16 @@
                 if (context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP')) {
                     _.merge(filterControlConfig, {
                         customFilterPopoverEnabled: true,
+                        blackListFields: [
+                            'DragAndDropRank',
+                            'Feature',
+                            'Iteration',
+                            'Parent',
+                            'PortfolioItem',
+                            'Requirement',
+                            'TestCase',
+                            'VersionId'
+                        ],
                         modelNames: this.modelNames
                     });
                 } else {
