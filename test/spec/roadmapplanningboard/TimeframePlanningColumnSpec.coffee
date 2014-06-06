@@ -46,7 +46,6 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
               @columnReadyStub()
             deleteplan: => @deletePlanStub()
             daterangechange: => @dateRangeChangeStub()
-          filterCollection: Ext.create 'Rally.data.filter.FilterCollection'
         , config
       @waitForColumnReady()
 
@@ -166,10 +165,6 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       @createColumnUsingAjax().then =>
         expect(@ajaxSpy.callCount).toBe 1
 
-    it 'should add a plan features filter', ->
-      @createColumnUsingAjax().then =>
-        expect(@column.filterCollection.tempFilters.planfeatures).not.toBeNull()
-
     describe 'with shallow fetch enabled', ->
 
       helpers
@@ -208,8 +203,8 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       @createPlanRecord()
       @createColumn()
 
-    it 'should return null', ->
-      expect(this.column.getStoreFilter()).toBeNull()
+    it 'should return a store filter with a null id if there are no features', ->
+      expect(this.column.getStoreFilter().toString()).toBe '(ObjectID = null)'
 
   describe 'progress bar', ->
 

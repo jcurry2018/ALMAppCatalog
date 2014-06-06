@@ -6,7 +6,7 @@
         alias: 'widget.timeframeplanningcolumn',
 
         requires: [
-            'Rally.data.wsapi.filter.MultiSelectFilter',
+            'Rally.data.wsapi.Filter',
             'Rally.apps.roadmapplanningboard.ThemeHeader',
             'Rally.apps.roadmapplanningboard.PlanCapacityProgressBar',
             'Rally.apps.roadmapplanningboard.util.Fraction',
@@ -129,30 +129,24 @@
             }
         },
 
-        loadStore: function () {
-            this._updatePlanFeatureFilter();
-            this.callParent(arguments);
+        getStoreFilter: function (model) {
+            var result = _.reduce(this.planRecord.data.features, function (result, feature) {
+                var filter = this._createFeatureFilter(feature.id);
+                if (!result) {
+                    return filter;
+                } else {
+                    return result.or(filter);
+                }
+            }, null, this);
+
+            return result || this._createFeatureFilter(null);
         },
 
-        _updatePlanFeatureFilter: function () {
-            if (this.filterCollection) {
-                this.filterCollection.removeTempFilterByKey('planfeatures');
-                this.filterCollection.addTempFilter(this._createFeatureFilter());
-            }
-        },
-
-        getStoreFilter: function () {
-            return null;
-        },
-
-        _createFeatureFilter: function () {
-            var features = this.planRecord.data.features.length > 0 ? this.planRecord.data.features : [null];
-            return Ext.create('Rally.data.wsapi.filter.MultiSelectFilter', {
-                itemId: 'planfeatures',
-                filterProperty: 'ObjectID',
+        _createFeatureFilter: function (featureId) {
+            return Ext.create('Rally.data.wsapi.Filter', {
+                property: 'ObjectID',
                 operator: '=',
-                value: features,
-                getFilterValue: function (feature) { return feature && feature.id; }
+                value: featureId
             });
         },
 
@@ -459,6 +453,7 @@
                 this._drawHeaderButtons();
             }
         },
+
 
         _getDateRange: function () {
             var formattedEndDate, formattedStartDate;

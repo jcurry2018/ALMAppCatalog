@@ -14,16 +14,15 @@
              */
             planStore: null,
 
+            filterable: true,
             columnHeaderConfig: {
                 headerTpl: 'Backlog'
+            },
+            baseFilter: {
+                property: 'ActualEndDate',
+                operator: '=',
+                value: 'null'
             }
-        },
-
-        constructor: function (config) {
-            this.mergeConfig(config);
-            this._createBaseFilter();
-
-            this.callParent([this.config]);
         },
 
         drawHeader: function () {
@@ -57,18 +56,6 @@
             return !found;
         },
 
-        getStoreFilter: function (model) {
-            var storeFilter = this.baseFilter;
-
-            if (this.filters) {
-                storeFilter = _.reduce(this.filters, function (result, filter) {
-                    return result ? result.and(filter) : filter;
-                }, storeFilter);
-            }
-
-            return storeFilter;
-        },
-
         _searchBacklog: function (cmp, value) {
             if (this.storeConfig.search !== value) {
                 this.refresh({
@@ -77,14 +64,6 @@
                     }
                 });
             }
-        },
-
-        _createBaseFilter: function () {
-            this.baseFilter = new Rally.data.QueryFilter({
-                property: 'ActualEndDate',
-                operator: '=',
-                value: 'null'
-            });
         }
     });
 
