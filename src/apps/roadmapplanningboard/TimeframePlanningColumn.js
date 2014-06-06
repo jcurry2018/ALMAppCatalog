@@ -6,7 +6,7 @@
         alias: 'widget.timeframeplanningcolumn',
 
         requires: [
-            'Rally.data.wsapi.Filter',
+            'Rally.data.wsapi.filter.MultiSelectFilter',
             'Rally.apps.roadmapplanningboard.ThemeHeader',
             'Rally.apps.roadmapplanningboard.PlanCapacityProgressBar',
             'Rally.apps.roadmapplanningboard.util.Fraction',
@@ -129,24 +129,35 @@
             }
         },
 
-        getStoreFilter: function (model) {
-            var result = _.reduce(this.planRecord.data.features, function (result, feature) {
-                var filter = this._createFeatureFilter(feature.id);
-                if (!result) {
-                    return filter;
-                } else {
-                    return result.or(filter);
-                }
-            }, null, this);
-
-            return result || this._createFeatureFilter(null);
+        loadStore: function () {
+            this._updatePlanFeatureFilter();
+            this.callParent(arguments);
         },
 
-        _createFeatureFilter: function (featureId) {
-            return Ext.create('Rally.data.wsapi.Filter', {
-                property: 'ObjectID',
+        filter: function () {
+            this._updatePlanFeatureFilter();
+            this.callParent(arguments);
+        },
+
+        _updatePlanFeatureFilter: function () {
+            if (this.filterCollection) {
+                this.filterCollection.removeTempFilterByKey('planfeatures');
+                this.filterCollection.addTempFilter(this._createFeatureFilter());
+            }
+        },
+
+        getStoreFilter: function () {
+            return null;
+        },
+
+        _createFeatureFilter: function () {
+            var features = this.planRecord.data.features.length > 0 ? this.planRecord.data.features : [null];
+            return Ext.create('Rally.data.wsapi.filter.MultiSelectFilter', {
+                itemId: 'planfeatures',
+                filterProperty: 'ObjectID',
                 operator: '=',
-                value: featureId
+                value: features,
+                getFilterValue: function (feature) { return feature && feature.id; }
             });
         },
 
@@ -453,7 +464,6 @@
                 this._drawHeaderButtons();
             }
         },
-
 
         _getDateRange: function () {
             var formattedEndDate, formattedStartDate;

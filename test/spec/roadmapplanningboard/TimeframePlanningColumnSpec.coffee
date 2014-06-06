@@ -46,6 +46,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
               @columnReadyStub()
             deleteplan: => @deletePlanStub()
             daterangechange: => @dateRangeChangeStub()
+          filterCollection: Ext.create 'Rally.data.filter.FilterCollection'
         , config
       @waitForColumnReady()
 
@@ -87,6 +88,14 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       @once
         condition: =>
           @columnReadyStub.callCount >= callCount
+
+    createColumnUsingAjax: (options) ->
+      @createColumn Ext.merge(
+        fields: ['FormattedID', 'Name']
+        types: ['PortfolioItem/Feature']
+        model: 'PortfolioItem/Feature'
+        useInMemoryStore: false
+      , options)
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -145,16 +154,6 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           expect(headerTplData['progressBarHtml']).toBeTruthy()
 
   describe 'loading features from store', ->
-
-    helpers
-      createColumnUsingAjax: (options) ->
-        @createColumn Ext.merge(
-          fields: ['FormattedID', 'Name']
-          types: ['PortfolioItem/Feature']
-          model: 'PortfolioItem/Feature'
-          useInMemoryStore: false
-        , options)
-
     beforeEach ->
       @createTimeframeRecord()
       @createPlanRecord()
@@ -164,6 +163,10 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
     it 'should only load the store once when the column is created', ->
       @createColumnUsingAjax().then =>
         expect(@ajaxSpy.callCount).toBe 1
+
+    it 'should add a plan features filter', ->
+      @createColumnUsingAjax().then =>
+        expect(@column.filterCollection.tempFilters.planfeatures).not.toBeNull()
 
     describe 'with shallow fetch enabled', ->
 
@@ -203,8 +206,8 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       @createPlanRecord()
       @createColumn()
 
-    it 'should return a store filter with a null id if there are no features', ->
-      expect(this.column.getStoreFilter().toString()).toBe '(ObjectID = null)'
+    it 'should return null', ->
+      expect(this.column.getStoreFilter()).toBeNull()
 
   describe 'progress bar', ->
 
@@ -452,3 +455,14 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
     it 'calculation should use refined before preliminary estimate', ->
       expect(@column.getHeaderTplData().pointTotal).toEqual 74
+
+  describe '#filter', ->
+    beforeEach ->
+      @createTimeframeRecord()
+      @createPlanRecord()
+      @createColumnUsingAjax().then =>
+
+    it 'should update plan features filter', ->
+      originalFilter = @column.filterCollection.tempFilters.planfeatures
+      @column.filter()
+      expect(@column.filterCollection.tempFilters.planfeatures).not.toBe originalFilter

@@ -9,20 +9,10 @@
             maskable: 'Rally.ui.mask.Maskable'
         },
         requires: [
-            'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController',
-            'Rally.ui.filter.view.FilterButton',
-            'Rally.ui.filter.view.CustomQueryFilter',
-            'Rally.ui.filter.view.ParentFilter',
-            'Rally.ui.filter.view.OwnerPillFilter',
-            'Rally.ui.filter.view.TagPillFilter'
+            'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
         ],
 
-        parentFilter: null,
-        queryFilter: null,
-
         config: {
-            filterable: false,
-            baseQueryFilter: null,
             /**
              * @cfg {Object} Object containing Names and TypePaths of the lowest level portfolio item (eg: 'Feature') and optionally its parent (eg: 'Initiative')
              */
@@ -53,23 +43,8 @@
             if (!this.config.context) {
                 this.config.context = this.context;
             }
-            if (this.config.baseFilter) {
-                this.config.baseFilter = this._createBaseFilter(this.config.baseFilter);
-            }
-            this.callParent([this.config]);
-        },
 
-        _createBaseFilter: function (bf) {
-            var baseFilter;
-            if (Ext.isArray(bf)) {
-                baseFilter = _.reduce(bf, function (result, extFilter) {
-                    var filter = new Rally.data.QueryFilter.fromExtFilter(extFilter);
-                    return result ? result.and(filter) : filter;
-                }, undefined);
-            } else {
-                baseFilter = new Rally.data.QueryFilter(bf);
-            }
-            return baseFilter;
+            this.callParent([this.config]);
         },
 
         initComponent: function () {
@@ -77,13 +52,7 @@
                 throw 'typeNames must have a child property with a name';
             }
 
-            if (this.filterable) {
-                this.filterButton = this._createFilterButton();
-            }
-
             this.callParent(arguments);
-
-            this.addEvents('filtersinitialized');
 
             this.on('beforerender', function () {
                 var cls = 'planning-column';
@@ -92,70 +61,6 @@
             }, this, {
                 single: true
             });
-        },
-
-        loadStore: function () {
-            if (this.filterable && !this.filtersInitialized) {
-                this.on('filtersinitialized', this.loadStore, this, {single: true});
-                return;
-            }
-
-            this.callParent(arguments);
-        },
-
-        _createFilterButton: function () {
-            return Ext.create('Rally.ui.filter.view.FilterButton', {
-                cls: 'medium columnfilter',
-                stateful: true,
-                stateId: this.context.getScopedStateId('filter.' + this.getColumnIdentifier() + '.' + this.context.getWorkspace()._refObjectUUID),
-                items: this._getFilterItems(),
-                listeners: {
-                    filter: {
-                        fn: this._initialFilter,
-                        single: true,
-                        scope: this
-                    }
-                }
-            });
-        },
-
-        _createPillFilterItem: function(typeName, config) {
-            return Ext.apply({
-                xtype: typeName,
-                margin: '-15 0 5 0',
-                showPills: true,
-                showClear: true
-            }, config);
-        },
-
-        _getFilterItems: function () {
-            var filterItems = [];
-
-            if (this.typeNames.parent) {
-                filterItems.push({
-                    xtype: 'rallyparentfilter',
-                    modelType: this.typeNames.parent.typePath,
-                    modelName: this.typeNames.parent.name,
-                    prependFilterFieldWithFormattedId: true,
-                    storeConfig: {
-                        context: {
-                            project: null
-                        }
-                    }
-                });
-            }
-
-            filterItems.push(
-                this._createPillFilterItem('rallyownerpillfilter', {
-                    filterChildren: false,
-                    project: this.context.getProject(),
-                    showPills: false
-                }),
-                this._createPillFilterItem('rallytagpillfilter', {remoteFilter: true}),
-                { xtype: 'rallycustomqueryfilter', filterHelpId: 194 }
-            );
-
-            return filterItems;
         },
 
         isMatchingRecord: function () {
@@ -197,64 +102,13 @@
             return this.callParent(arguments);
         },
 
-        drawHeader: function () {
-            this.callParent(arguments);
-
-            if (this.filterable) {
-                this.getHeaderTitle().insert(0, this.filterButton);
-            }
-        },
-
         getColumnIdentifier: function () {
             Ext.Error.raise('Need to override this to ensure unique identifier for persistence');
-        },
-
-        getStoreFilter: function (model) {
-            var storeFilter = this.baseFilter;
-
-            if (this.filterable && this.filters) {
-                storeFilter = _.reduce(this.filters, function (result, filter) {
-                    return result ? result.and(filter) : filter;
-                }, storeFilter);
-            }
-
-            return storeFilter;
         },
 
         refreshRecord: function (record, callback) {
             this.store.setFilter(this.getStoreFilter());
             return this.callParent(arguments);
-        },
-
-        refresh: function(newConfig) {
-            if (this.filterCollection) {
-                this.filterCollection.clearAllFilters();
-            }
-            this.callParent(arguments);
-        },
-
-        _initialFilter: function (component, filters) {
-            this.filterButton.on('filter', this._onFilter, this);
-            this._applyFilters(filters);
-            this.filtersInitialized = true;
-            this.fireEvent('filtersinitialized', this);
-        },
-
-        _onFilter: function (component, filters) {
-            this._applyFilters(filters);
-            this.refresh(this.config);
-        },
-
-        _applyFilters: function (filters) {
-            this.filters = filters;
-
-            if (Ext.isEmpty(this.filters)) {
-                this.filterButton.removeCls('primary');
-                this.filterButton.addCls('secondary');
-            } else {
-                this.filterButton.removeCls('secondary');
-                this.filterButton.addCls('primary');
-            }
         }
     });
 })();

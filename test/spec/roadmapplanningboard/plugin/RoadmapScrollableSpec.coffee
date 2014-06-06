@@ -475,6 +475,17 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         @scrollBackwards().then =>
           expect(filterSpy.callCount).toBe 1
 
+    it 'should add temp filters to newly added column when board is filtered', ->
+      nameFilter = new Rally.data.QueryFilter
+        property: 'Name',
+        operator: '=',
+        value: 'Android Support'
+
+      @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
+        @cardboard.filter nameFilter
+        @scrollBackwards().then =>
+          expect(@plugin.getLastVisibleScrollableColumn().filterCollection.tempFilters.undefined.toString()).toBe nameFilter.toString()
+
     it 'should handle only 1 column', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 1, timeframeColumnCount: 1).then =>
         @scrollBackwards().then =>
@@ -530,6 +541,17 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         filterSpy = @spy @cardboard, 'applyLocalFilters'
         @scrollForwards().then =>
           expect(filterSpy.callCount).toBe 1
+
+    it 'should add temp filters to newly added column when board is filtered', ->
+      nameFilter = new Rally.data.QueryFilter
+        property: 'Name',
+        operator: '=',
+        value: 'Android Support'
+
+      @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
+        @cardboard.filter nameFilter
+        @scrollForwards().then =>
+          expect(@plugin.getLastVisibleScrollableColumn().filterCollection.tempFilters.undefined.toString()).toBe nameFilter.toString()
 
     it 'should handle only 1 column', ->
       @createCardboard(pastColumnCount: 0, presentColumnCount: 2, timeframeColumnCount: 1).then =>
@@ -630,3 +652,16 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
 
       it 'should not call syncColumns', ->
         expect(@syncColumnsSpy).not.toHaveBeenCalled()
+
+
+  describe '#filter', ->
+    it 'should save the filter to the temp filter collection', ->
+      nameFilter = new Rally.data.QueryFilter
+        property: 'Name',
+        operator: '=',
+        value: 'Android Support'
+
+      @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
+        @cardboard.filter nameFilter
+        expect(@cardboard.filterCollection.tempFilters.undefined.toString()).toBe nameFilter.toString()
+
