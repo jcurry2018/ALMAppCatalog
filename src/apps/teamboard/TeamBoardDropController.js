@@ -4,24 +4,20 @@
     Ext.define('Rally.apps.teamboard.TeamBoardDropController', {
         alias: 'plugin.rallyteamboarddropcontroller',
         extend: 'Rally.ui.cardboard.plugin.ColumnDropController',
+        requires: ['Rally.data.util.RecordCollection'],
 
         handleBeforeCardDroppedSave: function (options) {
-            options.record.getCollection(options.column.attribute, {
-                autoLoad: true,
-                limit: Infinity,
-                listeners: {
-                    load: function(store){
-                        store.add(options.column.getValue());
-                        store.remove(options.sourceColumn.getValue());
-                        store.sync({
-                            success: function(){
-                                this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
-                            },
-                            failure: function(){
-                                this._onDropSaveFailure(options.column, options.sourceColumn, undefined, options.record, options.card, options.sourceIndex, {});
-                            },
-                            scope: this
-                        });
+            Rally.data.util.RecordCollection.modify({
+                add: [options.column.getValue()],
+                collectionName: options.column.attribute,
+                parentRecord: options.record,
+                remove: [options.sourceColumn.getValue()],
+                saveOptions: {
+                    success: function(){
+                        this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
+                    },
+                    failure: function(){
+                        this._onDropSaveFailure(options.column, options.sourceColumn, undefined, options.record, options.card, options.sourceIndex, {});
                     },
                     scope: this
                 }
