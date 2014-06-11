@@ -14,6 +14,7 @@
             'Rally.data.wsapi.TreeStoreBuilder',
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.cardboard.plugin.Print',
+            'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
@@ -236,6 +237,24 @@
             }
 
             plugins.push('rallygridboardtoggleable');
+            
+            plugins.push({
+                ptype: 'rallygridboardactionsmenu',
+                menuItems: [{
+                    text: 'Export',
+                    handler: this._exportMenuClick,
+                    scope: this
+                }],
+                buttonConfig: {
+                    iconCls: 'icon-export',
+                    toolTipConfig: {
+                        html: 'Import/Export/Print',
+                        anchor: 'top',
+                        hideDelay: 0
+                    }
+                }
+            });
+
             var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner'];
             if (context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
                 alwaysSelectedValues.push('DragAndDropRank');
@@ -295,6 +314,23 @@
             this.superclass.setHeight.apply(this, arguments);
             this._resizeGridBoardToFillSpace();
         }, 100),
+
+        _exportMenuClick: function(){
+            var context = this.getContext();
+            var iterationId = '-1';
+            var timebox = context.getTimeboxScope();
+
+            if (timebox && timebox.getRecord()){
+                iterationId = timebox.getRecord().getId();
+            }
+
+            window.location = String.format('{0}/sc/exportCsv.sp?cpoid={1}&iterationKey={2}&projectScopeUp={3}&projectScopeDown={4}',
+                Rally.environment.getServer().getContextUrl(),
+                context.getProject().ObjectID,
+                iterationId,
+                context.getProjectScopeUp(),
+                context.getProjectScopeDown());
+        },
 
         _resizeGridBoardToFillSpace: function() {
             if(this.gridboard) {
