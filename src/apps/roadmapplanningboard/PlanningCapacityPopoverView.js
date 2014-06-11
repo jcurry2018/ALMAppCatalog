@@ -18,6 +18,7 @@
         config: {
             model: null
         },
+        header: false,
 
         initComponent: function () {
             this.items = this._getItems();

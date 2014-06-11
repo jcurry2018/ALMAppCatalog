@@ -20,6 +20,7 @@
         config: {
             timelineViewModel: null
         },
+        header: false,
 
         initComponent: function () {
             this.items = this._getItems();
