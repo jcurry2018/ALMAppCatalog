@@ -98,7 +98,8 @@
                     remoteSort: true,
                     root: {expanded: true},
                     filters: [context.getTimeboxScope().getQueryFilter()],
-                    enableHierarchy: true
+                    enableHierarchy: true,
+                    pageSize: this.getGridPageSizes()[1]
                 };
 
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
@@ -469,6 +470,12 @@
                 gridConfig.plugins.push('rallytreegridexpandedrowpersistence');
             }
 
+            if (context.isFeatureEnabled('S67643_LIMIT_TREEGRID_PAGE_SIZE')) {
+                gridConfig.pagingToolbarCfg = {
+                    pageSizes: this.getGridPageSizes()
+                };
+            }
+
             return gridConfig;
         },
 
@@ -536,6 +543,10 @@
 
         _publishContentUpdatedNoDashboardLayout: function () {
             this.fireEvent('contentupdated', {dashboardLayout: false});
+        },
+
+        getGridPageSizes: function() {
+            return Ext.isIE ? [10, 25, 50] : [10, 25, 50, 100];
         }
     });
 })();
