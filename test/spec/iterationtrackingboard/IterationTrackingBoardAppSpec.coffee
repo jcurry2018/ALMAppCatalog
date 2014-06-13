@@ -33,6 +33,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
             workspace:
               WorkspaceConfiguration:
                 DragDropRankingEnabled: true
+                WorkDays: "Monday,Friday"
         ),
         renderTo: 'testDiv'
         height: 400
@@ -53,9 +54,8 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(["Defined", "In-Progress", "Completed", "Accepted"]);
 
       @ajax.whenQuerying('artifact').respondWith [{
-        RevisionHistory: {
+        RevisionHistory:
           _ref: '/revisionhistory/1'
-        }
       }]
 
     toggleToBoard: ->
@@ -77,6 +77,14 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       TeamMembers: []
       Editors: []
     }
+
+    @ajax.whenQuerying('iteration').respondWith([],
+      schema:
+        properties:
+          EndDate:
+            format:
+              tzOffset: 0
+    )
 
     @stubRequests()
 
@@ -179,32 +187,18 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(@app.down('rallytreegrid')).not.toBeNull()
       expect(@app.down('rallygrid')).toBeNull()
 
-  describe '#_getGridColumns', ->
-    helpers
-      _getDefaultCols: ->
-        ['FormattedID', 'Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion']
+  describe 'tree grid config', ->
 
-    it 'returns the default columns with the FormattedID removed when given no input', ->
+    it 'returns the default columns with the FormattedID removed', ->
       @createApp().then =>
-        cols = @app._getGridColumns()
-        expectedColumns = _.remove(@_getDefaultCols(), (col) ->
-          col != 'FormattedID'
-        )
-
-        expect(cols).toEqual expectedColumns
-
-    it 'returns the input columns with the FormattedID removed', ->
-      @createApp().then =>
-        cols = @app._getGridColumns(['used1', 'used2', 'FormattedID'])
-
-        expect(cols).toEqual ['used1', 'used2']
+        @toggleToGrid()
+        expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.defaultColumnCfgs).toEqual ['Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion']
 
     it 'enables the summary row on the treegrid when the toggle is on', ->
       @createApp().then =>
         @toggleToGrid()
         expect(@app.down('#gridBoard').getGridOrBoard().showSummary).toBe true
 
-  describe 'tree grid model types', ->
     it 'should include test sets', ->
       @createApp().then =>
         @toggleToGrid()
@@ -235,7 +229,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
             project:
               _ref: @projectRef
             workspace:
-              WorkspaceConfiguration: workspaceConfig
+              WorkspaceConfiguration: _.defaults(WorkDays: "Monday,Friday", workspaceConfig)
 
         )
         @createApp({ context }).then =>
@@ -394,6 +388,22 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     it 'appears on iteration tracking page', ->
       @createApp().then =>
         expect(css: '.rui-gridboard .right .icon-export').toBeVisible()
+
+    it 'opens the import user stories dialog', ->
+      @createApp().then =>
+        @click(css: '.rui-gridboard .right .icon-export').then =>
+          @click(css: ".#{Ext.baseCSSPrefix}menu-item-text", text: 'Import User Stories...').then =>
+            dialog = Ext.ComponentQuery.query('rallycsvimportdialog')[0]
+            expect(dialog).toBeDefined()
+            dialog.destroy()
+
+    it 'opens the import tasks dialog', ->
+      @createApp().then =>
+        @click(css: '.rui-gridboard .right .icon-export').then =>
+          @click(css: ".#{Ext.baseCSSPrefix}menu-item-text", text: 'Import Tasks...').then =>
+            dialog = Ext.ComponentQuery.query('rallycsvimportdialog')[0]
+            expect(dialog).toBeDefined()
+            dialog.destroy()
 
     it 'opens the print dialog', ->
       oldPopup = window.popup
