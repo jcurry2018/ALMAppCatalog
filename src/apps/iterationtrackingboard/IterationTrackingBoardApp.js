@@ -24,6 +24,7 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
             'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
+            'Rally.ui.grid.plugin.TreeGridChildPager',
             'Rally.ui.gridboard.plugin.GridBoardExpandAll',
             'Rally.ui.gridboard.plugin.GridBoardCustomView',
             'Rally.ui.filter.view.ModelFilter',
@@ -468,6 +469,7 @@
 
             if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
                 gridConfig.plugins.push('rallytreegridexpandedrowpersistence');
+                gridConfig.plugins.push('rallytreegridchildpager');
             }
 
             if (context.isFeatureEnabled('S67643_LIMIT_TREEGRID_PAGE_SIZE')) {
