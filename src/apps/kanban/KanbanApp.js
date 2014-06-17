@@ -114,41 +114,36 @@
         },
 
         _getGridboardConfig: function(cardboardConfig) {
-            var plugins = [
-                {
-                    ptype: 'rallygridboardfilterinfo',
-                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
-                    queryString: this.getSetting('query')
-                },
-                'rallygridboardaddnew',
-                {
-                    ptype: 'rallyboardpolicydisplayable',
-                    prefKey: 'kanbanAgreementsChecked',
-                    checkboxConfig: {
-                        boxLabel: 'Agreements'
-                    }
-                },
-                {
-                    ptype: 'rallygridboardartifacttypechooser',
-                    artifactTypePreferenceKey: 'artifact-types',
-                    showAgreements: false
-                },
-                'rallygridboardtagfilter'
-            ];
-
-            if (this.getContext().isFeatureEnabled('FILTER_BY_OWNER_ON_KANBAN_APP')) {
-                plugins.push({
-                    ptype: 'rallygridboardownerfilter',
-                    stateId: 'kanban-owner-filter-' + this.getAppId()
-                });
-            }
-
             return {
                 xtype: 'rallygridboard',
                 stateful: false,
                 toggleState: 'board',
                 cardBoardConfig: cardboardConfig,
-                plugins: plugins,
+                plugins: [
+                    {
+                        ptype: 'rallygridboardfilterinfo',
+                        isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
+                        queryString: this.getSetting('query')
+                    },
+                    'rallygridboardaddnew',
+                    {
+                        ptype: 'rallyboardpolicydisplayable',
+                        prefKey: 'kanbanAgreementsChecked',
+                        checkboxConfig: {
+                            boxLabel: 'Agreements'
+                        }
+                    },
+                    {
+                        ptype: 'rallygridboardartifacttypechooser',
+                        artifactTypePreferenceKey: 'artifact-types',
+                        showAgreements: false
+                    },
+                    'rallygridboardtagfilter',
+                    {
+                        ptype: 'rallygridboardownerfilter',
+                        stateId: 'kanban-owner-filter-' + this.getAppId()
+                    }
+                ],
                 context: this.getContext(),
                 modelNames: this._getDefaultTypes(),
                 addNewPluginConfig: {

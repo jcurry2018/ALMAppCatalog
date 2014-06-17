@@ -23,7 +23,6 @@
             'Rally.ui.cardboard.plugin.CollapsibleColumns',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.cardboard.plugin.FixedHeader',
-            'Rally.ui.cardboard.plugin.Scrollable',
             'Rally.ui.cardboard.Column',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.Card',
@@ -358,10 +357,7 @@
                         },
                         loadDescription: 'Portfolio Kanban',
                         loadMask: false,
-                        plugins: (this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS') ? [] : [{
-                                ptype: 'rallyscrollablecardboard',
-                                containerEl: this.getEl()
-                            }]).concat([{ ptype: 'rallyfixedheadercardboard' }]),
+                        plugins: [{ ptype: 'rallyfixedheadercardboard' }],
                         storeConfig: {
                             // pageSize config can be removed when we remove ENABLE_INFINITE_SCROLL_ALL_BOARDS toggle, because we can use the default value
                             pageSize: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS') ? 15 : 50,
@@ -449,7 +445,7 @@
                         headerTpl: 'No Entry'
                     },
                     value: null,
-                    plugins: [defaultColumnPolicyPlugin].concat(this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS') ? ['rallycardboardcollapsiblecolumns'] : [])
+                    plugins: [defaultColumnPolicyPlugin, 'rallycardboardcollapsiblecolumns']
                 }
             ];
 
@@ -466,7 +462,7 @@
                         fieldToDisplay: 'Name',
                         editable: false
                     },
-                    plugins: [stateColumnPolicyPlugin].concat(this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS') ? ['rallycardboardcollapsiblecolumns'] : [])
+                    plugins: [stateColumnPolicyPlugin, 'rallycardboardcollapsiblecolumns']
                 });
             }, this);
 
