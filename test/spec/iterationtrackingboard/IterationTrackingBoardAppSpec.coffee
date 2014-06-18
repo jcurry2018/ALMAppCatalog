@@ -295,24 +295,58 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
           expect(gridBoard.getHeight()).toBe currentHeight + 10
 
   describe 'custom filter popover toggle', ->
-
     beforeEach ->
       @featureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
       @featureEnabledStub.withArgs('BETA_TRACKING_EXPERIENCE').returns true
 
-    it 'uses the CustomFilter popover if the USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP toggle is enabled', ->
-      @featureEnabledStub.withArgs('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP').returns(true)
+    it 'should add common storeConfig to gridboard', ->
       @createApp().then =>
-        @click(id: @app.down('rallyfilterbutton').getId()).then ->
-          popover = Ext.ComponentQuery.query('rallycustomfilterpopover')[0]
-          expect(popover).toBeDefined()
+        gridBoard = @app.down 'rallygridboard'
+        expect(gridBoard.storeConfig.useShallowFetch).toBe true
+        expect(gridBoard.storeConfig.filters.length).toBe 1
+        expect(gridBoard.storeConfig.filters[0].toString()).toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
-    it 'does not use the CustomFilter popover if the USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP toggle is disabled', ->
-      @featureEnabledStub.withArgs('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP').returns(false)
-      @createApp().then =>
-        @click(id: @app.down('rallyfilterbutton').getId()).then ->
-          popover = Ext.ComponentQuery.query('rallyfilterpopover')[0]
-          expect(popover).toBeDefined()
+    describe 'USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP is false', ->
+      beforeEach ->
+        @featureEnabledStub.withArgs('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP').returns(false)
+
+      it 'should set useFilterCollection to true', ->
+        @createApp().then =>
+          expect(@app.gridboard.useFilterCollection).toBeTruthy()
+
+      it 'should use rallygridboard filter control', ->
+        @createApp().then =>
+          gridBoard = @app.down 'rallygridboard'
+          expect(_.find gridBoard.plugins, (plugin) ->
+            plugin.ptype == 'rallygridboardfiltercontrol'
+          ).toBeTruthy()
+
+      it 'does not use the CustomFilter popover', ->
+        @createApp().then =>
+          @click(id: @app.down('rallyfilterbutton').getId()).then ->
+            popover = Ext.ComponentQuery.query('rallyfilterpopover')[0]
+            expect(popover).toBeDefined()
+
+    describe 'USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP is true', ->
+      beforeEach ->
+        @featureEnabledStub.withArgs('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP').returns(true)
+
+      it 'uses the CustomFilter popover', ->
+        @createApp().then =>
+          @click(id: @app.down('rallyfilterbutton').getId()).then ->
+            popover = Ext.ComponentQuery.query('rallycustomfilterpopover')[0]
+            expect(popover).toBeDefined()
+
+      it 'should set useFilterCollection to false', ->
+        @createApp().then =>
+          expect(@app.gridboard.useFilterCollection).toBeFalsy()
+
+      it 'should use rallygridboard custom filter control', ->
+        @createApp().then =>
+          gridBoard = @app.down 'rallygridboard'
+          expect(_.find gridBoard.plugins, (plugin) ->
+            plugin.ptype == 'rallygridboardcustomfiltercontrol'
+          ).toBeTruthy()
 
   describe 'page sizes', ->
     beforeEach ->
@@ -399,41 +433,3 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
           pagingToolbar = @app.gridboard.getGridOrBoard().down '#pagingToolbar'
           expect(pagingToolbar.pageSizes).toEqual [25, 50, 100, 200]
-
-  describe 'grid board actions menu', ->
-    it 'appears on iteration tracking page', ->
-      @createApp().then =>
-        expect(css: '.rui-gridboard .right .icon-export').toBeVisible()
-
-    it 'opens the import user stories dialog', ->
-      @createApp().then =>
-        @click(css: '.rui-gridboard .right .icon-export').then =>
-          @click(css: ".#{Ext.baseCSSPrefix}menu-item-text", text: 'Import User Stories...').then =>
-            dialog = Ext.ComponentQuery.query('rallycsvimportdialog')[0]
-            expect(dialog).toBeDefined()
-            dialog.destroy()
-
-    it 'opens the import tasks dialog', ->
-      @createApp().then =>
-        @click(css: '.rui-gridboard .right .icon-export').then =>
-          @click(css: ".#{Ext.baseCSSPrefix}menu-item-text", text: 'Import Tasks...').then =>
-            dialog = Ext.ComponentQuery.query('rallycsvimportdialog')[0]
-            expect(dialog).toBeDefined()
-            dialog.destroy()
-
-    it 'opens the print dialog', ->
-      oldPopup = window.popup
-      popupStub = window.popup = @stub()
-      featureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
-      featureEnabledStub.withArgs('S68103_ITERATION_TRACKING_APP_PRINT').returns(true)
-
-      @createApp().then =>
-        @click(css: '.rui-gridboard .right .icon-export').then =>
-          @click(css: ".#{Ext.baseCSSPrefix}menu-item-text", text: 'Print...').then =>
-            expect(popupStub).toHaveBeenCalledOnce()
-            expect(popupStub.firstCall.args[0]).toContain Rally.environment.getServer().getContextUrl() + '/sc/print/printReportDialog.sp'
-            expect(popupStub.firstCall.args[0]).toContain 'tpsId=storycard'
-            expect(popupStub.firstCall.args[0]).toContain 'childId=taskstatus'
-            expect(popupStub.firstCall.args[0]).toContain "iterationKey=#{@iterationRecord.getId()}"
-
-            window.popup = oldPopup
