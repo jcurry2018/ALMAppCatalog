@@ -104,26 +104,7 @@
                         fieldLabel: '',
                         margin: '5 0 10 80'
                     }
-                }
-            );
-
-            if (config.shouldShowPageSize) {
-                // can be removed with toggle ENABLE_INFINITE_SCROLL_ALL_BOARDS
-                items.push({
-                    name: 'pageSize',
-                    xtype: 'rallynumberfield',
-                    plugins: ['rallyfieldvalidationui'],
-                    fieldLabel: 'Page Size',
-                    allowDecimals: false,
-                    minValue: 1,
-                    maxValue: 100,
-                    allowBlank: false,
-                    validateOnChange: false,
-                    validateOnBlur: false
-                });
-            }
-
-            items.push(
+                },
                 {
                     type: 'query'
                 });

@@ -7,12 +7,9 @@ Ext.require [
 describe 'Rally.apps.board.BoardApp', ->
 
   beforeEach ->
-    @ajax.whenQuerying('userstory').respondWithCount(1, {
-      values: [{
-        ScheduleState: 'In-Progress'
-      }]
+    @ajax.whenQuerying('userstory').respondWithCount 1,
+      values: [ ScheduleState: 'In-Progress' ]
       createImmediateSubObjects: true
-    })
 
     @ajax.whenQueryingAllowedValues('hierarchicalrequirement', 'ScheduleState').respondWith ['Defined', 'In-Progress', 'Completed', 'Accepted']
     @ajax.whenQueryingAllowedValues('defect', 'State').respondWith ['Submitted', 'Open', 'Fixed', 'Closed']
@@ -24,7 +21,6 @@ describe 'Rally.apps.board.BoardApp', ->
     @createApp().then =>
       expect(@app.getSetting('groupByField')).toBe 'ScheduleState'
       expect(@app.getSetting('type')).toBe 'HierarchicalRequirement'
-      expect(@app.getSetting('pageSize')).toBe 25
       expect(@app.getSetting('order')).toBe 'Rank'
       expect(@app.getSetting('query')).toBe ''
       expect(@app.getSetting('fields')).toBe 'FormattedID,Name,Owner'
@@ -54,18 +50,6 @@ describe 'Rally.apps.board.BoardApp', ->
     ).then =>
 
       expect(@_getBoard().getContext().getProject()._ref).toBe '/project/2'
-
-  it 'passes the page size to the board', ->
-    @createApp(pageSize: 1).then =>
-      expect(@_getBoard().getStoreConfig().pageSize).toBe 1
-      _.each @_getBoard().getColumns(), (column) ->
-        expect(column.store.pageSize).toBe 1
-
-  it 'defaults to a pageSize of 25', ->
-    @createApp().then =>
-      expect(@_getBoard().getStoreConfig().pageSize).toBe 25
-      _.each @_getBoard().getColumns(), (column) ->
-        expect(column.store.pageSize).toBe 25
 
   it 'passes the filters to the board', ->
     query = '(Name contains foo)'

@@ -345,8 +345,7 @@
                         columnConfig: {
                             xtype: 'rallycardboardcolumn',
                             additionalFetchFields: ['Discussion'],
-                            enableWipLimit: true,
-                            enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')
+                            enableWipLimit: true
                         },
                         columns: columns,
                         ddGroup: currentTypePath,
@@ -359,8 +358,6 @@
                         loadMask: false,
                         plugins: [{ ptype: 'rallyfixedheadercardboard' }],
                         storeConfig: {
-                            // pageSize config can be removed when we remove ENABLE_INFINITE_SCROLL_ALL_BOARDS toggle, because we can use the default value
-                            pageSize: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS') ? 15 : 50,
                             filters: filters,
                             context: this.context.getDataContext()
                         }

@@ -1,9 +1,5 @@
 Ext = window.Ext4 || window.Ext
 
-Ext.require [
-  'Rally.test.helpers.CardBoard'
-]
-
 describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   helpers
@@ -192,18 +188,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp().then =>
       expect(loadSpy.callCount).toBe 0
       expect(@app.getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
-
-  it 'should be able to scroll forwards', ->
-    @_createApp(
-      renderTo: Rally.test.helpers.CardBoard.smallContainerForScrolling()
-    ).then =>
-      Rally.test.helpers.CardBoard.scrollForwards @app.down('rallycardboard'), @
-
-  it 'should be able to scroll backwards', ->
-    @_createApp(
-      renderTo: Rally.test.helpers.CardBoard.smallContainerForScrolling()
-    ).then =>
-      Rally.test.helpers.CardBoard.scrollBackwards @app.down('rallycardboard'), @
 
   describe 'when the type is changed', ->
 

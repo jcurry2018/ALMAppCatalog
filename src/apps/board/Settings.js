@@ -112,11 +112,6 @@
                     xtype: 'rallytextfield'
                 },
                 {
-                    name: 'pageSize',
-                    xtype: 'rallynumberfield',
-                    fieldLabel: 'Page Size'
-                },
-                {
                     type: 'query'
                 }
             ];

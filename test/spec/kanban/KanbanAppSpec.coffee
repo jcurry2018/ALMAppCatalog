@@ -144,12 +144,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(columns[0].fields).toEqual @app.getSetting('cardFields').split(',')
       expect(columns[1].fields).toEqual @app.getSetting('cardFields').split(',')
 
-  it 'should show correct number of cards in columns', ->
-    @createApp(pageSize: 2).then =>
-      expect(@app.down('rallycardboard').storeConfig.pageSize).toBe 2
-      _.each @app.down('rallycardboard').getColumns(), (column) ->
-        expect(column.store.pageSize).toBe 2
-
   it 'should filter the board when a type checkbox is clicked', ->
     @createApp().then =>
       board = @app.down('rallycardboard')

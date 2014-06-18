@@ -33,8 +33,7 @@
                 showDeleteMenuItem: true,
                 showAddChildMenuItem: false,
                 showRankMenuItems: false
-            },
-            enableInfiniteScroll: true
+            }
         },
 
         constructor: function (config) {

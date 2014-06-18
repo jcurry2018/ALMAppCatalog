@@ -145,7 +145,6 @@
                     columnConfig: {
                         xtype: 'iterationtrackingboardcolumn',
                         additionalFetchFields: ['PortfolioItem'],
-                        enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
                         plugins: [{
                             ptype: 'rallycolumnpolicy',
                             app: this
