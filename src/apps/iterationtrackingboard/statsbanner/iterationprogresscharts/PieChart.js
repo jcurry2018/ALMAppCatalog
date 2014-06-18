@@ -195,6 +195,8 @@
         _createChartConfig: function(overrides) {
             var clickChartHandler = _.isFunction(this.clickHandler) ? this.clickHandler : Ext.emptyFn;
             var height = this.height;
+            var pieHeight = this.height * 0.9;
+
             return Ext.Object.merge({
                 xtype: 'rallychart',
                 loadMask: false,
@@ -203,21 +205,21 @@
                 chartData: {
                     series: [
                         {
-                            type:'pie',
+                            type: 'pie',
                             name: 'Parents',
                             data: this._chartData,
-                            size: height,
+                            size: pieHeight,
                             allowPointSelect: false,
                             dataLabels: {
                                 enabled: false
                             }
                         },
                         {
-                            type:'pie',
+                            type: 'pie',
                             name: 'Children',
                             data: this._childChartData,
-                            size: height,
-                            innerSize: 0.8 * height,
+                            size: pieHeight,
+                            innerSize: 0.8 * pieHeight,
                             allowPointSelect: false,
                             dataLabels: { enabled: false }
                         }
@@ -238,15 +240,15 @@
                         }
                     },
                     subtitle: {
-                        useHTML:true, //class refactor
+                        useHTML: true,
                         text: '<table align="center" class="pie-chart-legend"><tr><td><span class="legend-swatch defined-sample-swatch"></span><span>Defined</td>' +
-                              '<td><span class="legend-swatch in-progress-sample-swatch"></span>In-Progress</td>'+
-                              '<td><span class="legend-swatch completed-sample-swatch"></span>Completed</td>'+
+                              '<td><span class="legend-swatch in-progress-sample-swatch"></span>In-Progress</td>' +
+                              '<td><span class="legend-swatch completed-sample-swatch"></span>Completed</td>' +
                               '<td><span class="legend-swatch blocked-sample-swatch"></span>Blocked</td></tr></table>',
                         verticalAlign: 'bottom',
                         floating: true,
-                        x: -50,
-                        y: -25
+                        x: -10,
+                        y: -20
                     },
                     tooltip: {
                         formatter: this._formatTooltip
@@ -256,7 +258,7 @@
                     plotOptions: {
                         pie: {
                             shadow: false,
-                            center: ['50%', '50%'],
+                            center: ['50%', '45%'],
                             point: {
                                 events: {
                                     click: function(event) {
