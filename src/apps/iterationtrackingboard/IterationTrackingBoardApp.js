@@ -335,7 +335,9 @@
                     'Workspace',
                     'Changesets',
                     'RevisionHistory',
-                    'Children'
+                    'Children',
+                    'Successors',
+                    'Predecessors'
                 ],
                 boardFieldBlackList: [
                     'ObjectID',
@@ -350,7 +352,8 @@
                     'RevisionHistory',
                     'PortfolioItemType',
                     'StateChangedDate',
-                    'Children'
+                    'Children',
+                    'PredecessorsAndSuccessors'
                 ],
                 alwaysSelectedValues: alwaysSelectedValues,
                 modelNames: this.modelNames,
