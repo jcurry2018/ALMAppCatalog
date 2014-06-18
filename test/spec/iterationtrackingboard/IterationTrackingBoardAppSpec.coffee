@@ -18,12 +18,11 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       nextDay = Rally.util.DateTime.add(tomorrow, 'day', 1)
       dayAfter = Rally.util.DateTime.add(nextDay, 'day', 1)
       @iterationData = [
-        {Name:'Iteration 1', _ref:'/iteration/0', StartDate: now, EndDate: tomorrow}
-        {Name:'Iteration 2', _ref:'/iteration/2', StartDate: nextDay, EndDate: dayAfter}
+        {Name:'Iteration 1', StartDate: now, EndDate: tomorrow}
+        {Name:'Iteration 2', StartDate: nextDay, EndDate: dayAfter}
       ]
 
-      @IterationModel = Rally.test.mock.data.WsapiModelFactory.getIterationModel()
-      @iterationRecord = new @IterationModel @iterationData[0]
+      @iterationRecord = @mom.getRecord('iteration', values: @iterationData[0])
 
       @app = Ext.create('Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', Ext.apply(
         context: Ext.create('Rally.app.Context',
@@ -92,7 +91,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       removeSpy = @spy(@app, 'remove')
 
       newScope = Ext.create('Rally.app.TimeboxScope',
-        record: new @IterationModel @iterationData[1]
+        record: @mom.getRecord('iteration', values: @iterationData[1])
       )
 
       @app.onTimeboxScopeChange newScope
@@ -391,3 +390,24 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
           pagingToolbar = @app.gridboard.getGridOrBoard().down '#pagingToolbar'
           expect(pagingToolbar.pageSizes).toEqual [25, 50, 100, 200]
 
+  describe 'grid board actions menu', ->
+    it 'appears on iteration tracking page', ->
+      @createApp().then =>
+        expect(css: '.rui-gridboard .right .icon-export').toBeVisible()
+
+    it 'opens the print dialog', ->
+      oldPopup = window.popup
+      popupStub = window.popup = @stub()
+      featureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
+      featureEnabledStub.withArgs('S68103_ITERATION_TRACKING_APP_PRINT').returns(true)
+
+      @createApp().then =>
+        @click(css: '.rui-gridboard .right .icon-export').then =>
+          @click(css: ".#{Ext.baseCSSPrefix}menu-item-text", text: 'Print...').then =>
+            expect(popupStub).toHaveBeenCalledOnce()
+            expect(popupStub.firstCall.args[0]).toContain Rally.environment.getServer().getContextUrl() + '/sc/print/printReportDialog.sp'
+            expect(popupStub.firstCall.args[0]).toContain 'tpsId=storycard'
+            expect(popupStub.firstCall.args[0]).toContain 'childId=taskstatus'
+            expect(popupStub.firstCall.args[0]).toContain "iterationKey=#{@iterationRecord.getId()}"
+
+            window.popup = oldPopup
