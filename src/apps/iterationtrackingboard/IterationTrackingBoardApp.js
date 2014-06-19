@@ -101,7 +101,8 @@
                     root: {expanded: true},
                     filters: [context.getTimeboxScope().getQueryFilter()],
                     enableHierarchy: true,
-                    pageSize: this.getGridPageSizes()[1]
+                    pageSize: this.getGridPageSizes()[1],
+                    childPageSizeEnabled: context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')
                 };
 
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
