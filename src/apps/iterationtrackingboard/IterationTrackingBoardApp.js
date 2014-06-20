@@ -215,6 +215,7 @@
                             'PortfolioItem',
                             'Requirement',
                             'TestCase',
+                            'TestCaseResult',
                             'VersionId'
                         ],
                         modelNames: this.modelNames
