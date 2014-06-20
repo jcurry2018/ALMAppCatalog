@@ -370,8 +370,6 @@
 
         _exportHandler: function() {
             var context = this.getContext();
-            var iterationId = '-1';
-            var timebox = context.getTimeboxScope();
             var params = {
                 cpoid: context.getProject().ObjectID,
                 projectScopeUp: context.getProjectScopeUp(),
