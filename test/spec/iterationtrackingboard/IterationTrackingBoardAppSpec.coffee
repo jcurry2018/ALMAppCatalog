@@ -112,7 +112,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @app.down('rallytreegrid').on 'storecurrentpagereset', storeCurrentPageResetStub
 
       newScope = Ext.create('Rally.app.TimeboxScope',
-        record: new @IterationModel @iterationData[1]
+        record: @mom.getRecord('iteration', values: @iterationData[1])
       )
 
       @app.onTimeboxScopeChange newScope
