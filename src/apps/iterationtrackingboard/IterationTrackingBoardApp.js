@@ -239,14 +239,22 @@
             }
 
             plugins.push('rallygridboardtoggleable');
-            
+
+            var actionsMenuItems = [{
+                text: 'Export...',
+                handler: this._exportHandler,
+                scope: this
+            }];
+            if (context.isFeatureEnabled('S68103_ITERATION_TRACKING_APP_PRINT')) {
+                actionsMenuItems.push({
+                    text: 'Print...',
+                    handler: this._printHandler,
+                    scope: this
+                });
+            }
             plugins.push({
                 ptype: 'rallygridboardactionsmenu',
-                menuItems: [{
-                    text: 'Export',
-                    handler: this._exportMenuClick,
-                    scope: this
-                }],
+                menuItems: actionsMenuItems,
                 buttonConfig: {
                     iconCls: 'icon-export',
                     toolTipConfig: {
@@ -317,22 +325,56 @@
             this._resizeGridBoardToFillSpace();
         }, 100),
 
-        _exportMenuClick: function(){
+        _exportHandler: function() {
             var context = this.getContext();
             var iterationId = '-1';
             var timebox = context.getTimeboxScope();
+            var params = {
+                cpoid: context.getProject().ObjectID,
+                projectScopeUp: context.getProjectScopeUp(),
+                projectScopeDown: context.getProjectScopeDown(),
+                iterationKey: this._getIterationOid()
+            };
 
             if (timebox && timebox.getRecord()){
                 iterationId = timebox.getRecord().getId();
             }
 
-            window.location = String.format('{0}/sc/exportCsv.sp?cpoid={1}&iterationKey={2}&projectScopeUp={3}&projectScopeDown={4}',
+            window.location = Ext.String.format('{0}/sc/exportCsv.sp?{1}',
                 Rally.environment.getServer().getContextUrl(),
-                context.getProject().ObjectID,
-                iterationId,
-                context.getProjectScopeUp(),
-                context.getProjectScopeDown());
+                Ext.Object.toQueryString(params)
+            );
         },
+
+        _printHandler: function() {
+            var context = this.getContext();
+            var params = {
+                cpoid: context.getProject().ObjectID,
+                projectScopeUp: context.getProjectScopeUp(),
+                projectScopeDown: context.getProjectScopeDown(),
+                iterationKey: this._getIterationOid(),
+                tpsId: 'storycard',
+                childId: 'taskstatus'
+            };
+            var printDialogUrl = Ext.String.format('{0}/sc/print/printReportDialog.sp?{1}',
+                Rally.environment.getServer().getContextUrl(),
+                Ext.Object.toQueryString(params)
+            );
+            if (_.isFunction(window.popup)) {
+                window.popup(printDialogUrl, 800, 610, 'print');
+            }
+        },
+
+        _getIterationOid: function() {
+            var iterationId = '-1';
+            var timebox = this.getContext().getTimeboxScope();
+
+            if (timebox && timebox.getRecord()){
+                iterationId = timebox.getRecord().getId();
+            }
+            return iterationId;
+        },
+
 
         _resizeGridBoardToFillSpace: function() {
             if(this.gridboard) {
