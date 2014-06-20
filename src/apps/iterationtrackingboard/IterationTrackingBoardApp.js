@@ -1,6 +1,8 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
+    var defaultGridColumns = ['Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion'];
+
     /**
      * Iteration Tracking Board App
      * The Iteration Tracking Board can be used to visualize and manage your User Stories and Defects within an Iteration.
@@ -9,9 +11,11 @@
         extend: 'Rally.app.TimeboxScopedApp',
         requires: [
             'Rally.data.Ranker',
+            'Rally.data.WsapiModelFactory',
+            'Rally.data.wsapi.TreeStoreBuilder',
+            'Rally.ui.dialog.CsvImportDialog',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.grid.TreeGrid',
-            'Rally.data.wsapi.TreeStoreBuilder',
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.cardboard.plugin.Print',
             'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
@@ -34,7 +38,6 @@
             'Rally.ui.filter.view.TagPillFilter',
             'Rally.app.Message',
             'Rally.apps.iterationtrackingboard.Column',
-            'Rally.clientmetrics.ClientMetricsRecordable',
             'Rally.apps.iterationtrackingboard.StatsBanner'
         ],
 
@@ -196,8 +199,8 @@
         },
 
         _getGridBoardPlugins: function() {
-            var plugins = ['rallygridboardaddnew'],
-                context = this.getContext();
+            var plugins = ['rallygridboardaddnew'];
+            var context = this.getContext();
 
             if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
                 plugins.push('rallygridboardexpandall');
@@ -248,7 +251,20 @@
 
             plugins.push('rallygridboardtoggleable');
 
-            var actionsMenuItems = [{
+            var actionsMenuItems = [
+            {
+                text: 'Import User Stories...',
+                handler: this._importHandler({
+                    type: 'userstory',
+                    title: 'Import User Stories'
+                })
+            }, {
+                text: 'Import Tasks...',
+                handler: this._importHandler({
+                    type: 'task',
+                    title: 'Import Tasks'
+                })
+            }, {
                 text: 'Export...',
                 handler: this._exportHandler,
                 scope: this
@@ -333,6 +349,25 @@
             this._resizeGridBoardToFillSpace();
         }, 100),
 
+        _importHandler: function(options) {
+            return _.bind(function() {
+                Rally.data.WsapiModelFactory.getModel({
+                    type: options.type,
+                    success: function(model) {
+                        Ext.widget({
+                            xtype: 'rallycsvimportdialog',
+                            model: model,
+                            title: options.title,
+                            params: {
+                                iterationOid: this._getIterationOid()
+                            }
+                        });
+                    },
+                    scope: this
+                });
+            }, this);
+        },
+
         _exportHandler: function() {
             var context = this.getContext();
             var iterationId = '-1';
@@ -343,10 +378,6 @@
                 projectScopeDown: context.getProjectScopeDown(),
                 iterationKey: this._getIterationOid()
             };
-
-            if (timebox && timebox.getRecord()){
-                iterationId = timebox.getRecord().getId();
-            }
 
             window.location = Ext.String.format('{0}/sc/exportCsv.sp?{1}',
                 Rally.environment.getServer().getContextUrl(),
@@ -382,7 +413,6 @@
             }
             return iterationId;
         },
-
 
         _resizeGridBoardToFillSpace: function() {
             if(this.gridboard) {
@@ -591,14 +621,7 @@
         },
 
         _getGridColumns: function (columns) {
-            var result = ['FormattedID', 'Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion'];
-
-            if (columns) {
-                result = columns;
-            }
-            _.pull(result, 'FormattedID');
-
-            return result;
+            return columns ? _.without(columns, 'FormattedID') : defaultGridColumns;
         },
 
         _onLoad: function () {

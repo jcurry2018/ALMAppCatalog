@@ -8,6 +8,7 @@
         extend: 'Ext.Container',
         alias:'widget.statsbanner',
         requires: [
+            'Rally.Message',
             'Rally.apps.iterationtrackingboard.statsbanner.PlannedVelocity',
             'Rally.apps.iterationtrackingboard.statsbanner.TimeboxEnd',
             'Rally.apps.iterationtrackingboard.statsbanner.Defects',
@@ -65,6 +66,7 @@
             this.subscribe(this, Rally.Message.objectCreate, this._update, this);
             this.subscribe(this, Rally.Message.objectUpdate, this._update, this);
             this.subscribe(this, Rally.Message.bulkUpdate, this._update, this);
+            this.subscribe(this, Rally.Message.bulkImport, this._update, this);
 
             this.store = Ext.create('Rally.data.wsapi.artifact.Store', {
                 models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
