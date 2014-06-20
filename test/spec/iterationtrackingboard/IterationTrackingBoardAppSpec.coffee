@@ -103,6 +103,22 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(@app.down('#gridBoard')).toBeDefined()
       expect(@app.down('#statsBanner')).toBeDefined()
 
+  it 'fires storecurrentpagereset on scope change', ->
+    @createApp().then =>
+      treeGrid = Ext.create 'Ext.Component'
+      @stub(@app, 'down').returns treeGrid
+
+      storeCurrentPageResetStub = @stub()
+      @app.down('rallytreegrid').on 'storecurrentpagereset', storeCurrentPageResetStub
+
+      newScope = Ext.create('Rally.app.TimeboxScope',
+        record: new @IterationModel @iterationData[1]
+      )
+
+      @app.onTimeboxScopeChange newScope
+
+      expect(storeCurrentPageResetStub).toHaveBeenCalledOnce()
+
   it 'should add the stats banner', ->
     @createApp().then =>
       statsBanner = @app.down '#statsBanner'

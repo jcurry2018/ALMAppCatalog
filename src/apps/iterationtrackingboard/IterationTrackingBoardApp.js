@@ -63,6 +63,14 @@
                 this.on('afterrender', this.onScopeChange, this, {single: true});
                 return;
             }
+
+            var grid = this.down('rallytreegrid');
+            if (grid) {
+                // reset page count to 1.
+                // must be called here to reset persisted page count value.
+                grid.fireEvent('storecurrentpagereset');
+            }
+
             this._addStatsBanner();
             this._getGridStore().then({
                 success: function(gridStore) {
@@ -542,8 +550,7 @@
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 plugins: [],
                 stateId: stateId,
-                stateful: true,
-                pageResetMessages: [Rally.app.Message.timeboxScopeChange]
+                stateful: true
             };
 
             if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
