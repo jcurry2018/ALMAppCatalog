@@ -77,10 +77,13 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.PlannedVelocity', ->
         record = @mom.getRecord 'userstory',
           values:
             PlanEstimate: 5
-        scope = Ext.create 'Rally.app.TimeboxScope',
-          record: @mom.getRecord 'iteration',
+        iteration = @mom.getRecord 'iteration',
             values:
               PlannedVelocity: 5
+        scope = Ext.create 'Rally.app.TimeboxScope',
+          record: iteration
+
+        @ajax.whenQuerying("iteration").respondWith iteration.data
         @createAndWaitForUpdate(scope: scope, record).then (updateSpy) =>
           expect(updateSpy.getCall(0).args[0].percentage).toBe 100
           expect(@pane.getEl().down('.metric-chart-text').dom.innerHTML).toContain '100'
@@ -94,10 +97,13 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.PlannedVelocity', ->
             {PlanEstimate: .1, ScheduleState: 'Accepted'}
           ]
           count: 3
-        scope = Ext.create 'Rally.app.TimeboxScope',
-          record: @mom.getRecord 'iteration',
+        iteration = @mom.getRecord 'iteration',
             values:
               PlannedVelocity: 5
+        scope = Ext.create 'Rally.app.TimeboxScope',
+          record: iteration
+          
+        @ajax.whenQuerying("iteration").respondWith iteration.data
         @createAndWaitForUpdate(scope: scope, record).then (updateSpy) =>
           expect(updateSpy.getCall(0).args[0].percentage).toBe 6
           expect(@pane.getEl().down('.metric-chart-text').dom.innerHTML).toContain '6'
@@ -108,10 +114,13 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.PlannedVelocity', ->
       record = @mom.getRecord 'userstory',
         values:
           PlanEstimate: 5
-      scope = Ext.create 'Rally.app.TimeboxScope',
-        record: @mom.getRecord 'iteration',
-          values:
-            PlannedVelocity: 4
+      iteration = @mom.getRecord 'iteration',
+            values:
+              PlannedVelocity: 4
+        scope = Ext.create 'Rally.app.TimeboxScope',
+          record: iteration
+          
+        @ajax.whenQuerying("iteration").respondWith iteration.data
       @refreshPane(scope: scope, record).then =>
         firstSeries = @pane.refreshChart.getCall(0).args[0].chartData.series[0].data[0]
         secondSeries = @pane.refreshChart.getCall(0).args[0].chartData.series[0].data[1]
@@ -123,10 +132,13 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.PlannedVelocity', ->
       record = @mom.getRecord 'userstory',
         values:
           PlanEstimate: 3
-      scope = Ext.create 'Rally.app.TimeboxScope',
-        record: @mom.getRecord 'iteration',
-          values:
-            PlannedVelocity: 4
+      iteration = @mom.getRecord 'iteration',
+            values:
+              PlannedVelocity: 4
+        scope = Ext.create 'Rally.app.TimeboxScope',
+          record: iteration
+          
+        @ajax.whenQuerying("iteration").respondWith iteration.data
       @refreshPane(scope: scope, record).then =>
         firstSeries = @pane.refreshChart.getCall(0).args[0].chartData.series[0].data[0]
         secondSeries = @pane.refreshChart.getCall(0).args[0].chartData.series[0].data[1]
@@ -138,10 +150,13 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.PlannedVelocity', ->
       record = @mom.getRecord 'userstory',
         values:
           PlanEstimate: 2
-      scope = Ext.create 'Rally.app.TimeboxScope',
-        record: @mom.getRecord 'iteration',
-          values:
-            PlannedVelocity: 4
+      iteration = @mom.getRecord 'iteration',
+            values:
+              PlannedVelocity: 4
+        scope = Ext.create 'Rally.app.TimeboxScope',
+          record: iteration
+          
+        @ajax.whenQuerying("iteration").respondWith iteration.data
       @refreshPane(scope: scope, record).then =>
         firstSeries = @pane.refreshChart.getCall(0).args[0].chartData.series[0].data[0]
         secondSeries = @pane.refreshChart.getCall(0).args[0].chartData.series[0].data[1]
