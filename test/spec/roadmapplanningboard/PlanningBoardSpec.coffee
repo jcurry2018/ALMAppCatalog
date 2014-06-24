@@ -219,11 +219,13 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     describe 'deleting all of the columns', ->
 
       beforeEach ->
-        @createCardboard(isAdmin: true).then =>
-          _.times @planStore.count(), => @deleteColumn(1)
+        if !Ext.isGecko
+          @createCardboard(isAdmin: true).then =>
+            _.times @planStore.count(), => @deleteColumn(1)
 
       it 'should contain a single timeframe column', ->
-        expect(@getTimeframePlanningColumns().length).toBe 1
+        if !Ext.isGecko
+          expect(@getTimeframePlanningColumns().length).toBe 1
 
       it 'should add a new empty timeframe column', ->
         if !Ext.isGecko
@@ -232,28 +234,30 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     describe 'deleting newly added columns', ->
 
       beforeEach ->
-        @createCardboard(isAdmin: true).then =>
-          @cardboard._addNewColumn().then =>
+        if !Ext.isGecko
+          @createCardboard(isAdmin: true).then =>
             @cardboard._addNewColumn().then =>
               @cardboard._addNewColumn().then =>
-                expect(@planStore.count()).toBe 7
-                # 0: backlog, 1-4: existing columns, 5-7: new columns
-                # delete the 'middle' new column, then the last new column, then the first
-                @deleteColumn(6).then =>
+                @cardboard._addNewColumn().then =>
+                  expect(@planStore.count()).toBe 7
+                  # 0: backlog, 1-4: existing columns, 5-7: new columns
+                  # delete the 'middle' new column, then the last new column, then the first
                   @deleteColumn(6).then =>
-                    @deleteColumn(5)
+                    @deleteColumn(6).then =>
+                      @deleteColumn(5)
 
       it 'should remove the new plans from the plan store', ->
         if !Ext.isGecko
           expect(@planStore.count()).toBe 4
 
       describe 'when the remaining columns are deleted', ->
+          beforeEach ->
+            if !Ext.isGecko
+              _.times @planStore.count(), => @deleteColumn(1)
 
-        beforeEach ->
-          _.times @planStore.count(), => @deleteColumn(1)
-
-        it 'should contain a single timeframe column', ->
-          expect(@getTimeframePlanningColumns().length).toBe 1
+          it 'should contain a single timeframe column', ->
+            if !Ext.isGecko   
+              expect(@getTimeframePlanningColumns().length).toBe 1
 
   describe 'permissions', ->
 
