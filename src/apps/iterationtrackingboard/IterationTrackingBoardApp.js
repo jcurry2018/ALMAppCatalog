@@ -233,6 +233,7 @@
                         customFilterPopoverEnabled: true,
                         blackListFields: [
                             'DirectChildrenCount',
+                            'DisplayColor',
                             'DragAndDropRank',
                             'Feature',
                             'Iteration',
@@ -242,6 +243,9 @@
                             'TestCase',
                             'TestCaseResult',
                             'VersionId'
+                        ],
+                        whiteListFields: [
+                            'Tags'
                         ],
                         modelNames: this.modelNames
                     });
@@ -258,7 +262,8 @@
                 if (context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP')) {
                     plugins.push({
                         ptype: 'rallygridboardcustomfiltercontrol',
-                        filterControlConfig: filterControlConfig
+                        filterControlConfig: filterControlConfig,
+                        filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES')
                     });
                 } else {
                     plugins.push({
