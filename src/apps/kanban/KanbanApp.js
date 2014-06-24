@@ -24,7 +24,6 @@
         appName: 'Kanban',
 
         settingsScope: 'project',
-        useTimeboxScope: true,
 
         config: {
             defaultSettings: {
@@ -151,6 +150,9 @@
                         beforeeditorshow: this._onBeforeEditorShow,
                         scope: this
                     }
+                },
+                storeConfig: {
+                    filters: this._getFilters()
                 }
             };
         },
@@ -239,11 +241,20 @@
                 },
                 loadMask: false,
                 storeConfig: {
-                    context: this.getContext().getDataContext(),
-                    filters: this.getSetting('query') ?
-                        [Rally.data.QueryFilter.fromQueryString(this.getSetting('query'))] : []
+                    context: this.getContext().getDataContext()
                 }
             };
+        },
+
+        _getFilters: function() {
+            var filters = [];
+            if(this.getSetting('query')) {
+                filters.push(Rally.data.QueryFilter.fromQueryString(this.getSetting('query')));
+            }
+            if(this.getContext().getTimeboxScope()) {
+                filters.push(this.getContext().getTimeboxScope().getQueryFilter());
+            }
+            return filters;
         },
 
         _getLastColumnFilter: function() {

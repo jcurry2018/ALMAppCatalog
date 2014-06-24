@@ -312,6 +312,31 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(@app.getEl().query('.card-blocked-icon').length).toBe 1
       expect(@app.getEl().query('.card-color-icon').length).toBe 1
 
+  it 'should include the query filter from settings', ->
+    query = '(Name = "foo")'
+    @createApp(query: query).then =>
+      storeConfig = @app.down('rallygridboard').storeConfig
+      expect(storeConfig.filters.length).toBe 1
+      expect(storeConfig.filters[0].toString()).toBe query
+
+  it 'should include the filter from timebox scope', ->
+    iteration = @mom.getRecord 'iteration'
+    timeboxScope = Ext.create 'Rally.app.TimeboxScope', record: iteration
+    @createApp({}, {}, timebox: timeboxScope).then =>
+      storeConfig = @app.down('rallygridboard').storeConfig
+      expect(storeConfig.filters.length).toBe 1
+      expect(storeConfig.filters[0].toString()).toBe timeboxScope.getQueryFilter().toString()
+
+  it 'should include the filters from timebox scope and settings', ->
+    iteration = @mom.getRecord 'iteration'
+    timeboxScope = Ext.create 'Rally.app.TimeboxScope', record: iteration
+    query = '(Name = "foo")'
+    @createApp(query: query, {}, timebox: timeboxScope).then =>
+      storeConfig = @app.down('rallygridboard').storeConfig
+      expect(storeConfig.filters.length).toBe 2
+      expect(storeConfig.filters[0].toString()).toBe query
+      expect(storeConfig.filters[1].toString()).toBe timeboxScope.getQueryFilter().toString()
+
   helpers
     createApp: (settings = {}, options = {}, context = {}) ->
       @app = Ext.create 'Rally.apps.kanban.KanbanApp',
