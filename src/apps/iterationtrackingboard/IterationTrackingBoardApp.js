@@ -39,9 +39,7 @@
             'Rally.ui.filter.view.TagPillFilter',
             'Rally.app.Message',
             'Rally.apps.iterationtrackingboard.Column',
-            'Rally.apps.iterationtrackingboard.StatsBanner',
-            'Rally.clientmetrics.ClientMetricsRecordable',
-            'Rally.apps.iterationtrackingboard.PrintDialog'
+            'Rally.apps.iterationtrackingboard.StatsBanner'
         ],
 
         mixins: [
@@ -299,7 +297,6 @@
             }
             plugins.push({
                 ptype: 'rallygridboardactionsmenu',
-                itemId: 'printExportMenuButton',
                 menuItems: actionsMenuItems,
                 buttonConfig: {
                     iconCls: 'icon-export',
@@ -406,10 +403,22 @@
         },
 
         _printHandler: function() {
-            var gridBoard = this.queryById('gridBoard');
-            var gridOrBoard = gridBoard.getGridOrBoard();
-            var totalRows = gridOrBoard.store.totalCount;
-            Ext.create('Rally.apps.iterationtrackingboard.PrintDialog', {showWarning: totalRows >= 400});
+            var context = this.getContext();
+            var params = {
+                cpoid: context.getProject().ObjectID,
+                projectScopeUp: context.getProjectScopeUp(),
+                projectScopeDown: context.getProjectScopeDown(),
+                iterationKey: this._getIterationOid(),
+                tpsId: 'storycard',
+                childId: 'taskstatus'
+            };
+            var printDialogUrl = Ext.String.format('{0}/sc/print/printReportDialog.sp?{1}',
+                Rally.environment.getServer().getContextUrl(),
+                Ext.Object.toQueryString(params)
+            );
+            if (_.isFunction(window.popup)) {
+                window.popup(printDialogUrl, 800, 610, 'print');
+            }
         },
 
         _getIterationOid: function() {
@@ -645,25 +654,13 @@
             this.setLoading(false);
         },
 
-        _hidePrintButton: function(hide) {
-            var button = _.find(this.gridboard.plugins, {itemId: 'printExportMenuButton'});
-            if (button) {
-                var menuItem = _.find(button.menuItems, {text: 'Print...'});
-                if (menuItem) {
-                    menuItem.hidden = hide;
-                }
-            }
-        },
-
         _onToggle: function (toggleState) {
             var appEl = this.getEl();
 
             if (toggleState === 'board') {
                 appEl.replaceCls('grid-toggled', 'board-toggled');
-                this._hidePrintButton(true);
             } else {
                 appEl.replaceCls('board-toggled', 'grid-toggled');
-                this._hidePrintButton(false);
             }
             this._publishContentUpdated();
         },
