@@ -317,25 +317,15 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       it 'should use rallygridboard filter control', ->
         @createApp().then =>
           gridBoard = @app.down 'rallygridboard'
-          expect(_.find gridBoard.plugins, (plugin) ->
+          plugin = _.find gridBoard.plugins, (plugin) ->
             plugin.ptype == 'rallygridboardfiltercontrol'
-          ).toBeTruthy()
-
-      it 'does not use the CustomFilter popover', ->
-        @createApp().then =>
-          @click(id: @app.down('rallyfilterbutton').getId()).then ->
-            popover = Ext.ComponentQuery.query('rallyfilterpopover')[0]
-            expect(popover).toBeDefined()
+          expect(plugin).toBeDefined()
+          expect(plugin.filterControlConfig.stateful).toBe true
+          expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-filter-button')
 
     describe 'USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP is true', ->
       beforeEach ->
         @featureEnabledStub.withArgs('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP').returns(true)
-
-      it 'uses the CustomFilter popover', ->
-        @createApp().then =>
-          @click(id: @app.down('rallyfilterbutton').getId()).then ->
-            popover = Ext.ComponentQuery.query('rallycustomfilterpopover')[0]
-            expect(popover).toBeDefined()
 
       it 'should set useFilterCollection to false', ->
         @createApp().then =>
@@ -344,9 +334,11 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       it 'should use rallygridboard custom filter control', ->
         @createApp().then =>
           gridBoard = @app.down 'rallygridboard'
-          expect(_.find gridBoard.plugins, (plugin) ->
+          plugin = _.find gridBoard.plugins, (plugin) ->
             plugin.ptype == 'rallygridboardcustomfiltercontrol'
-          ).toBeTruthy()
+          expect(plugin).toBeDefined()
+          expect(plugin.filterControlConfig.stateful).toBe true
+          expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-custom-filter-button')
 
   describe 'page sizes', ->
     beforeEach ->

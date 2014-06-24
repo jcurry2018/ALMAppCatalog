@@ -224,51 +224,45 @@
                     cls: 'small gridboard-filter-control',
                     context: context,
 //                    margin: '3 10 3 7',
-                    stateful: true,
-                    stateId: context.getScopedStateId('iteration-tracking-filter-button')
+                    stateful: true
                 };
-
-                if (context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP')) {
-                    _.merge(filterControlConfig, {
-                        customFilterPopoverEnabled: true,
-                        blackListFields: [
-                            'DirectChildrenCount',
-                            'DisplayColor',
-                            'DragAndDropRank',
-                            'Feature',
-                            'Iteration',
-                            'Parent',
-                            'PortfolioItem',
-                            'Requirement',
-                            'TestCase',
-                            'TestCaseResult',
-                            'VersionId'
-                        ],
-                        whiteListFields: [
-                            'Tags'
-                        ],
-                        modelNames: this.modelNames
-                    });
-                } else {
-                    _.merge(filterControlConfig, {
-                        items: [
-                            this._createOwnerFilterItem(context),
-                            this._createTagFilterItem(context),
-                            this._createModelFilterItem(context)
-                        ]
-                    });
-                }
 
                 if (context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP')) {
                     plugins.push({
                         ptype: 'rallygridboardcustomfiltercontrol',
-                        filterControlConfig: filterControlConfig,
-                        filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES')
+                        filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
+                        filterControlConfig: _.merge(filterControlConfig, {
+                            blackListFields: [
+                                'DirectChildrenCount',
+                                'DisplayColor',
+                                'DragAndDropRank',
+                                'Feature',
+                                'Iteration',
+                                'Parent',
+                                'PortfolioItem',
+                                'Requirement',
+                                'TestCase',
+                                'TestCaseResult',
+                                'VersionId'
+                            ],
+                            whiteListFields: [
+                                'Tags'
+                            ],
+                            modelNames: this.modelNames,
+                            stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
+                        })
                     });
                 } else {
                     plugins.push({
                         ptype: 'rallygridboardfiltercontrol',
-                        filterControlConfig: filterControlConfig
+                        filterControlConfig: _.merge(filterControlConfig, {
+                            items: [
+                                this._createOwnerFilterItem(context),
+                                this._createTagFilterItem(context),
+                                this._createModelFilterItem(context)
+                            ],
+                            stateId: context.getScopedStateId('iteration-tracking-filter-button')
+                        })
                     });
                 }
             } else {
