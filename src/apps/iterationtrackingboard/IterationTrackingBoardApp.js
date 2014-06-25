@@ -223,7 +223,7 @@
                 var filterControlConfig = {
                     cls: 'small gridboard-filter-control',
                     context: context,
-                    margin: '3 10 3 7',
+//                    margin: '3 10 3 7',
                     stateful: true,
                     stateId: context.getScopedStateId('iteration-tracking-filter-button')
                 };
