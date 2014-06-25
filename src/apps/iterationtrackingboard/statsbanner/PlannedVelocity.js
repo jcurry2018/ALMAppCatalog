@@ -36,10 +36,13 @@
         },
 
         onDataChanged: function() {
-            var renderData = this._getRenderData();
-            this.update(renderData);
-
-            this.refreshChart(this._getChartConfig(renderData));
+            this._getRenderData().then({
+                success: function(renderData){
+                    this.update(renderData);
+                    this.refreshChart(this._getChartConfig(renderData));
+                },
+                scope: this
+            });
         },
 
         getChartEl: function() {
@@ -53,26 +56,30 @@
         },
 
         _getRenderData: function() {
+            var deferred = Ext.create('Deft.Deferred');
             var estimate = _.reduce(this.store.getRange(), function(accum, record) {
                 return accum + record.get('PlanEstimate') || 0;
             }, 0);
 
             estimate = Math.round(estimate * 100) / 100;
 
-            var timeboxRecord = this.getContext().getTimeboxScope().getRecord();
+            var timebox = this.getContext().getTimeboxScope();
+            var timeboxUnits = this._getTimeboxUnits();
+            timebox.getPlannedVelocity().then({
+                success: function(plannedVelocity){
+                    var percentage = plannedVelocity === 0 ? 0 : Math.round(estimate / plannedVelocity * 100);
 
-            var plannedVelocity = (timeboxRecord && timeboxRecord.get('PlannedVelocity')) || 0;
+                    var data = {
+                        estimate: estimate,
+                        percentage: percentage,
+                        plannedVelocity: plannedVelocity,
+                        unit: timeboxUnits
+                    };
+                    deferred.resolve(data);
+                }
+            });
 
-            var percentage = plannedVelocity === 0 ? 0 : Math.round(estimate / plannedVelocity * 100);
-
-            var data = {
-                estimate: estimate,
-                percentage: percentage,
-                plannedVelocity: plannedVelocity,
-                unit: this._getTimeboxUnits()
-            };
-
-            return data;
+            return deferred.promise;
         },
 
         _getChartConfig: function(renderData) {
