@@ -597,7 +597,10 @@
             };
 
             if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
-                gridConfig.plugins.push('rallytreegridexpandedrowpersistence');
+                gridConfig.plugins.push({
+                    xtype: 'rallytreegridexpandedrowpersistence',
+                    enableExpandLoadingMask: !context.isFeatureEnabled('EXPAND_ALL_LOADING_MASK_DISABLE')
+                });
                 gridConfig.plugins.push('rallytreegridchildpager');
             }
 
