@@ -340,6 +340,26 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
           expect(plugin.filterControlConfig.stateful).toBe true
           expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-custom-filter-button')
 
+    describe 'EXPAND_ALL_TREE_GRID_CHILDREN is true', ->
+      beforeEach ->
+        @featureEnabledStub.withArgs('EXPAND_ALL_TREE_GRID_CHILDREN').returns(true)
+
+      it 'should configure plugin', ->
+        @createApp().then =>
+          expect(_.find(@app.gridboard.plugins, ptype: 'rallygridboardexpandall')).toBeTruthy()
+
+      describe 'in IE', ->
+        beforeEach ->
+          @_isIE = Ext.isIE
+          Ext.isIE = true
+
+        afterEach ->
+          Ext.isIE = @_isIE
+
+        it 'should not configure plugin for IE', ->
+          @createApp().then =>
+            expect(_.find(@app.gridboard.plugins, {ptype: 'rallygridboardexpandall'})).toBeFalsy()
+
   describe 'page sizes', ->
     beforeEach ->
       @_isIE = Ext.isIE

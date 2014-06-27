@@ -215,7 +215,7 @@
             var plugins = ['rallygridboardaddnew'];
             var context = this.getContext();
 
-            if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
+            if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN') && !Ext.isIE) {
                 plugins.push('rallygridboardexpandall');
             }
 
@@ -595,8 +595,8 @@
                     ptype: 'rallytreegridexpandedrowpersistence',
                     enableExpandLoadingMask: !context.isFeatureEnabled('EXPAND_ALL_LOADING_MASK_DISABLE')
                 });
-                gridConfig.plugins.push('rallytreegridchildpager');
             }
+            gridConfig.plugins.push('rallytreegridchildpager');
 
             if (context.isFeatureEnabled('S67643_LIMIT_TREEGRID_PAGE_SIZE')) {
                 gridConfig.pagingToolbarCfg = {
