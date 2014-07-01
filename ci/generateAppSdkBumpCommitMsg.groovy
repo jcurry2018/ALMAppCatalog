@@ -12,7 +12,7 @@ StringBuilder commitMsg = new StringBuilder() << "${env.JOB_NAME} ${env.BUILD_NU
 
 if(prevSdkBuildNumber < newBuildNumber){
     (prevSdkBuildNumber + 1..newBuildNumber).each { buildNumber ->
- 	def build = upstreamProject.getBuildByNumber(buildNumber) ?: build.getCause(hudson.model.Cause.UpstreamCause).upstreamRun
+ 	    def build = upstreamProject.getBuildByNumber(buildNumber) ?: build.getCause(hudson.model.Cause.UpstreamCause).upstreamRun
        	build.changeSet.each { change ->
             commitMsg << "sdk commit: RallySoftware/appsdk@${change.commitId}\n"
             commitMsg << "author: ${change.authorName}\n"
