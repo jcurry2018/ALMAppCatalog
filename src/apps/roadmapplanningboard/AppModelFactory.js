@@ -250,8 +250,6 @@
                 return _this._serializeRecordCollection.apply(_this, arguments);
             };
         }
-    }, function () {
-        Rally.data.ModelFactory.registerTypes(this.modelTypes, this);
     });
 
 })();
