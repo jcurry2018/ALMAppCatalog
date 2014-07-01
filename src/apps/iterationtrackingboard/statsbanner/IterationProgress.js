@@ -22,7 +22,7 @@
             store: null
         },
 
-        currentChartDisplayed: 0,
+        currentChartDisplayed: 1,
 
         stateId: 'stats-banner-iteration-progress',
         stateful: true,
@@ -142,7 +142,7 @@
         applyState: function (state) {
             if (state){
                 if (state.currentChartDisplayed > this.carouselItems.length -1 || state.currentChartDisplayed < 0) {
-                    this.currentChartDisplayed = 0;
+                    this.currentChartDisplayed = 1;
                 } else {
                     this.currentChartDisplayed = state.currentChartDisplayed;
                 }

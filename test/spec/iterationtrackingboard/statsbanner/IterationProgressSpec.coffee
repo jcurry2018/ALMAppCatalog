@@ -84,10 +84,10 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.IterationProgress', ->
 
   describe 'chart settings', ->
 
-    it 'should default to zero', ->
+    it 'should default to one', ->
       iterationProgress = @createIterationProgress()
-      expect(iterationProgress.currentChartDisplayed).toBe(0)
-      expect(iterationProgress.getState().currentChartDisplayed).toBe(0)
+      expect(iterationProgress.currentChartDisplayed).toBe(1)
+      expect(iterationProgress.getState().currentChartDisplayed).toBe(1)
 
     it 'should apply the state', ->
       iterationProgress = @createIterationProgress()
@@ -102,7 +102,7 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.IterationProgress', ->
       totalItems = iterationProgress.carouselItems.length
 
       iterationProgress.applyState(currentChartDisplayed: totalItems+1)
-      expect(iterationProgress.currentChartDisplayed).toBe(0)
+      expect(iterationProgress.currentChartDisplayed).toBe(1)
 
   describe 'carousel', ->
 
