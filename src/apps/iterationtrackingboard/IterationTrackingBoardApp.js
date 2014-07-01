@@ -237,12 +237,8 @@
                                 'DirectChildrenCount',
                                 'DisplayColor',
                                 'DragAndDropRank',
-                                'Feature',
                                 'Iteration',
-                                'Parent',
                                 'PortfolioItem',
-                                'Requirement',
-                                'TestCase',
                                 'TestCaseResult',
                                 'VersionId'
                             ],
