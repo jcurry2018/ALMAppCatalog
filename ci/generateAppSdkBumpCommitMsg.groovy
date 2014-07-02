@@ -1,3 +1,5 @@
+import jenkins.model.Jenkins
+
 def appSdkSrcVersion = build.buildVariables.APPSDK_SRC_VERSION
 def env = build.characteristicEnvVars
 
