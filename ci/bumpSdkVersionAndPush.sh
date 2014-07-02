@@ -5,7 +5,7 @@ sed -i "s/appsdk-src:tgz:.*\",/appsdk-src:tgz:${APPSDK_SRC_VERSION}\",/" js_depe
 git add js_dependencies.json
 git commit -F appsdk.bump --author="${JOB_NAME} <bogus@rallydev.com>"
 
-if [ $SHOULD_PUSH == "true"]; then
+if [ $SHOULD_PUSH == "true" ]; then
     git push origin HEAD:$GIT_BRANCH
 else
     echo "NOT COMMITING!!"
