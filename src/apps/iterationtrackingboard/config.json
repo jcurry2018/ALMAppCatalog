@@ -5,6 +5,8 @@
    "sdk": "x",
    "javascript": [
       "Column.js",
+      "IterationTrackingTreeView.js",
+      "IterationTrackingTreeGrid.js",
       "statsbanner/BannerWidget.js",
       "statsbanner/Gauge.js",
       "statsbanner/PlannedVelocity.js",

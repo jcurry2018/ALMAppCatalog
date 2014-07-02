@@ -15,7 +15,7 @@
             'Rally.data.wsapi.TreeStoreBuilder',
             'Rally.ui.dialog.CsvImportDialog',
             'Rally.ui.gridboard.GridBoard',
-            'Rally.ui.grid.TreeGrid',
+            'Rally.apps.iterationtrackingboard.IterationTrackingTreeGrid',
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.cardboard.plugin.Print',
             'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
@@ -41,7 +41,8 @@
             'Rally.apps.iterationtrackingboard.Column',
             'Rally.apps.iterationtrackingboard.StatsBanner',
             'Rally.clientmetrics.ClientMetricsRecordable',
-            'Rally.apps.iterationtrackingboard.PrintDialog'
+            'Rally.apps.iterationtrackingboard.PrintDialog',
+            'Rally.ui.grid.plugin.ColumnAutoSizer'
         ],
 
         mixins: [
@@ -576,7 +577,7 @@
                 stateId = context.getScopedStateId(stateString);
 
             var gridConfig = {
-                xtype: 'rallytreegrid',
+                xtype: 'rallyiterationtrackingtreegrid',
                 store: gridStore,
                 enableRanking: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled,
                 columnCfgs: null, //must set this to null to offset default behaviors in the gridboard
@@ -588,7 +589,7 @@
                     return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);
                 },
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
-                plugins: [],
+                plugins: ['rallycolumnautosizerplugin', 'rallytreegridchildpager'],
                 stateId: stateId,
                 stateful: true
             };
@@ -599,7 +600,6 @@
                     enableExpandLoadingMask: !context.isFeatureEnabled('EXPAND_ALL_LOADING_MASK_DISABLE')
                 });
             }
-            gridConfig.plugins.push('rallytreegridchildpager');
 
             if (context.isFeatureEnabled('S67643_LIMIT_TREEGRID_PAGE_SIZE')) {
                 gridConfig.pagingToolbarCfg = {
