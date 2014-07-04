@@ -4,7 +4,7 @@ sed -i "s/appsdk-src:tgz:.*\",/appsdk-src:tgz:${APPSDK_SRC_VERSION}\",/" js_depe
 
 git add js_dependencies.json
 git config user.name Hudson
-git config.user.email hudson@rallydev.com
+git config user.email hudson@rallydev.com
 git commit -F appsdk.bump --author="${JOB_NAME} <bogus@rallydev.com>"
 
 if [ $SHOULD_PUSH == "true" ]; then
