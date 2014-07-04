@@ -7,7 +7,7 @@ git config user.name Hudson
 git config user.email hudson@rallydev.com
 git commit -F appsdk.bump --author="${JOB_NAME} <bogus@rallydev.com>"
 
-if [ $SHOULD_PUSH == "true" ]; then
+if [ "$SHOULD_PUSH" == "true" ]; then
     git push origin HEAD:$GIT_BRANCH
 else
     echo "NOT COMMITING!!"
