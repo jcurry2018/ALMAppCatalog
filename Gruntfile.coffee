@@ -165,7 +165,7 @@ module.exports = (grunt) ->
               'test/support/ExtLoader.js'
 
               # 3rd party libraries & customizations
-              "#{appsdk_path}/test/support/sinon/sinon-1.6.0.js"
+              "#{appsdk_path}/test/support/sinon/sinon-1.10.2.js"
               "#{appsdk_path}/test/support/sinon/jasmine-sinon.js"
               "#{appsdk_path}/test/support/sinon/rally-sinon-config.js"
 

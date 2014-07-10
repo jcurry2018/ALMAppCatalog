@@ -45,9 +45,8 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
 
       task = @mom.getRecord 'task'
 
-      @ajaxStub = @ajax.whenQuerying('artifact').respondWith(_.pluck [record], 'data')
-      # @ajaxStub = @ajax.whenQuerying('artifact').respondWith(_.pluck [record, recordWithChildren], 'data')
-      # @ajaxStub.onSecondCall().returns [task.data]
+      @ajaxStub = @ajax.whenQuerying('artifact').respondWith(_.pluck [record, recordWithChildren], 'data')
+      @ajaxStub.onSecondCall().returns [task.data]
 
   beforeEach ->
     @openStub = @stub()
@@ -113,7 +112,7 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
       @clickPrint().then =>
         expect(@ajaxStub).toHaveBeenCalledOnce()
 
-    # it 'should print children', ->
-    #   @click(id: 'printDialogReportTypeIncludeChildren-inputEl').then =>
-    #     @clickPrint().then =>
-    #       expect(@ajaxStub).toHaveBeenCalledTwice()
+    it 'should print children', ->
+      @click(id: 'printDialogReportTypeIncludeChildren-inputEl').then =>
+        @clickPrint().then =>
+          expect(@ajaxStub).toHaveBeenCalledTwice()
