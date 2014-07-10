@@ -408,7 +408,13 @@
             var gridBoard = this.queryById('gridBoard');
             var gridOrBoard = gridBoard.getGridOrBoard();
             var totalRows = gridOrBoard.store.totalCount;
-            Ext.create('Rally.apps.iterationtrackingboard.PrintDialog', {showWarning: totalRows >= 400});
+            var timeboxScope = this.getContext().getTimeboxScope();
+
+            Ext.create('Rally.apps.iterationtrackingboard.PrintDialog', {
+                showWarning: totalRows >= 400,
+                timeboxScope: timeboxScope,
+                grid: gridOrBoard
+            });
         },
 
         _getIterationOid: function() {
@@ -433,7 +439,7 @@
                 stateId: 'iteration-tracking-board-app',
 
                 defaultGridViews: [{
-                    model: ['UserStory', 'Defect', 'DefectSuite'],
+                    model: ['UserStory', 'Defect', 'DefectSuite', 'TestSet'],
                     name: 'Defect Status',
                     state: {
                         cmpState: {
@@ -647,7 +653,7 @@
         },
 
         _hidePrintButton: function(hide) {
-            if (this.getContext().isFeatureEnabled('S68103_ITERATION_TRACKING_APP_PRINT')) {
+            if (this.getContext().isFeatureEnabled('S68103_ITERATION_TRACKING_APP_PRINT' && this.gridboard)) {
                 var button = _.find(this.gridboard.plugins, {itemId: 'printExportMenuButton'});
                 if (button) {
                     var menuItem = _.find(button.menuItems, {text: 'Print...'});
