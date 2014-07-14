@@ -119,7 +119,7 @@
         _buildStoreConfig: function(shouldIncludeChildren) {
             var timeboxFilter = this.timeboxScope.getQueryFilter();
 
-            var storeConfig = {
+            return {
                 models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
                 autoLoad: true,
                 remoteSort: true,
@@ -127,13 +127,12 @@
                 enableHierarchy: shouldIncludeChildren,
                 childPageSizeEnabled: false,
                 filters: [timeboxFilter],
+                sorters: this.grid.getStore().getSorters(),
                 listeners: {
                     load: this._onStoreLoad,
                     scope: this
                 }
             };
-
-            return storeConfig;
         },
 
         _onStoreLoad: function(treeStore, node, records, success, eOpts) {
