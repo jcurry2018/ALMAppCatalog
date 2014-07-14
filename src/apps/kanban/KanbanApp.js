@@ -17,7 +17,11 @@
             'Rally.ui.cardboard.PolicyContainer',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.plugin.Scrollable',
-            'Rally.ui.report.StandardReport'
+            'Rally.ui.report.StandardReport',
+            'Rally.clientmetrics.ClientMetricsRecordable'
+        ],
+        mixins: [
+            'Rally.clientmetrics.ClientMetricsRecordable'
         ],
         cls: 'kanban',
         alias: 'widget.kanbanapp',
@@ -394,6 +398,7 @@
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
             }
+            this.recordComponentReady();
         },
 
         _publishContentUpdatedNoDashboardLayout: function() {
