@@ -158,10 +158,12 @@
         },
 
         _onDataReady: function() {
+            var timeboxScopeRecord = this.timeboxScope.getRecord();
+            var iterationName = timeboxScopeRecord ? timeboxScopeRecord.get('Name') : 'Unscheduled';
             var treeGridPrinter = Ext.create('Rally.ui.grid.TreeGridPrinter', {
                 records: this.allRecords,
                 grid: this.grid,
-                iterationName: this.timeboxScope.getRecord().get('Name')
+                iterationName: iterationName
             });
 
             var printWindow = Rally.getWindow().open(Rally.environment.getServer().getContextUrl() + '/print/printContainer.html', 'printWindow', 'height=600,width=1000,toolbar=no,menubar=no');
