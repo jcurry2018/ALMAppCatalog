@@ -166,7 +166,7 @@
                 iterationName: iterationName
             });
 
-            var printWindow = Rally.getWindow().open(Rally.environment.getServer().getContextUrl() + '/print/printContainer.html', 'printWindow', 'height=600,width=1000,toolbar=no,menubar=no');
+            var printWindow = Rally.getWindow().open(Rally.environment.getServer().getContextUrl() + '/print/printContainer.html', 'printWindow', 'height=600,width=1000,toolbar=no,menubar=no,scrollbars=yes');
             treeGridPrinter.print(printWindow);
 
             this.destroy();
