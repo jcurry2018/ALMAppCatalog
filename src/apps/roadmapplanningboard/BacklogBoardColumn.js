@@ -29,16 +29,13 @@
         drawHeader: function () {
             this.callParent(arguments);
 
-            this.getColumnHeader().add(
-                Ext.create('Rally.ui.SearchField', {
-                    searchOnKeyup: true,
-                    showSearchButton: true,
-                    listeners: {
-                        search: this._searchBacklog,
-                        scope: this
-                    }
-                })
-            );
+            this.getColumnHeader().add({
+                xtype: 'rallysearchfield',
+                listeners: {
+                    search: this._searchBacklog,
+                    scope: this
+                }
+            });
         },
 
         getColumnIdentifier: function () {

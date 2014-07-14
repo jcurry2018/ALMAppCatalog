@@ -4,12 +4,6 @@
    "server": "https://rally1.rallydev.com",
    "sdk": "x",
    "javascript": [
-      "TimeboxCardBoard.js",
-      "IterationPlanningBoardBacklogColumn.js",
-      "IterationPlanningBoardColumnProgressBar.js",
-      "IterationPlanningBoardColumn.js",
-      "TimeboxGridBoard.js",
-      "TimeboxScrollable.js",
       "IterationPlanningBoardApp.js"
    ],
    "css": [

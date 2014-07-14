@@ -8,7 +8,6 @@
     Ext.define('Rally.apps.portfoliokanban.PortfolioKanbanApp', {
         extend: 'Rally.app.App',
         requires: [
-            'Rally.data.util.PortfolioItemHelper',
             'Rally.apps.portfoliokanban.PortfolioKanbanCard',
             'Rally.apps.portfoliokanban.PortfolioKanbanPolicy',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
