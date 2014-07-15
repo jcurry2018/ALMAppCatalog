@@ -104,10 +104,8 @@
         },
 
         _handlePrintClick: function() {
-            var includeChildren = Ext.getCmp('whattoprint').getChecked()[0].inputValue === 'includechildren';
-
-            var storeConfig = this._buildStoreConfig(includeChildren);
             var treeStoreBuilder = Ext.create('Rally.data.wsapi.TreeStoreBuilder');
+            var storeConfig = this._buildStoreConfig();
 
             treeStoreBuilder.build(storeConfig);
         },
@@ -116,15 +114,16 @@
             this.destroy();
         },
 
-        _buildStoreConfig: function(shouldIncludeChildren) {
+        _buildStoreConfig: function() {
             var timeboxFilter = this.timeboxScope.getQueryFilter();
+            var includeChildren = Ext.getCmp('whattoprint').getChecked()[0].inputValue === 'includechildren';
 
             return {
                 models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
                 autoLoad: true,
                 remoteSort: true,
-                root: {expanded: shouldIncludeChildren},
-                enableHierarchy: shouldIncludeChildren,
+                root: {expanded: includeChildren},
+                enableHierarchy: includeChildren,
                 childPageSizeEnabled: false,
                 filters: [timeboxFilter],
                 sorters: this.grid.getStore().getSorters(),
@@ -166,6 +165,10 @@
             });
 
             var printWindow = Rally.getWindow().open(Rally.environment.getServer().getContextUrl() + '/print/printContainer.html', 'printWindow', 'height=600,width=1000,toolbar=no,menubar=no,scrollbars=yes');
+            if (!printWindow) {
+                alert('It looks like you a popup blocker installed. Please turn this off to see the print window.');
+                return;
+            }
             treeGridPrinter.print(printWindow);
 
             this.destroy();
