@@ -239,6 +239,7 @@
                                 'DragAndDropRank',
                                 'Iteration',
                                 'PortfolioItem',
+                                'TestCase',
                                 'TestCaseResult',
                                 'VersionId'
                             ],
