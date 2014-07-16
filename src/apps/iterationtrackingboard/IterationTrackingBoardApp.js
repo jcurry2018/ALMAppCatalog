@@ -652,11 +652,15 @@
             this.setLoading(false);
         },
 
-        _hidePrintButton: function(hide) {
-            if (this.getContext().isFeatureEnabled('S68103_ITERATION_TRACKING_APP_PRINT' && this.gridboard)) {
-                var button = _.find(this.gridboard.plugins, {itemId: 'printExportMenuButton'});
+        _hidePrintButton: function(hide, gridboard) {
+            var button, menuItem;
+
+            if (this.getContext().isFeatureEnabled('S68103_ITERATION_TRACKING_APP_PRINT') && gridboard) {
+                button = _.find(gridboard.plugins, {itemId: 'printExportMenuButton'});
+
                 if (button) {
-                    var menuItem = _.find(button.menuItems, {text: 'Print...'});
+                    menuItem = _.find(button.menuItems, {text: 'Print...'});
+                    
                     if (menuItem) {
                         menuItem.hidden = hide;
                     }
@@ -664,15 +668,15 @@
             }
         },
 
-        _onToggle: function (toggleState) {
+        _onToggle: function (toggleState, gridOrBoard, gridboard) {
             var appEl = this.getEl();
 
             if (toggleState === 'board') {
                 appEl.replaceCls('grid-toggled', 'board-toggled');
-                this._hidePrintButton(true);
+                this._hidePrintButton(true, gridboard);
             } else {
                 appEl.replaceCls('board-toggled', 'grid-toggled');
-                this._hidePrintButton(false);
+                this._hidePrintButton(false, gridboard);
             }
             this._publishContentUpdated();
         },
