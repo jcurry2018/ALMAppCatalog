@@ -13,9 +13,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
             subscription: Rally.environment.getContext().getSubscription(),
         renderTo: 'testDiv'
         height: 500
-        appContainer:
-          dashboard:
-            isFullPageApp: isFullPageApp
+        isFullPageApp: isFullPageApp
       , config
 
       @waitForComponentReady @app
@@ -109,8 +107,8 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp().then =>
       expect(@app.getEl().down('.filterInfo') instanceof Ext.Element).toBeTruthy()
 
-  it 'does not display a filter icon when panel config "true"', ->
-    @_createApp(null, "true").then =>
+  it 'does not display a filter icon when isFullPageApp', ->
+    @_createApp(null, true).then =>
       expect(@app.getEl().down('.filterInfo')).toBeFalsy()
 
   it 'shows project setting label if following a specific project scope', ->
