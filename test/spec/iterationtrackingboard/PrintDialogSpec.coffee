@@ -11,12 +11,15 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
         xtype: 'iterationprogessappprintdialog'
         showWarning: options.showWarning
         timeboxScope: Ext.create 'Rally.app.TimeboxScope', record: @mom.getRecord 'iteration'
+        grid:
+          getStore: ->
+            getSorters: -> []
 
     clickCancel: ->
-      @click(css: ".#{Ext.baseCSSPrefix}docked-bottom .#{Ext.baseCSSPrefix}btn.secondary")
+      @click css: ".#{Ext.baseCSSPrefix}docked-bottom .#{Ext.baseCSSPrefix}btn.secondary"
 
     clickPrint: ->
-      @click(css: ".#{Ext.baseCSSPrefix}docked-bottom .#{Ext.baseCSSPrefix}btn.primary")
+      @click css: ".#{Ext.baseCSSPrefix}docked-bottom .#{Ext.baseCSSPrefix}btn.primary"
 
     createStoresAndStubAjax: ->
       record = @mom.getRecord 'userstory', values:
@@ -50,6 +53,8 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
 
   beforeEach ->
     @openStub = @stub()
+    @openStub.returns {}
+
     @stub Rally, 'getWindow', =>
       open: @openStub
 
