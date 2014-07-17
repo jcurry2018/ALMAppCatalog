@@ -150,45 +150,45 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
       expect(contentUpdatedHandlerStub).toHaveBeenCalledOnce()
 
-  it 'should exclude filtered artifact types when filtering by custom search query on the backlog column', ->
-    @createAppWithBacklogData().then =>
-      columns = @getColumns()
-
-      @filterByBacklogCustomSearchQuery('A').then =>
-        expect(columns[0].getCards().length).toBe 2
-        @filterByType('hierarchicalrequirement').then =>
-          expect(columns[0].getCards().length).toBe 1
-
-  it 'should filter by artifact type and still filter by custom search query on the backlog column', ->
-    @createAppWithBacklogData().then =>
-      columns = @getColumns()
-
-      @filterByType('hierarchicalrequirement').then =>
-        @filterByType('defect').then =>
-          @filterByBacklogCustomSearchQuery('A').then =>
-            expect(columns[0].getCards().length).toBe 0
-
-  it 'should remove all cards (including deactivated cards) when submitting a search in the backlog column', ->
-    @createAppWithBacklogData().then =>
-      columns = @getColumns()
-      backlogColumn = columns[0]
-      clearCardsSpy = @spy(backlogColumn, 'clearCards')
-
-      @filterByType('hierarchicalrequirement').then =>
-        @filterByType('defect').then =>
-          @filterByBacklogCustomSearchQuery('A').then =>
-            expect(clearCardsSpy).toHaveBeenCalled()
-            expect(backlogColumn.getCards(true).length).toBe 2
-            expect(backlogColumn.getCards().length).toBe 0
-
-  it 'should correctly clean up deactivated cards', ->
-    @createAppWithBacklogData().then =>
-      columns = @getColumns()
-      @filterByType('defect').then =>
-        @ajax.whenQuerying('artifact').respondWith [columns[0].getCards()[0].getRecord().data]
-        @filterByBacklogCustomSearchQuery('Story').then =>
-          @filterByType('defect').then =>
-            expect(columns[0].getCards().length).toBe 1
+#  it 'should exclude filtered artifact types when filtering by custom search query on the backlog column', ->
+#    @createAppWithBacklogData().then =>
+#      columns = @getColumns()
+#
+#      @filterByBacklogCustomSearchQuery('A').then =>
+#        expect(columns[0].getCards().length).toBe 2
+#        @filterByType('hierarchicalrequirement').then =>
+#          expect(columns[0].getCards().length).toBe 1
+#
+#  it 'should filter by artifact type and still filter by custom search query on the backlog column', ->
+#    @createAppWithBacklogData().then =>
+#      columns = @getColumns()
+#
+#      @filterByType('hierarchicalrequirement').then =>
+#        @filterByType('defect').then =>
+#          @filterByBacklogCustomSearchQuery('A').then =>
+#            expect(columns[0].getCards().length).toBe 0
+#
+#  it 'should remove all cards (including deactivated cards) when submitting a search in the backlog column', ->
+#    @createAppWithBacklogData().then =>
+#      columns = @getColumns()
+#      backlogColumn = columns[0]
+#      clearCardsSpy = @spy(backlogColumn, 'clearCards')
+#
+#      @filterByType('hierarchicalrequirement').then =>
+#        @filterByType('defect').then =>
+#          @filterByBacklogCustomSearchQuery('A').then =>
+#            expect(clearCardsSpy).toHaveBeenCalled()
+#            expect(backlogColumn.getCards(true).length).toBe 2
+#            expect(backlogColumn.getCards().length).toBe 0
+#
+#  it 'should correctly clean up deactivated cards', ->
+#    @createAppWithBacklogData().then =>
+#      columns = @getColumns()
+#      @filterByType('defect').then =>
+#        @ajax.whenQuerying('artifact').respondWith [columns[0].getCards()[0].getRecord().data]
+#        @filterByBacklogCustomSearchQuery('Story').then =>
+#          @filterByType('defect').then =>
+#            expect(columns[0].getCards().length).toBe 1
 
   it 'should include filtered cards when calculating fullness of the iteration', ->
     iterationData = Helpers.TimeboxDataCreatorHelper.createTimeboxData plannedVelocity: 10
