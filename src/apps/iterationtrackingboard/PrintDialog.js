@@ -163,13 +163,19 @@
                 grid: this.grid,
                 iterationName: iterationName
             });
+            var win = Rally.getWindow();
 
-            var printWindow = Rally.getWindow().open(Rally.environment.getServer().getContextUrl() + '/print/printContainer.html', 'printWindow', 'height=600,width=1000,toolbar=no,menubar=no,scrollbars=yes');
-            if (!printWindow) {
+            if(win.printWindow) {
+                win.printWindow.close();
+            }
+
+            win.printWindow = win.open(Rally.environment.getServer().getContextUrl() + '/print/printContainer.html', 'printWindow', 'height=600,width=1000,toolbar=no,menubar=no,scrollbars=yes');
+            if (!win.printWindow) {
                 alert('It looks like you have a popup blocker installed. Please turn this off to see the print window.');
                 return;
             }
-            treeGridPrinter.print(printWindow);
+            treeGridPrinter.print(win.printWindow);
+            win.printWindow.focus();
 
             this.destroy();
         }
