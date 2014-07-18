@@ -37,6 +37,7 @@
                 vertical: true,
                 columns: 1,
                 height: 70,
+                width: 470,
                 items: [
                     {
                         boxLabel: 'Summary list of work items',
@@ -67,7 +68,7 @@
             var warningTextClasses = this.showWarning ? 'print-warning' : 'print-warning hidden';
             this.items.push({
                 xtype: 'container',
-                html: '<div class="icon-warning alert"></div> Iterations with more than 400 items may cause problems when printing.',
+                html: '<div class="icon-warning alert"></div> Print is limited to 200 work items.',
                 cls: warningTextClasses,
                 itemId: 'tooManyItems'
             });
@@ -121,6 +122,7 @@
             return {
                 models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
                 autoLoad: true,
+                pageSize: 200,
                 remoteSort: true,
                 root: {expanded: includeChildren},
                 enableHierarchy: includeChildren,

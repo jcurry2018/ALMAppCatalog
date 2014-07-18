@@ -411,7 +411,7 @@
             var timeboxScope = this.getContext().getTimeboxScope();
 
             Ext.create('Rally.apps.iterationtrackingboard.PrintDialog', {
-                showWarning: totalRows >= 400,
+                showWarning: totalRows > 200,
                 timeboxScope: timeboxScope,
                 grid: gridOrBoard
             });
@@ -421,14 +421,14 @@
             var iterationId = '-1';
             var timebox = this.getContext().getTimeboxScope();
 
-            if (timebox && timebox.getRecord()){
+            if (timebox && timebox.getRecord()) {
                 iterationId = timebox.getRecord().getId();
             }
             return iterationId;
         },
 
         _resizeGridBoardToFillSpace: function() {
-            if(this.gridboard) {
+            if (this.gridboard) {
                 this.gridboard.setHeight(this.getAvailableGridBoardHeight());
             }
         },
@@ -660,7 +660,7 @@
 
                 if (button) {
                     menuItem = _.find(button.menuItems, {text: 'Print...'});
-                    
+
                     if (menuItem) {
                         menuItem.hidden = hide;
                     }
