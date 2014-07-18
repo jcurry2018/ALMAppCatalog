@@ -55,8 +55,13 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
         )
 
     filterByBacklogCustomSearchQuery: (query) ->
-      @click(css: '.rally-search-text input').then (el) =>
-        el.sendKeys(query)
+      searchField = @getColumns()[0].getColumnHeader().down('rallysearchfield')
+      searchStub = @stub()
+      searchField.on 'search', searchStub, @, single: true
+
+      @click(searchField.getEl().down('input')).then (el) =>
+        el.sendKeys(query).then =>
+          @waitForCallback searchStub
 
     getProgressBar: (columnIndex) ->
       @getColumns()[columnIndex].getProgressBar().down('.progress-bar')
