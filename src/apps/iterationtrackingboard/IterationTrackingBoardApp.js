@@ -40,6 +40,7 @@
             'Rally.app.Message',
             'Rally.apps.iterationtrackingboard.Column',
             'Rally.apps.iterationtrackingboard.StatsBanner',
+            'Rally.apps.iterationtrackingboard.StatsBannerField',
             'Rally.clientmetrics.ClientMetricsRecordable',
             'Rally.apps.iterationtrackingboard.PrintDialog',
             'Rally.ui.grid.plugin.ColumnAutoSizer'
@@ -53,12 +54,14 @@
         alias: 'widget.rallyiterationtrackingboard',
 
         settingsScope: 'project',
+        userScopedSettings: true,
         scopeType: 'iteration',
         autoScroll: false,
 
         config: {
             defaultSettings: {
                 showCardAge: true,
+                showStatsBanner: true,
                 cardAgeThreshold: 3
             }
         },
@@ -78,7 +81,10 @@
                 grid.fireEvent('storecurrentpagereset');
             }
 
-            this._addStatsBanner();
+            if(this._shouldShowStatsBanner()){
+                this._addStatsBanner();
+            }
+
             this._getGridStore().then({
                 success: function(gridStore) {
                     var model = gridStore.model;
@@ -107,6 +113,18 @@
             return fields;
         },
 
+        getUserSettingsFields: function () {
+            var fields = this.callParent(arguments);
+
+            fields.push({
+                xtype: 'rallystatsbannersettingsfield',
+                fieldLabel: '',
+                mapsToMultiplePreferenceKeys: ['showStatsBanner']
+            });
+
+            return fields;
+        },
+
         _getGridStore: function() {
             var context = this.getContext(),
                 config = {
@@ -125,6 +143,10 @@
             }
 
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
+        },
+
+        _shouldShowStatsBanner: function() {
+            return this.getSetting('showStatsBanner');
         },
 
         _addStatsBanner: function() {
@@ -206,7 +228,7 @@
          */
         getAvailableGridBoardHeight: function() {
             var height = this.getHeight();
-            if(this.down('#statsBanner').rendered) {
+            if(this._shouldShowStatsBanner() && this.down('#statsBanner').rendered) {
                 height -= this.down('#statsBanner').getHeight();
             }
             return height;

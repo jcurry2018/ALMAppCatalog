@@ -127,18 +127,29 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       expect(storeCurrentPageResetStub).toHaveBeenCalledOnce()
 
-  it 'should add the stats banner', ->
-    @createApp().then =>
-      statsBanner = @app.down '#statsBanner'
-      expect(statsBanner).not.toBeNull()
-      expect(statsBanner.getContext()).toBe @app.getContext()
+  describe 'stats banner', ->
+    it 'should add the stats banner by default', ->
+      @createApp().then =>
+        statsBanner = @app.down '#statsBanner'
+        expect(statsBanner).not.toBeNull()
+        expect(statsBanner.getContext()).toBe @app.getContext()
 
-  it 'should resize the grid board when stats banner is toggled', ->
-    @createApp().then =>
-      statsBanner = @app.down '#statsBanner'
-      setHeightSpy = @spy @app.down('rallygridboard'), 'setHeight'
-      statsBanner.setHeight 40
-      @waitForCallback(setHeightSpy)
+    it 'should not add the stats banner when the user sets it to not show', ->
+      @stub(Rally.apps.iterationtrackingboard.IterationTrackingBoardApp::, 'getSetting').withArgs('showStatsBanner').returns(false)
+      @createApp().then =>
+        expect(@app.down('#statsBanner')).toBeNull()
+
+    it 'should add the stats banner when the user sets it to show', ->
+      @stub(Rally.apps.iterationtrackingboard.IterationTrackingBoardApp::, 'getSetting').withArgs('showStatsBanner').returns(true)
+      @createApp().then =>
+        expect(@app.down('#statsBanner')).not.toBeNull()
+
+    it 'should resize the grid board when stats banner is toggled', ->
+      @createApp().then =>
+        statsBanner = @app.down '#statsBanner'
+        setHeightSpy = @spy @app.down('rallygridboard'), 'setHeight'
+        statsBanner.setHeight 40
+        @waitForCallback(setHeightSpy)
 
   it 'fires contentupdated event after board load', ->
     contentUpdatedHandlerStub = @stub()
