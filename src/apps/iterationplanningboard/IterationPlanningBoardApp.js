@@ -8,7 +8,8 @@
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardManageIterations',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
+            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
+            'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl'
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
         modelNames: ['User Story', 'Defect'],
@@ -20,20 +21,46 @@
         },
 
         launch: function() {
-            var plugins = [
-                {
-                    ptype: 'rallygridboardfilterinfo',
-                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false
-                },
-                {
-                    ptype: 'rallygridboardaddnew',
-                    rankScope: 'BACKLOG'
-                },
-                {
-                    ptype: 'rallygridboardartifacttypechooser',
-                    artifactTypePreferenceKey: 'artifact-types'
-                }
-            ];
+            var plugins = [{ ptype: 'rallygridboardaddnew', rankScope: 'BACKLOG' }];
+
+            if (this.getContext().isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_PLANNING_APP'))
+            {
+                plugins.push({
+                    ptype: 'rallygridboardcustomfiltercontrol',
+                    context: this.getContext(),
+                    filterChildren: true,
+                    filterControlConfig: {
+                        blackListFields: [
+                            'DisplayColor',
+                            'DragAndDropRank',
+                            'Iteration',
+                            'PortfolioItem',
+                            'TestCase',
+                            'TestCaseResult',
+                            'VersionId'
+                        ],
+                        cls: 'small gridboard-filter-control',
+                        margin: '3 10 3 0',
+                        whiteListFields: [
+                            'Tags'
+                        ],
+                        modelNames: this.modelNames,
+                        stateful: true,
+                        stateId: this.getContext().getScopedStateId('iteration-planning-custom-filter-button')
+                    }
+                });
+            } else {
+                plugins.push(
+                    {
+                        ptype: 'rallygridboardfilterinfo',
+                        isGloballyScoped: Ext.isEmpty(this.getSetting('project'))
+                    },
+                    {
+                        ptype: 'rallygridboardartifacttypechooser',
+                        artifactTypePreferenceKey: 'artifact-types'
+                    }
+                );
+            }
 
             if (this.getContext().getSubscription().isHsEdition() || this.getContext().getSubscription().isExpressEdition()) {
                 plugins.push({ptype: 'rallygridboardmanageiterations'});
@@ -45,6 +72,7 @@
                 modelNames: this.modelNames,
                 timeboxType: 'Iteration',
                 plugins: plugins,
+                useFilterCollection: false,
                 cardBoardConfig: {
                     cardConfig: {
                         fields:  this.getCardFieldNames()

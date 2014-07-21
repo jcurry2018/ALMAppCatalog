@@ -7,7 +7,8 @@
             'Rally.data.util.PortfolioItemHelper',
             'Rally.ui.gridboard.planning.TimeboxGridBoard',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
-            'Rally.ui.gridboard.plugin.GridBoardFieldPicker'
+            'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
+            'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl'
         ],
 
         launch: function() {
@@ -52,6 +53,32 @@
                         rankScope: 'BACKLOG'
                     },
                     {
+                        ptype: 'rallygridboardcustomfiltercontrol',
+                        filterChildren: false,
+                        filterControlConfig: {
+                            blackListFields: [
+                                'DirectChildrenCount',
+                                'DisplayColor',
+                                'DragAndDropRank',
+                                'Iteration',
+                                'TestCase',
+                                'TestCaseResult',
+                                'VersionId',
+                                'PortfolioItemType',
+                                'Release'
+                            ],
+                            whiteListFields: [
+                                'Tags'
+                            ],
+                            margin: '3 10 3 0',
+                            modelNames: [piTypePath],
+                            stateId: this.getContext().getScopedStateId('release-planning-custom-filter-button'),
+                            cls: 'small gridboard-filter-control',
+                            context: this.getContext(),
+                            stateful: true
+                        }
+                    },
+                    {
                         ptype: 'rallygridboardfieldpicker',
                         boardFieldBlackList: [
                             'ObjectID',
@@ -75,13 +102,15 @@
                             'Changesets',
                             'Discussion',
                             'LastUpdateDate',
-                            'Owner'
+                            'Owner',
+                            'PortfolioItemType'
                         ],
                         headerPosition: 'left'
                     }
                 ],
                 startDateField: 'ReleaseStartDate',
-                timeboxType: 'Release'
+                timeboxType: 'Release',
+                useFilterCollection: false
             });
         },
 
