@@ -431,21 +431,27 @@
             var gridBoard = this.queryById('gridBoard');
             var gridOrBoard = gridBoard.getGridOrBoard();
             var totalRows = gridOrBoard.store.totalCount;
-            Ext.create('Rally.apps.iterationtrackingboard.PrintDialog', {showWarning: totalRows >= 400});
+            var timeboxScope = this.getContext().getTimeboxScope();
+
+            Ext.create('Rally.apps.iterationtrackingboard.PrintDialog', {
+                showWarning: totalRows > 200,
+                timeboxScope: timeboxScope,
+                grid: gridOrBoard
+            });
         },
 
         _getIterationOid: function() {
             var iterationId = '-1';
             var timebox = this.getContext().getTimeboxScope();
 
-            if (timebox && timebox.getRecord()){
+            if (timebox && timebox.getRecord()) {
                 iterationId = timebox.getRecord().getId();
             }
             return iterationId;
         },
 
         _resizeGridBoardToFillSpace: function() {
-            if(this.gridboard) {
+            if (this.gridboard) {
                 this.gridboard.setHeight(this.getAvailableGridBoardHeight());
             }
         },
@@ -456,7 +462,7 @@
                 stateId: 'iteration-tracking-board-app',
 
                 defaultGridViews: [{
-                    model: ['UserStory', 'Defect', 'DefectSuite'],
+                    model: ['UserStory', 'Defect', 'DefectSuite', 'TestSet'],
                     name: 'Defect Status',
                     state: {
                         cmpState: {
@@ -669,11 +675,15 @@
             this.setLoading(false);
         },
 
-        _hidePrintButton: function(hide) {
-            if (this.getContext().isFeatureEnabled('S68103_ITERATION_TRACKING_APP_PRINT')) {
-                var button = _.find(this.gridboard.plugins, {itemId: 'printExportMenuButton'});
+        _hidePrintButton: function(hide, gridboard) {
+            var button, menuItem;
+
+            if (this.getContext().isFeatureEnabled('S68103_ITERATION_TRACKING_APP_PRINT') && gridboard) {
+                button = _.find(gridboard.plugins, {itemId: 'printExportMenuButton'});
+
                 if (button) {
-                    var menuItem = _.find(button.menuItems, {text: 'Print...'});
+                    menuItem = _.find(button.menuItems, {text: 'Print...'});
+
                     if (menuItem) {
                         menuItem.hidden = hide;
                     }
@@ -681,15 +691,15 @@
             }
         },
 
-        _onToggle: function (toggleState) {
+        _onToggle: function (toggleState, gridOrBoard, gridboard) {
             var appEl = this.getEl();
 
             if (toggleState === 'board') {
                 appEl.replaceCls('grid-toggled', 'board-toggled');
-                this._hidePrintButton(true);
+                this._hidePrintButton(true, gridboard);
             } else {
                 appEl.replaceCls('board-toggled', 'grid-toggled');
-                this._hidePrintButton(false);
+                this._hidePrintButton(false, gridboard);
             }
             this._publishContentUpdated();
         },

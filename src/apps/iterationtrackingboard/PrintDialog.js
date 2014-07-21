@@ -33,26 +33,34 @@
             },
             {
                 xtype: 'radiogroup',
+                id: 'whattoprint',
                 vertical: true,
                 columns: 1,
                 height: 70,
+                width: 470,
                 items: [
                     {
                         boxLabel: 'Summary list of work items',
                         name: 'reportType',
-                        inputValue: '1',
+                        inputValue: 'summary',
                         checked: true
                     },
                     {
                         boxLabel: 'Summary list of work items with children',
+                        id: 'printDialogReportTypeIncludeChildren',
                         name: 'reportType',
-                        inputValue: '2'
+                        inputValue: 'includechildren'
                     }
                 ]
             }
         ],
         constructor: function(config) {
             this.initConfig(config || {});
+            this.timeboxScope = this.config.timeboxScope;
+
+            this.nodesToExpand = [];
+            this.allRecords = [];
+
             this.callParent(arguments);
         },
 
@@ -60,7 +68,7 @@
             var warningTextClasses = this.showWarning ? 'print-warning' : 'print-warning hidden';
             this.items.push({
                 xtype: 'container',
-                html: '<div class="icon-warning alert"></div></span> Iterations with more than 400 items may cause problems when printing.',
+                html: '<div class="icon-warning alert"></div> Print is limited to 200 work items.',
                 cls: warningTextClasses,
                 itemId: 'tooManyItems'
             });
@@ -92,14 +100,85 @@
                     }
                 ]
             }];
+
             this.callParent(arguments);
         },
 
         _handlePrintClick: function() {
-            //todo: add code to handle the print
+            var treeStoreBuilder = Ext.create('Rally.data.wsapi.TreeStoreBuilder');
+            var storeConfig = this._buildStoreConfig();
+
+            treeStoreBuilder.build(storeConfig);
         },
 
-        _handleCancelClick: function() {
+        _handleCancelClick: function(target, e) {
+            this.destroy();
+        },
+
+        _buildStoreConfig: function() {
+            var timeboxFilter = this.timeboxScope.getQueryFilter();
+            var includeChildren = Ext.getCmp('whattoprint').getChecked()[0].inputValue === 'includechildren';
+
+            return {
+                models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
+                autoLoad: true,
+                pageSize: 200,
+                remoteSort: true,
+                root: {expanded: includeChildren},
+                enableHierarchy: includeChildren,
+                childPageSizeEnabled: false,
+                filters: [timeboxFilter],
+                sorters: this.grid.getStore().getSorters(),
+                listeners: {
+                    load: this._onStoreLoad,
+                    scope: this
+                }
+            };
+        },
+
+        _onStoreLoad: function(treeStore, node, records, success, eOpts) {
+            if (_.isEmpty(this.allRecords)) {
+                this.allRecords = records;
+            }
+
+            if (treeStore.enableHierarchy) {
+                this.nodesToExpand = _.without(this.nodesToExpand, node.getId());
+
+                _(records).filter(function(record) {
+                    return !record.isLeaf();
+                }).forEach(function(record) {
+                    this.nodesToExpand.push(record.getId());
+                    record.expand(true);
+                }, this);
+            }
+
+            if (_.isEmpty(this.nodesToExpand)) {
+                this._onDataReady();
+            }
+        },
+
+        _onDataReady: function() {
+            var timeboxScopeRecord = this.timeboxScope.getRecord();
+            var iterationName = timeboxScopeRecord ? timeboxScopeRecord.get('Name') : 'Unscheduled';
+            var treeGridPrinter = Ext.create('Rally.ui.grid.TreeGridPrinter', {
+                records: this.allRecords,
+                grid: this.grid,
+                iterationName: iterationName
+            });
+            var win = Rally.getWindow();
+
+            if(win.printWindow) {
+                win.printWindow.close();
+            }
+
+            win.printWindow = win.open(Rally.environment.getServer().getContextUrl() + '/print/printContainer.html', 'printWindow', 'height=600,width=1000,toolbar=no,menubar=no,scrollbars=yes');
+            if (!win.printWindow) {
+                alert('It looks like you have a popup blocker installed. Please turn this off to see the print window.');
+                return;
+            }
+            treeGridPrinter.print(win.printWindow);
+            win.printWindow.focus();
+
             this.destroy();
         }
     });
