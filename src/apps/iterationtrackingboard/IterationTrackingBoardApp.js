@@ -85,7 +85,7 @@
                 this._addStatsBanner();
             }
 
-            this._getGridStore().then({
+            this._buildGridStore().then({
                 success: function(gridStore) {
                     var model = gridStore.model;
                     if(_.isFunction(model.getArtifactComponentModels)) {
@@ -125,11 +125,11 @@
             return fields;
         },
 
-        _getGridStore: function() {
+        _buildGridStore: function() {
             var context = this.getContext(),
                 config = {
                     models: this.modelNames,
-                    autoLoad: !context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
+                    autoLoad: false,
                     remoteSort: true,
                     root: {expanded: true},
                     enableHierarchy: true,
@@ -604,15 +604,8 @@
             var gridConfig = {
                 xtype: 'rallyiterationtrackingtreegrid',
                 store: gridStore,
-                enableRanking: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled,
-                columnCfgs: null, //must set this to null to offset default behaviors in the gridboard
-                defaultColumnCfgs: this._getGridColumns(),
-                showSummary: true,
+                columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
-                treeColumnRenderer: function (value, metaData, record, rowIdx, colIdx, store, view) {
-                    store = store.treeStore || store;
-                    return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);
-                },
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 plugins: ['rallycolumnautosizerplugin', 'rallytreegridchildpager'],
                 stateId: stateId,

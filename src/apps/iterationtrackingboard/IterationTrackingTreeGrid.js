@@ -9,7 +9,8 @@
         alias: 'widget.rallyiterationtrackingtreegrid',
 
         requires: [
-            'Rally.apps.iterationtrackingboard.IterationTrackingTreeView'
+            'Rally.apps.iterationtrackingboard.IterationTrackingTreeView',
+            'Rally.ui.renderer.RendererFactory'
         ],
 
         config: {
@@ -35,8 +36,6 @@
              */
             treeColumnResizable: false,
 
-            treeColumnRenderer: undefined,
-
             /**
              * @cfg {Array}
              * Array of configurations for summary e.g. {field: 'PlanEstimate', type: 'sum', units: 'pt'}
@@ -57,7 +56,12 @@
                     type: 'sum',
                     units: 'hr'
                 }
-            ]
+            ],
+
+            treeColumnRenderer: function (value, metaData, record, rowIdx, colIdx, store) {
+                store = store.treeStore || store;
+                return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);
+            }
         }
     });
 })();

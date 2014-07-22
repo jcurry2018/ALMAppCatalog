@@ -216,15 +216,15 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   describe 'tree grid config', ->
 
-    it 'returns the default columns with the FormattedID removed', ->
+    it 'returns the columns with the FormattedID removed', ->
       @createApp().then =>
         @toggleToGrid()
-        expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.defaultColumnCfgs).toEqual ['Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion']
+        expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.columnCfgs).toEqual ['Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion']
 
     it 'enables the summary row on the treegrid when the toggle is on', ->
       @createApp().then =>
         @toggleToGrid()
-        expect(@app.down('#gridBoard').getGridOrBoard().showSummary).toBe true
+        expect(@app.down('#gridBoard').getGridOrBoard().summaryColumns.length).toBe 3
 
     it 'should include test sets', ->
       @createApp().then =>
