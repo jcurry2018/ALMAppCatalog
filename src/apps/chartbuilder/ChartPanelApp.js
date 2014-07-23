@@ -74,8 +74,6 @@
 		constructIFrame: function() {
 			var ifr = '<iframe width="100%" height="480" src="/analytics/chart/latest/almshim.html"></iframe>';
 			this.down("#mrcontainer").el.dom.innerHTML = ifr;
-			window.t = this;
-
 		},
 
 		render: function () {
@@ -140,7 +138,7 @@
 
 			// example - binding events to the chart app
 			Ext.EventManager.onWindowResize(function() {
-				if (self.chart.onResize) {
+				if (self.chart && self.chart.onResize) {
 					self.chart.onResize();
 				}
 			}, this);
