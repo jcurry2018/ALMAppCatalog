@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Team Board</title>
+
+
+    <script type="text/javascript" src="https://rally1.rallydev.com/apps/x/sdk-debug.js"></script>
+
+    <script type="text/javascript">
+        // I am keeping the extra , in there to simplify my code. If someone is actually using an old version of IE to make an app let me know.
+        Rally.loadScripts(
+                [
+                      "TeamBoardCardContentLeft.js",
+                      "TeamBoardCardContentRight.js",
+                      "TeamBoardUtil.js",
+                      "TeamBoardCard.js",
+                      "TeamBoardDropController.js",
+                      "plugin/TeamBoardIterationAwarePlugin.js",
+                      "plugin/TeamBoardUserIterationCapacity.js",
+                      "plugin/TeamBoardWip.js",
+                      "TeamBoardColumn.js",
+                      "TeamBoardProjectRecordsLoader.js",
+                      "TeamBoardSettings.js",
+                      "TeamBoardApp.js",
+                ],
+        function() {
+            Rally.launchApp('Rally.apps.teamboard.TeamBoardApp', {
+                name:"Team Board"
+            });
+        }, true);
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="TeamBoardApp.css">
+</head>
+<body></body>
+</html>

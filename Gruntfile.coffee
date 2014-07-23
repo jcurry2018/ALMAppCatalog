@@ -28,6 +28,7 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'nexus:__createartifact__', 'Internal task to create and publish the nexus artifact', ['version', 'nexus:push:publish', 'clean:target']
   grunt.registerTask 'nexus:deploy', 'Deploys to nexus', ['build', 'nexus:__createartifact__']
+  grunt.registerTask 'nexus:verify', 'Fetches the last build and verifies its integrity', ['clean:nexus', 'version', 'nexus:push:verify']
 
   grunt.registerTask 'check', 'Run convention tests on all files', ['regex-check']
   grunt.registerTask 'ci', 'Does a full build, runs tests and deploys to nexus', ['build', 'test:ci', 'nexus:__createartifact__']
@@ -72,6 +73,7 @@ module.exports = (grunt) ->
       test: ['test/gen', '_SpecRunner.html', '.webdriver']
       dependencies: ['lib/', 'bin/sencha/']
       target: ['target/']
+      nexus: ['tmp']
 
     jshint:
       options:
@@ -292,6 +294,9 @@ module.exports = (grunt) ->
         ]
         options:
           publish: [{ id: 'com.rallydev.js:app-catalog:tgz', version: '<%= buildVersion %>', path: 'target/' }]
+          verify: [
+            { id: 'com.rallydev.js:app-catalog:tgz', version: '<%= buildVersion %>', path: 'tmp/' }
+          ]
 
     sencha:
       options:

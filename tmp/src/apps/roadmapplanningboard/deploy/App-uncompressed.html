@@ -1,0 +1,5393 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ReleaseSummary</title>
+
+    <script type="text/javascript" src="/apps/x/sdk.js"></script>
+
+    <script type="text/javascript">
+        Rally.onReady(function () {
+                (function() {
+    var Ext = window.Ext4 || window.Ext;
+
+    /**
+     * Extra data types for Rally REST JSON API
+     * @private
+     */
+    Ext.define('Rally.apps.roadmapplanningboard.DataTypes', {}, function () {
+        Ext.apply(Ext.data.Types, {
+            /**
+             * @property {Object} COLLECTION
+             */
+            COLLECTION: {
+                type: 'collection',
+                sortType: Ext.data.SortTypes.none
+            }
+        });
+    });
+})();
+
+                (function() {
+    var Ext = window.Ext4 || window.Ext;
+
+    /**
+     * @private
+     * The base class for all models interacting with the Rally REST JSON API. This class will not generally be used directly.
+     * Use Rally.data.ModelFactory#getModel and Rally.data.ModelFactory#getModels to obtain model instances for specific object types.
+     *
+     * See [Data Models](#!/guide/data_models) for more information on models.
+     */
+    Ext.define('Rally.apps.roadmapplanningboard.Model', {
+        extend: 'Rally.data.Model',
+
+        requires: [
+            'Rally.apps.roadmapplanningboard.DataTypes'
+        ],
+
+        uriKey: 'ref',
+
+        /**
+         * Return all fields that are of the collection type
+         * @returns {Rally.data.Field[]} all fields that are collections
+         */
+        getCollectionFields: function () {
+            return _.filter(this.getFields(), function (field) {
+                return field.type === Ext.data.Types.COLLECTION;
+            });
+        },
+
+        /**
+         *
+         * @returns {Rally.data.Field[]} all fields that are collection fields and are dirty
+         */
+        getDirtyCollectionFields: function () {
+            return _.intersection(this.getCollectionFields(), this.getDirtyFields());
+        }
+    });
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.util.RequestCollectionHelper', {
+        singleton: true,
+
+        updateRequestIfCollection: function (request, onItemAddedToCollection, onItemRemovedFromCollection) {
+            _.each(request.records, function (record) {
+                var fields = record.getDirtyCollectionFields();
+                if (fields.length) {
+                    request = this._processCollectionField(fields, record, request, onItemAddedToCollection, onItemRemovedFromCollection);
+                }
+            }, this);
+
+            return request;
+        },
+
+        _processCollectionField: function (fields, record, request, onItemAddedToCollection, onItemRemovedFromCollection) {
+            // make sure this is the only change
+            if (record.getDirtyFields().length > 1) {
+                Ext.Error.raise('Cannot update other fields on a record if a collection has changed');
+            }
+
+            var field = fields[0];
+            var fieldName = fields[0].name;
+
+            var oldValue = record.modified[fieldName];
+            var newValue = record.get(fieldName);
+
+            if (newValue.length > oldValue.length) {
+                // make sure we're only adding 1 relationship
+                if (newValue.length - oldValue.length > 1) {
+                    Ext.Error.raise('Cannot add more than one relationship at a time');
+                }
+
+                onItemAddedToCollection(field, oldValue, newValue, record, request);
+            } else if (newValue.length < oldValue.length) {
+                // make sure we're only removing 1 relationship
+                if (oldValue.length - newValue.length > 1) {
+                    Ext.Error.raise('Cannot delete more than one relationship at a time');
+                }
+
+                onItemRemovedFromCollection(field, oldValue, newValue, record, request);
+            } else {
+                Ext.Error.raise('Attempting to update a collection where nothing has changed');
+            }
+
+            return request;
+        }
+    });
+}).call(this);
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    /**
+     * @private
+     * A {@link Ext.data.writer.Json} subclass that talks to a Rally REST JSON API service
+     */
+    Ext.define('Rally.apps.roadmapplanningboard.Writer', {
+        extend: 'Ext.data.writer.Json',
+        alias: 'writer.roadmap',
+        requires: ['Rally.apps.roadmapplanningboard.util.RequestCollectionHelper'],
+        root: '',
+
+        write: function (request) {
+            this.callParent(arguments);
+
+            Rally.apps.roadmapplanningboard.util.RequestCollectionHelper.updateRequestIfCollection(this.callParent(arguments),
+                this._onItemAdded, this._onItemRemoved);
+
+            return request;
+        },
+
+        _onItemAdded: function (field, oldValue, newValue, record, request) {
+            request.url += '/' + field.name;
+
+            var addedId = _.difference(_.pluck(newValue, record.idProperty), _.pluck(oldValue, record.idProperty))[0];
+            request.jsonData = _.find(newValue, function (value) {
+                return addedId === value.id;
+            });
+        },
+
+        _onItemRemoved: function (field, oldValue, newValue, record, request) {
+            var deletedId = _.difference(_.pluck(oldValue, record.idProperty), _.pluck(newValue, record.idProperty))[0];
+
+            request.url += '/' + field.name + '/' + deletedId;
+
+            // need to change param to urlParams as DELETE will be fired and need the params on the URL thank you Ext
+            request.urlParams = request.params;
+            delete request.jsonData;
+        }
+    });
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    /**
+     * @private
+     * A {@link Ext.data.reader.Json} subclass that reads a Rally REST JSON API response
+     */
+    Ext.define('Rally.apps.roadmapplanningboard.Reader', {
+        extend: 'Ext.data.reader.Json',
+        alias: 'reader.roadmap',
+
+        root: 'results',
+
+        /**
+         * The RPM services don't wrap all requests in arrays. For example a create returns the resource data and not
+         * an array wrapping that data. Ext expects arrays at the root for creates. This method simply wraps the data
+         * in the root inside an array if appropriate. Yay Ext.
+         * @param data
+         * @returns {Object} The data from
+         */
+        readRecords: function(data) {
+            // Check if the data is an array to handle nested objects
+            data = data[this.root] || Ext.isArray(data) ? data : {results: [data]};
+
+            return this.callParent([data]);
+        }
+    });
+})();
+
+                (function() {
+
+    var Ext = window.Ext4 || window.Ext;
+
+    /**
+     * @private
+     * Proxy to talk to Rally REST JSON API services
+     */
+    Ext.define('Rally.apps.roadmapplanningboard.Proxy', {
+        extend: 'Ext.data.proxy.Rest',
+        requires: [
+            'Rally.apps.roadmapplanningboard.Writer',
+            'Rally.apps.roadmapplanningboard.Reader',
+            'Rally.ui.notify.Notifier',
+            'Rally.apps.roadmapplanningboard.util.RequestCollectionHelper'
+        ],
+        alias: 'proxy.roadmap',
+
+        reader: {
+            type: 'roadmap'
+        },
+
+        writer: {
+            type: 'roadmap',
+            writeAllFields: false
+        },
+
+        doRequest: function (operation, callback, scope) {
+            operation = this._decorateOperation(operation);
+            return this.callParent(arguments);
+        },
+
+        /**
+         * Decorate each request operation with params for workspace and project UUIDs.
+         * @param {Object} operation
+         * @returns {Object} operation
+         */
+        _decorateOperation: function(operation) {
+            var context = operation.context || Rally.environment.getContext();
+
+            operation.noQueryScoping = true;
+            operation.params = operation.params || {};
+            operation.params.workspace = context.getWorkspace()._refObjectUUID || '';
+            operation.params.project = context.getProject()._refObjectUUID || '';
+
+            return operation;
+        },
+
+        /**
+         * This method will build the url running it through an {Ext.XTemplate} with the operation params
+         * @param {Object} request
+         * @returns {String} url
+         */
+        buildUrl: function (request) {
+            var recordData = (request.records && request.records[0].data) || {};
+            var data = _.merge({}, request.operation.params, recordData);
+            return new Ext.XTemplate(this.getUrl(request)).apply(data);
+        },
+
+        buildRequest: function(operation) {
+            var request = Rally.apps.roadmapplanningboard.util.RequestCollectionHelper.updateRequestIfCollection(this.callParent(arguments),
+                this._onItemAdded, this._onItemRemoved);
+            request.withCredentials = true;
+
+            return request;
+        },
+
+        _onItemAdded: function (field, oldValue, newValue, record, request) {
+            request.action = 'create';
+        },
+
+        _onItemRemoved: function (field, oldValue, newValue, record, request) {
+            request.action = 'destroy';
+        }
+    });
+
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    /**
+     * @private
+     * This should never be called directly, but only through the {@link Rally.data.ModelFactory}
+     */
+    Ext.define('Rally.apps.roadmapplanningboard.AppModelFactory', {
+        
+        singleton: true,
+        
+        requires: [
+            'Rally.apps.roadmapplanningboard.Model',
+            'Rally.apps.roadmapplanningboard.Proxy'
+        ],
+
+        /**
+         * @property
+         * {String[]} modelTypes An array of types this factory knows how to handle. These
+         */
+        modelTypes: [
+            'plan',
+            'roadmap',
+            'timeframe',
+            'timeline'
+        ],
+
+        getPlanModel: function () {
+            if (this.planModel) {
+                return this.planModel;
+            }
+            this.planModel = Ext.define('Rally.apps.roadmapplanningboard.PlanModel', {
+                extend: 'Rally.apps.roadmapplanningboard.Model',
+                fields: [
+                    {
+                        name: 'id',
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'ref',
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'name',
+                        type: 'string'
+                    },
+                    {
+                        name: 'theme',
+                        type: 'string'
+                    },
+                    {
+                        name: 'lowCapacity',
+                        type: 'int'
+                    },
+                    {
+                        name: 'highCapacity',
+                        type: 'int'
+                    },
+                    {
+                        name: 'timeframe',
+                        serialize: function (record) {
+                            // Do some special serialization of the timeframe, we must have the ref and the id.
+                            // Turns out this is very hard to get using an Ext.Writer
+                            if (record.isModel) {
+                                return {
+                                    id: record.getId(),
+                                    ref: record.get('ref')
+                                };
+                            }
+
+                            return record;
+                        }
+                    },
+                    {
+                        // This has to be a plain ol' JSON object in order to play nice with the url pattern given to the proxy,
+                        // thank you Ext and your awesome handling of Model relationships
+                        name: 'roadmap'
+                    },
+                    {
+                        name: 'features',
+                        type: 'collection'
+                    },
+                    {
+                        name: 'updatable',
+                        defaultValue: true
+                    }
+                ],
+                proxy: {
+                    type: 'roadmap',
+                    url: Rally.environment.getContext().context.services.planning_service_url + '/roadmap/{roadmap.id}/plan/{id}'
+                }
+            });
+            return this.planModel;
+        },
+
+        getRoadmapModel: function () {
+            if (this.roadmapModel) {
+                return this.roadmapModel;
+            }
+            this.roadmapModel = Ext.define('Rally.apps.roadmapplanningboard.RoadmapModel', {
+                extend: 'Rally.apps.roadmapplanningboard.Model',
+                fields: [
+                    {
+                        name: 'id',
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'ref',
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'name',
+                        type: 'string'
+                    },
+                    {
+                        name: 'plans',
+                        serialize: this._getRecordCollectionSerializer()
+                    }
+                ],
+                proxy: {
+                    type: 'roadmap',
+                    url: Rally.environment.getContext().context.services.planning_service_url + '/roadmap'
+                }
+            });
+            return this.roadmapModel;
+        },
+        /**
+         * The server will give us Zulu time. We need to make sure we're normalizing for our timezone
+         * and stripping the time since we only care about the date
+         * @param value The value from the server
+         * @returns {Ext.Date}
+         * @private
+         */
+        _normalizeDate: function (value) {
+            var date = Ext.Date.parse(value, 'c');
+            if (date.getTime()) {
+                return Ext.Date.clearTime(Ext.Date.add(date, Ext.Date.MINUTE, date.getTimezoneOffset()));
+            }
+        },
+
+        getTimeframeModel: function () {
+            if (this.timeframeModel) {
+                return this.timeframeModel;
+            }
+            this.timeframeModel = Ext.define('Rally.apps.roadmapplanningboard.TimeframeModel', {
+                extend: 'Rally.apps.roadmapplanningboard.Model',
+                fields: [
+                    {
+                        name: 'id',
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'ref',
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'name',
+                        type: 'string'
+                    },
+                    {
+                        name: 'startDate',
+                        type: 'date',
+                        dateFormat: 'Y-m-d\\TH:i:s\\Z',
+                        convert: this._normalizeDate
+                    },
+                    {
+                        name: 'endDate',
+                        type: 'date',
+                        dateFormat: 'Y-m-d\\TH:i:s\\Z',
+                        convert: this._normalizeDate
+                    },
+                    {
+                        name: 'updatable',
+                        type: 'boolean',
+                        defaultValue: true
+                    },
+                    {
+                        name: 'timeline'
+                    }
+                ],
+                proxy: {
+                    type: 'roadmap',
+                    url: Rally.environment.getContext().context.services.timeline_service_url + '/timeline/{timeline.id}/timeframe/{id}'
+                }
+            });
+            return this.timeframeModel;
+        },
+
+        getTimelineModel: function () {
+            if (this.timelineModel) {
+                return this.timelineModel;
+            }
+            this.timelineModel = Ext.define('Rally.apps.roadmapplanningboard.TimelineModel', {
+                extend: 'Rally.apps.roadmapplanningboard.Model',
+                fields: [
+                    {
+                        name: 'id',
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'ref',
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'name',
+                        type: 'string'
+                    },
+                    {
+                        name: 'timeframes',
+                        type: 'collection',
+                        serialize: this._getRecordCollectionSerializer()
+                    }
+                ],
+                proxy: {
+                    type: 'roadmap',
+                    url: Rally.environment.getContext().context.services.timeline_service_url + '/timeline'
+                }
+            });
+            return this.timelineModel;
+        },
+
+        _serializeRecordCollection: function (values, parentRecord) {
+            var _this = this;
+
+            return _.map(values, function(record) {
+                return _this._serializeRecord(record);
+            });
+        },
+
+        _serializeRecord: function (record) {
+            if (record.isModel) {
+                return record.getProxy().getWriter().getRecordData(record);
+            }
+
+            return record.data || record;
+        },
+
+        _getRecordCollectionSerializer: function () {
+            var _this = this;
+
+            return function() {
+                return _this._serializeRecordCollection.apply(_this, arguments);
+            };
+        }
+    });
+
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', {
+        extend: 'Rally.ui.cardboard.plugin.ColumnDropController',
+        alias: 'plugin.orcacolumndropcontroller',
+
+        config: {
+            dragDropEnabled: true
+        },
+
+        init: function (column) {
+            this.callParent(arguments);
+            this.cmp = column;
+        },
+
+        mayDrop: function (cards) {
+            return this.dragDropEnabled;
+        },
+
+        canDragDropCard: function (card) {
+            return this.mayDrop() && this.callParent(arguments);
+        },
+
+        handleBeforeCardDroppedSave: function (options) {
+            var sourceIsBacklog = this._isBacklogColumn(options.sourceColumn);
+            var destIsBacklog = this._isBacklogColumn(options.column);
+            var draggingWithinBacklog = sourceIsBacklog && destIsBacklog;
+
+            if (!destIsBacklog) {
+                options.index = this._getMappedIndex(options);
+            }
+
+            if (this.canDragDropCard(options.card) && !draggingWithinBacklog) {
+                options.card.removeCls(this.self.cardDraggableCls);
+            }
+
+            if(draggingWithinBacklog) {
+                return this.callParent(arguments);
+            } else if (sourceIsBacklog) {
+                return this._moveOutOfBacklog(options);
+            } else if (destIsBacklog) {
+                return this._moveIntoBacklog(options);
+            } else {
+                return this._moveFromColumnToColumn(options);
+            }
+        },
+
+        _isBacklogColumn: function(column) {
+            return !column.planRecord;
+        },
+
+        /**
+         * Calculate the index to insert a new feature in the features array.
+         * This could be different than the index in the the cards array.
+         * @param {Rally.ui.cardboard.Card[]} cards
+         * @param {Number} destCardIndex
+         * @returns {Number}
+         * @private
+         */
+        _getMappedIndex: function (options) {
+            var features = this._getFilteredFeatures(options.column.planRecord, options.card.getRecord());
+
+            var cardToInsertBefore = options.column.getCards()[options.index + 1];
+            if (!cardToInsertBefore) {
+                return features.length;
+            }
+
+            // find the index of the record in planRecord Feature
+            return _.findIndex(features, function (feature) {
+                return cardToInsertBefore.getRecord().get('_refObjectUUID') === feature.id;
+            });
+        },
+
+        getRefForRelativeRecord: function (relativeRecord) {
+            return this._getFeatureRef(relativeRecord);
+        },
+
+        _moveIntoBacklog: function (options) {
+            var planRecord = options.sourceColumn.planRecord;
+
+            this._removeFeature(planRecord, options.record);
+
+            // Remove card from plan column
+            planRecord.save({
+                requester: options.column,
+                callback: function() {
+                    this._afterCardDropComplete(options);
+                },
+                scope: this
+            });
+        },
+
+        _moveOutOfBacklog: function (options) {
+            var planRecord = options.column.planRecord;
+
+            this._addFeature(planRecord, options.record, options.index);
+
+            planRecord.save({
+                success: function () {
+                    return this._onDropSaveSuccess(options.column, null, options.card, options.record, "move");
+                },
+                failure: function (response, opts) {
+                    return this._onDropSaveFailure(options.column, options.sourceColumn, options.record, options.card, options.sourceIndex, response);
+                },
+                callback: function () {
+                    this._afterCardDropComplete(options);
+                },
+                requester: options.column,
+                scope: this,
+                params: options.params
+            });
+        },
+
+        _moveFromColumnToColumn: function(options) {
+            var context = this.cmp.context || Rally.environment.getContext();
+            var srcPlanRecord = options.sourceColumn.planRecord;
+            var destPlanRecord = options.column.planRecord;
+
+            this._removeFeature(srcPlanRecord, options.record);
+            this._addFeature(destPlanRecord, options.record, options.index);
+
+            Ext.Ajax.request({
+                method: 'POST',
+                withCredentials: true,
+                url: this._constructUrl(srcPlanRecord.get('roadmap'), srcPlanRecord.getId(), destPlanRecord.getId()),
+                jsonData: {
+                    id: options.record.get('_refObjectUUID'),
+                    ref: this._getFeatureRef(options.record)
+                },
+                success: function() {
+                    srcPlanRecord.commit();
+                    if (srcPlanRecord !== destPlanRecord) {
+                        destPlanRecord.commit();
+                    }
+                    return this._onDropSaveSuccess(options.column, options.sourceColumn, options.card, options.record, options.type);
+                },
+                failure: function(response, opts) {
+                    return this._onDropSaveFailure(options, response);
+                },
+                callback: function() {
+                    this._afterCardDropComplete(options);
+                },
+                scope: this,
+                params: Ext.apply({ workspace: context.getWorkspace()._refObjectUUID}, options.params)
+            });
+        },
+
+        _onDropSaveFailure: function (options, operation) {
+            this.cmp.ownerCardboard.refresh({rebuildBoard: true});
+        },
+
+        _afterCardDropComplete: function (options) {
+            this.addDragDropHandle(options.card);
+        },
+
+        _removeFeature: function (planRecord, featureRecord) {
+            planRecord.set('features', this._getFilteredFeatures(planRecord, featureRecord));
+        },
+
+        _getFilteredFeatures: function (planRecord, featureRecord) {
+            return _.reject(planRecord.get('features'), function (feature) {
+                return feature.id === featureRecord.get('_refObjectUUID');
+            });
+        },
+
+        _getFeatureRef: function(featureRecord) {
+            var featureId = featureRecord.get('_refObjectUUID');
+            return '/' + featureRecord.getRef().reference.type  + '/' + featureId;
+        },
+
+        _addFeature: function (planRecord, featureRecord, index) {
+            var features = _.clone(planRecord.get('features'));
+
+            var featureId = featureRecord.get('_refObjectUUID');
+
+            features.splice(index, 0, {
+                id: featureId,
+                ref: this._getFeatureRef(featureRecord)
+            });
+
+            planRecord.set('features', features);
+        },
+
+        _constructUrl: function (roadmap, sourceId, destinationId) {
+            return Ext.create('Ext.XTemplate', Rally.environment.getContext().context.services.planning_service_url + '/roadmap/{roadmap.id}/plan/{sourceId}/features/to/{destinationId}').apply({
+                sourceId: sourceId,
+                destinationId: destinationId,
+                roadmap: roadmap
+            });
+        }
+    });
+
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.PlanningBoardColumn', {
+        extend: 'Rally.ui.cardboard.Column',
+        alias: 'widget.planningboardcolumn',
+
+        mixins: {
+            maskable: 'Rally.ui.mask.Maskable'
+        },
+        requires: [
+            'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
+        ],
+
+        config: {
+            /**
+             * @cfg {Object} Object containing Names and TypePaths of the lowest level portfolio item (eg: 'Feature') and optionally its parent (eg: 'Initiative')
+             */
+            typeNames: {},
+            dropControllerConfig: {
+                ptype: 'orcacolumndropcontroller'
+            },
+            cardConfig: {
+                showIconsAndHighlightBorder: true,
+                showPlusIcon: false,
+                showColorIcon: true,
+                showGearIcon: true,
+                showReadyIcon: false,
+                showBlockedIcon: false,
+                showEditMenuItem: true,
+                showCopyMenuItem: false,
+                showSplitMenuItem: false,
+                showDeleteMenuItem: true,
+                showAddChildMenuItem: false,
+                showRankMenuItems: false
+            }
+        },
+
+        constructor: function (config) {
+            this.mergeConfig(config);
+            this.context = this.context || Rally.environment.getContext();
+            if (!this.config.context) {
+                this.config.context = this.context;
+            }
+
+            this.callParent([this.config]);
+        },
+
+        initComponent: function () {
+            if (!this.typeNames.child || !this.typeNames.child.name) {
+                throw 'typeNames must have a child property with a name';
+            }
+
+            this.callParent(arguments);
+
+            this.on('beforerender', function () {
+                var cls = 'planning-column';
+                this.getContentCell().addCls(cls);
+                return this.getColumnHeaderCell().addCls(cls);
+            }, this, {
+                single: true
+            });
+        },
+
+        isMatchingRecord: function () {
+            return true;
+        },
+
+        _getProgressBarHtml: function () {
+            return '<div></div>';
+        },
+
+        findCardInfo: function (searchCriteria, includeHiddenCards) {
+            var card, index, _i, _len, _ref;
+
+            searchCriteria = searchCriteria.get && searchCriteria.getId() ? searchCriteria.getId() : searchCriteria;
+            _ref = this.getCards(includeHiddenCards);
+            for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+                card = _ref[index];
+                if (card.getRecord().getId() === searchCriteria || card.getEl() === searchCriteria || card.getEl() === Ext.get(searchCriteria)) {
+                    return {
+                        record: card.getRecord(),
+                        index: index,
+                        card: card
+                    };
+                }
+            }
+            return null;
+        },
+
+        destroy: function () {
+            var plugin, _i, _len, _ref;
+
+            _ref = this.plugins;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                plugin = _ref[_i];
+                if (plugin !== null) {
+                    plugin.destroy();
+                }
+            }
+            return this.callParent(arguments);
+        },
+
+        getColumnIdentifier: function () {
+            Ext.Error.raise('Need to override this to ensure unique identifier for persistence');
+        },
+
+        refreshRecord: function (record, callback) {
+            this.store.setFilter(this.getStoreFilter());
+            return this.callParent(arguments);
+        }
+    });
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.BacklogBoardColumn', {
+        extend: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
+        alias: 'widget.backlogplanningcolumn',
+
+        requires: ['Rally.ui.SearchField'],
+
+        config: {
+            /**
+             * @cfg {Rally.data.Store}
+             * A store that contains all plans for this app - it is used to filter out features found in plans
+             */
+            planStore: null,
+
+            columnHeaderConfig: {
+                headerTpl: 'Backlog'
+            }
+        },
+
+        constructor: function (config) {
+            this.mergeConfig(config);
+            this._createBaseFilter();
+
+            this.callParent([this.config]);
+        },
+
+        drawHeader: function () {
+            this.callParent(arguments);
+
+            this.getColumnHeader().add({
+                xtype: 'rallysearchfield',
+                listeners: {
+                    search: this._searchBacklog,
+                    scope: this
+                }
+            });
+        },
+
+        getColumnIdentifier: function () {
+            return "roadmapplanningboard.backlog.column";
+        },
+
+        _getAllPlanFeatures: function () {
+            return _.reduce(this.planStore.data.items, function (result, plan) {
+                return result.concat(plan.get('features'));
+            }, []);
+        },
+
+        isMatchingRecord: function (featureRecord) {
+            var recordId = featureRecord.get('_refObjectUUID'),
+                found = _.find(this._getAllPlanFeatures(), { id: recordId });
+            return !found;
+        },
+
+        getStoreFilter: function (model) {
+            var storeFilter = this.baseFilter;
+
+            if (this.filters) {
+                storeFilter = _.reduce(this.filters, function (result, filter) {
+                    return result ? result.and(filter) : filter;
+                }, storeFilter);
+            }
+
+            return storeFilter;
+        },
+
+        _searchBacklog: function (cmp, value) {
+            if (this.storeConfig.search !== value) {
+                this.refresh({
+                    storeConfig: {
+                        search: value ? Ext.String.trim(value) : ""
+                    }
+                });
+            }
+        },
+
+        _createBaseFilter: function () {
+            this.baseFilter = new Rally.data.QueryFilter({
+                property: 'ActualEndDate',
+                operator: '=',
+                value: 'null'
+            });
+        }
+    });
+
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    /**
+     * This class provides methods to help with generating new start and end dates for timeframes. Timeframe ranges
+     * are generated by making a best guess to a cadence of provided date ranges. The supported cadences are either
+     * quarters or a series of weeks (ex: 10 weeks)
+     */
+    Ext.define('Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator', {
+
+        singleton: true,
+
+        quarters: [
+            { startDate: '01-01', endDate: '03-31' },
+            { startDate: '04-01', endDate: '06-30' },
+            { startDate: '07-01', endDate: '09-30' },
+            { startDate: '10-01', endDate: '12-31' }
+        ],
+        format: 'Y-m-d',
+
+        /**
+         * Generate the next start date given an end date.
+         * @param {Ext.Date} endDate
+         * @returns {Ext.Date} The next start date
+         */
+        getNextStartDate: function (endDate) {
+            if (!endDate) {
+                return Ext.Date.parse(this.getQuarter(new Date(Ext.Date.now())).startDate, this.format);
+            }
+            return Ext.Date.add(endDate, Ext.Date.DAY, 1);
+        },
+
+        /**
+         * Generate the next end date given start and end dates. This method will try to guess if the given date range
+         * is a span of a quarter or weeks
+         * @param {Ext.Date} startDate
+         * @param {Ext.Date} endDate
+         * @returns {Ext.Date} The next end date
+         */
+        getNextEndDate: function (startDate, endDate) {
+            var nextEndDate;
+            var nextStartDate = this.getNextStartDate(endDate);
+
+            if (!endDate) {
+                var now = new Date(Ext.Date.now());
+                nextEndDate = Ext.Date.parse(this.getQuarter(now).endDate, this.format);
+            } else {
+                var days = this.getDaysBetween(startDate, endDate);
+
+                // Determine if the end date should be a weekish cadence or end on a quarter
+                if (this.isQuarter(startDate, endDate) || !this.isWeeks(days)) {
+                    nextEndDate = Ext.Date.parse(this.getQuarter(nextStartDate).endDate, this.format);
+                } else {
+                    nextEndDate = Ext.Date.add(endDate, Ext.Date.DAY, days+1);
+                }
+            }
+
+            // Move the time to 23:59:59 of the end date
+            return Ext.Date.add(Ext.Date.add(Ext.Date.add(nextEndDate, Ext.Date.DAY, 1), Ext.Date.SECOND, -1), Ext.Date.MINUTE, -nextEndDate.getTimezoneOffset());
+        },
+
+        /**
+         * Test if the start and end date are the bounds of a quarter
+         * @param startDate
+         * @param endDate
+         * @returns {boolean}
+         */
+        isQuarter: function (startDate, endDate) {
+            var index = _.findIndex(this.quarters, function (quarter) {
+                return Ext.Date.format(startDate, 'm-d') === quarter.startDate && Ext.Date.format(endDate, 'm-d') === quarter.endDate;
+            }, this);
+
+            return index >= 0;
+        },
+
+
+        /**
+         * @param {Number} days The number of days between 2 dates
+         * @returns {boolean}
+         */
+        isWeeks: function (days) {
+            if (days === 0 || ((days + 1) % 7)) {
+                return false;
+            }
+            return true;
+        },
+
+        /**
+         * Get the number of days between 2 dates. The dates must sampled from the same time (ex: midnight)
+         * @param {Date} startDate The start date
+         * @param {Date} endDate The end date
+         * @returns {number} The days between 2 dates
+         */
+        getDaysBetween: function(startDate, endDate) {
+            return Math.round((endDate  - startDate) / 86400000); // milliseconds in a day - round for DST
+        },
+
+        /**
+         * Get the quarter in the {Rally.apps.roadmapplanningboard.TimeframeCreator.quarters} array that the input date
+         * falls between
+         * @param {Date} date The date to pick a quarter from
+         * @returns {Object} Quarter object with startDate and endDate
+         */
+        getQuarter: function (date) {
+            var dateStr = Ext.Date.format(date, 'm-d');
+            var year = Ext.Date.format(date, 'Y');
+            var quarter = _.find(this.quarters, function (quarter) {
+                return dateStr >= quarter.startDate && dateStr <= quarter.endDate;
+            });
+
+            return {
+                startDate: year + '-' + quarter.startDate,
+                endDate: year + '-' + quarter.endDate
+            };
+        }
+    });
+
+})();
+
+                (function() {
+
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.DeftInjector', {
+        singleton: true,
+        requires: [
+            'Rally.data.Store',
+            'Rally.apps.roadmapplanningboard.AppModelFactory',
+            'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
+        ],
+        loaded: false,
+
+        init: function () {
+            if (!this.loaded) {
+                Deft.Injector.configure({
+                    timelineStore: {
+                        className: 'Rally.data.Store',
+                        parameters: [{
+                            model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimelineModel()
+                        }]
+                    },
+                    timeframeStore: {
+                        className: 'Rally.data.Store',
+                        parameters: [{
+                            model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel()
+                        }]
+                    },
+                    planStore: {
+                        className: 'Rally.data.Store',
+                        parameters: [{
+                            model: Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel()
+                        }]
+                    },
+                    roadmapStore: {
+                        className: 'Rally.data.Store',
+                        parameters: [{
+                            model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
+                        }]
+                    },
+                    preliminaryEstimateStore: {
+                      className: 'Rally.data.wsapi.Store',
+                      parameters: [{
+                            model: 'PreliminaryEstimate'
+                      }]
+                    },
+                    nextDateRangeGenerator: {
+                        className: 'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
+                    }
+                });
+            }
+            this.loaded = true;
+        }
+    });
+})();
+
+                (function() {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.mixin.CollapsableHeaderContainer', {
+        _getCollapsableHeaderContainerConfig: function(config) {
+            return Ext.apply({
+                xtype: 'container',
+                cls: 'roadmap-header-collapsable' + (this.ownerCardboard.showHeader ? '' : ' header-collapsed')
+            }, config);
+        }
+    });
+})();
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.PlaceholderColumn', {
+        extend: 'Ext.Component',
+        alias: 'widget.cardboardplaceholdercolumn',
+
+        requires: [ 'Rally.ui.cardboard.Column', 'Rally.ui.cardboard.ColumnHeader' ],
+
+        mixins: [ 'Rally.apps.roadmapplanningboard.mixin.CollapsableHeaderContainer' ],
+
+        afterRender: function () {
+            this.drawHeader();
+
+            this.fireEvent('ready', this);
+        },
+
+        drawHeader: function () {
+            var config = {
+                renderTo: Ext.get(this.headerCell)
+            };
+
+            Ext.fly(this.headerCell).addCls('planning-column');
+            this.columnHeader = Ext.widget(Ext.merge(config, this.columnHeaderConfig));
+
+            // Add a couple of containers to match the structure of the timeframe planning column header
+            this.columnHeader.add(this._getCollapsableHeaderContainerConfig(this._getTemplateConfig()));
+        },
+
+        _getTemplateConfig: function() {
+            return {
+                tpl: [
+                    '<div class="timeframeDatesContainer"></div>',
+                    '<div class="progress-bar-background"></div>',
+                    '<div class="theme_container"></div>'
+                ],
+                data: {}
+            };
+        },
+
+        getColumnHeader: function() {
+            return this.columnHeader;
+        },
+
+        getColumnHeaderCell: function () {
+            return Ext.get(this.headerCell);
+        },
+
+        getContentCell: function () {
+            return Ext.get(this.contentCell);
+        },
+
+        getCards: function () {
+            return [];
+        },
+
+        findCardInfo: function () {
+            return null;
+        },
+
+        isMatchingRecord: function () {
+            return false;
+        },
+
+        isVisible: function () {
+            return true;
+        },
+
+        refresh: function () {
+            this.fireEvent('ready', this);
+            return null;
+        },
+
+        getHeaderTitle: function () {
+            return this.columnHeader.down('#headerTitle');
+        },
+
+        getMinWidth: function () {
+            return Rally.ui.cardboard.Column.prototype.getMinWidth();
+        },
+
+        filter: function () {}
+    });
+
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.PlanCapacityProgressBar', {
+        extend: 'Rally.ui.renderer.template.progressbar.ProgressBarTemplate',
+        alias: 'widget.PlanCapacityProgressBar',
+
+        config: {
+            height: '15px',
+            isClickable: true,
+
+            percentFullColors: {
+                blue: '#35B2E4 ',
+                green: '#8AC651',
+                red: '#fc5f5e'
+            },
+
+            calculateColorFn: function (values) {
+                if (values.total < values.low) {
+                    return this.percentFullColors.blue;
+                }
+                if (values.total <= values.high) {
+                    return this.percentFullColors.green;
+                }
+                return this.percentFullColors.red;
+            },
+
+            generateLabelTextFn: function (values) {
+                return values.total + " of " + values.high;
+            }
+        }
+    });
+
+}).call(this);
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.ThemeHeader', {
+        extend: 'Ext.container.Container',
+        alias: 'widget.roadmapthemeheader',
+        cls: 'theme_container',
+        requires: [
+            'Rally.ui.field.ClickToEditFieldContainer'
+        ],
+        config: {
+            record: undefined,
+            editable: true
+        },
+        initComponent: function () {
+            this.callParent(arguments);
+            this.on('afterrender', function () {
+                this.add(this._createThemeContainer());
+            });
+        },
+        getCardboardComponent: function () {
+            if (this.container && this.container.parent('.cardboard')) {
+                return Ext.getCmp(this.container.parent('.cardboard').id);
+            }
+        },
+        _getEmptyText: function () {
+            return this.editable ? '+ Add theme' : '';
+        },
+        _createThemeContainer: function () {
+            var record = this.record;
+            var field = this.record.getField('theme');
+
+            this.themeContainer = Ext.create('Rally.ui.field.ClickToEditFieldContainer', {
+                record: record,
+                field: field,
+                cls: 'field_container',
+                clickToEdit: this.editable,
+                completeOnEnter: false,
+                autoDestroy: true,
+                listeners: {
+                    fieldupdated: function (options) {
+                        if (options.field.getValue() !== record.get('theme')) {
+                            record.set('theme', options.field.getValue());
+                            record.save({
+                                requester: this
+                            });
+                        }
+                        return this.refresh(record);
+                    }
+                }
+            });
+            this._customizeThemeContainer(record, field);
+            this.themeContainer.draw();
+            return this.themeContainer;
+        },
+        _customizeThemeContainer: function (record, field) {
+            var themeHeader;
+
+            this.themeContainer.removeAll(true);
+            themeHeader = this;
+            this.themeContainer._drawViewMode = function () {
+                var themeClass, themeValue, viewComponentHeight;
+
+                themeValue = record.data[field.name];
+                if (themeValue) {
+                    themeValue = Ext.String.trim(themeValue);
+                }
+                themeClass = ['fieldContainerView'];
+                if (themeValue) {
+                    themeClass.push('setTheme');
+                } else {
+                    themeValue = themeHeader._getEmptyText();
+                    themeClass.push('unsetTheme');
+                }
+                viewComponentHeight = 0;
+                this.add({
+                    xtype: 'component',
+                    cls: themeClass,
+                    itemId: 'field-view',
+                    html: Rally.ui.detail.view.DetailRendererFactory.getRenderTemplate(this.getField(), themeHeader.getRecord()).apply({
+                        theme: themeValue
+                    }),
+                    listeners: {
+                        resize: function () {
+                            var resizeHeight;
+
+                            resizeHeight = this.el !== null && this.el.getHeight();
+                            if (resizeHeight !== viewComponentHeight) {
+                                viewComponentHeight = resizeHeight;
+                                if (themeHeader.getCardboardComponent()) {
+                                    themeHeader.getCardboardComponent().fireEvent('headersizechanged');
+                                }
+                            }
+                        },
+                        boxready: function () {
+                            viewComponentHeight = this.el !== null && this.el.getHeight();
+                            if (themeHeader.getCardboardComponent()) {
+                                themeHeader.getCardboardComponent().fireEvent('headersizechanged');
+                            }
+                        }
+                    }
+                });
+            };
+            this.themeContainer._drawEditMode = function () {
+                this.editor = Ext.create('Ext.form.field.TextArea', {
+                    name: field.name,
+                    value: record.get(field.name),
+                    emptyText: themeHeader._getEmptyText(),
+                    width: '100%',
+                    grow: true,
+                    growMin: 17,
+                    growAppend: '\n'
+                });
+                this.editor.on('autosize', function () {
+
+                    if (themeHeader.getCardboardComponent()) {
+                        themeHeader.getCardboardComponent().fireEvent('headersizechanged');
+                    }
+                });
+                this.add(this.editor);
+                if (this.singleEdit) {
+                    if (this.editor.getEl() && (this.cancelOnEsc || this.completeOnEnter)) {
+                        this.editor.getEl().on('keydown', function (event) {
+                            if (event.getKey() === Ext.EventObject.ENTER && this.completeOnEnter) {
+                                return this._fireFieldUpdated();
+                            } else if (event.getKey() === Ext.EventObject.ESC && this.cancelOnEsc) {
+                                return this.refresh(this.record);
+                            }
+                        }, this);
+                    }
+                    this.editor.on('select', this._fireFieldUpdated, this);
+                    this.editor.on('blur', this._fireFieldUpdated, this);
+                    this.editor.focus();
+                }
+            };
+        }
+    });
+
+}).call(this);
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+    Ext.define('Rally.apps.roadmapplanningboard.util.Fraction', {
+        config: {
+            denominator: null,
+            numeratorItems: null,
+            numeratorItemValueFunction: function (item) {
+                return item;
+            }
+        },
+        _numerator: null,
+        applyDenominatorItems: function (denominatorItems) {
+            this._numerator = null;
+            return denominatorItems;
+        },
+        applyDenominatorItemValueFunction: function (denominatorItemValueFunction) {
+            this._numerator = null;
+            return denominatorItemValueFunction;
+        },
+        constructor: function (config) {
+            return this.initConfig(config);
+        },
+        getPercent: function () {
+            if (this.denominator <= 0) {
+                return 0;
+            }
+            return this.getNumerator() / this.denominator;
+        },
+        getNumerator: function () {
+            return this._numerator || (this._numerator = Ext.Array.sum(Ext.Array.map(this.numeratorItems, this.numeratorItemValueFunction)));
+        },
+        getFormattedPercent: function () {
+            return "" + (Ext.util.Format.number(this.getPercent() * 100, '0')) + "%";
+        },
+        _sumNumerator: function () {
+            return Ext.Array.sum(Ext.Array.map(this.numeratorItems, this.numeratorItemValueFunction));
+        }
+    });
+
+}).call(this);
+
+                (function () {
+    var Ext, me;
+
+    Ext = window.Ext4 || window.Ext;
+
+    me = null;
+
+    Ext.define('Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView', {
+        extend: 'Rally.ui.popover.Popover',
+        alias: 'widget.capacitypopover',
+        modal: false,
+        placement: 'bottom',
+        shouldHidePopoverOnBodyClick: true,
+        shouldHidePopoverOnIframeClick: true,
+        saveOnClose: true,
+        cls: 'roadmap-planning-popover',
+        chevronPrefixCls: 'roadmap-planning-popover-chevron',
+        config: {
+            model: null
+        },
+        header: false,
+
+        initComponent: function () {
+            this.items = this._getItems();
+            this.callParent(arguments);
+
+            this.lowCapacity = this.down('#low-capacity-field');
+            this.highCapacity = this.down('#high-capacity-field');
+        },
+
+        _getItems: function() {
+            return [
+                {
+                    layout: {
+                        type: 'table',
+                        align: 'center',
+                        columns: 2
+                    },
+                    items: [
+                        {
+                            xtype: 'component',
+                            html: 'Planned Capacity Range',
+                            cls: 'popover-label',
+                            colspan: 2
+                        },
+                        this._getNumberField({
+                            itemId: 'low-capacity-field',
+                            fieldLabel: 'Low',
+                            name: 'lowCapacity',
+                            msgTarget: 'capacity-validation-error',
+                            padding: '0 13 0 0'
+                        }, this.model.get('lowCapacity')),
+                        this._getNumberField({
+                            itemId: 'high-capacity-field',
+                            fieldLabel: 'High',
+                            name: 'highCapacity'
+                        }, this.model.get('highCapacity'))
+                    ]
+                },
+                {
+                    xtype: 'container',
+                    cls: 'capacity-buttons',
+                    items: [
+                        {
+                            xtype: 'rallybutton',
+                            itemId: 'capacityCancel',
+                            text: 'Cancel',
+                            cls: 'secondary dark button small right',
+                            listeners: {
+                                click: this._onCancel,
+                                scope: this
+                            }
+                        },
+                        {
+                            xtype: 'rallybutton',
+                            itemId: 'capacityDone',
+                            text: 'Done',
+                            cls: 'primary button small right',
+                            listeners: {
+                                click: this._onDone,
+                                scope: this
+                            }
+                        }
+                    ]
+                },
+                {
+                    xtype: 'component',
+                    autoEl: 'div',
+                    id: 'capacity-validation-error',
+                    cls: ['form-error-msg-field', 'capacity-error-msg-field']
+                }
+            ];
+        },
+
+        _getNumberField: function(config, value) {
+            var _this = this;
+
+            return _.merge({xtype: 'numberfield',
+                value:  value,
+                hideTrigger: true,
+                minValue: 0,
+                maxLength: 4,
+                enforceMaxLength: true,
+                maxLengthText: '',
+                maxValue: 9999,
+                maxText: '',
+                allowDecimals: false,
+                validateOnBlur: false,
+                validateOnChange: false,
+                validator: function () {
+                    return _this._validateRange();
+                },
+                labelAlign: 'left',
+                labelWidth: 34,
+                labelPad: 0,
+                width: '80px',
+                listeners: {
+                    validitychange: this._validityChange,
+                    scope: this
+                }
+            }, config);
+        },
+
+        _validityChange: function (capacityField, isValid) {
+            if(isValid) {
+                this.down('#capacityDone').enable();
+                this.lowCapacity.validateOnChange = false;
+                this.highCapacity.validateOnChange = false;
+
+                this.lowCapacity.clearInvalid();
+                this.highCapacity.clearInvalid();
+            }
+        },
+
+        _validateRange: function () {
+            var lowValue = this.lowCapacity.getValue();
+            var highValue = this.highCapacity.getValue();
+
+            return highValue >= lowValue ? true : 'Low estimate should not exceed the high estimate';
+        },
+
+        _onCancel: function () {
+            this.saveOnClose = false;
+            this.destroy();
+        },
+
+        _onDone: function () {
+            this.saveOnClose = true;
+            this.destroy();
+        },
+
+        _save: function () {
+            var requester;
+            this.model.set('lowCapacity', this.lowCapacity.getValue());
+            this.model.set('highCapacity', this.highCapacity.getValue());
+
+            if (this.view && this.view.owner && this.view.owner.ownerCardboard) {
+                requester = this.view.owner.ownerCardboard;
+            }
+            this.model.save({
+                requester: requester
+            });
+        },
+
+        destroy: function () {
+            if(this.saveOnClose) {
+                if (this.lowCapacity.validate() && this.highCapacity.validate()) {
+                    this._save();
+                } else {
+                    this.lowCapacity.validateOnChange = true;
+                    this.highCapacity.validateOnChange = true;
+                    this.down('#capacityDone').disable();
+                    return false;
+                }
+
+            }
+
+            this.callParent(arguments);
+        }
+    });
+
+}).call(this);
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.util.TimelineViewModel', {
+        statics: {
+            createFromStores: function (timeframePlanStoreWrapper, currentTimeframeRecord) {
+                var _this = this;
+                var timeframes = _.map(timeframePlanStoreWrapper.getTimeframeAndPlanRecords(), function(record) {
+                    return _this._createTimeframe(record.timeframe);
+                });
+
+                return Ext.create('Rally.apps.roadmapplanningboard.util.TimelineViewModel',{
+                    timeframes: timeframes,
+                    currentTimeframe: this._createTimeframe(currentTimeframeRecord)
+                });
+            },
+
+            _createTimeframe: function (timeframeRecord) {
+                return {
+                    startDate: timeframeRecord.get('startDate'),
+                    endDate: timeframeRecord.get('endDate')
+                };
+            }
+        },
+        constructor: function (config) {
+            var _this = this;
+
+            this.currentTimeframe = config.currentTimeframe;
+            this.timeframes = _.sortBy(_.reject(config.timeframes, function (tf) {
+                return _.isEqual(tf, _this.currentTimeframe);
+            }), 'startDate');
+        },
+
+        getPreviousTimeframe: function (currentTimeframe) {
+            currentTimeframe = currentTimeframe || this.currentTimeframe;
+
+            var startDate = currentTimeframe.startDate || currentTimeframe.endDate;
+            var prevTimeframe = _.findLast(this.timeframes, function (tf) {
+                return !startDate || tf.endDate < startDate;
+            });
+
+            return prevTimeframe || null;
+        },
+
+        getNextTimeframe: function (currentTimeframe) {
+            currentTimeframe = currentTimeframe || this.currentTimeframe;
+
+            var endDate = currentTimeframe.endDate || currentTimeframe.startDate;
+            var nextTimeframe = endDate && _.find(this.timeframes, function (tf) {
+                return tf.startDate > endDate;
+            });
+
+            return nextTimeframe || null;
+        },
+
+        isTimeframeOverlapping: function (newTimeframe) {
+            return _.some(this.timeframes, function (timeframe) {
+                var overlappingInside = this._isDateInRange(newTimeframe.startDate, timeframe) || this._isDateInRange(newTimeframe.endDate, timeframe);
+                var overlappingOutside = newTimeframe.startDate <= timeframe.startDate && newTimeframe.endDate >= timeframe.endDate;
+                return overlappingInside || overlappingOutside;
+            }, this);
+        },
+
+        _isDateInRange: function (date, dateRange) {
+            return date >= dateRange.startDate && date <= dateRange.endDate;
+        }
+    });
+}).call(this);
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.TimeframePlanningColumn', {
+        extend: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
+        alias: 'widget.timeframeplanningcolumn',
+
+        requires: [
+            'Rally.data.wsapi.filter.MultiSelectFilter',
+            'Rally.apps.roadmapplanningboard.ThemeHeader',
+            'Rally.apps.roadmapplanningboard.PlanCapacityProgressBar',
+            'Rally.apps.roadmapplanningboard.util.Fraction',
+            'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView',
+            'Rally.apps.roadmapplanningboard.util.TimelineViewModel'
+        ],
+
+        mixins: [ 'Rally.apps.roadmapplanningboard.mixin.CollapsableHeaderContainer' ],
+
+        config: {
+            startDateField: 'startDate',
+            endDateField: 'endDate',
+            editPermissions: {
+                capacityRanges: true,
+                theme: true,
+                timeframeDates: true,
+                deletePlan: true
+            },
+            timeframePlanStoreWrapper: undefined,
+            timeframeRecord: undefined,
+            planRecord: undefined,
+            dateFormat: 'M j',
+            pointFields: ['RefinedEstimate', 'PreliminaryEstimate']
+        },
+
+        constructor: function (config) {
+            this.mergeConfig(config);
+            this.config.storeConfig = this.config.storeConfig || {};
+            this.config.storeConfig.sorters = [
+                {
+                    sorterFn: Ext.bind(this._sortPlan, this)
+                }
+            ];
+            this.config.storeConfig.pageSize = 200;
+            this.callParent([this.config]);
+        },
+
+        initComponent: function () {
+            this.callParent(arguments);
+
+            this.addEvents('deleteplan', 'daterangechange');
+
+            this.mon(this, 'ready', this._updateHeader, this);
+            this.mon(this, 'addcard', this._updateHeader, this);
+            this.mon(this, 'cardupdated', this._updateHeader, this);
+            this.mon(this, 'removecard', this._updateHeader, this);
+
+            if (this.planRecord && this.planRecord.store) {
+                this.planRecord.store.on('update', function () {
+                    this._updateHeader();
+                }, this);
+            }
+            this._createDummyPlannedCapacityRangeTooltipForSizeCalculations();
+        },
+
+        _createDummyPlannedCapacityRangeTooltipForSizeCalculations: function () {
+            this.dummyPlannedCapacityRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
+                target: Ext.getBody(),
+                html: this._getPlannedCapacityRangeTooltipTitle(),
+                listeners: {
+                    beforeshow: function () {
+                        this.hide();
+                    }
+                }
+            });
+            this.dummyPlannedCapacityRangeTooltip.show();
+        },
+
+        getColumnIdentifier: function () {
+            return "planningboardtimeframecolumn" + this.planRecord.getId();
+        },
+
+        /**
+         * @private
+         * Custom sort function for the plan column. It uses the order of features within the plan record to determine
+         * the order of feature cards. WSAPI gives us the features in a different order than we want, so we must
+         * reorder
+         * @param a {Rally.data.Model} The first record to compare
+         * @param b {Rally.data.Model} The second record to compare
+         * @returns {Number}
+         */
+        _sortPlan: function (a, b) {
+            var aIndex = this._findFeatureIndex(a);
+            var bIndex = this._findFeatureIndex(b);
+
+            return aIndex > bIndex ? 1 : -1;
+        },
+
+        /**
+         * @private
+         * Return the index of the feature in the plan record. This is used to sort records returned from WSAPI
+         * @param {Rally.data.Model} record
+         * @returns {Number} This will return the index of the record in the plan features array
+         */
+        _findFeatureIndex: function (record) {
+            return _.findIndex(this.planRecord.get('features'), function (feature) {
+                return feature.id === record.get('_refObjectUUID').toString();
+            });
+        },
+
+        /**
+         * Override
+         * @returns {boolean}
+         */
+        mayRank: function () {
+            return this._getSortDirection() === 'ASC' && this.enableRanking;
+        },
+
+        afterRender: function (event) {
+            this.callParent(arguments);
+            if (this.editPermissions.capacityRanges) {
+                this.columnHeader.getEl().on('click', this.onProgressBarClick, this, {
+                    delegate: '.progress-bar-container'
+                });
+            }
+            if (this.editPermissions.timeframeDates) {
+                this.columnHeader.getEl().on('click', this.onTimeframeDatesClick, this, {
+                    delegate: '.timeframeDates'
+                });
+            }
+        },
+
+        loadStore: function () {
+            this._updatePlanFeatureFilter();
+            this.callParent(arguments);
+        },
+
+        filter: function () {
+            this._updatePlanFeatureFilter();
+            this.callParent(arguments);
+        },
+
+        _updatePlanFeatureFilter: function () {
+            if (this.filterCollection) {
+                this.filterCollection.removeTempFilterByKey('planfeatures');
+                this.filterCollection.addTempFilter(this._createFeatureFilter());
+            }
+        },
+
+        getStoreFilter: function () {
+            return null;
+        },
+
+        _createFeatureFilter: function () {
+            var features = this.planRecord.data.features.length > 0 ? this.planRecord.data.features : [null];
+            return Ext.create('Rally.data.wsapi.filter.MultiSelectFilter', {
+                itemId: 'planfeatures',
+                filterProperty: 'ObjectID',
+                operator: '=',
+                value: features,
+                getFilterValue: function (feature) { return feature && feature.id; }
+            });
+        },
+
+        addCapacityClick: function(button, event) {
+            this.onProgressBarClick(event);
+        },
+
+        onProgressBarClick: function (event) {
+            var target = Ext.get(Ext.query('.progress-bar-background', this.getColumnHeader().getEl().dom)[0]);
+
+            event.stopPropagation();
+            this.plannedCapacityRangeTooltip.disable();
+
+            if (this.popover) {
+                return;
+            }
+            this.popover = Ext.create('Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView', {
+                target: target,
+                owner: this,
+                offsetFromTarget: [
+                    { x: 0, y: 0 },
+                    { x: 0, y: 0 },
+                    { x: 0, y: 5 },
+                    { x: 0, y: 0 }
+                ],
+                model: this.planRecord,
+                listeners: {
+                    destroy: function () {
+                        this.popover = null;
+                        if (this._getHighCapacity()) {
+                            this.plannedCapacityRangeTooltip.enable();
+                        }
+                    },
+                    scope: this
+                }
+            });
+        },
+
+        onTimeframeDatesClick: function (event) {
+            var _this = this;
+
+            this.timeframePopover = Ext.create('Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', {
+                target: Ext.get(event.target),
+                offsetFromTarget: [
+                    { x: 0, y: 0 },
+                    { x: 0, y: 0 },
+                    { x: 0, y: 5 },
+                    { x: 0, y: 0 }
+                ],
+                timelineViewModel: Rally.apps.roadmapplanningboard.util.TimelineViewModel.createFromStores(this.timeframePlanStoreWrapper, this.timeframeRecord),
+                listeners: {
+                    destroy: function () {
+                        _this._drawDateRange();
+                        _this.timeframePopover = null;
+                    },
+                    save: function (options) {
+                        _this._saveTimeframeDates(options);
+                    }
+                }
+            });
+        },
+
+        _drawCollapsableContainer: function() {
+            if (!this.collapsableContainer) {
+                this.collapsableContainer = this.getColumnHeader().add(this._getCollapsableHeaderContainerConfig());
+            }
+        },
+
+        _drawDateRange: function () {
+            if (this.dateRange) {
+                this.dateRange.update(this.getDateHeaderTplData());
+            } else {
+                this.dateRange = this.collapsableContainer.add({
+                    xtype: 'component',
+                    cls: 'timeframeDatesContainer',
+                    tpl: "<div class='timeframeDates {clickableClass}'>{formattedDate}</div>",
+                    data: this.getDateHeaderTplData(),
+                    listeners: {
+                        afterrender: this._createDateRangeTooltip,
+                        scope: this
+                    }
+                });
+            }
+        },
+
+        _createDateRangeTooltip: function () {
+            if (this.editPermissions.timeframeDates) {
+                if (this.dateRangeTooltip) {
+                    this.dateRangeTooltip.destroy();
+                }
+
+                this.dateRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
+                    target: this.dateRange.getEl(),
+                    hideDelay: 100,
+                    anchor: 'right',
+                    html: this.getDateHeaderTplData().titleText
+                });
+            }
+        },
+
+        _drawProgressBar: function () {
+            if (this.progressBar) {
+                this.progressBar.update(this.getHeaderTplData());
+                this._afterProgressBarRender();
+            } else {
+                this.progressBar = this.collapsableContainer.add({
+                    xtype: 'container',
+                    tpl: [
+                        '<div class="progress-bar-background">',
+                        '<tpl if="highCapacity">',
+                        '<div class="progress-bar-percent-done">{formattedPercent}</div>',
+                        '<div class="progress-bar-display">{progressBarHtml}</div>',
+                        '<tpl else>',
+                        '<div>',
+                        '<span>{pointTotal}</span> <span class="no-capacity-label">{itemType} {pointText}</span>',
+                        '<div class="add-capacity"></div>',
+                        '</div>',
+                        '</tpl>',
+                        '</div>'
+                    ],
+                    data: this.getHeaderTplData(),
+                    listeners: {
+                        afterrender: this._afterProgressBarRender,
+                        scope: this
+                    }
+                });
+            }
+        },
+
+        _afterProgressBarRender: function () {
+            this._addCapacityButton();
+            this._createPlannedCapacityRangeTooltip();
+            if (this._getHighCapacity()) {
+                this.plannedCapacityRangeTooltip.enable();
+            } else {
+                this.plannedCapacityRangeTooltip.disable();
+            }
+        },
+
+        _addCapacityButton: function () {
+            if (this.editPermissions.capacityRanges && this.rendered) {
+                Ext.create('Rally.ui.Button', {
+                    text: 'Set Capacity',
+                    cls: 'secondary dark',
+                    renderTo: Ext.query('.add-capacity', this.getColumnHeader().getEl().dom)[0],
+                    handler: this.addCapacityClick,
+                    scope: this
+                });
+            }
+        },
+
+        _createPlannedCapacityRangeTooltip: function () {
+            if (this.plannedCapacityRangeTooltip) {
+                return;
+            }
+
+            var anchorOffset = 0;
+            var mouseXOffset = 0;
+
+            if (this.dummyPlannedCapacityRangeTooltip) {
+                var tooltipWidth = this.dummyPlannedCapacityRangeTooltip.getWidth();
+                var anchorWidth = this.dummyPlannedCapacityRangeTooltip.getEl().down('.' + Ext.baseCSSPrefix + 'tip-anchor').getWidth();
+                anchorOffset = tooltipWidth / 2 - anchorWidth;
+                var width = this.rendered ? this.getWidth() : 0;
+                mouseXOffset = (width - tooltipWidth) / 2;
+                this.dummyPlannedCapacityRangeTooltip.destroy();
+            }
+
+            this.plannedCapacityRangeTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
+                cls: 'planned-capacity-range-tooltip',
+                target: this.progressBar.getEl(),
+                constrainPosition: false,
+                anchor: 'top',
+                anchorOffset: anchorOffset,
+                mouseOffset: [ mouseXOffset, 0],
+                hideDelay: 100,
+                html: this._getPlannedCapacityRangeTooltipTitle()
+            });
+        },
+
+        _drawTheme: function () {
+            if (!this.theme && this.planRecord) {
+                this.theme = this.collapsableContainer.add({
+                    xtype: 'roadmapthemeheader',
+                    record: this.planRecord,
+                    editable: this.editPermissions.theme
+                });
+            }
+        },
+
+        _drawHeaderButtons: function () {
+            if (!this.headerButtonContainer) {
+                this.headerButtonContainer = this.getHeaderTitle().add({
+                    xtype: 'container',
+                    cls: 'header-button-container'
+                });
+            }
+
+            this._drawDeletePlanButton();
+        },
+
+        _drawDeletePlanButton: function () {
+            if (!this.deletePlanButton && this.editPermissions.deletePlan) {
+                this.deletePlanButton = this.headerButtonContainer.add({
+                    xtype: 'rallybutton',
+                    iconCls: 'icon-delete',
+                    cls: 'picto small',
+                    elTooltip: 'Delete column',
+                    listeners: {
+                        click: function () {
+                            if (this.planRecord.get('features').length ) {
+                                this._drawDeletePlanConfirmDialog();
+                            } else {
+                                this.fireEvent('deleteplan', this);
+                            }
+                        },
+                        scope: this
+                    }
+                });
+            }
+        },
+
+        _drawDeletePlanConfirmDialog: function () {
+            if (this.confirmationDialog) {
+                this.confirmationDialog.destroy();
+            }
+
+            this.confirmationDialog = Ext.create('Rally.ui.dialog.ConfirmDialog', {
+                cls: 'roadmap-delete-plan-confirm',
+                title: '<span class="title-icon icon-warning"></span>Delete Plan from Roadmap',
+                message: 'Deleting this plan will remove the timeframe for all projects and return features in this plan to the backlog.',
+                confirmLabel: 'Delete',
+                listeners: {
+                    confirm: function () {
+                        this.fireEvent('deleteplan', this);
+                    },
+                    scope: this
+                }
+            });
+        },
+
+        destroy: function () {
+            if (this.confirmationDialog) {
+                this.confirmationDialog.destroy();
+            }
+            this.callParent(arguments);
+        },
+
+        getHeaderTplData: function () {
+            var pointFields = this.pointFields;
+            var highCapacity = this._getHighCapacity();
+            var lowCapacity = (this.planRecord && this.planRecord.get('lowCapacity')) || 0;
+
+            var fraction = Ext.create('Rally.apps.roadmapplanningboard.util.Fraction', {
+                denominator: highCapacity,
+                numeratorItems: this.getCards(true),
+                numeratorItemValueFunction: function (card) {
+                    var value = _.find(_.map(pointFields, function(pointField) {
+                        var fieldValue = card.getRecord().get(pointField);
+                        return fieldValue ? (fieldValue.Value || fieldValue) : false;
+                    }));
+
+                    return value || 0;
+                }
+            });
+
+            var pointTotal = fraction.getNumerator();
+
+            return {
+                highCapacity: highCapacity,
+                lowCapacity: lowCapacity,
+                pointTotal: pointTotal,
+                pointText: 'pt' + (pointTotal !== 1 ? 's' : ''),
+                itemType: this.typeNames.child.name.toLowerCase(),
+                progressBarHtml: this._getProgressBarHtml(fraction),
+                formattedPercent: fraction.getFormattedPercent(),
+                progressBarTitle: this._getPlannedCapacityRangeTooltipTitle()
+            };
+        },
+
+        _getHighCapacity: function () {
+            return (this.planRecord && this.planRecord.get('highCapacity')) || 0;
+        },
+
+        getDateHeaderTplData: function () {
+            return {
+                formattedDate: this._getDateRange(),
+                titleText: 'Edit Date Range',
+                clickableClass: this.editPermissions.timeframeDates ? 'clickable' : ''
+            };
+        },
+
+        drawHeader: function () {
+            this.callParent(arguments);
+            this._updateHeader();
+        },
+
+        _updateHeader: function () {
+            if (!this.destroying && this.rendered) {
+                this._drawCollapsableContainer();
+                this._drawDateRange();
+                this._drawProgressBar();
+                this._drawTheme();
+                this._drawHeaderButtons();
+            }
+        },
+
+        _getDateRange: function () {
+            var formattedEndDate, formattedStartDate;
+
+            formattedStartDate = this._getFormattedDate(this.startDateField);
+            formattedEndDate = this._getFormattedDate(this.endDateField);
+            if (!formattedStartDate && !formattedEndDate) {
+                return "&nbsp;";
+            }
+            return "" + formattedStartDate + " - " + formattedEndDate;
+        },
+
+        _getFormattedDate: function (dateField) {
+            var date;
+
+            date = this.timeframeRecord.get(dateField);
+            if (date) {
+                return Ext.Date.format(date, this.dateFormat);
+            }
+        },
+
+        _getProgressBarHtml: function (fraction) {
+            var progressBar = Ext.create('Rally.apps.roadmapplanningboard.PlanCapacityProgressBar', {
+                isClickable: this.editPermissions.capacityRanges
+            });
+
+            var lowCapacity = this.planRecord ? this.planRecord.get('lowCapacity') : undefined;
+            var highCapacity = this.planRecord ? this.planRecord.get('highCapacity') : undefined;
+
+            return progressBar.apply({
+                low: lowCapacity || 0,
+                high: highCapacity || 0,
+                total: fraction.getNumerator(),
+                percentDone: fraction.getPercent()
+            });
+        },
+
+        _getPlannedCapacityRangeTooltipTitle: function () {
+            var title = 'Planned Capacity Range';
+            return this.editPermissions.capacityRanges ? 'Edit ' + title : title;
+        },
+
+        _saveTimeframeDates: function (options) {
+            this.timeframeRecord.set('startDate', options.startDate);
+            this.timeframeRecord.set('endDate', options.endDate);
+
+            if (this.timeframeRecord.dirty) {
+                this.timeframeRecord.save({
+                    success: function () {
+                        this.fireEvent('daterangechange', this);
+                    },
+                    requester: this.view,
+                    scope: this
+                });
+            }
+
+            return true;
+        }
+    });
+
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', {
+        inject: ['planStore', 'timeframeStore'],
+
+        config: {
+            roadmap: null,
+            timeline: null,
+            requester: null
+        },
+
+        constructor: function (config) {
+            this.initConfig(config);
+            this.timeframeStore.on('update', this._timeframeUpdated, this);
+        },
+
+        getTimeframeAndPlanRecords: function () {
+            var _this = this;
+            var records = _.map(this.timeframeStore.data.items, function(timeframe){
+                return {
+                    timeframe: timeframe,
+                    plan: _this._getPlanForTimeFrameAndSyncName(timeframe)
+                };
+            });
+
+            return _.filter(records, function (record){
+                return !!record.plan;
+            });
+        },
+
+        load: function () {
+            return Deft.Promise.all([
+                this._loadPlanStore(),
+                this._loadTimeframeStore()
+            ]);
+        },
+
+        deletePlan: function (planRecord) {
+            var deferred = new Deft.Deferred();
+
+            planRecord.destroy({
+                success: function () {
+                    deferred.resolve();
+                },
+                failure: function () {
+                    deferred.reject('Failed to delete plan record');
+                }
+            });
+
+            return deferred.promise;
+        },
+
+        _getPlanForTimeframe: function (timeframe) {
+            return this.planStore.getAt(this.planStore.findBy(function (record) {
+                return record.get('timeframe').id === timeframe.getId();
+            }));
+        },
+
+        _loadPlanStore: function () {
+            return this.planStore.load({
+                params: {
+                    roadmap: {
+                        id: this.roadmap.getId()
+                    }
+                },
+                requester: this.requester,
+                storeServiceName: 'Planning'
+            });
+        },
+
+        _loadTimeframeStore: function () {
+            return this.timeframeStore.load({
+                params: {
+                    timeline: {
+                        id: this.timeline.getId()
+                    }
+                },
+                requester: this.requester,
+                storeServiceName: 'Timeline'
+            });
+        },
+
+        _timeframeUpdated: function(store, record, operation, modifiedFieldNames, eOpts) {
+            if (operation === 'edit' && _.contains(modifiedFieldNames, 'name')) {
+                this._getPlanForTimeFrameAndSyncName(record);
+            }
+        },
+
+        _getPlanForTimeFrameAndSyncName: function (timeframe) {
+            var plan = this._getPlanForTimeframe(timeframe);
+            var timeframName = timeframe.get('name');
+
+            if (plan && plan.get('name') !== timeframName) {
+                plan.set('name', timeframName);
+                plan.save();
+            }
+
+            return plan;
+        }
+    });
+}).call(this);
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.util.PlanGenerator', {
+        requires: [
+            'Rally.apps.roadmapplanningboard.AppModelFactory',
+            'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
+        ],
+
+        inject: ['timeframeStore', 'planStore', 'nextDateRangeGenerator'],
+
+        config: {
+            timeframePlanStoreWrapper: null,
+            roadmap: null
+        },
+
+        constructor: function (config) {
+            this.initConfig(config);
+        },
+
+        createPlanWithTimeframe: function (options) {
+            options = options || {};
+
+            var lastRecordWithAPlan = _.last(this.timeframePlanStoreWrapper.getTimeframeAndPlanRecords());
+            var lastTimeframeRecord = lastRecordWithAPlan ? lastRecordWithAPlan.timeframe : this.timeframePlanStoreWrapper.timeframeStore.last();
+
+            var timeframeData = {
+                timeline: lastTimeframeRecord.get('timeline'),
+                startDate: null,
+                endDate: null
+            };
+
+            if (!options.resetDates && lastRecordWithAPlan) {
+                timeframeData.startDate = lastTimeframeRecord.get('startDate');
+                timeframeData.endDate = lastTimeframeRecord.get('endDate');
+            }
+
+            return Deft.promise.Chain.pipeline([this._createTimeframe, this._createPlan], this, timeframeData);
+        },
+
+        _createTimeframe: function (timeframeData) {
+            var deferred = Ext.create('Deft.Deferred');
+
+            _.first(this.timeframePlanStoreWrapper.timeframeStore.add({
+                name: "New Timeframe",
+                startDate: this.nextDateRangeGenerator.getNextStartDate(timeframeData.endDate),
+                endDate: this.nextDateRangeGenerator.getNextEndDate(timeframeData.startDate, timeframeData.endDate),
+                timeline: timeframeData.timeline
+            })).save({
+
+                success: function(record, operation) {
+                    deferred.resolve(record);
+                },
+
+                failure: function(record, operation) {
+                    deferred.reject(operation.error.status + ' ' + operation.error.statusText);
+                }
+            });
+
+            return deferred;
+        },
+
+        _createPlan: function (timeframeRecord) {
+            var deferred = Ext.create('Deft.Deferred');
+
+            _.first(this.timeframePlanStoreWrapper.planStore.add({
+                name: timeframeRecord.get('name'),
+                theme: '',
+                roadmap: {id: this.roadmap.getId()}, // Turn the roadmap into a JSON into a JSON object in order correctly match the url pattern in the Plan model proxy.
+                timeframe: timeframeRecord,
+                features: []
+            })).save({
+                success: function (record, operation) {
+                    deferred.resolve({planRecord: record, timeframeRecord: timeframeRecord});
+                },
+                failure: function (record, operation) {
+                    deferred.reject(operation.error.status + ' ' + operation.error.statusText);
+                },
+                scope: this
+            });
+
+            return deferred;
+        }
+    });
+}).call(this);
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.PlanningBoard', {
+        extend: 'Rally.ui.cardboard.CardBoard',
+        alias: 'widget.roadmapplanningboard',
+
+        inject: ['preliminaryEstimateStore'],
+
+        requires: [
+            'Rally.data.util.PortfolioItemHelper',
+            'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
+            'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
+            'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
+            'Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper',
+            'Rally.apps.roadmapplanningboard.util.PlanGenerator',
+            'Rally.ui.Button',
+            'Rally.ui.grid.TreeGrid',
+            'Rally.data.PreferenceManager'
+        ],
+
+        cls: 'roadmap-board cardboard',
+
+        statics: {
+            PREFERENCE_NAME: 'roadmapplanningboard.header.expanded'
+        },
+
+        config: {
+            roadmap: null,
+            timeline: null,
+            isAdmin: false,
+            showHeader: true,
+            storeConfig: {
+                useShallowFetch: true,
+                enablePostGet: true
+            },
+            cardConfig: {
+                editable: true,
+                skipDefaultFields: true,
+                customFieldConfig: {
+                    UserStories: {
+                        popoverConfig: {
+                            placement: ['bottom', 'right', 'left', 'top'],
+                            listViewConfig: {
+                                addNewConfig: {
+                                    showAddWithDetails: false
+                                },
+                                gridConfig: {
+                                    columnCfgs: [
+                                        'FormattedID',
+                                        'Name',
+                                        {
+                                            dataIndex: 'ScheduleState', // 'dataIndex' is the actual field name
+                                            text: 'State' // 'text' is the display name
+                                        },
+                                        {
+                                            dataIndex: 'PlanEstimate',
+                                            editor: {
+                                                decimalPrecision: 0
+                                            }
+                                        },
+                                        'Project'
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            columnConfig: {
+                additionalFetchFields: ['PreliminaryEstimate', 'RefinedEstimate']
+            },
+            ddGroup: 'planningBoard',
+            dropAllowed: "planningBoard",
+            dropNotAllowed: "planningBoard",
+
+            /**
+             * @cfg {Object} Object containing Names and TypePaths of the lowest level portfolio item (eg: 'Feature') and optionally its parent (eg: 'Initiative')
+             */
+            typeNames: {}
+        },
+
+        initComponent: function () {
+            this.timeframePlanStoreWrapper = Ext.create('Rally.apps.roadmapplanningboard.util.TimeframePlanStoreWrapper', {
+                requester: this,
+                roadmap: this.roadmap,
+                timeline: this.timeline
+            });
+
+            if(!this.typeNames.child || !this.typeNames.child.name) {
+                throw 'typeNames must have a child property with a name';
+            }
+
+            this.mergeConfig(this.config);
+
+            this.callParent(arguments);
+        },
+
+        refresh: function (options) {
+            options = options || {};
+
+            if (options.rebuildBoard) {
+                this.showMask('Refreshing the board...');
+                this.addCls('loading');
+
+                return this._loadColumnData().then({
+                    success: function () {
+                        var firstTimeframeColumn = this.getColumns()[1]; // first visible timeframe column
+                        var firstTimeframeRecord = firstTimeframeColumn && firstTimeframeColumn.timeframeRecord;
+
+                        this.buildColumns({
+                            firstTimeframe: firstTimeframeRecord,
+                            render: true
+                        });
+                    },
+                    scope: this
+                }).then({
+                    success: this._refreshBacklog,
+                    scope: this
+                }).always(function () {
+                    this.hideMask();
+                    this.removeCls('loading');
+                }, this);
+            } else {
+                var deferred = new Deft.Deferred();
+                this.on('load', function () { deferred.resolve(); }, this, {single: true});
+
+                this.callParent(arguments);
+
+                return deferred.promise;
+            }
+        },
+
+        shouldRetrieveModels: function () {
+            return !this.columns || this.columns.length === 0;
+        },
+
+        onModelsRetrieved: function (callback) {
+            return this._loadColumnData().then({
+                success: function () {
+                    this.buildColumns();
+                    callback.call(this);
+                },
+                scope: this
+            });
+        },
+
+        _loadColumnData: function () {
+            return Deft.Promise.all([this.timeframePlanStoreWrapper.load(), this._loadPreliminaryStore()]).then({
+                failure: function (operation) {
+                    var service = operation.storeServiceName || 'External';
+                    Rally.ui.notify.Notifier.showError({message: 'Failed to load: ' + service + ' service data load issue'});
+                },
+                scope: this
+            });
+        },
+
+        drawAddNewColumnButton: function () {
+            var column = this.getRightmostColumn();
+            if (column.rendered && this.isAdmin) {
+                if (this.addNewColumnButton) {
+                    this.addNewColumnButton.destroy();
+                }
+                this.addNewColumnButton = Ext.create('Rally.ui.Button', {
+                    border: 1,
+                    text: '<i class="icon-add"></i>',
+                    elTooltip: 'Add Timeframe',
+                    cls: 'scroll-button right',
+                    height: 28,
+                    frame: false,
+                    handler: this._addNewColumn,
+                    renderTo: column.getHeaderTitle().getEl(),
+                    scope: this,
+                    userAction: 'rpb add timeframe'
+                });
+            }
+        },
+
+        getRightmostColumn: function () {
+            return _.last(this.getColumns());
+        },
+
+        _loadPreliminaryStore: function() {
+            return this.preliminaryEstimateStore.load();
+        },
+
+        /**
+         * @inheritDoc
+         */
+        renderColumns: function () {
+            this.callParent(arguments);
+
+            if(this.firstLoad) {
+                var titleField = this.getColumns()[1].columnHeader.down('rallyclicktoeditfieldcontainer');
+                if(titleField) {
+                    titleField.goToEditMode();
+                }
+
+                this.firstLoad = false;
+            }
+
+            this.drawAddNewColumnButton();
+        },
+
+        /**
+         * This method will build an array of columns from timeframe and plan stores
+         * @returns {Array} columns
+         */
+        buildColumns: function () {
+            var planColumns = _.map(this.timeframePlanStoreWrapper.getTimeframeAndPlanRecords(), function (record) {
+                return this._addColumnFromTimeframeAndPlan(record.timeframe, record.plan);
+            }, this);
+
+            this.columns = [this._getBacklogColumnConfig()].concat(planColumns);
+
+            return this.columns;
+        },
+
+        _getBacklogColumnConfig: function () {
+            return {
+                xtype: 'backlogplanningcolumn',
+                types: this.types,
+                typeNames: this.typeNames,
+                planStore: this.timeframePlanStoreWrapper.planStore,
+                enableCrossColumnRanking: false,
+                cls: 'column backlog',
+                cardConfig: {
+                    preliminaryEstimateStore: this.preliminaryEstimateStore
+                }
+            };
+        },
+
+        /**
+         * Return the backlog column if it exists
+         * @returns {Rally.apps.roadmapplanningboard.BacklogBoardColumn} column The backlog column of the cardboard
+         */
+        getBacklogColumn: function () {
+            var columns = this.getColumns();
+
+            if (!Ext.isEmpty(columns)) {
+                return columns[0];
+            } else {
+                return null;
+            }
+        },
+
+        /**
+         * Get the first record of the cardboard
+         * @returns {Rally.data.Record}
+         */
+        getFirstRecord: function () {
+            var cards;
+            var record = null;
+            var column = this.getBacklogColumn();
+
+            if (column) {
+                cards = column.getCards();
+                if (!Ext.isEmpty(cards)) {
+                    record = cards[0].getRecord();
+                }
+            }
+            return record;
+        },
+
+        _addNewColumn: function (options) {
+            options = options || {};
+
+            this.addNewColumnButton.setDisabled(true);
+
+            var getRecordPromise;
+
+            if (options.timeframeRecord && options.planRecord) {
+                var deferred = new Deft.Deferred();
+                deferred.resolve({
+                    timeframeRecord: options.timeframeRecord,
+                    planRecord: options.planRecord
+                });
+                getRecordPromise = deferred.promise;
+            } else {
+                getRecordPromise = this._addNewPlanRecord();
+            }
+
+            return getRecordPromise.then({
+                success: function (records) {
+                    var column = this.addNewColumn(this._addColumnFromTimeframeAndPlan(records.timeframeRecord, records.planRecord));
+                    column.columnHeader.down('rallyclicktoeditfieldcontainer').goToEditMode();
+                    return column;
+                },
+                failure: function (error) {
+                    this.addNewColumnButton.setDisabled(false);
+                    Rally.ui.notify.Notifier.showError({message: 'Failed to create new column: ' + error});
+                },
+                scope: this
+            });
+        },
+
+        _addNewPlanRecord: function (options) {
+            var generator = Ext.create('Rally.apps.roadmapplanningboard.util.PlanGenerator', {
+                timeframePlanStoreWrapper: this.timeframePlanStoreWrapper,
+                roadmap: this.roadmap
+            });
+
+            return generator.createPlanWithTimeframe(options);
+        },
+
+        addNewColumn: function (columnConfig) {
+            var columnEls = this.createColumnElements('after', _.last(this.getColumns()));
+            var column = this.addColumn(columnConfig, this.getColumns().length);
+            this.renderColumn(column, columnEls);
+
+            this.drawAddNewColumnButton();
+
+            return column;
+        },
+
+        destroy: function () {
+            this.callParent(arguments);
+        },
+
+        _addColumnFromTimeframeAndPlan: function (timeframe, plan) {
+            return {
+                xtype: 'timeframeplanningcolumn',
+                timeframeRecord: timeframe,
+                planRecord: plan,
+                timeframePlanStoreWrapper: this.timeframePlanStoreWrapper,
+                types: this.types,
+                typeNames: this.typeNames,
+                columnHeaderConfig: {
+                    record: timeframe,
+                    fieldToDisplay: 'name',
+                    editable: this.isAdmin
+                },
+                cardConfig: {
+                    preliminaryEstimateStore: this.preliminaryEstimateStore
+                },
+                editPermissions: {
+                    capacityRanges: this.isAdmin,
+                    theme: this.isAdmin,
+                    timeframeDates: this.isAdmin,
+                    deletePlan: this.isAdmin
+                },
+                enableCrossColumnRanking: true,
+                dropControllerConfig: {
+                    dragDropEnabled: this.isAdmin
+                },
+                isMatchingRecord: function (featureRecord) {
+                    return plan && _.find(plan.get('features'), function (feature) {
+                        return (feature.id === featureRecord.get('_refObjectUUID'));
+                    });
+                },
+                listeners: {
+                    deleteplan: this._deleteTimeframePlanningColumn,
+                    daterangechange: this._onColumnDateRangeChange,
+                    scope: this
+                }
+            };
+        },
+
+        _onColumnDateRangeChange: function (column) {
+            // resorting of columns handled in RoadmapScrollable plugin
+        },
+
+        _deleteTimeframePlanningColumn: function (column) {
+            this.pendingDeletions = this.pendingDeletions || [];
+            this.pendingDeletions.push(column.planRecord);
+
+            var deletingLastColumn = (this.timeframePlanStoreWrapper.planStore.count() - this.pendingDeletions.length) < 1;
+
+            if (column.deletePlanButton) {
+                column.deletePlanButton.hide();
+            }
+
+            if (deletingLastColumn) {
+                return this._addNewPlanRecord({resetDates: true}).then({
+                    success: function (options) {
+                        this._deletePlan(column).then({
+                            success: function () {
+                                this._addNewColumn(options);
+                            },
+                            scope: this
+                        });
+                    },
+                    scope: this
+                });
+            }
+
+            return this._deletePlan(column);
+        },
+
+        _deletePlan: function (column) {
+            var timeframeName = column.timeframeRecord.get('name');
+            var planRecordToDelete = column.planRecord;
+            var columnHadFeatures = column.planRecord.get('features').length;
+
+            return this.timeframePlanStoreWrapper.deletePlan(column.planRecord).then({
+                success: function () {
+                    this.destroyColumn(column);
+                    this.pendingDeletions = _.reject(this.pendingDeletions, function (record) {
+                        return record.getId() === planRecordToDelete.getId();
+                    });
+                    if (columnHadFeatures) {
+                        this._refreshBacklog();
+                    }
+                    Rally.ui.notify.Notifier.showConfirmation({message: 'Column "' + timeframeName + '" deleted.'});
+                },
+                failure: function (error) {
+                    Rally.ui.notify.Notifier.showError({message: error});
+                },
+                scope: this
+            });
+        },
+
+        _isColumnOutOfOrder: function (currentColumn) {
+            var columns = this.getColumns();
+            var currentColumnIndex = _.findIndex(columns, function (column) {
+                return column.getId() === currentColumn.getId();
+            }, this);
+
+            var previousColumn = columns[currentColumnIndex - 1] || null;
+            var nextColumn = columns[currentColumnIndex + 1] || null;
+
+            var previousTimeframe = previousColumn && previousColumn.timeframeRecord;
+            var nextTimeframe = nextColumn && nextColumn.timeframeRecord;
+
+            var startsAfterPreviousTimeframe = !previousTimeframe || (currentColumn.timeframeRecord.get('endDate') > previousTimeframe.get('endDate'));
+            var endsBeforeNextTimeframe = !nextTimeframe || (currentColumn.timeframeRecord.get('endDate') < nextTimeframe.get('endDate'));
+
+            return !startsAfterPreviousTimeframe || !endsBeforeNextTimeframe;
+        },
+
+        _refreshBacklog: function () {
+            this.getColumns()[0].refresh();
+        }
+
+    });
+
+})();
+
+                (function() {
+    var Ext = window.Ext4 || window.Ext;
+
+    /**
+     * @private
+     * Allows the Roadmap Planning Board CardBoard to be scrolled forwards and backwards
+     */
+    Ext.define('Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', {
+        alias: 'plugin.rallytimeframescrollablecardboard',
+        extend: 'Rally.ui.cardboard.plugin.Scrollable',
+
+        requires: [
+            'Rally.apps.roadmapplanningboard.PlaceholderColumn'
+        ],
+
+        /**
+         * @cfg {Number} timeframeColumnCount The number of timeframe columns
+         */
+        timeframeColumnCount: 4,
+
+        currentTimeframeIndex: 0,
+
+        /**
+         * @cfg {String} columnConfig The xtype of the columns created if the available columns is less than {Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable#timeframeColumnCount}
+         */
+        columnConfig: {
+            xtype: 'cardboardplaceholdercolumn'
+        },
+
+        init: function (cmp) {
+            this.originalBuildColumns = cmp.buildColumns;
+            cmp.buildColumns = Ext.bind(this.buildColumns, this);
+
+            this.originalDrawAddNewColumnButton = cmp.drawAddNewColumnButton;
+            cmp.drawAddNewColumnButton = Ext.bind(this.drawAddNewColumnButton, this);
+            cmp.addNewColumn = Ext.bind(this.addNewColumn, this);
+
+            this.originalDestroyColumn = cmp.destroyColumn;
+            cmp.destroyColumn = Ext.bind(this.destroyColumn, this);
+
+            this.originalOnColumnDateRangeChange = cmp._onColumnDateRangeChange;
+            cmp._onColumnDateRangeChange = Ext.bind(this._onColumnDateRangeChange, this);
+            
+            this.originalFilter = cmp.filter;
+            cmp.filter = Ext.bind(this.filter, this);
+            
+
+            this.callParent(arguments);
+        },
+
+        filter: function (filter, clearFilterKeys, ignoreDefaultFilters) {
+            // Add temp filters so that when we scroll the filters will be applied to the newly created columns
+            // We have to do this because the roadmap board is different than every other cardboard and doesn't maintain a list of column instances.
+            // Instead, it stores column configs and creates new columns when scrolling. We cannot add the filter to the column store configs because
+            // the filter will be added permanently to the store and will not be cleared when the filter is changed by a user.
+            // Puppies weep.
+            this.cmp.filterCollection = this.cmp.filterCollection || Ext.create('Rally.data.filter.FilterCollection');
+            this.cmp.filterCollection.clearTempFilters();
+            this.cmp.filterCollection.addTempFilter(filter);
+
+            this.originalFilter.call(this.cmp, filter, clearFilterKeys, ignoreDefaultFilters);
+        },
+        
+        drawAddNewColumnButton: function () {
+            if (this._isForwardsButtonHidden()) {
+                this.originalDrawAddNewColumnButton.call(this.cmp);
+            }
+        },
+
+        buildColumns: function (options) {
+            options = options || {};
+
+            var columns = this.originalBuildColumns.call(this.cmp, options);
+
+            this.backlogColumn = columns[0];
+            this.scrollableColumns = columns.slice(1);
+
+            this._sortColumns();
+
+            this.currentTimeframeIndex = this._getIndexOfFirstColumnToShow(options.firstTimeframe);
+
+            this._addPlaceholderColumns();
+
+            if (options.render) {
+                this._hideColumns();
+                this._syncColumns();
+            } else {
+                this.cmp.columns = [this.backlogColumn].concat(this._getColumnsToShow());
+            }
+
+            return this.cmp.columns;
+        },
+
+        _onColumnDateRangeChange: function (updatedColumn) {
+            this._sortColumns();
+
+            var columnMovedOffBoard = !_.some(this._getColumnsToShow(), function (column) {
+                return column.timeframeRecord && column.timeframeRecord.getId() === updatedColumn.timeframeRecord.getId();
+            });
+
+            if (columnMovedOffBoard) {
+                this.currentTimeframeIndex = updatedColumn.index; // Scroll to updated column
+            }
+
+            this._hideColumn(updatedColumn);
+            this._syncColumns();
+
+            this.originalOnColumnDateRangeChange.call(this.cmp, updatedColumn);
+        },
+
+        _sortColumns: function () {
+            this.scrollableColumns.sort(function (columnA, columnB) {
+                var timeframeA = columnA.timeframeRecord;
+                var timeframeB = columnB.timeframeRecord;
+
+                if (!timeframeA && !timeframeB) {
+                    return 0;
+                } else if (!timeframeA) {
+                    return 1;
+                } else if (!timeframeB) {
+                    return -1;
+                }
+
+                return timeframeA.get('endDate') > timeframeB.get('endDate') ? 1 : -1;
+            });
+
+            this._reindexColumns();
+        },
+
+        _getIndexOfFirstColumnToShow: function (firstTimeframe) {
+            var firstColumnToShow = this._getColumnForTimeframe(firstTimeframe) || this._getFirstPresentColumn() || this._getMostRecentPastColumn();
+            return firstColumnToShow.index || 0;
+        },
+
+        _getColumnForTimeframe: function (timeframe) {
+            return timeframe && _.find(this.scrollableColumns, function (column) {
+                return column.timeframeRecord && column.timeframeRecord.getId() === timeframe.getId();
+            });
+        },
+
+        _getMostRecentPastColumn: function () {
+            return _.max(this.scrollableColumns, function (column) {
+                return column.timeframeRecord && column.timeframeRecord.get('endDate');
+            });
+        },
+
+        _getFirstPresentColumn: function () {
+            var now = new Date();
+            var format = 'Y-m-d';
+
+            return _.find(this.scrollableColumns, function (column) {
+                return column.timeframeRecord && Ext.Date.format(column.timeframeRecord.get('endDate'), format) >= Ext.Date.format(now, format);
+            });
+        },
+
+        _isBackwardsButtonHidden: function () {
+            return this.getFirstVisibleScrollableColumn().index === 0;
+        },
+
+        _isForwardsButtonHidden: function () {
+            return this.getLastVisibleScrollableColumn().index === this.scrollableColumns.length - 1;
+        },
+
+        _syncColumns: function () {
+            this._reindexColumns();
+            this._adjustCurrentColumnIndex();
+            this._updatePlaceholderColumns();
+            this._renderScrollableColumns();
+            this._renderButtons();
+        },
+
+        _scroll: function (forwards) {
+            this.currentTimeframeIndex += forwards ? 1 : -1;
+
+            this._syncColumns();
+
+            this.cmp.fireEvent('scroll', this.cmp);
+        },
+
+        addNewColumn: function (columnConfig) {
+            var placeHolderColumn = this._getFirstPlaceholderColumn();
+
+            if (placeHolderColumn) {
+                this.scrollableColumns.splice(placeHolderColumn.index, 0, columnConfig);
+            } else {
+                this.scrollableColumns.push(columnConfig);
+                this.currentTimeframeIndex++;
+            }
+
+            this._syncColumns();
+
+            return this._getVisibleColumn(columnConfig);
+        },
+
+        destroyColumn: function (columnToDelete) {
+            this.scrollableColumns.splice(columnToDelete.index, 1);
+            this._hideColumn(columnToDelete);
+            this._syncColumns();
+        },
+
+        _hideColumn: function (column) {
+            this.originalDestroyColumn.call(this.cmp, column);
+        },
+
+        _hideColumns: function () {
+            _.each(this.cmp.getColumns().slice(1), function (column) {
+                this._hideColumn(column);
+            }, this);
+        },
+
+        _renderScrollableColumns: function () {
+            var columnsToHide = _.reject(this.getScrollableColumns(), this._shouldShowColumn, this);
+            _.each(columnsToHide, this._hideColumn, this);
+            _.each(this._getColumnsToShow(), function (columnConfig) {
+                var columnNotVisible = !this._getVisibleColumn(columnConfig);
+
+                if (columnNotVisible) {
+                    this._drawColumn(columnConfig);
+                }
+            }, this);
+        },
+
+        _drawColumn: function (columnConfig) {
+            var displayIndex = this._getDisplayIndexForScrollableColumn(columnConfig);
+            var column = this.cmp.addColumn(columnConfig, displayIndex);
+            column.on('ready', this._onNewlyAddedColumnReady, this, {single: true});
+            this.cmp.renderColumn(column, this._createColumnEls(displayIndex));
+        },
+
+        _shouldShowColumn: function (column) {
+            return column.index >= this.currentTimeframeIndex && column.index < this.currentTimeframeIndex + this.timeframeColumnCount;
+        },
+
+        _getColumnsToShow: function () {
+            return _.filter(this.scrollableColumns, function (column) {
+                return this._shouldShowColumn(column);
+            }, this);
+        },
+
+        _getVisibleColumn: function (columnConfig) {
+            return _.find(this.getScrollableColumns(), function (visibleColumn) {
+                if (columnConfig.planRecord && visibleColumn.planRecord) {
+                    return columnConfig.planRecord.getId() === visibleColumn.planRecord.getId();
+                }
+
+                return _.has(columnConfig, 'placeholderId') && (columnConfig.placeholderId === visibleColumn.placeholderId);
+            });
+        },
+
+        _createColumnEls: function (displayIndex) {
+            return this.cmp.createColumnElements('after', this.cmp.getColumns()[displayIndex - 1]);
+        },
+
+        _updatePlaceholderColumns: function () {
+            this._removePlaceholderColumns();
+            this._addPlaceholderColumns();
+        },
+
+        _addPlaceholderColumns: function() {
+            var numPlaceholderColumnsToAdd = this.currentTimeframeIndex + this.timeframeColumnCount - this.scrollableColumns.length;
+
+            var placeholderColumns = _.times(numPlaceholderColumnsToAdd, function (index) {
+                return Ext.merge({
+                    placeholderId: index,
+                    index: index + this.scrollableColumns.length
+                }, this.columnConfig);
+            }, this);
+
+            this.scrollableColumns = this.scrollableColumns.concat(placeholderColumns);
+        },
+
+        _removePlaceholderColumns: function() {
+            this.scrollableColumns = _.reject(this.scrollableColumns, this._isPlaceholderColumn);
+        },
+
+        _reindexColumns: function () {
+            _.each(this.scrollableColumns, function (column, index) {
+                column.index = index;
+
+                var visibleColumn = this._getVisibleColumn(column);
+                if (visibleColumn) {
+                    visibleColumn.index = index;
+                }
+            }, this);
+        },
+
+        _adjustCurrentColumnIndex: function() {
+            var timeframeColumnsToShow = _.filter(this._getColumnsToShow(), function (column) {
+                return !this._isPlaceholderColumn(column);
+            }, this);
+
+            if (_.isEmpty(timeframeColumnsToShow) && this.currentTimeframeIndex > 0) {
+                this.currentTimeframeIndex--;
+            }
+        },
+
+        _getDisplayIndexForScrollableColumn: function (scrollableColumn) {
+            return scrollableColumn.index - this.currentTimeframeIndex + 1;
+        },
+
+        _renderButtons: function () {
+            this.drawAddNewColumnButton();
+            this._afterScroll();
+        },
+
+        _isPlaceholderColumn: function (column) {
+            return column.xtype === 'cardboardplaceholdercolumn';
+        },
+
+        _getFirstPlaceholderColumn: function () {
+            return _.find(this.getScrollableColumns(), this._isPlaceholderColumn);
+        },
+
+        _onNewlyAddedColumnReady: function () {
+            this.cmp.applyLocalFilters();
+        },
+
+        _sizeButtonToColumnHeader: function (button, column) {
+            button.getEl().setHeight(column.getHeaderTitle().getHeight() - 17).setStyle('margin-top', '16px');
+        },
+
+        getFirstVisibleScrollableColumn: function () {
+            return this.getScrollableColumns()[0];
+        },
+
+        getLastVisibleScrollableColumn: function () {
+            return _.last(this.getScrollableColumns());
+        },
+
+        getScrollableColumns: function () {
+            var columns = this.cmp.getColumns();
+            return columns ? columns.slice(1) : [];
+        }
+    });
+})();
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.plugin.RoadmapCollapsableFixedHeader', {
+        alias: 'plugin.rallyroadmapcollapsableheader',
+
+        extend: 'Rally.ui.cardboard.plugin.FixedHeader',
+
+        requires: [
+            'Rally.data.PreferenceManager'
+        ],
+
+        statics: {
+            PREFERENCE_NAME: 'roadmapplanningboard.header.expanded'
+        },
+
+        clientMetrics: [
+            {
+                method: '_toggleHeaders',
+                descriptionProperty: 'getClickActionDescription'
+            }
+        ],
+
+        init: function (cmp) {
+            this.originalRenderColumns = cmp.renderColumns;
+            cmp.renderColumns = Ext.bind(this.renderColumns, this);
+
+            this.callParent(arguments);
+        },
+
+        destroy: function () {
+            this._destroyHeaderButton();
+        },
+
+        renderColumns: function () {
+            this._readPreference().then({
+                success: function () {
+                    this.originalRenderColumns.call(this.cmp);
+                    this._drawHeaderToggle();
+                },
+                scope: this
+            });
+        },
+
+        _drawHeaderToggle: function () {
+            this._destroyHeaderButton();
+
+            this.headerToggleButton = Ext.create('Rally.ui.Button', {
+                cls: 'header-toggle-button',
+                listeners: {
+                    click: this._toggleHeaders,
+                    scope: this
+                },
+                renderTo: Ext.getBody().down('.fixed-header-card-board-header-container')
+            });
+
+            this._updateHeaderToggleButton();
+        },
+
+        _updateHeaderToggleButton: function () {
+            if(this.cmp.showHeader) {
+                this._addHeaderToggleTooltip('Collapse header');
+                this.headerToggleButton.setIconCls('icon-chevron-up');
+            } else {
+                this._addHeaderToggleTooltip('Expand header');
+                this.headerToggleButton.setIconCls('icon-chevron-down');
+            }
+
+            this.headerToggleButton.show();
+        },
+
+        _addHeaderToggleTooltip: function(content) {
+            if (this.headerToggleTooltip) {
+                this.headerToggleTooltip.destroy();
+            }
+
+            this.headerToggleTooltip = Ext.create('Rally.ui.tooltip.ToolTip', {
+                target: this.headerToggleButton.getEl(),
+                showDelay: 1000,
+                html: '<span>' + content + '</span>',
+                anchorOffset: 6,
+                mouseOffset: [0, -8]
+            });
+        },
+
+        _toggleHeaders: function () {
+            this.cmp.showHeader = !this.cmp.showHeader;
+            this.headerToggleButton.hide();
+            this._updateHeaderToggleButton();
+            this._updateHeaderContainers().then({
+                success: function () {
+                    this.cmp.fireEvent('headersizechanged', this.cmp);
+                },
+                scope: this
+            });
+            this._savePreference(this.cmp.showHeader);
+        },
+
+        _savePreference: function(val) {
+            var settings = {},
+                name = Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME;
+
+            settings[name] = val;
+            return Rally.data.PreferenceManager.update({
+                settings: settings,
+                filterByUser: true,
+                filterByName: name
+            });
+        },
+
+        _readPreference: function() {
+            return Rally.data.PreferenceManager.load({
+                filterByUser: true,
+                filterByName: Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME
+            }).then({
+                success: function (result) {
+                    var name = Rally.apps.roadmapplanningboard.PlanningBoard.PREFERENCE_NAME;
+                    this.cmp.showHeader = !result.hasOwnProperty(name) || result[name] === 'true';
+                },
+                scope: this
+            });
+        },
+
+        getClickActionDescription: function () {
+            return 'Roadmap header expansion toggled from [' + !this.cmp.showHeader + '] to [' + this.cmp.showHeader + ']';
+        },
+
+        _updateHeaderContainers: function () {
+            var headerContainers = _.map(this.cmp.getEl().query('.roadmap-header-collapsable'), Ext.get);
+            var promises = _.map(headerContainers, this._toggleHeaderContainer, this);
+
+            return Deft.Promise.all(promises);
+        },
+
+        _toggleHeaderContainer: function (el) {
+            var deferred = new Deft.Deferred();
+
+            el.removeCls('header-collapsed');
+            el.animate({
+                duration: this.cmp.showHeader ? 1000 : 250,
+                to: {
+                    height: this.cmp.showHeader ? '100%' : '0',
+                    opacity: this.cmp.showHeader ? 1.0 : 0
+                },
+                listeners: {
+                    afteranimate: function() {
+                        if (!this.cmp.showHeader) {
+                            el.addCls('header-collapsed');
+                        }
+                        deferred.resolve();
+                    },
+                    scope: this
+                }
+            });
+
+            return deferred.promise;
+        },
+
+        _destroyHeaderButton: function () {
+            if(this.headerToggleButton) {
+                this.headerToggleButton.destroy();
+            }
+        }
+    });
+})();
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.PlanningGridBoard', {
+        extend: 'Rally.ui.gridboard.GridBoard',
+        alias: 'widget.roadmapplanninggridboard',
+        requires: [
+            'Rally.ui.gridboard.plugin.GridBoardAddNew',
+            'Rally.ui.gridboard.plugin.GridBoardFilterControl',
+            'Rally.ui.filter.view.CustomQueryFilter',
+            'Rally.ui.filter.view.ParentFilter',
+            'Rally.ui.filter.view.OwnerPillFilter',
+            'Rally.ui.filter.view.TagPillFilter',
+            'Rally.ui.gridboard.plugin.GridBoardFeedback',
+            'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
+            'Rally.apps.roadmapplanningboard.PlanningBoard',
+            'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable',
+            'Rally.apps.roadmapplanningboard.plugin.RoadmapCollapsableFixedHeader'
+        ],
+
+        cls: 'rui-gridboard roadmap-board',
+
+        toggleState: 'board',
+        stateId: 'roadmapgridboard',
+
+        config: {
+            /**
+             * @cfg {Rally.data.Model} The roadmap to use
+             */
+            roadmap: null,
+
+            /**
+             * @cfg {Rally.data.Model} The timeline to use
+             */
+            timeline: null,
+
+            /**
+             * @cfg {Object} A Rally context
+             */
+            context: null,
+
+            /**
+             * @cfg {Object} Object containing Names and TypePaths of the lowest level portfolio item (eg: 'Feature') and optionally its parent (eg: 'Initiative')
+             */
+            typeNames: {},
+
+            /**
+             * @cfg {Boolean} If the user is an admin
+             */
+            isAdmin: false
+        },
+
+        initComponent: function () {
+            if(!this.typeNames.child || !this.typeNames.child.name) {
+                throw 'typeNames must have a child property with a name';
+            }
+
+            this.addNewPluginConfig = {
+                listeners: {
+                    beforecreate: this._onBeforeCreate,
+                    beforeeditorshow: this._onBeforeCreate
+                },
+                style: {
+                    'float': 'left'
+                },
+                fieldLabel: 'New ' + this.typeNames.child.name
+            };
+
+            this.plugins = [
+                'rallygridboardaddnew',
+                {
+                    ptype: 'rallygridboardfiltercontrol',
+                    filterControlConfig: {
+                        cls: 'small gridboard-filter-control',
+                        margin: '3 10 3 7',
+                        stateful: true,
+                        stateId: this.context.getScopedStateId('roadmapplanningboard-filter-button'),
+                        items: this._getFilterItems()
+                    }
+                },
+                {
+                    ptype: 'rallygridboardfieldpicker',
+                    headerPosition: 'left',
+                    boardFieldDefaults: ['PreliminaryEstimate', 'Discussions', 'UserStories', 'Name'],
+                    gridFieldBlackList: ['DragAndDropRank', 'DisplayColor'],
+                    stateful: true,
+                    stateId: this.getContext().getScopedStateId('fields')
+                },
+                {
+                    ptype: 'rallygridboardfeedback',
+                    feedbackDialogConfig: {
+                        title: 'What do you think about the Roadmap Planning Board?',
+                        subject: 'Roadmap Planning Board',
+                        feedbackId: 'roadmapplanningboard',
+                        helpInfo: {
+                            id: 282,
+                            text: "What's coming soon?"
+                        }
+                    }
+                }
+            ];
+
+            this.cardBoardConfig = {
+                xtype: 'roadmapplanningboard',
+                context: this.context,
+                roadmap: this.roadmap,
+                timeline: this.timeline,
+                isAdmin: this.isAdmin,
+                types: this.modelNames,
+                typeNames: this.typeNames,
+                firstLoad: this.firstLoad,
+                attribute: 'Name',
+                plugins: [
+                    { ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 3 },
+                    { ptype: 'rallyroadmapcollapsableheader' }
+                ]
+            };
+
+            this.callParent(arguments);
+        },
+
+        _createPillFilterItem: function(typeName, config) {
+            return Ext.apply({
+                xtype: typeName,
+                margin: '-15 0 5 0',
+                showPills: true,
+                showClear: true
+            }, config);
+        },
+
+        _getFilterItems: function () {
+            var filterItems = [];
+
+            if (this.typeNames.parent) {
+                filterItems.push({
+                    xtype: 'rallyparentfilter',
+                    modelType: this.typeNames.parent.typePath,
+                    modelName: this.typeNames.parent.name,
+                    prependFilterFieldWithFormattedId: true,
+                    storeConfig: {
+                        context: {
+                            project: null
+                        }
+                    }
+                });
+            }
+
+            filterItems.push(
+                this._createPillFilterItem('rallyownerpillfilter', {
+                    filterChildren: false,
+                    project: this.context.getProject(),
+                    showPills: false
+                }),
+                this._createPillFilterItem('rallytagpillfilter', {remoteFilter: true}),
+                { xtype: 'rallycustomqueryfilter', filterHelpId: 194 }
+            );
+
+            return filterItems;
+        },
+
+        /**
+         * This method is fired by AddNew and will run before the artifact is created.
+         * Scoping will be the GridBoardAddNew plugin (because of issues with deep merging of the listener config and the scope)
+         * @private
+         */
+        _onBeforeCreate: function (addNew, record, params) {
+            // the order of arguments is different between beforecreate and beforeeditorshow
+            if (!record.isModel) {
+                params = record;
+            }
+            var rankRecord = this.gridboard.getGridOrBoard().getFirstRecord();
+            if (rankRecord) {
+                params.rankAbove = rankRecord.getUri();
+            }
+        }
+    });
+
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    /**
+     * @private
+     */
+    Ext.define('Rally.apps.roadmapplanningboard.SplashContainer', {
+        alias: 'widget.splashcontainer',
+        extend: 'Ext.container.Container',
+        requires: [
+            'Rally.ui.carousel.Carousel',
+            'Rally.data.PreferenceManager',
+            'Rally.util.Help'
+        ],
+        cls: 'roadmap-splash-container',
+        itemId: 'roadmap-splash-container',
+
+        layout: {
+            type: 'vbox',
+            pack: 'center',
+            align: 'center'
+        },
+
+        config: {
+            showGetStarted: false,
+            showGotIt: true
+        },
+
+        statics: {
+            PREFERENCE_NAME: 'RoadmapSplashPreference',
+
+            loadPreference: function () {
+                return Rally.data.PreferenceManager.load({
+                    filterByUser: true,
+                    filterByName: Rally.apps.roadmapplanningboard.SplashContainer.PREFERENCE_NAME
+                });
+            }
+        },
+
+        initComponent: function () {
+            this.callParent(arguments);
+
+            var carouselItems = _.times(5, function (index) {
+                return {
+                    xtype: 'component',
+                    cls: 'start-screen start-screen-' + (index + 1),
+                    width: 655,
+                    height: 385
+                };
+            });
+
+            var headerText = 'Create realistic feature roadmap plans that consider feature size, business value, development risk, and overall development capacity.';
+            var helpLink = Rally.util.Help.getLinkTag({
+                id: 281,
+                text: 'What about my Release?'
+            });
+
+            this.add([
+                {
+                    xtype: 'rallycarousel',
+                    itemId: 'carousel',
+                    showHeader: true,
+                    headerConfig: {
+                        title: 'Introducing the new Roadmap Planning Board!',
+                        text: headerText + ' ' + helpLink
+                    },
+
+                    carouselItems: carouselItems
+                }
+            ]);
+
+            var footer = this.down('#carousel').down('#carousel-footer');
+
+            if (this.showGetStarted || this.showGotIt) {
+                footer.add({
+                    xtype: 'rallybutton',
+                    text: this.showGetStarted ? 'Get Started!' : 'Got it!',
+                    itemId: this.showGetStarted ? 'get-started' : 'got-it',
+                    cls: 'splash-action-button primary medium',
+                    handler: function () {
+                        this._savePreference();
+                        this.fireEvent(this.showGetStarted ? 'getstarted' : 'gotit', this);
+                    },
+                    scope: this
+                });
+            }
+
+            footer.add({
+                xtype: 'rallybutton',
+                text: 'Learn more',
+                itemId: 'learn-more',
+                cls: 'secondary medium',
+                href: Rally.util.Help.getHelpUrl({id: 280})
+            });
+
+            this.addEvents(
+                'gotit',
+                'getstarted'
+            );
+        },
+
+        _savePreference: function () {
+            var settings = {};
+            settings[Rally.apps.roadmapplanningboard.SplashContainer.PREFERENCE_NAME] = true;
+            return Rally.data.PreferenceManager.update({
+                settings: settings,
+                filterByUser: true,
+                filterByName: Rally.apps.roadmapplanningboard.SplashContainer.PREFERENCE_NAME
+            });
+        }
+    });
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.util.TimelineRoadmapStoreWrapper', {
+        requires: ['Rally.apps.roadmapplanningboard.DeftInjector'],
+
+        inject: ['timelineStore','roadmapStore'],
+
+        config: {
+            requester: null
+        },
+
+        constructor: function (config) {
+            this.initConfig(config);
+        },
+
+        load: function () {
+            return Deft.Promise.all([
+                this.roadmapStore.load({requester: this.requester, storeServiceName: "Planning"}),
+                this.timelineStore.load({requester: this.requester, storeServiceName: "Timeline"})
+            ]).then(function (results){
+                return {
+                    roadmap: results[0].records[0],
+                    timeline: results[1].records[0]
+                };
+            });
+        },
+
+        activeTimeline: function () {
+            return this.timelineStore.first();
+        },
+
+        activeRoadmap: function () {
+            return this.roadmapStore.first();
+        },
+
+        hasCompleteRoadmapData: function () {
+            return this.hasTimeline() && this.hasRoadmap();
+        },
+
+        hasTimeline: function () {
+            return this.timelineStore.count() > 0;
+        },
+
+        hasRoadmap: function () {
+            return this.roadmapStore.count() > 0;
+        }
+    });
+}).call(this);
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.util.UserPermissions', {
+        config: {
+            workspace: null,
+            permissions: null
+        },
+
+        constructor: function (config) {
+            this.initConfig(config);
+        },
+
+        isUserAdmin: function () {
+            return this.permissions.isSubscriptionAdmin() || this.permissions.isWorkspaceAdmin(this.workspace._ref);
+        }
+    });
+}).call(this);
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.util.RoadmapGenerator', {
+        requires: [
+            'Rally.apps.roadmapplanningboard.AppModelFactory',
+            'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
+        ],
+
+        config: {
+            timelineRoadmapStoreWrapper: null,
+            workspace: null
+        },
+
+        constructor: function (config) {
+            this.initConfig(config);
+        },
+
+        createCompleteRoadmapData: function () {
+            var promiseOptions = {
+                success: function () {
+                    return {
+                        roadmap: this.timelineRoadmapStoreWrapper.activeRoadmap(),
+                        timeline: this.timelineRoadmapStoreWrapper.activeTimeline()
+                    };
+                },
+                scope: this
+            };
+
+            var deferred = new Deft.Deferred();
+
+            if(!this.timelineRoadmapStoreWrapper.hasTimeline() && this.timelineRoadmapStoreWrapper.hasRoadmap()) {
+                deferred.reject('Cannot create a timeline when a roadmap already exists');
+            } else if(!this.timelineRoadmapStoreWrapper.hasTimeline() && !this.timelineRoadmapStoreWrapper.hasRoadmap()) {
+                return this._createTimelineRoadmap().then(promiseOptions);
+            } else if (!this.timelineRoadmapStoreWrapper.hasRoadmap()) {
+                return this._createRoadmap().then(promiseOptions);
+            } else {
+                deferred.resolve(promiseOptions);
+            }
+
+            return deferred.promise;
+        },
+
+        _createTimelineRoadmap: function () {
+            return Deft.promise.Chain.pipeline([this._createTimeline, this._createRoadmap], this);
+        },
+
+        _createRoadmap: function () {
+            var timeline = this.timelineRoadmapStoreWrapper.activeTimeline();
+            var timeframes = timeline.get('timeframes');
+            var deferred = new Deft.Deferred();
+
+            if (!timeframes || !timeframes.length) {
+                deferred.reject('Timeline must contain timeframes');
+            } else {
+                var roadmapRecord = _.first(this.timelineRoadmapStoreWrapper.roadmapStore.add({
+                    name: this.workspace.Name + ' Roadmap',
+                    plans: this._createPlansForNewRoadmap(timeframes)
+                }));
+
+                roadmapRecord.save({
+                    success: function (record, operation) {
+                        deferred.resolve(record);
+                    },
+                    failure: function (record, operation) {
+                        deferred.reject('Unable to create a new roadmap.');
+                    }
+                });
+            }
+
+            return deferred.promise;
+        },
+        
+        _createTimeline: function () {
+            var deferred = new Deft.Deferred();
+
+            var timelineRecord = _.first(this.timelineRoadmapStoreWrapper.timelineStore.add({
+                name: this.workspace.Name + ' Timeline',
+                timeframes: this._createTimeframesForNewTimeline()
+            }));
+
+            timelineRecord.save({
+                success: function (record, operation) {
+                    deferred.resolve(record);
+                },
+                failure: function (record, operation) {
+                    deferred.reject('Unable to create a new timeline.');
+                }
+            });
+    
+            return deferred.promise;
+        },
+
+        _createPlansForNewRoadmap: function (timeframes) {
+            var _this = this;
+
+            return _.map(timeframes, function (timeframe) {
+                return _this._createPlanForNewRoadmap('New Plan', timeframe);
+            });
+        },
+
+        _createPlanForNewRoadmap: function(name, timeframe) {
+            var planModel = Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel();
+
+            return Ext.create(planModel, {
+                name: name,
+                theme: '',
+                timeframe: timeframe,
+                lowCapacity: 0,
+                highCapacity: 0
+            });
+        },
+
+        _createTimeframesForNewTimeline: function () {
+            var dateGenerator = Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator;
+
+            return [
+                this._createTimeframeForNewTimeline('New Timeframe', dateGenerator.getNextStartDate(), dateGenerator.getNextEndDate())
+            ];
+        },
+
+        _createTimeframeForNewTimeline: function (name, startDate, endDate) {
+            var timeframeModel = Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel();
+
+            return Ext.create(timeframeModel, {
+                name: name,
+                startDate: startDate,
+                endDate: endDate
+            });
+        }
+    });
+}).call(this);
+                
+(function() {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', {
+        extend: 'Rally.app.App',
+        requires: [
+            'Rally.data.util.PortfolioItemHelper',
+            'Rally.apps.roadmapplanningboard.SplashContainer',
+            'Rally.ui.notify.Notifier',
+            'Rally.apps.roadmapplanningboard.DeftInjector',
+            'Rally.apps.roadmapplanningboard.PlanningGridBoard',
+            'Rally.apps.roadmapplanningboard.util.TimelineRoadmapStoreWrapper',
+            'Rally.apps.roadmapplanningboard.util.UserPermissions',
+            'Rally.apps.roadmapplanningboard.util.RoadmapGenerator',
+            'Rally.clientmetrics.ClientMetricsRecordable',
+            'Rally.util.BrowserValidation'
+        ],
+        cls: 'roadmap-planning-board',
+        autoScroll: false,
+        mixins: [
+            'Rally.clientmetrics.ClientMetricsRecordable'
+        ],
+        config: {
+            feedbackConfig: {
+                feedbackDialogConfig: {
+                    title: 'Feedback on Roadmap Planning Board',
+                    subject: 'Roadmap Planning Board',
+                    feedbackId: 'roadmapplanningboard'
+                }
+            },
+
+            addNewConfig: {
+                ignoredRequiredFields: ['Name', 'Project', 'ScheduleState', 'State']
+            }
+        },
+
+        launch: function() {
+            Rally.apps.roadmapplanningboard.DeftInjector.init();
+
+            // Assume global context if it wasn't passed
+            this.context = this.context || Rally.environment.getContext();
+
+            this.timelineRoadmapStoreWrapper = Ext.create('Rally.apps.roadmapplanningboard.util.TimelineRoadmapStoreWrapper', {
+                requester: this
+            });
+
+            var userPermissions = Ext.create('Rally.apps.roadmapplanningboard.util.UserPermissions', {
+                workspace: this.context.getWorkspace(),
+                permissions: Rally.environment.getContext().getPermissions()
+            });
+
+            this.isAdmin = userPermissions.isUserAdmin();
+
+            this.lsCacheProvider = Ext.create('Rally.state.LSCacheProvider', {});
+
+            this.browserCheck();
+
+            this.mon(Ext.Ajax, 'requestexception', this._onRequestException, this);
+
+            this._retrievePITypes(function(records) {
+                this.types = [records[0].get('TypePath')];
+                this.typeNames = {
+                    child: {
+                        typePath: records[0].get('TypePath'),
+                        name: records[0].get('Name')
+                    }
+                };
+
+                if (records.length > 1) {
+                    this.typeNames.parent = {
+                        typePath: records[1].get('TypePath'),
+                        name: records[1].get('Name')
+                    };
+                }
+
+                var preferencePromise = Rally.apps.roadmapplanningboard.SplashContainer.loadPreference().then({
+                    success: function(result) {
+                        this.alreadyGotIt = result[Rally.apps.roadmapplanningboard.SplashContainer.PREFERENCE_NAME];
+                    },
+                    scope: this
+                });
+
+                Deft.Promise.all([this.timelineRoadmapStoreWrapper.load(), preferencePromise]).then({
+                    success: function(results) {
+                        var roadmapDataExists = this.timelineRoadmapStoreWrapper.hasCompleteRoadmapData();
+                        if (!roadmapDataExists || !this.alreadyGotIt) {
+                            this.splash = this.add({
+                                xtype: 'splashcontainer',
+                                showGetStarted: this.isAdmin && !roadmapDataExists,
+                                showGotIt: roadmapDataExists,
+                                listeners: {
+                                    gotit: function() {
+                                        this.splash.destroy();
+                                        this._buildGridBoard();
+                                    },
+                                    getstarted: function() {
+                                        this.splash.destroy();
+                                        this._createRoadmapData().then({
+                                            success: function() {
+                                                this._buildGridBoard({
+                                                    firstLoad: true
+                                                });
+                                            },
+                                            failure: function(error) {
+                                                this._displayError('Unable to create roadmap data: ' + error);
+                                            },
+                                            scope: this
+                                        });
+                                    },
+                                    scope: this
+                                }
+                            });
+                        } else {
+                            this._buildGridBoard();
+                        }
+
+                        if (Rally.BrowserTest) {
+                            Rally.BrowserTest.publishComponentReady(this);
+                        }
+                    },
+                    failure: function(operation) {
+                        var service = operation.storeServiceName || 'External';
+                        this._displayError('Failed to load app: ' + service + ' service data load issue');
+                    },
+                    scope: this
+                });
+            });
+        },
+
+        _getBrowserPrefValue: function () {
+            return this.lsCacheProvider.get('RoadmapBrowserCheckPreference', null);
+        },
+
+        _setBrowserPrefValue: function() {
+            return this.lsCacheProvider.set('RoadmapBrowserCheckPreference', true);
+        },
+
+        browserCheck: function() {
+            var browserInfo = Rally.util.BrowserValidation.getCurrentBrowserInfo();
+
+            if (!this._getBrowserPrefValue()) {
+                this._setBrowserPrefValue();
+
+                if (!Rally.util.BrowserValidation.isSupported(browserInfo)) {
+                    Rally.ui.notify.Notifier.showError({
+                        allowHTML: true,
+                        message: browserInfo.displayName + " " + browserInfo.version + ' is not supported. For a better experience, please use a <a target="_blank" href="https://help.rallydev.com/supported-web-browsers">supported browser</a>'
+                    });
+                }
+            }
+        },
+
+        _displayError: function(message) {
+            Rally.ui.notify.Notifier.showError({message: message});
+        },
+
+        _createRoadmapData: function() {
+            var roadmapGenerator = Ext.create('Rally.apps.roadmapplanningboard.util.RoadmapGenerator', {
+                timelineRoadmapStoreWrapper: this.timelineRoadmapStoreWrapper,
+                workspace: this.context.getWorkspace()
+            });
+
+            return roadmapGenerator.createCompleteRoadmapData();
+        },
+
+        _retrievePITypes: function(callback) {
+            Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
+                defaultToLowest: true,
+                loadAllTypes: true,
+                success: callback,
+                scope: this
+            });
+        },
+
+        _buildGridBoard: function(config) {
+            config = config || {};
+
+            var boardConfig = Ext.merge({
+                xtype: 'roadmapplanninggridboard',
+                itemId: 'gridboard',
+                context: this.context,
+                timeline: this.timelineRoadmapStoreWrapper.activeTimeline(),
+                roadmap: this.timelineRoadmapStoreWrapper.activeRoadmap(),
+                isAdmin: this.isAdmin,
+                typeNames: this.typeNames,
+                modelNames: this.types,
+                listeners: {
+                    load: this._onLoad,
+                    scope: this
+                },
+                height: this.getHeight()
+            }, config);
+
+            this.add(boardConfig);
+        },
+
+        setHeight: function(height) {
+            this.callParent(arguments);
+            if(this.down('#gridboard')) {
+                this.down('#gridboard').setHeight(height);
+            }
+        },
+
+        _onRequestException: function(connection, response, requestOptions) {
+            var requester = requestOptions.operation && requestOptions.operation.requester;
+            var el = this.getEl();
+
+            if (requester === this && el) {
+                el.mask('Roadmap planning is <strong>temporarily unavailable</strong>, please try again in a few minutes.', "roadmap-service-unavailable-error");
+            }
+        },
+
+        _onLoad: function() {
+            this.recordComponentReady();
+        }
+    });
+})();
+
+                (function () {
+    var Ext = window.Ext4 || window.Ext;
+
+    Ext.define('Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', {
+        extend: 'Rally.ui.popover.Popover',
+        alias: 'widget.daterangepopover',
+        requires: [
+            'Rally.apps.roadmapplanningboard.util.TimelineViewModel',
+            'Rally.ui.picker.DatePicker',
+            'Rally.ui.DateField'
+        ],
+        placement: 'bottom',
+        shouldHidePopoverOnBodyClick: false,
+        shouldHidePopoverOnIframeClick: false,
+        saveOnClose: true,
+        closable: false,
+        waitTimeForDateFieldValidation: 100,
+        cls: 'roadmap-planning-popover',
+        chevronPrefixCls: 'roadmap-planning-popover-chevron',
+        config: {
+            timelineViewModel: null
+        },
+        header: false,
+
+        initComponent: function () {
+            this.items = this._getItems();
+            this.callParent(arguments);
+
+            this.addEvents(
+                'save'
+            );
+
+            this.startDate = this.down('#startDate');
+            this.endDate = this.down('#endDate');
+        },
+
+        _getItems: function () {
+            return [
+                {
+                    itemId: 'datesPopoverLayout',
+                    layout: {
+                        type: 'table',
+                        align: 'center',
+                        columns: 3
+                    },
+                    items: [
+                        {
+                            xtype: 'component',
+                            html: 'Date Range',
+                            cls: 'popoverDateRangeText'
+                        },
+                        {
+                            xtype: 'container',
+                            colspan: 2,
+                            cellCls: 'date-buttons',
+                            // Reverse the order in which we add the buttons to handle floating right in a table cell
+                            items: [
+                                {
+                                    xtype: 'rallybutton',
+                                    itemId: 'datesDone',
+                                    text: 'Done',
+                                    cls: 'primary button small right',
+                                    listeners: {
+                                        click: this._onDone,
+                                        scope: this
+                                    }
+                                },
+                                {
+                                    xtype: 'rallybutton',
+                                    itemId: 'datesCancel',
+                                    text: 'Cancel',
+                                    cls: 'secondary dark button small right',
+                                    listeners: {
+                                        click: this._onCancel,
+                                        scope: this
+                                    }
+                                }
+                            ]
+                        },
+                        this._getDateFieldConfig('start', this.timelineViewModel.currentTimeframe.startDate),
+                        {
+                            xtype: 'component',
+                            html: 'to',
+                            cls: 'popoverToText'
+                        },
+                        this._getDateFieldConfig('end', this.timelineViewModel.currentTimeframe.endDate),
+                        {
+                            xtype: 'component',
+                            itemId: 'dateType',
+                            tpl: "<div class='popoverDateText'>{dateType}</div>",
+                            colspan: 3
+                        }
+                    ]
+                },
+                {
+                    xtype: 'component',
+                    autoEl: 'div',
+                    id: 'startdate-validation-error',
+                    cls: ['form-error-msg-field', 'date-range-error-msg-field']
+                },
+                {
+                    xtype: 'component',
+                    autoEl: 'div',
+                    id: 'enddate-validation-error',
+                    cls: ['form-error-msg-field', 'date-range-error-msg-field']
+                }
+            ];
+        },
+
+        _getDateFieldConfig: function (fieldPrefix, value) {
+            var _this = this;
+            var displayText = fieldPrefix + ' date';
+
+            return {
+                xtype: 'rallydatefield',
+                cls: 'dateField',
+                itemId: fieldPrefix + 'Date',
+                msgTarget: fieldPrefix + 'date-validation-error',
+                checkChangeBuffer: this.waitTimeForDateFieldValidation,
+                value: value,
+                validateOnBlur: false,
+                validateOnChange: false,
+                validator: function () {
+                    return _this._validateDateRanges();
+                },
+                onTriggerClick: function () {
+                    return _this._createPicker(this, displayText);
+                },
+                listeners: {
+                    validitychange: function (dateField, isValid) {
+                        if(isValid) {
+                            this.down('#datesDone').enable();
+                        }
+                    },
+                    focus: function (dateField) {
+                        if (this.picker && this.picker.dateFieldId !== dateField.itemId) {
+                            this._createPicker(dateField, displayText);
+                        } else {
+                            this._resetAndAddClsToDateField(dateField);
+                        }
+                    },
+                    aftervalidate: function (dateField, isValid) {
+                        if (this.picker && isValid) {
+                            this.picker.value = dateField.getValue();
+                            this._updatePicker(dateField, isValid);
+                        }
+
+                        if (isValid) {
+                            var otherDateField = dateField === this.startDate ? this.endDate : this.startDate;
+                            otherDateField.clearInvalid();
+                        }
+                    },
+                    scope: this
+                }
+            };
+        },
+
+        _validateDateRanges: function () {
+            var newTimeframe = {
+                startDate: this.startDate.getValue(),
+                endDate: this.endDate.getValue()
+            };
+
+            if (!Ext.isDate(newTimeframe.startDate) || !Ext.isDate(newTimeframe.endDate)) {
+                return 'Date fields must contain valid dates';
+            }
+
+            if (newTimeframe.startDate > newTimeframe.endDate) {
+                return 'Start date is after end date';
+            }
+
+            this.timelineViewModel.currentTimeframe = newTimeframe;
+
+            if (this.timelineViewModel.isTimeframeOverlapping(newTimeframe)) {
+                return 'Date range overlaps an existing timeframe';
+            }
+
+            return true;
+        },
+
+        _onCancel: function () {
+            this.saveOnClose = false;
+            this.destroy();
+        },
+
+        _onDone: function () {
+            this.saveOnClose = true;
+            this.destroy();
+        },
+
+        destroy: function () {
+            if(this.saveOnClose) {
+                var startDateValid = this.startDate.isValid();
+                var endDateValid = this.endDate.isValid();
+
+                if (startDateValid && endDateValid) {
+                    this._save();
+                } else {
+                    this.startDate.validateOnChange = true;
+                    this.endDate.validateOnChange = true;
+                    this.down('#datesDone').disable();
+                    return false;
+                }
+
+            }
+
+            this.callParent(arguments);
+        },
+
+        _save: function () {
+            this.fireEvent('save', {
+                startDate: this.timelineViewModel.currentTimeframe.startDate,
+                endDate: this.timelineViewModel.currentTimeframe.endDate
+            });
+        },
+
+        _createPicker: function (dateField, displayText) {
+            var _this = this;
+
+            if (this.picker) {
+                this.picker.destroy();
+            }
+
+            var pickerOpts = {
+                xtype: 'rallydatepicker',
+                itemId: 'datePicker',
+                floating: false,
+                hidden: false,
+                focusOnShow: false,
+                focusOnToFront: false,
+                enableMonthPicker: false,
+                colspan: 3,
+                dateFieldId: dateField.itemId,
+                handler: function (picker, date) {
+                    dateField.setValue(date);
+
+                    var isValid = _this._dateFieldsValid();
+                    _this._updatePicker(dateField, isValid);
+                    _this._addDateSelectedTransitions(dateField);
+                },
+                disabledDateRanges: this.timelineViewModel.timeframes,
+                disabledDatesText: 'This date overlaps an existing timeframe'
+            };
+
+            if (dateField.itemId === this.startDate.itemId) {
+                pickerOpts.value = this.timelineViewModel.currentTimeframe.startDate;
+                pickerOpts.maxDate = this.timelineViewModel.currentTimeframe.endDate;
+                pickerOpts.maxText = 'This date is after the end date';
+            } else {
+                pickerOpts.value = this.timelineViewModel.currentTimeframe.endDate;
+                pickerOpts.minDate = this.timelineViewModel.currentTimeframe.startDate;
+                pickerOpts.minText = 'This date is before the start date';
+            }
+
+            this._setPickerRange(pickerOpts, this._dateFieldsValid());
+
+            this.picker = this.down('#datesPopoverLayout').add(pickerOpts);
+
+            this._addPickerClasses();
+            this._resetAndAddClsToDateField(dateField);
+            this.down('#dateType').update({
+                dateType: displayText
+            });
+        },
+
+        _dateFieldsValid: function () {
+            return this._validateDateRanges() === true;
+        },
+
+        _updatePicker: function (dateField, isValid) {
+            this._setPickerRange(this.picker, isValid);
+            this.picker.update(dateField.getValue(), true);
+        },
+
+        _setPickerRange: function (picker, isValid) {
+            if (isValid) {
+                picker.rangeStart = this.timelineViewModel.currentTimeframe.startDate;
+                picker.rangeEnd = this.timelineViewModel.currentTimeframe.endDate;
+            } else {
+                picker.rangeStart = null;
+                picker.rangeEnd = null;
+            }
+        },
+
+        _addDateSelectedTransitions: function (dateField) {
+            dateField.addCls('transition-bg-color');
+            dateField.addCls('dateSelected');
+            return setTimeout(function () {
+                return dateField.removeCls('dateSelected');
+            }, 1);
+        },
+
+        _resetAndAddClsToDateField: function (dateField) {
+            _.each([this.startDate, this.endDate], function (comp) {
+                comp.removeCls('triggerSelected');
+            });
+
+            dateField.addCls('triggerSelected');
+        },
+
+        _addPickerClasses: function () {
+            var datePickerPrev = this.picker.getEl().down( '.' + Ext.baseCSSPrefix + 'datepicker-prev');
+            datePickerPrev.addCls('icon-chevron-left');
+
+            var datePickerNext = this.picker.getEl().down('.' + Ext.baseCSSPrefix + 'datepicker-next');
+            datePickerNext.addCls('icon-chevron-right');
+
+            var todayButton = this.picker.getEl().down('.' + Ext.baseCSSPrefix + 'datepicker-footer .' + Ext.baseCSSPrefix + 'btn');
+            todayButton.addCls('secondary');
+        }
+    });
+
+}).call(this);
+
+
+            Rally.launchApp('Rally.apps.releasesummary.ReleaseSummaryApp', {
+                name:"ReleaseSummary",
+	            parentRepos:""
+            });
+
+        });
+    </script>
+
+
+    <style type="text/css">
+        .roadmap-planning-board {
+  overflow-y: hidden;
+}
+
+.roadmap-board .no-drag-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.roadmap-board .progress-bar-container .progress-bar-label {
+  font-family: ProximaNovaSemiBold, Helvetica, Arial;
+  color: #262626;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.roadmap-board .progress-bar-display {
+  margin: 0 45px;
+}
+
+.roadmap-board .field-picker-btn:first-child {
+  margin-left: 0;
+}
+
+.roadmap-board .progress-bar-percent-done {
+  width: 40px;
+  padding: 0 0 0 1px;
+  margin: 0px 0 0 0;
+  height: 14px;
+  float: right;
+  vertical-align: top;
+}
+
+.roadmap-board .no-timebox .columns tr td.blank-slate-column {
+  width: 66%;
+  text-align: center;
+  vertical-align: top;
+}
+
+.roadmap-board .show-label {
+  float: right;
+  margin-top: 3px;
+}
+
+.roadmap-board .header {
+  padding: 5px 5px 5px 10px;
+}
+
+.roadmap-board .header .add-new {
+  float: left;
+}
+
+.roadmap-board .add-new label {
+  padding-top: 0;
+}
+
+.roadmap-board .add-new .new {
+  margin-left: 0;
+}
+
+.roadmap-board .manage-iterations {
+  float: right;
+  margin: 3px 10px 0 0;
+}
+
+.roadmap-board .type-checkbox {
+  float: right;
+  margin: 5px;
+}
+
+.roadmap-board .type-checkbox label {
+  position: relative;
+  top: 1px;
+}
+
+.planned-capacity-range-tooltip {
+  white-space: nowrap;
+}
+
+.roadmap-board .progress-bar-container.field-percentDone {
+  margin: 0;
+  display: inline-block;
+}
+
+.roadmap-board .backlog {
+  border-right: none;
+}
+
+.roadmap-board .column-container .column-header .column-header-title {
+  width: auto;
+  margin-right: 50px;
+  margin-left: 50px;
+  padding: 0;
+  height: 35px;
+}
+
+.roadmap-board .column-container .column-header .column-header-title > span {
+  position: relative;
+  padding: 10px 8px 0 8px;
+}
+
+.roadmap-board .planning-column .column-header .column-header-title .header-button-container {
+  display: none;
+  position: absolute;
+  right: -26px;
+  bottom: -2px;
+  padding: 0;
+  margin: 0px 8px 4px 8px;
+}
+
+.roadmap-board .planning-column .column-header .column-header-title .header-button-container > span {
+  width: auto !important;
+}
+
+.roadmap-board .planning-column .column-header .column-header-title .header-button-container > span > div {
+  border-radius: 2px;
+  background-color: #C0C0C0;
+  float: right;
+}
+
+.roadmap-board .planning-column .column-header .column-header-title .header-button-container .@{prefix}btn {
+  float: right;
+  border-radius: 2px;
+  background-color: #C0C0C0;
+  padding: 3px 2px 3px 4px
+}
+
+.roadmap-board .planning-column .column-header .column-header-title .header-button-container .@{prefix}btn:hover {
+  color: #FFFFFF;
+  background-color: #00A9E0;
+}
+
+.roadmap-board .planning-column .column-header .column-header-title > span:hover .header-button-container {
+  display: block;
+}
+
+.roadmap-board .column-header .column-header-title .columnfilter {
+  position: absolute;
+  left: -26px;
+  top: 11px;
+}
+
+.roadmap-board .planning-column {
+  background-color: white;
+}
+
+.roadmap-board .planning-column .rally-search-field {
+  width: 100% !important;
+  margin: 4px 0 7px 0;
+}
+.roadmap-board .planning-column .rally-search-field > div{
+  width: 100% !important;
+  overflow: hidden;
+}
+
+.roadmap-board .planning-column .rally-search-field > div > div {
+  width: 100% !important;
+}
+
+.roadmap-board .planning-column .rally-search-text {
+  width: 90% !important;
+  margin: 0 3% !important;
+}
+
+.roadmap-board .planning-column .search > div {
+  overflow-x: hidden;
+}
+
+.roadmap-board .planning-column .search-button {
+  background: transparent url('search-button.gif');
+  width: 15px;
+  height: 15px;
+  background-size: 15px 15px;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.roadmap-board .planning-column .columnTitle {
+  font-family: ProximaNovaSemiBold, Helvetica, Arial;
+  font-size: 18px;
+  font-weight: normal;
+  color: #262626;
+}
+
+.roadmap-board .planning-column .columnTitle .fieldContainerView {
+  font-family: ProximaNovaSemiBold, Helvetica, Arial;
+  font-size: 18px;
+  font-weight: normal;
+  line-height: 23px;
+  white-space: nowrap;
+  width: 95%;
+  overflow: hidden;
+  margin: 0 auto;
+  text-overflow: ellipsis;
+  padding: 0px 0px;
+}
+
+.roadmap-board .planning-column .columnTitle input {
+  font-family: ProximaNovaSemiBold, Helvetica, Arial;
+  font-size: 18px;
+  font-weight: normal;
+  padding: 0px 0px;
+}
+
+/* Modifications to accommodate differences in Firefox */
+
+@-moz-document url-prefix() {
+
+  .roadmap-board .planning-column .columnTitle .fieldContainerView {
+    padding: 1px 1px;
+  }
+
+  .roadmap-board .planning-column .columnTitle input {
+    padding: 0px 0px;
+  }
+
+}
+
+.roadmap-board .planning-column .columnTitle table {
+  margin: 0;
+}
+
+.roadmap-board .column-headers {
+  border-bottom: 1px dotted #C6C6C6;
+}
+
+.roadmap-board .planning-column .column-header {
+  margin: 0 0 0 0;
+  text-align: center;
+}
+
+.roadmap-board .planning-column .column-header .editableField {
+  min-height: 20px;
+}
+
+.roadmap-board .planning-column .timeframeDates {
+  font-family: NotoSans, Helvetica, Arial;
+  font-size: 12px;
+  color: #666666;
+  border: 1px solid transparent;
+}
+
+.roadmap-board .planning-column .timeframeDates.clickable:hover {
+  border-color: #D6D6D6;
+}
+
+.roadmap-board .planning-column .timeframeDatesContainer {
+  margin: 0 auto 8px auto;
+  width: 125px;
+  height: 19px;
+}
+
+.roadmap-board .first-card-column {
+  border-left: 1px solid #c0c0c0;
+}
+
+.roadmap-board .progress-bar-background {
+  color: white;
+  background-color: #424242;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px 5px;
+  height: 36px;
+  position: relative;
+}
+
+.roadmap-board .progress-bar-background .no-capacity-label {
+  font-family: ProximaNova, Helvetica, Arial;
+}
+
+.roadmap-board .progress-bar-background .@{prefix}btn {
+  position: absolute;
+  right: 0;
+  top: 5px;
+}
+
+.roadmap-board .planning-column.current-timebox {
+  background-color: #8f8f8f;
+}
+
+.roadmap-board .planning-column.current-timebox .columnContent {
+  background-color: #c6c6c6;
+  margin: 2px 2px 0 2px;
+  border: none;
+}
+
+.roadmap-board .planning-column.current-timebox .column-header {
+  margin: 2px 2px 0 2px;
+}
+
+.roadmap-board .column-container .fixed-header-card-board-header-container {
+  border-bottom: 1px dotted #c0c0c0;
+  position: relative;
+}
+
+.roadmap-board .theHeader .card-column {
+  background-color: #FFF;
+}
+
+.roadmap-board .column-container .column-header {
+  font-size: 10pt;
+  min-height: 55px;
+}
+
+.roadmap-board .column-container .column-header .columnTpl {
+  font-family: ProximaNovaSemiBold, Helvetica, Arial;
+  font-size: 18px;
+  font-weight: normal;
+  padding-top: 2px;
+  color: rgb(0, 0, 0);
+}
+
+.roadmap-board .column-container .planning-column {
+  border-top: 1px solid transparent;
+  border-right: 1px dotted #c0c0c0;
+  vertical-align: top;
+}
+
+.roadmap-board .column-container .last-card-column {
+  border-right: 1px solid #c0c0c0;
+}
+
+.roadmap-board .column-container td.card-column {
+  border-top-style: none;
+}
+
+.roadmap-board .column {
+  border-right: none;
+}
+
+.roadmap-board .field_container {
+  float: left;
+  width: 90%;
+}
+
+.roadmap-board .field_container .@{prefix}form-item {
+  margin-bottom: 0;
+}
+
+.roadmap-board .theme_container {
+  font-family: NotoSans, Helvetica, Arial;
+}
+
+.roadmap-board .theme_container {
+  text-align: left;
+  font-weight: 300;
+  font-size: 9pt;
+  color: #a9a9a9;
+  padding: 8px;
+}
+
+.roadmap-board .theme_container .field_container.editMode {
+  border-color: #C6C6C6;
+}
+
+.roadmap-board .theme_container .fieldContainerView {
+  white-space: pre-wrap;
+  max-height: 205px;
+  overflow: auto;
+}
+
+.roadmap-board .column-container .column-header .editableField {
+  padding: 0px;
+}
+
+.roadmap-board .column-container .column-header .editableField:hover {
+  border: 1px solid #3197c6 !important;
+}
+
+.roadmap-board .column-container .column-header .editableField textarea {
+  font-size: 12px;
+  color: #262626;
+  padding: 0;
+  border-width: 0;
+  line-height: normal;
+  margin: 0px;
+  display: block;
+}
+
+.roadmap-board .editableField .setTheme {
+  color: #262626;
+}
+
+/* The .theme-transitioning class is added to each theme container while they are expanding or collapsing
+   visibility of children is set to hidden because there appears to be a bug in Ext 4.2
+   with slideOut and slideIn displaying the contents incorrectly
+*/
+.roadmap-board .theme-transitioning * {
+  visibility: hidden !important;
+}
+
+.roadmap-board .header-toggle-button {
+  color: #C0C0C0;
+  font-size: 20px;
+  position: absolute;
+  right: 0;
+  bottom: -21px;
+  background: #fff;
+  border-left: 1px dotted #b3b3b3 !important;
+  border-bottom: 1px dotted #b3b3b3 !important;
+  border-top: 1px solid #fff !important;
+  border-right: 1px dotted  #b3b3b3 !important;
+  border-radius: 0;
+  z-index: 100;
+  padding: 3px 7px 0px 3px;
+}
+
+.roadmap-board .header-collapsed {
+  display: none;
+}
+
+.roadmap-board .header-toggle-button:hover {
+  color: #444;
+}
+
+.roadmap-board .header-toggle-button .@{prefix}btn-icon-el {
+  position: absolute;
+  top: -4px;
+}
+
+.roadmap-board .scroll-button {
+  padding-top: 0;
+  padding-bottom: 0;
+  background-position: center 4px;
+}
+
+.roadmap-board .scroll-button.right {
+  right: 0;
+}
+
+.roadmap-board .scroll-button span {
+  color: #a9a9a9;
+}
+
+.roadmap-board .scroll-button:hover span {
+  color: #666;
+}
+
+.roadmap-splash-container .carousel-header .title {
+  font-family: ProximaNovaBold !important;
+}
+
+.roadmap-splash-container .carousel-footer {
+  margin-right: 40px;
+
+  .@{prefix}btn {
+    float: right;
+  }
+}
+
+.roadmap-splash-container {
+
+  .start-screen {
+    background-repeat: no-repeat;
+  }
+
+  .start-screen-1 {
+    background: url('start-screen-1.png');
+  }
+
+  .start-screen-2 {
+    background: url('start-screen-2.png');
+  }
+
+  .start-screen-3 {
+    background: url('start-screen-3.png');
+  }
+
+  .start-screen-4 {
+    background: url('start-screen-4.png');
+  }
+
+  .start-screen-5 {
+    background: url('start-screen-5.png');
+  }
+
+}
+
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+  .roadmap-board a.themeButtonExpand {
+    background-image: url('smChev_down@2x.png');
+    background-size: 12px 8px;
+  }
+}
+
+.roadmap-board a.themeButtonExpand:hover {
+  background-image: url('smChev_down_over.png');
+}
+
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+  .roadmap-board a.themeButtonExpand:hover {
+    background-image: url('smChev_down_over@2x.png');
+    background-size: 12px 8px;
+  }
+}
+
+.roadmap-board .no-drag-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.roadmap-planning-popover .@{prefix}panel-body {
+  color: white;
+}
+
+.roadmap-planning-popover .month-triangles {
+  background-image: none;
+  color: #424242 !important;
+  font-size: 48px;
+  line-height: 23px;
+  margin-bottom: 3px;
+  margin-top: -1px;
+  padding: 0px;
+}
+
+.roadmap-planning-popover .month-selection-common-attrs {
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  border-bottom: 1px solid #c0c0c0;
+  background-color: #e6e6e6;
+}
+
+.roadmap-planning-popover .dateField .@{prefix}trigger-cell {
+  height: 30px;
+  background-color: #ffffff;
+  border-radius: 0 3px 3px 0;
+  border-left: none;
+}
+
+.roadmap-planning-popover .dateField .icon-calendar {
+  color: #888888;
+  font-size: 18px;
+}
+
+.roadmap-planning-popover .dateField.triggerSelected .icon-calendar,
+.roadmap-planning-popover .dateField:hover .icon-calendar {
+  color: #00A9E0;
+}
+
+.roadmap-planning-popover .dateField .icon-calendar:before {
+  position: relative;
+  top: 3px;
+}
+
+.roadmap-planning-popover .dateField:hover input,
+.roadmap-planning-popover .dateField.triggerSelected input {
+  border-color: #00A9E0;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.roadmap-planning-popover .dateField:hover .@{prefix}form-trigger,
+.roadmap-planning-popover .dateField.triggerSelected .@{prefix}form-trigger {
+  border-color: #00A9E0;
+}
+
+.roadmap-planning-popover .dateField.transition-bg-color input,
+.roadmap-planning-popover .dateField.transition-bg-color .@{prefix}form-trigger {
+  transition: background-color 2s;
+}
+
+.roadmap-planning-popover .dateField.dateSelected input,
+.roadmap-planning-popover .dateField.dateSelected .@{prefix}form-trigger {
+  background-color: #cadda3;
+  transition: background-color 0s;
+}
+
+.roadmap-planning-popover .dateField .@{prefix}form-trigger-wrap .@{prefix}form-field {
+  width: 70px !important;
+  border-radius: 3px 0 0 3px;
+  border-right: none;
+}
+
+.roadmap-planning-popover .dateField .@{prefix}form-trigger {
+  height: 30px;
+  width: 26px;
+  border-left: none;
+  border-radius: 0 3px 3px 0;
+  background-position: 2px 8.5px;
+  background-image: none;
+  display: block;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker,
+.roadmap-planning-popover .@{prefix}datepicker-cell {
+  border: none;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker-month .@{prefix}btn-split-right {
+  background-image: none !important;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker {
+  width: 222px !important;
+  font-size: 12px;
+  font-weight: 300;
+  font-color: black !important;
+  font-family: san-serif;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-month {
+  width: 70%;
+  margin: 0 auto;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-month a {
+  margin: 0;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-month .@{prefix}btn-default-small-over {
+  background-color: #c0c0c0;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-month .@{prefix}btn {
+  padding: 3px 0 5px 0;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-month .@{prefix}btn * {
+  padding: 0 !important;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-month .@{prefix}btn,
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-month .@{prefix}btn * {
+  cursor: default !important;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-month .@{prefix}btn-center {
+  overflow: visible;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-month .@{prefix}btn-center .@{prefix}btn-inner {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-header {
+  background-color: #c0c0c0;
+  padding: 0;
+  height: auto;
+  width: auto;
+  font-size: 11px;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-prev,
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-next {
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 28px;
+  padding-top: 3px;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-prev {
+  left: 0;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-next {
+  right: 0;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-arrow {
+  background-image: none;
+  color: #e0e0e0;
+  background-color: transparent;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-prev .icon-chevron-left,
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-next .icon-chevron-right {
+  background-image: none;
+  font-size: 22px;
+  padding: 0 2px
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-prev .icon-chevron-left:hover,
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-next .icon-chevron-right:hover {
+  background-color: transparent;
+  color: #666666 !important;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-column-header-inner {
+  padding: 0;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-column-header {
+  background-image: none;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner td {
+  border: 0;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner tbody tr td.rally-datepicker-in-range a {
+  background-color: #CCEEF9;
+  border-color: #CCEEF9;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner tbody tr td.@{prefix}datepicker-disabled a {
+  background-color: #929292;
+  border-color: #929292;
+  color: #eeeeee !important;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner tbody tr td.rally-datepicker-current-value a {
+  background-color: #35B2E4;
+  border-color: #35B2E4;
+  color: #ffffff !important;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner tbody tr td.rally-datepicker-highlighted-value a {
+  border-color: #35B2E4;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner tbody tr td a.@{prefix}datepicker-date:hover {
+  background-color: #d6d6d6;
+  border-color: #d6d6d6;
+  color: #ffffff !important;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner tbody tr td.@{prefix}datepicker-disabled a,
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner tbody tr td.@{prefix}datepicker-active a,
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner tbody tr td.@{prefix}datepicker-prevday a {
+  font-size: 10px;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner tbody tr td.@{prefix}datepicker-prevday a {
+  color: #d6d6d6 !important;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner tbody tr td .@{prefix}datepicker-date {
+  font-size: 10px;
+  padding-left: 0;
+  padding-right: 0;
+  margin: 0;
+  border: 1px solid white;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner .@{prefix}datepicker-today a {
+  color: black;
+  font-family: NotoSansBold;
+  padding-top: 3px;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner a {
+  font-size: 11px;
+  color: black !important;
+  text-align: center;
+  padding: 4px;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner th {
+  background-color: #e6e6e6;
+  color: black;
+  padding: 4px 0px;
+  border-bottom-color: #d6d6d6;
+  text-align: center;
+  width: auto;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker table.@{prefix}datepicker-inner th span {
+  font-size: 11px;
+  padding-right: 0;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}btn-default-small-over {
+  background-color: #ffffff;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}btn-default-small .@{prefix}btn-inner {
+  font-weight: 300;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-footer {
+  border-top: 1px solid #d6d6d6;
+  background-color: #ffffff;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-footer .@{prefix}btn {
+  float: none;
+  width: 210px;
+  margin: auto;
+  padding: 0;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}datepicker-footer .@{prefix}monthpicker-buttons .@{prefix}btn {
+  background-color: #35B2E4;
+  border: transparent;
+  color: #ffffff;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}monthpicker .@{prefix}monthpicker-item {
+  text-align: center;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}monthpicker a {
+  font-weight: 300;
+  font-size: 11px;
+  color: black !important;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}monthpicker a:hover {
+  background-color: #35B2E4;
+  border: none;
+  color: #ffffff !important;
+}
+
+.roadmap-planning-popover .@{prefix}datepicker .@{prefix}monthpicker .@{prefix}monthpicker-selected {
+  background-color: #ffffff;
+  font-weight: 700;
+  color: black;
+  border: none;
+}
+
+.roadmap-planning-popover .@{prefix}ie .dateField .icon-calendar {
+  line-height: 15px;
+}
+
+.roadmap-planning-popover .@{prefix}ie .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-prev .icon-chevron-left {
+  line-height: 1px;
+}
+
+.roadmap-planning-popover .@{prefix}ie .@{prefix}datepicker .@{prefix}datepicker-header .@{prefix}datepicker-next .icon-chevron-right {
+  line-height: 1px;
+}
+
+.roadmap-planning-popover .@{prefix}ie .@{prefix}datepicker .@{prefix}datepicker-month .en-triangle-down {
+  line-height: 1px;
+}
+
+.roadmap-board .no-drag-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.roadmap-board .no-drag-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.roadmap-planning-popover td {
+  vertical-align: middle;
+}
+
+.roadmap-planning-popover td.date-buttons .@{prefix}container > span {
+  width: auto !important;
+  display: inline !important;
+}
+
+.roadmap-planning-popover td.date-buttons .@{prefix}container > span > div {
+  display: block !important;
+}
+
+.roadmap-planning-popover td.date-buttons {
+  vertical-align: top;
+  text-align: right;
+}
+
+.roadmap-planning-popover td.date-buttons .@{prefix}btn.primary,
+.roadmap-planning-popover td.date-buttons .@{prefix}btn.secondary {
+  float: right;
+  margin: 0 0 0 4px;
+}
+
+.roadmap-planning-popover .capacity-buttons {
+  margin-top: 10px;
+}
+
+.roadmap-planning-popover .capacity-buttons .button {
+  width: 86px
+}
+
+.roadmap-planning-popover .capacity-buttons .primary {
+  margin-right: 0px
+}
+
+.roadmap-planning-popover .capacity-buttons .secondary {
+  margin-left: 0px
+}
+
+.roadmap-planning-popover .popoverDateRangeText,
+.roadmap-planning-popover .popover-label {
+  font-family: ProximaNovaSemiBold, Helvetica, Arial;
+  font-weight: normal;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.roadmap-planning-popover .popoverDateRangeText {
+  margin-top: 2px;
+}
+
+.roadmap-planning-popover .popover-label {
+  text-align: center;
+}
+
+.roadmap-planning-popover .popoverToText {
+  font-family: NotoSans, Helvetica, Arial;
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+.roadmap-planning-popover .popoverDateText {
+  text-transform: uppercase;
+  font-family: NotoSans, Helvetica, Arial;
+  font-size: 12px;
+  padding: 10px 0;
+}
+
+.roadmap-planning-popover .@{prefix}panel {
+  border-color: transparent;
+}
+
+.roadmap-planning-popover.menu {
+  font-weight: 300;
+}
+
+.roadmap-planning-popover a {
+  color: #ffffff !important;
+  margin: 2px;
+  display: block;
+  font-size: 14px;
+  padding: 4px 8px;
+}
+
+.roadmap-planning-popover a.active {
+  background-color: #262626 !important;
+}
+
+.roadmap-planning-popover a:hover {
+  background-color: #35b2e4;
+}
+
+.roadmap-planning-popover .@{prefix}form-item-label {
+  border-radius: 3px;
+  display: block;
+  font-family: NotoSans, Helvetica, Arial;
+  font-size: 12px;
+  font-weight: 300;
+  margin: 2px;
+  color: #FFFFFF;
+}
+
+.roadmap-planning-popover .@{prefix}form-field {
+  height: 30px;
+  text-align: center;
+  width: 37px;
+}
+
+.roadmap-planning-popover .dateField.@{prefix}form-invalid input {
+  border-color: #B81B10;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.roadmap-planning-popover .dateField.@{prefix}form-invalid .@{prefix}form-trigger {
+  border-color: #B81B10;
+}
+
+.roadmap-planning-popover .form-error-msg-field {
+  background-color: #B81B10;
+  color: white;
+  font-family: NotoSans, Helvetica, Arial;
+  font-size: 10px;
+  padding: 5px;
+  margin: 5px 2px 0 1px;
+}
+
+.roadmap-planning-popover .date-range-error-msg-field {
+  width: 222px;
+}
+
+.roadmap-planning-popover .capacity-error-msg-field {
+  width: 182px;
+  margin-right: 1px;
+}
+
+.roadmap-planning-popover #capacity-validation-error li {
+  font-family: NotoSans, Helvetica, Arial;
+  font-size: 12px;
+}
+
+.roadmap-service-unavailable-error div {
+  background-image: none;
+  padding: 5px 10px 5px 10px;
+  font-size: 12px;
+  background-color: #F66349;
+  font-weight: normal;
+}
+
+.roadmap-board .rui-card .rui-card-content .field-content .rui-field-label {
+  text-transform: uppercase;
+  margin: 1px 5px 0 2px;
+  color: #666666;
+  font-size: 11px;
+}
+
+.roadmap-board .rui-card .rui-card-content .field-content .rui-field-value {
+  font-size: 11px;
+}
+
+.roadmap-board .rui-card .rui-card-content .field-content.Name .rui-field-value {
+  font-size: 12px;
+}
+
+.roadmap-delete-plan-confirm .confirmMessage {
+  text-align: left;
+  font-size: 12px;
+  padding: 10px;
+}
+
+.roadmap-delete-plan-confirm .title-icon {
+  color: #FAD200;
+  font-size: 16px;
+  position: relative;
+  top: 2px;
+  padding: 0px 4px 0px 0px;
+}
+
+    </style>
+</head>
+<body></body>
+</html>

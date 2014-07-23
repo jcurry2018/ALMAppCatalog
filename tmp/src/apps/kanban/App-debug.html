@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kanban Board</title>
+
+
+    <script type="text/javascript" src="https://rally1.rallydev.com/apps/x/sdk-debug.js"></script>
+
+    <script type="text/javascript">
+        // I am keeping the extra , in there to simplify my code. If someone is actually using an old version of IE to make an app let me know.
+        Rally.loadScripts(
+                [
+                      "Column.js",
+                      "ColumnCardFieldPicker.js",
+                      "ColumnSettingsField.js",
+                      "Settings.js",
+                      "KanbanApp.js",
+                ],
+        function() {
+            Rally.launchApp('Rally.apps.kanban.KanbanApp', {
+                name:"Kanban Board"
+            });
+        }, true);
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="KanbanApp.css">
+</head>
+<body></body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project CFD</title>
+
+
+    <script type="text/javascript" src="https://rally1.rallydev.com/apps/x/sdk-debug.js"></script>
+
+    <script type="text/javascript">
+        // I am keeping the extra , in there to simplify my code. If someone is actually using an old version of IE to make an app let me know.
+        Rally.loadScripts(
+                [
+                      "../../Colors.js",
+                      "../../IntegrationHeaders.js",
+                      "../../settings/StateFieldPicker.js",
+                      "../../settings/ProjectPicker.js",
+                      "ProjectCFDSettings.js",
+                      "ProjectCFDCalculator.js",
+                      "ProjectCFDApp.js",
+                ],
+        function() {
+            Rally.launchApp('Rally.apps.charts.cfd.project.ProjectCFDApp', {
+                name:"Project CFD"
+            });
+        }, true);
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="../../Charts.less">
+</head>
+<body></body>
+</html>

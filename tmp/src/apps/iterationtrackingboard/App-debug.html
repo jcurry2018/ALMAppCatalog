@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Iteration Tracking Board</title>
+
+
+    <script type="text/javascript" src="https://rally1.rallydev.com/apps/x/sdk-debug.js"></script>
+
+    <script type="text/javascript">
+        // I am keeping the extra , in there to simplify my code. If someone is actually using an old version of IE to make an app let me know.
+        Rally.loadScripts(
+                [
+                      "Column.js",
+                      "IterationTrackingTreeView.js",
+                      "IterationTrackingTreeGrid.js",
+                      "statsbanner/BannerWidget.js",
+                      "statsbanner/Gauge.js",
+                      "statsbanner/PlannedVelocity.js",
+                      "statsbanner/TimeboxEnd.js",
+                      "statsbanner/Defects.js",
+                      "statsbanner/Accepted.js",
+                      "statsbanner/Tasks.js",
+                      "statsbanner/iterationprogresscharts/IterationProgressMixin.js",
+                      "statsbanner/iterationprogresscharts/IterationProgressChart.js",
+                      "statsbanner/iterationprogresscharts/BurndownChart.js",
+                      "statsbanner/iterationprogresscharts/CumulativeFlowChart.js",
+                      "statsbanner/iterationprogresscharts/PieChart.js",
+                      "statsbanner/iterationprogresscharts/MinimalPieChart.js",
+                      "statsbanner/IterationProgressDialogChartToggle.js",
+                      "statsbanner/IterationProgressDialog.js",
+                      "statsbanner/IterationProgress.js",
+                      "statsbanner/CollapseExpand.js",
+                      "StatsBanner.js",
+                      "StatsBannerField.js",
+                      "PrintDialog.js",
+                      "IterationTrackingBoardApp.js",
+                ],
+        function() {
+            Rally.launchApp('Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', {
+                name:"Iteration Tracking Board"
+            });
+        }, true);
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="StatsBanner.less">
+    <link rel="stylesheet" type="text/css" href="IterationTrackingBoardApp.less">
+</head>
+<body></body>
+</html>

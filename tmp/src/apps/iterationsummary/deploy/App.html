@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Iteration Summary</title>
+
+    <script type="text/javascript" src="/apps/x/sdk.js"></script>
+
+    <script type="text/javascript">
+        Rally.onReady(function () {
+                (function(){var Ext=window.Ext4||window.Ext;Ext.define("Rally.apps.iterationsummary.IterationSummaryApp",{extend:"Rally.app.TimeboxScopedApp",requires:["Ext.XTemplate","Rally.util.DateTime","Rally.data.ModelFactory","Rally.nav.Manager","Rally.data.wsapi.Store","Rally.util.Timebox","Deft.Deferred"],appName:"Iteration Summary",cls:"iteration-summary-app",scopeType:"iteration",mixins:["Rally.clientmetrics.ClientMetricsRecordable"],clientMetrics:[{method:"_onEditLinkClick",description:"iteration summary app - edit iteration link clicked"}],statics:{PAST_WITH_SOME_UNACCEPTED_WORK:"Try to accept work well before the end of the Iteration.",PAST_WITH_ACCEPTED_WORK_AFTER_END_DATE:"Some work accepted after the end of the Iteration.",CURRENT_WITH_SOME_UNACCEPTED_WORK:"Try to accept work well before the end of the Iteration.",CURRENT_WITH_NO_ACCEPTED_WORK:"You still have time, but try to accept your first story today or tomorrow.",PAST_WITH_DEFECTS:"Defects were not closed before the end of the Iteration.",CURRENT_WITH_DEFECTS:'We recommend addressing defects before considering a story "done".',CURRENT_TESTS_FAILING_TITLE:"{PERCENT}% Tests Passing",CURRENT_TESTS_FAILING_MESSAGE:"All tests should be passing before the iteration ends.",CURRENT_TESTS_PASSING:"All Tests Passing.",WORK_NOT_ESTIMATED:" work items have no estimate.",DEFINED_STATE:"Defined"},supportsUnscheduled:!1,initComponent:function(){this.callParent(arguments),this.subscribe(this,Rally.Message.objectDestroy,this._refreshApp,this),this.subscribe(this,Rally.Message.objectCreate,this._refreshApp,this),this.subscribe(this,Rally.Message.objectUpdate,this._refreshApp,this),this.subscribe(this,Rally.Message.bulkUpdate,this._onBulkUpdate,this)},_shouldUpdate:function(record){return this.getContext().getTimeboxScope().getRecord()&&Ext.Array.contains(["defect","hierarchicalrequirement","testset","defectsuite","testcase"],record.get("_type").toLowerCase())},_onBulkUpdate:function(records){_.any(records,this._shouldUpdate,this)&&this._addContent()},_refreshApp:function(record){this._shouldUpdate(record)&&this._addContent()},onScopeChange:function(scope){delete this._tzOffset,this._addContent()},onNoAvailableTimeboxes:function(){this._checkAndDestroy("#dataContainer")},_isHsOrTeamEdition:function(){return Rally.environment.getContext().getSubscription().isAnyOfTheseTypes(["HS","Express_Edition"])},getIteration:function(){return this.getContext().getTimeboxScope().getRecord()},getStartDate:function(){return this.getIteration().get("StartDate")},getEndDate:function(){return this.getIteration().get("EndDate")},calculateTimeboxInfo:function(){var deferred=Ext.create("Deft.Deferred");return Ext.isDefined(this._tzOffset)?deferred.resolve(this._tzOffset):(this.recordLoadBegin({description:"calculating timebox info"}),Rally.environment.getIoProvider().httpGet({requester:this,url:Rally.environment.getServer().getWsapiUrl()+"/iteration?includeSchema=true&pagesize=1&fetch=Name",success:function(results){this._tzOffset=void 0!==results.Schema.properties.EndDate.format.tzOffset?results.Schema.properties.EndDate.format.tzOffset/60:0,this.timeBoxInfo=this._determineTimeBoxInfo(this._tzOffset),this.recordLoadEnd(),deferred.resolve()},scope:this})),deferred.promise},getScheduleStates:function(){var deferred=Ext.create("Deft.Deferred");return this.recordLoadBegin({description:"getting schedule states"}),Ext.isDefined(this._scheduleStates)?deferred.resolve(this._scheduleStates):Rally.data.ModelFactory.getModel({type:"UserStory",context:this.getContext().getDataContext(),success:function(model){model.getField("ScheduleState").getAllowedValueStore().load({requester:this,callback:function(records,operation,success){this._scheduleStates=_.map(records,function(record){return record.get("StringValue")}),deferred.resolve(this._scheduleStates)},scope:this})},scope:this}),deferred.promise.always(function(obj){return this.recordLoadEnd(),obj},this)},_addContent:function(scope){var iteration=this.getIteration();return this.calculateTimeboxInfo().then({success:function(){this._checkAndDestroy("#dataContainer"),this.add({xtype:"container",itemId:"dataContainer",cls:"message",defaults:{xtype:"component"},items:[{html:this._buildDaysRemainingMessage()},{cls:"dates",html:Rally.util.DateTime.formatWithDefault(this.getStartDate(),this.getContext())+" - "+Rally.util.DateTime.formatWithDefault(this.getEndDate(),this.getContext())},{cls:"state",html:iteration.get("State")},{xtype:"container",itemId:"stats"},{xtype:"component",cls:"edit",renderTpl:new Ext.XTemplate('<a class="editLink" href="#">Edit iteration...</a>'),renderSelectors:{editLink:".editLink"},listeners:{editLink:{click:this._onEditLinkClick,stopEvent:!0,scope:this}}}]}),this._getStatusRowData()},scope:this})},_onEditLinkClick:function(){Rally.nav.Manager.edit(this.getIteration().get("_ref"))},_buildDaysRemainingMessage:function(){var message="";if(this.timeBoxInfo.daysRemaining>0){var remainingText=1===this.timeBoxInfo.daysRemaining?" Day Remaining":" Days Remaining";message='<span class="daysRemaining">'+this.timeBoxInfo.daysRemaining+remainingText+"</span> in a "}return message+=this.timeBoxInfo.timeboxLength+" day Iteration"},_determineTimeBoxInfo:function(tzOffset){var timeboxCounts=Rally.util.Timebox.getCounts(this.getStartDate(),this.getEndDate(),this.getContext().getWorkspace().WorkspaceConfiguration.WorkDays,tzOffset);return{timeOrientation:Rally.util.Timebox.getOrientation(this.getStartDate(),this.getEndDate(),tzOffset),timeboxLength:timeboxCounts.workdays,daysRemaining:timeboxCounts.remaining}},_checkAndDestroy:function(itemId){this.down(itemId)&&this.down(itemId).destroy()},_getStatusRowData:function(){var queryObjects={hierarchicalrequirement:"Defects:summary[State],TestCases:summary[LastVerdict],PlanEstimate,AcceptedDate,ScheduleState",defect:"TestCases:summary[LastVerdict],PlanEstimate,AcceptedDate,ScheduleState"};this.results={},this.recordLoadBegin({description:"getting status row data"}),this._isHsOrTeamEdition()||Ext.apply(queryObjects,{defectsuite:"Defects:summary[State],PlanEstimate,AcceptedDate,ScheduleState",testset:"TestCases:summary[LastVerdict],PlanEstimate,AcceptedDate,ScheduleState"}),Rally.data.ModelFactory.getModels({types:Ext.Object.getKeys(queryObjects),success:function(models){var loadPromises=[];Ext.Object.each(queryObjects,function(key,value){if(models[key]){var loadDeferred=Ext.create("Deft.Deferred");Ext.create("Rally.data.wsapi.Store",{model:models[key],fetch:value,context:this.getContext().getDataContext(),filters:[this.getContext().getTimeboxScope().getQueryFilter()],limit:1/0,autoLoad:!0,requester:this,listeners:{load:function(store,data){this.results[store.model.prettyTypeName]=data,loadDeferred.resolve()},scope:this}}),loadPromises.push(loadDeferred.promise)}},this),0===loadPromises.length?(this.recordLoadEnd(),this.recordComponentReady()):Deft.Promise.all(loadPromises).then({success:function(){this.recordLoadEnd(),this._displayStatusRows()},scope:this})},scope:this})},_getPostAcceptedState:function(){return this.getScheduleStates().then({success:function(states){return 4>=states.length?null:5===states.length?states[0]===this.self.DEFINED_STATE?states[4]:null:states[5]},scope:this})},_showStatuses:function(){return this.timeBoxInfo.timeboxLength-this.timeBoxInfo.daysRemaining>=5||this.timeBoxInfo.timeboxLength-this.timeBoxInfo.daysRemaining>this.timeBoxInfo.daysRemaining},_aggregateAcceptance:function(items,postAcceptedState){var acceptanceData={totalPlanEstimate:0,totalAcceptedPoints:0,totalItems:0,totalAcceptedItems:0,acceptedLate:!1,workNotEstimated:0};return Ext.each(items,function(item){acceptanceData.totalItems++,item.get("PlanEstimate")&&(acceptanceData.totalPlanEstimate+=item.get("PlanEstimate")),"Accepted"===item.get("ScheduleState")||null!==postAcceptedState&&item.get("ScheduleState")===postAcceptedState?(acceptanceData.totalAcceptedPoints+=item.get("PlanEstimate"),acceptanceData.totalAcceptedItems++,item.get("AcceptedDate")&&item.get("AcceptedDate")>this.getEndDate()&&(acceptanceData.acceptedLate=!0)):item.get("PlanEstimate")||acceptanceData.workNotEstimated++},this),acceptanceData},_getAcceptanceConfigObject:function(){return this._getPostAcceptedState().then({success:function(postAcceptedState){var totalPlanEstimate=0,totalAcceptedPoints=0,totalItems=0,totalAcceptedItems=0,acceptedLate=!1,workNotEstimated=0;Ext.Object.each(this.results,function(key,item){var itemAcceptanceData=this._aggregateAcceptance(item,postAcceptedState);totalPlanEstimate+=itemAcceptanceData.totalPlanEstimate,totalAcceptedPoints+=itemAcceptanceData.totalAcceptedPoints,totalItems+=itemAcceptanceData.totalItems,totalAcceptedItems+=itemAcceptanceData.totalAcceptedItems,acceptedLate||(acceptedLate=itemAcceptanceData.acceptedLate),workNotEstimated+=itemAcceptanceData.workNotEstimated},this);var percentAccepted=Math.floor(100*(totalAcceptedPoints/(totalPlanEstimate||1))),config={rowType:"pointAcceptance"};return"future"!==this.timeBoxInfo.timeOrientation&&(config.title=percentAccepted+"% Accepted",config.subtitle="("+Ext.util.Format.round(totalAcceptedPoints,2)+" of "+Ext.util.Format.round(totalPlanEstimate,2)+" "+this.getContext().getWorkspace().WorkspaceConfiguration.IterationEstimateUnitName+")",config.message="",0===this.timeBoxInfo.daysRemaining?100>percentAccepted?(config.status="error",config.message=this.self.PAST_WITH_SOME_UNACCEPTED_WORK,config.learnMore="stories"):acceptedLate?(config.message=this.self.PAST_WITH_ACCEPTED_WORK_AFTER_END_DATE,config.status="success",config.learnMore="stories"):config.status="success":this._showStatuses()?(0===percentAccepted?config.status="warn":100===percentAccepted?0===workNotEstimated?config.status="success":(config.status="pending",config.message=workNotEstimated+this.self.WORK_NOT_ESTIMATED):config.status="pending",100>percentAccepted&&(config.message=this.self.CURRENT_WITH_SOME_UNACCEPTED_WORK,config.learnMore="stories")):(config.status="pending",0===percentAccepted&&(config.message=this.self.CURRENT_WITH_NO_ACCEPTED_WORK,config.learnMore="stories"))),config},scope:this})},_getActiveDefectCount:function(items){var activeDefectsCount=0;return items=items||[],Ext.Array.forEach(items,function(item){var defectSummary=item.get("Summary").Defects;Ext.Object.each(defectSummary.State,function(state,count){"Closed"!==state&&(activeDefectsCount+=count)})}),activeDefectsCount},_getDefectsConfigObject:function(){var totalDefectCount=this._getActiveDefectCount(this.results.userstory);this.results.defectsuite&&(totalDefectCount+=this._getActiveDefectCount(this.results.defectsuite));var config={rowType:"defects"};return totalDefectCount>0&&"future"!==this.timeBoxInfo.timeOrientation&&(config.title=totalDefectCount+" Active Defect"+(1!==totalDefectCount?"s":""),config.subtitle="",config.learnMore="defects","past"===this.timeBoxInfo.timeOrientation?(config.status="error",config.message=this.self.PAST_WITH_DEFECTS):"current"===this.timeBoxInfo.timeOrientation&&(config.status="warn",config.message=this.self.CURRENT_WITH_DEFECTS)),config},_getPassingTestCases:function(items){var testCounts={passingTests:0,totalTests:0};return items=items||[],Ext.Array.forEach(items,function(item){var testCaseSummary=item.get("Summary").TestCases;Ext.Object.each(testCaseSummary.LastVerdict,function(verdict,count){"Pass"===verdict&&(testCounts.passingTests+=count),testCounts.totalTests+=count})}),testCounts},_getTestsConfigObject:function(){var config={rowType:"testsPassing"},testCounts={passingTests:0,totalTests:0},testTypes=["userstory","defect","testset"];if(Ext.Array.forEach(testTypes,function(testType){var tmpTestCnt=this._getPassingTestCases(this.results[testType]);testCounts.totalTests+=tmpTestCnt.totalTests,testCounts.passingTests+=tmpTestCnt.passingTests},this),0!==testCounts.totalTests&&"future"!==this.timeBoxInfo.timeOrientation){var percentPassing=Math.floor(100*(testCounts.passingTests/testCounts.totalTests));config.title=this.self.CURRENT_TESTS_FAILING_TITLE.replace("{PERCENT}",percentPassing),config.subtitle="("+testCounts.passingTests+" of "+testCounts.totalTests+")",testCounts.passingTests===testCounts.totalTests?(config.message=this.self.CURRENT_TESTS_PASSING,config.status="success"):(config.message=this.self.CURRENT_TESTS_FAILING_MESSAGE,config.learnMore="tests",config.status="past"===this.timeBoxInfo.timeOrientation?"error":this._showStatuses()?0===testCounts.passingTests?"warn":"pending":"pending")}return config},_displayStatusRows:function(){return this._getAcceptanceConfigObject().then({success:function(acceptanceConfigObject){this.down("#stats").suspendLayouts(),this.down("#stats").removeAll(),this._displayStatusRow(acceptanceConfigObject),this._displayStatusRow(this._getDefectsConfigObject()),this._isHsOrTeamEdition()||this._displayStatusRow(this._getTestsConfigObject()),this.down("#stats").resumeLayouts(!0),this.recordComponentReady()},scope:this})},_displayStatusRow:function(rowConfig){if(rowConfig.title){var items=[{cls:"header "+rowConfig.rowType||"",html:rowConfig.title+'<span class="subtitle">'+rowConfig.subtitle+"</span>"}];if(rowConfig.message){var message=rowConfig.message;rowConfig.learnMore&&(message+=' <a href="https://help.rallydev.com/iteration-summary#'+rowConfig.learnMore+'" title="Learn More" target="_blank" class="learnMore">Learn More</a>'),items.push({cls:"details",html:message})}this.down("#stats").add({xtype:"container",cls:rowConfig.status?"timeboxStatusRow "+rowConfig.status:"timeboxStatusRow",items:[{xtype:"container",cls:"timeboxStatusDetails",defaults:{xtype:"component"},items:items}]})}}})})();
+
+            Rally.launchApp('Rally.apps.iterationsummary.IterationSummaryApp', {
+                name:"Iteration Summary",
+	            parentRepos:""
+            });
+
+        });
+    </script>
+
+
+    <style type="text/css">
+        .iteration-summary-app {
+    padding: 10px;
+    width: 100% !important;
+}
+
+.iteration-summary-app .daysRemaining {
+    font-family: NotoSansBold, Helvetica, Arial;
+    font-weight: normal;
+}
+
+.iteration-summary-app .dates {
+    font-size: 12px;
+}
+
+.iteration-summary-app .message {
+    padding-top: 10px;
+    font-size: 14px;
+}
+
+.iteration-summary-app .state {
+    padding-top: 5px;
+    font-style: italic;
+}
+
+.iteration-summary-app .edit {
+    font-size: 11px;
+    padding-top: 10px;
+}
+
+.iteration-summary-app .timeboxStatusRow {
+    margin-top: 10px;
+    padding-left: 5px;
+}
+
+.iteration-summary-app .timeboxStatusRow.success {
+    background-color: #6ab17d;
+}
+
+.iteration-summary-app .timeboxStatusRow.warn {
+    background-color: #d9af4b;
+}
+
+.iteration-summary-app .timeboxStatusRow.error {
+    background-color: #f47168;
+}
+
+.iteration-summary-app .timeboxStatusRow.pending {
+    background-color: #c6c6c6;
+}
+
+.iteration-summary-app .timeboxStatusRow .timeboxStatusDetails {
+    background-color: #ffffff;
+    padding-left: 5px;
+}
+
+.iteration-summary-app .timeboxStatusRow .timeboxStatusDetails .header {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
+    font-weight: normal;
+    font-size: 16px;
+}
+
+.iteration-summary-app .timeboxStatusRow .timeboxStatusDetails .subtitle {
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
+    font-size: 12px;
+    font-weight: normal;
+    padding-left: 5px;
+}
+
+.iteration-summary-app .timeboxStatusRow .timeboxStatusDetails .details {
+    font-size: 11px;
+}
+
+    </style>
+</head>
+<body></body>
+</html>

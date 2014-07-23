@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Custom Tree Grid</title>
+
+
+    <script type="text/javascript" src="https://rally1.rallydev.com/apps/x/sdk-debug.js"></script>
+
+    <script type="text/javascript">
+        // I am keeping the extra , in there to simplify my code. If someone is actually using an old version of IE to make an app let me know.
+        Rally.loadScripts(
+                [
+                      "TreeGridApp.js",
+                ],
+        function() {
+            Rally.launchApp('Rally.apps.treegrid.TreeGridApp', {
+                name:"Custom Tree Grid"
+            });
+        }, true);
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="TreeGridApp.less">
+</head>
+<body></body>
+</html>

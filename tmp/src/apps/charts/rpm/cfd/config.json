@@ -1,0 +1,24 @@
+{
+   "name": "Portfolio CFD",
+   "className": "Rally.apps.charts.rpm.cfd.CumulativeFlowChartApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "../../Colors.js",
+      "../../DateMixin.js",
+      "../../IntegrationHeaders.js",
+      "../../settings/RadioGroupSetting.js",
+      "../../settings/SettingsChangeMixin.js",
+      "../../settings/DataTypePicker.js",
+      "../../settings/PortfolioDatePicker.js",
+      "../../settings/PortfolioItemDataTypePicker.js",
+      "../../settings/PortfolioItemPicker.js",
+      "../ChartSettings.js",
+      "../PortfolioChartAppBase.js",
+      "CumulativeFlowCalculator.js",
+      "CumulativeFlowChartApp.js"
+   ],
+   "css": [
+      "../../Charts.less"
+   ]
+}
