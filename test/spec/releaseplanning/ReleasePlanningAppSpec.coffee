@@ -33,7 +33,9 @@ describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
       values:
         Release:
           _ref: @releaseData[0]._ref
-        LeafStoryPlanEstimateTotal: 12
+        PreliminaryEstimate:
+          Value: 12
+
     @ajax.whenQuerying('portfolioitem/feature').respondWith @featureData
 
     @app = Ext.create 'Rally.apps.releaseplanning.ReleasePlanningApp',
@@ -53,7 +55,7 @@ describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
   it 'should show a feature card in the correct release column', ->
     expect(@getColumn(1).getCards()[0].getRecord().get('Name')).toBe @featureData[0].Name
 
-  it 'should show a progress bar based on story points and planned velocity', ->
+  it 'should show a progress bar based on preliminary estimate and planned velocity', ->
     expect(@getProgressBarHtml(1)).toBe '12 of 20'
 
   it 'should order the release columns based on end date', ->

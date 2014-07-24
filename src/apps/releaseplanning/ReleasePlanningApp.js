@@ -27,7 +27,7 @@
                 cardBoardConfig: {
                     columnConfig: {
                         columnStatusConfig: {
-                            pointField: 'LeafStoryPlanEstimateTotal'
+                            pointField: 'PreliminaryEstimate.Value'
                         }
                     },
                     listeners: {
@@ -105,6 +105,7 @@
                             'Owner',
                             'PortfolioItemType'
                         ],
+                        boardFieldDefaults: ['PreliminaryEstimate', 'UserStories'],
                         headerPosition: 'left'
                     }
                 ],
