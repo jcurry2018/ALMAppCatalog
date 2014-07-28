@@ -12,8 +12,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
       @column = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', Ext.merge {},
         store: Deft.Injector.resolve('featureStore')
-        cardConfig:
-          preliminaryEstimateStore: Deft.Injector.resolve('preliminaryEstimateStore')
         context:
           getProject: -> Rally.environment.getContext().getProject()
           getScopedStateId: (stateId) -> stateId

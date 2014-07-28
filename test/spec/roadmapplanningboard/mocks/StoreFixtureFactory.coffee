@@ -276,18 +276,6 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
     @secondFeatureStoreFixture.model.setProxy 'memory'
     @secondFeatureStoreFixture
 
-  getPreliminaryEstimateStoreFixture: ->
-    @preliminaryEstimateStoreFixture = Ext.create 'Rally.data.wsapi.Store',
-      model: Rally.test.mock.data.WsapiModelFactory.getModel 'PreliminaryEstimate'
-      proxy:
-        type: 'memory'
-      data: [
-        {Value: 8, _refObjectName: 'L', Name: 'L', Description: 'Large'}
-      ]
-
-    @preliminaryEstimateStoreFixture.model.setProxy 'memory'
-    @preliminaryEstimateStoreFixture
-
   getTimelineStoreFixture: ->
     @timelineStoreFixture = Ext.create 'Rally.data.Store',
       model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimelineModel()
