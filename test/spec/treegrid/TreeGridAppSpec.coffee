@@ -6,29 +6,35 @@ Ext.require [
 
 describe 'Rally.apps.treegrid.TreeGridApp', ->
 
+  helpers
+    getTreeGridAppConfig: (featureEnabled) ->
+      modelNames: ['PortfolioItem/Project']
+      getContext: ->
+        get: ->
+        isFeatureEnabled: -> featureEnabled
+        getScopedStateId: -> 'someStateId'
+
   beforeEach ->
-    @ajax.whenQuerying('artifact').respondWith()
+    @piQueryStub = @ajax.whenQuerying('portfolioitem/project').respondWith()
 
   afterEach ->
     if (@treeGridApp)
       @treeGridApp.destroy()
 
   it 'should initialize', ->
-    @treeGridApp = Ext.create('Rally.apps.treegrid.TreeGridApp',
-      getContext: ->
-        get: ->
-        isFeatureEnabled: -> false
-        getScopedStateId: -> 'someStateId'
-    )
+    @treeGridApp = Ext.create 'Rally.apps.treegrid.TreeGridApp', @getTreeGridAppConfig(false)
     expect(Ext.isDefined(@treeGridApp)).toBeTruthy()
 
   it 'should persist row expansion if enabled', ->
-    @treeGridApp = Ext.create('Rally.apps.treegrid.TreeGridApp',
-      getContext: ->
-        get: ->
-        isFeatureEnabled: -> true
-        getScopedStateId: -> 'someStateId'
-    )
+    @treeGridApp = Ext.create 'Rally.apps.treegrid.TreeGridApp', @getTreeGridAppConfig(true)
     treeGrid = @treeGridApp.down 'rallytreegrid'
 
     expect(_.filter(treeGrid.plugins, ptype: 'rallytreegridexpandedrowpersistence').length).toBe 1
+
+  it 'should fetch column attributes', ->
+    @treeGridApp = Ext.create 'Rally.apps.treegrid.TreeGridApp', @getTreeGridAppConfig(true)
+    @waitForCallback(@piQueryStub).then =>
+      fetchedColumns = @piQueryStub.getCall(0).args[0].params.fetch.split(',')
+      _.each(@treeGridApp.columnNames, (columnName) ->
+        expect(fetchedColumns).toContain columnName
+      )

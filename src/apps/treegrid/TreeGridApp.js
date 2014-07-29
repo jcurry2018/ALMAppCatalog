@@ -10,7 +10,10 @@
         alias: 'widget.treegridapp',
         componentCls: 'treegrid',
 
-        modelNames: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
+        //modelNames: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
+        modelNames: ['PortfolioItem/Strategy'],
+
+        columnNames: ['Name', 'Owner', 'Project'],
 
         launch: function () {
             var plugins = [],
@@ -29,7 +32,7 @@
                         xtype: 'rallytreegrid',
                         plugins: plugins,
                         store: gridStore,
-                        columnCfgs: ['Name', 'Owner', 'Project', 'Discussion'],
+                        columnCfgs: this.columnNames,
                         stateId: this.getContext().getScopedStateId('custom-treegrid'),
                         stateful: true
                     });
@@ -47,9 +50,10 @@
                     autoLoad: false,
                     remoteSort: true,
                     root: {expanded: true},
-                    enableHierarchy: true,
+                    enableHierarchy: false,
                     childPageSizeEnabled: true,
-                    useShallowFetch: context.isFeatureEnabled('COMPACT_WSAPI_REQUESTS') ? false : true
+                    useShallowFetch: context.isFeatureEnabled('COMPACT_WSAPI_REQUESTS') ? false : true,
+                    fetch: this.columnNames
                 };
 
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
