@@ -71,8 +71,18 @@
 			return defaults;
 		},
 
+		getUrlSearchString: function() {
+			return location.search || '';
+		},
+
+		isDebugMode: function() {
+			var parameters = Ext.Object.fromQueryString(this.getUrlSearchString());
+			return parameters.packtag === 'false';
+		},
+
 		constructIFrame: function() {
-			var ifr = '<iframe width="100%" height="480" src="/analytics/chart/latest/almshim.html"></iframe>';
+			var filename = this.isDebugMode() ? 'almshim.html' : 'almshim.min.html';
+			var ifr = '<iframe width="100%" height="480" src="/analytics/chart/latest/' + filename + '"></iframe>';
 			this.down("#mrcontainer").el.dom.innerHTML = ifr;
 		},
 

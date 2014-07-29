@@ -30,10 +30,10 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 				context: context
 			, config
 
-			a = @app
+			@app.getUrlSearchString = -> contextValues.searchString || ''
 
-			@container.add(a)
-			@once condition: => a.down '#mrcontainer'
+			@container.add(@app)
+			@once condition: => @app.down '#mrcontainer'
 
 		getIFrame : (app) ->
 			expect(app).toBeDefined()
@@ -43,7 +43,7 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 	it 'uses default almshim.html as the iframe source', ->
 		@createApp().then (app) =>
 			iframe = @getIFrame(app)
-			expect(iframe.src).toContain "/analytics/chart/latest/almshim.html"
+			expect(iframe.src).toContain "/analytics/chart/latest/almshim.min.html"
 
 	it 'sets up the almbridge on the iframe', ->
 		@createApp().then (app) =>
@@ -75,3 +75,15 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 		@createApp().then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.almBridge.getProject().ObjectID).toBe Rally.environment.getContext().getProject().ObjectID
+
+	it 'changes shim location if packtag=false', ->
+		@createApp({}, { searchString : "?packtag=false" }).then (app) =>
+			iframe = @getIFrame(app)
+			expect(iframe.src).toContain "/analytics/chart/latest/almshim.html"
+
+	it 'keeps minified shim location if packtag != false', ->
+		@createApp({}, { searchString : "?packtag=true" }).then (app) =>
+			iframe = @getIFrame(app)
+			expect(iframe.src).toContain "/analytics/chart/latest/almshim.min.html"
+
+
