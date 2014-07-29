@@ -175,7 +175,6 @@
                 context: context,
                 plugins: this._getGridBoardPlugins(),
                 modelNames: this.modelNames,
-                useFilterCollection: !context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP'),
                 cardBoardConfig: this._getBoardConfig(),
                 gridConfig: this._getGridConfig(gridStore),
                 storeConfig: {

@@ -109,8 +109,7 @@
                     }
                 ],
                 startDateField: 'ReleaseStartDate',
-                timeboxType: 'Release',
-                useFilterCollection: false
+                timeboxType: 'Release'
             });
         },
 

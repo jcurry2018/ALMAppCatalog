@@ -72,7 +72,6 @@
                 modelNames: this.modelNames,
                 timeboxType: 'Iteration',
                 plugins: plugins,
-                useFilterCollection: false,
                 cardBoardConfig: {
                     cardConfig: {
                         fields:  this.getCardFieldNames()

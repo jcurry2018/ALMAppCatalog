@@ -16,11 +16,11 @@
             'Rally.ui.gridboard.plugin.BoardPolicyDisplayable',
             'Rally.ui.filter.view.OwnerPillFilter',
             'Rally.ui.filter.view.TagPillFilter',
-            'Rally.ui.gridboard.plugin.GridBoardTagFilter',
-            'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.cardboard.plugin.CollapsibleColumns',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
+            'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
+            'Rally.ui.gridboard.plugin.GridBoardTagFilter',
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.cardboard.Column',
             'Rally.ui.cardboard.CardBoard',
@@ -274,20 +274,29 @@
                     plugins: [
                         'rallygridboardaddnew',
                         {
-                            ptype: 'rallygridboardfiltercontrol',
+                            ptype: 'rallygridboardcustomfiltercontrol',
+                            filterChildren: false,
                             filterControlConfig: {
+                                blackListFields: [
+                                    'DirectChildrenCount',
+                                    'DisplayColor',
+                                    'DragAndDropRank',
+                                    'Iteration',
+                                    'TestCase',
+                                    'TestCaseResult',
+                                    'VersionId',
+                                    'PortfolioItemType',
+                                    'State'
+                                ],
+                                whiteListFields: [
+                                    'Tags'
+                                ],
+                                margin: '3 10',
+                                modelNames: [currentTypePath],
+                                stateId: this.getContext().getScopedStateId('portfolio-kanban-custom-filter-button'),
                                 cls: 'small gridboard-filter-control',
-                                margin: '3 10 3 7',
-                                stateful: true,
-                                stateId: this.getContext().getScopedStateId('portfolio-kanban-filter-button'),
-                                items: [
-                                    this._createFilterItem('rallyownerpillfilter', {
-                                        filterChildren: false,
-                                        project: this.getContext().getProject(),
-                                        showPills: false
-                                    }),
-                                    this._createFilterItem('rallytagpillfilter', {remoteFilter: true})
-                                ]
+                                context: this.getContext(),
+                                stateful: true
                             }
                         },
                         {

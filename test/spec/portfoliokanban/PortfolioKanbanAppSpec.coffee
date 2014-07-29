@@ -28,7 +28,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     waitForAppReady: ->
       readyStub = @stub()
       Rally.environment.getMessageBus().subscribe Rally.Message.piKanbanBoardReady, readyStub
-      @waitForCallback readyStub
+      @waitForCallback readyStub, 2
 
   beforeEach ->
     Rally.environment.getContext().context.subscription.Modules = ['Rally Portfolio Manager']
