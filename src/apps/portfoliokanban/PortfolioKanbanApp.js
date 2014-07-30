@@ -40,7 +40,7 @@
 
         config: {
             defaultSettings: {
-                fields: 'PercentDoneByStoryCount,UserStories'
+                fields: 'Discussion,PercentDoneByStoryCount,UserStories'
             }
         },
 
@@ -312,7 +312,6 @@
                                 'Subscription',
                                 'Workspace',
                                 'Changesets',
-                                'Discussion',
                                 'LastUpdateDate',
                                 'Owner'
                             ],
@@ -338,12 +337,10 @@
                         cardConfig: {
                             xtype: 'rallyportfoliokanbancard',
                             editable: true,
-                            fields: Rally.apps.portfoliokanban.PortfolioKanbanCard.defaultFields.concat('Discussion'),
                             showColorIcon: true
                         },
                         columnConfig: {
                             xtype: 'rallycardboardcolumn',
-                            additionalFetchFields: ['Discussion'],
                             enableWipLimit: true
                         },
                         columns: columns,

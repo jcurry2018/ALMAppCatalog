@@ -100,12 +100,11 @@
                             'Subscription',
                             'Workspace',
                             'Changesets',
-                            'Discussion',
                             'LastUpdateDate',
                             'Owner',
                             'PortfolioItemType'
                         ],
-                        boardFieldDefaults: ['PreliminaryEstimate', 'UserStories'],
+                        boardFieldDefaults: ['Discussion', 'PreliminaryEstimate', 'UserStories'],
                         headerPosition: 'left'
                     }
                 ],
