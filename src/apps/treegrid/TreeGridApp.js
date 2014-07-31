@@ -13,7 +13,7 @@
         //modelNames: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
         modelNames: ['PortfolioItem/Strategy'],
 
-        columnNames: ['Name', 'Owner', 'Project'],
+        columnNames: ['FormattedID', 'Name', 'Owner', 'Project'],
 
         launch: function () {
             var plugins = [],
