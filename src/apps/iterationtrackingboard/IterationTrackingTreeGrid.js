@@ -58,9 +58,15 @@
                 }
             ],
 
+
             treeColumnRenderer: function (value, metaData, record, rowIdx, colIdx, store) {
                 store = store.treeStore || store;
                 return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);
+            },
+
+            noDataHelpLink: {
+                url: "https://help.rallydev.com/tracking-iterations#filter",
+                title: "Filter Help Page"
             }
         }
     });
