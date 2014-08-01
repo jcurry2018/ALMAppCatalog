@@ -376,7 +376,6 @@
         _onBeforeEditorShow: function(addNew, params) {
             params.rankTo = 'BOTTOM';
             params.rankScope = 'BACKLOG';
-            params.iteration = 'u';
 
             var groupByFieldName = this.groupByField.name;
 
