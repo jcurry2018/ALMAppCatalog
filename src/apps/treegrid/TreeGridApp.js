@@ -10,10 +10,12 @@
         alias: 'widget.treegridapp',
         componentCls: 'treegrid',
 
-        //modelNames: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
-        modelNames: ['PortfolioItem/Initiative'],
+//        modelNames: ['User Story'],// 'Defect', 'Defect Suite', 'Test Set'],
+        modelNames: ['PortfolioItem/Project'],
 
         columnNames: ['FormattedID', 'Name', 'Owner', 'Project'],
+
+        storeConfig: {},
 
         launch: function () {
             var plugins = [],
@@ -45,19 +47,19 @@
 
         _getGridStore: function() {
             var context = this.getContext(),
-                config = {
+                storeConfig = Ext.apply(this.storeConfig, {
                     models: this.modelNames,
                     autoLoad: false,
                     remoteSort: true,
                     root: {expanded: true},
                     pageSize: 200,
-                    enableHierarchy: false,
+                    enableHierarchy: true,
                     childPageSizeEnabled: true,
                     useShallowFetch: context.isFeatureEnabled('COMPACT_WSAPI_REQUESTS') ? false : true,
                     fetch: this.columnNames
-                };
+                });
 
-            return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
+            return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(storeConfig);
         }
     });
 
