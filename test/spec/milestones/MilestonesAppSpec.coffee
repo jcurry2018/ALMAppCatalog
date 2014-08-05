@@ -15,6 +15,9 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
         isProjectEditor: ->
           canEdit
 
+      context.getWorkspace = ->
+        Name: 'default workspace'
+
       context
 
     _createApp: (milestoneData, canEdit = true) ->
@@ -28,15 +31,15 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
 
       @waitForCallback milestoneQuery
 
-    _createAppWithData: ->
-      @_createApp [
+    _createAppWithData: (config = {}) ->
+      @_createApp [ _.extend(
         {
           FormattedID: 'MI6'
           Name: 'Milestones are awesome'
           TargetDate: new Date()
           Artifacts:
             Count: 3
-        }
+        }, config)
       ]
 
     _createAppWithNoData: (canEdit = true) ->
@@ -65,3 +68,17 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
     it 'should display some canned text if the grid is empty', ->
       @_createAppWithNoData().then =>
         expect(@app.getEl().down('.no-data-container').getHTML()).toContain 'Looks like milestones have not yet been defined for the current project'
+
+  describe 'project column text', ->
+    it 'should indicate project scoping', ->
+      @_createAppWithData(
+        TargetProject:
+          Name: 'Test Project 2'
+      ).then =>
+        expect(@app.getEl().down('.targetproject').getHTML()).toContain @milestoneData[0].TargetProject.Name
+
+    it 'should indicate workspace scoping', ->
+      @_createAppWithData(
+        TargetProject: null
+      ).then =>
+        expect(@app.getEl().down('.targetproject').getHTML()).toContain 'All projects in default workspace'
