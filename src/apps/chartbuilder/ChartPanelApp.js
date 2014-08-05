@@ -6,9 +6,6 @@
 		extend: "Rally.app.App",
 		componentCls: 'cbchart-app',
 		config: {
-			defaultSettings: {
-				url: ''
-			}
 		},
 		requires: [],
 		items: [
@@ -23,52 +20,17 @@
 			id: 279
 		},
 
-		settingsTransformers: {
-			'combobox': function(original) {
-				return {
-					xtype: 'rallycombobox',
-					valueField: 'value',
-					displayField: 'label',
-					name: original.name,
-					store: {
-						xtype: "store",
-						fields: [
-							'label','value'
-						],
-						data: original.values || [{label:'data expected is \'label\' and \'value\'',value:''}]
-					}
-				};
-			}
-		},
-
 		getSettingsFields: function () {
-			var fields = this.callParent(arguments);
-
-			fields.push({
-				type: "text",
-				name: "url",
-				label: "URL To Load"
-			});
-
-			var self = this;
-
-			_.each(this.appPrefs, function(pref) {
-				var p = pref;
-				if (self.settingsTransformers[pref.type]) {
-					p = self.settingsTransformers[pref.type](pref);
-				}
-				fields.push(p);
-			});
-
-			return fields;
+			var fields = this.callParent(arguments) || [];
+			// get the settings fields that the chart requires
+			var listOfTransformedSettings = this.almBridge.getSettingsFields();
+			return fields.concat(listOfTransformedSettings);
 		},
 
 		getDefaultSettings: function() {
 			var defaults = this.callParent(arguments);
-			_.each(this.appPrefs, function(pref) {
-				defaults[pref.name] = pref['default'];
-			});
-			return defaults;
+			var defaultsFromEaselChart = this.almBridge.getDefaultSettings();
+			return Ext.apply( defaults, defaultsFromEaselChart, {} );
 		},
 
 		getUrlSearchString: function() {
@@ -87,7 +49,6 @@
 		},
 
 		render: function () {
-			var self = this;
 			this.callParent(arguments);
 
 			this.constructIFrame();
@@ -101,58 +62,12 @@
 
 			var chartToLoad = this.appContainer.slug;
 
-			// provide port(s) for the chart app to use
-			var almBridge = {
-				lbapiBaseUrl: function() {
-					return Rally.environment.getServer().getLookbackUrl();
-				},
+			this.almBridge = Ext.create("Rally.apps.chartbuilder.EaselAlmBridgeApi", {
+				chartType : chartToLoad,
+				app: this
+			});
 
-				wsapiBaseUrl: function() {
-					return Rally.environment.getServer().getWsapiUrl();
-				},
-
-				getProjectScopingDown: function() {
-					return self.getContext().getProjectScopeDown();
-				},
-
-				getWorkspace: function() {
-					return self.getContext().getWorkspace();
-				},
-
-				getProject: function() {
-					return self.getContext().getProject();
-				},
-
-				//toggleEnabled : function(name) { return false;},
-				//getPreference: function(n) {
-				//	return self.getSetting(n) || self.defaultSettings[n];
-				//},
-				log: function(a,b) {
-					var c = console;
-					c.log(a,b);
-				},
-				//registerPreferences : function(easelPreferences) {
-				//	self.appPrefs = easelPreferences;
-				//	_.each(self.appPrefs, function(pref) {
-				//		if (pref['default']) {
-				//			self.defaultSettings[pref.name] = pref['default'];
-				//		}
-				//	});
-				//},
-				getChartType: function() {
-					return chartToLoad;
-				}
-			};
-
-			iframe.almBridge = almBridge;
-
-			// example - binding events to the chart app
-			Ext.EventManager.onWindowResize(function() {
-				if (self.chart && self.chart.onResize) {
-					self.chart.onResize();
-				}
-			}, this);
-
+			iframe.almBridge = this.almBridge;
 		}
 	});
 

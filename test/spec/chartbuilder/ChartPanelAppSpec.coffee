@@ -55,17 +55,6 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 			iframe = @getIFrame(app)
 			expect(iframe.almBridge.getChartType()).toBe 'theslug'
 
-
-	it 'returns the appropriate LBAPI Url from the ALM Bridge', ->
-		@createApp().then (app) =>
-			iframe = @getIFrame(app)
-			expect(iframe.almBridge.lbapiBaseUrl()).toBe '/analytics/v2.0'
-
-	it 'returns the appropriate WSAPI Url from the ALM Bridge', ->
-		@createApp().then (app) =>
-			iframe = @getIFrame(app)
-			expect(iframe.almBridge.wsapiBaseUrl()).toBe '/webservice/v2.x'
-
 	it 'returns the appropriate workspace from the ALM Bridge', ->
 		@createApp().then (app) =>
 			iframe = @getIFrame(app)
