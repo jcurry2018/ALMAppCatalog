@@ -32,8 +32,10 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
       @_createApp [
         {
           FormattedID: 'MI6'
-          Name: 'Milestones are awesome',
+          Name: 'Milestones are awesome'
           TargetDate: new Date()
+          Artifacts:
+            Count: 3
         }
       ]
 
@@ -58,6 +60,7 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
         expect(@app.getEl().down('.formatted-id-template').getHTML()).toContain @milestoneData[0].FormattedID
         expect(@app.getEl().down('.name').getHTML()).toContain @milestoneData[0].Name
         expect(@app.getEl().down('.targetdate').getHTML()).toContain @milestoneData[0].TargetDate.getFullYear()
+        expect(@app.getEl().down('.artifacts').getHTML()).toContain @milestoneData[0].Artifacts.Count
 
     it 'should display some canned text if the grid is empty', ->
       @_createAppWithNoData().then =>

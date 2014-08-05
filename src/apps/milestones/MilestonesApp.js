@@ -23,11 +23,18 @@
                             }
                         },
                         'Name',
-                        'TargetDate'
+                        'TargetDate',
+                        {
+                            dataIndex: 'Artifacts',
+                            renderer: function(artifactsCollection) {
+                                return artifactsCollection.Count;
+                            },
+                            text: 'Item Count'
+                        }
                     ],
                     enableRanking: true,
                     storeConfig: {
-                        fetch: 'FormattedID,Name,TargetDate',
+                        fetch: 'FormattedID,Name,TargetDate,Artifacts',
                         sorters: [{
                             property: 'TargetDate',
                             direction: 'DESC'
