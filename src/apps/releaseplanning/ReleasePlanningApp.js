@@ -56,26 +56,11 @@
                         ptype: 'rallygridboardcustomfiltercontrol',
                         filterChildren: false,
                         filterControlConfig: {
-                            blackListFields: [
-                                'DirectChildrenCount',
-                                'DisplayColor',
-                                'DragAndDropRank',
-                                'Iteration',
-                                'TestCase',
-                                'TestCaseResult',
-                                'VersionId',
-                                'PortfolioItemType',
-                                'Release'
-                            ],
-                            whiteListFields: [
-                                'Tags'
-                            ],
-                            margin: '3 10 3 0',
-                            modelNames: [piTypePath],
-                            stateId: this.getContext().getScopedStateId('release-planning-custom-filter-button'),
-                            cls: 'small gridboard-filter-control',
+                            blackListFields: ['PortfolioItemType', 'Release'],
                             context: this.getContext(),
-                            stateful: true
+                            modelNames: [piTypePath],
+                            stateful: true,
+                            stateId: this.getContext().getScopedStateId('release-planning-custom-filter-button')
                         }
                     },
                     {

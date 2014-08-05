@@ -242,46 +242,33 @@
             }
 
             if (context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
-                var filterControlConfig = {
-                    cls: 'small gridboard-filter-control',
-                    context: context,
-//                    margin: '3 10 3 7',
-                    stateful: true
-                };
-
                 if (context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP')) {
                     plugins.push({
                         ptype: 'rallygridboardcustomfiltercontrol',
                         filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
-                        filterControlConfig: _.merge(filterControlConfig, {
-                            blackListFields: [
-                                'DirectChildrenCount',
-                                'DisplayColor',
-                                'DragAndDropRank',
-                                'Iteration',
-                                'PortfolioItem',
-                                'TestCase',
-                                'TestCaseResult',
-                                'VersionId'
-                            ],
-                            whiteListFields: [
-                                'Tags'
-                            ],
+                        filterControlConfig: {
+                            blackListFields: ['Iteration', 'PortfolioItem'],
+                            context: context,
+                            margin: '3 9 3 30',
                             modelNames: this.modelNames,
+                            stateful: true,
                             stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
-                        })
+                        }
                     });
                 } else {
                     plugins.push({
                         ptype: 'rallygridboardfiltercontrol',
-                        filterControlConfig: _.merge(filterControlConfig, {
+                        filterControlConfig: {
+                            cls: 'small gridboard-filter-control',
+                            context: context,
                             items: [
                                 this._createOwnerFilterItem(context),
                                 this._createTagFilterItem(context),
                                 this._createModelFilterItem(context)
                             ],
+                            stateful: true,
                             stateId: context.getScopedStateId('iteration-tracking-filter-button')
-                        })
+                        }
                     });
                 }
             } else {
