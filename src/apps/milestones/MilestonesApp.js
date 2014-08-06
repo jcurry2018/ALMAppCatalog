@@ -62,7 +62,8 @@
                 return {
                     recordTypes: ['Milestone'],
                     showAddWithDetails: false,
-                    openEditorAfterAddFailure: false
+                    openEditorAfterAddFailure: false,
+                    minWidth: 800
                 };
             }
             return {};
