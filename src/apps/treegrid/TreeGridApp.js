@@ -11,7 +11,7 @@
         componentCls: 'treegrid',
 
         //modelNames: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
-        modelNames: ['PortfolioItem/Strategy'],
+        modelNames: ['PortfolioItem/Initiative'],
 
         columnNames: ['FormattedID', 'Name', 'Owner', 'Project'],
 
@@ -50,6 +50,7 @@
                     autoLoad: false,
                     remoteSort: true,
                     root: {expanded: true},
+                    pageSize: 200,
                     enableHierarchy: false,
                     childPageSizeEnabled: true,
                     useShallowFetch: context.isFeatureEnabled('COMPACT_WSAPI_REQUESTS') ? false : true,
