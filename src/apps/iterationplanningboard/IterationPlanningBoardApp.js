@@ -6,9 +6,7 @@
         requires: [
             'Rally.ui.gridboard.planning.TimeboxGridBoard',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
-            'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardManageIterations',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl'
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
@@ -21,11 +19,12 @@
         },
 
         launch: function() {
-            var plugins = [{ ptype: 'rallygridboardaddnew', rankScope: 'BACKLOG' }];
-
-            if (this.getContext().isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_PLANNING_APP'))
-            {
-                plugins.push({
+            var plugins = [
+                {
+                    ptype: 'rallygridboardaddnew',
+                    rankScope: 'BACKLOG'
+                },
+                {
                     ptype: 'rallygridboardcustomfiltercontrol',
                     context: this.getContext(),
                     filterControlConfig: {
@@ -34,22 +33,11 @@
                         stateful: true,
                         stateId: this.getContext().getScopedStateId('iteration-planning-custom-filter-button')
                     }
-                });
-            } else {
-                plugins.push(
-                    {
-                        ptype: 'rallygridboardfilterinfo',
-                        isGloballyScoped: Ext.isEmpty(this.getSetting('project'))
-                    },
-                    {
-                        ptype: 'rallygridboardartifacttypechooser',
-                        artifactTypePreferenceKey: 'artifact-types'
-                    }
-                );
-            }
+                }
+            ];
 
             if (this.getContext().getSubscription().isHsEdition() || this.getContext().getSubscription().isExpressEdition()) {
-                plugins.push({ptype: 'rallygridboardmanageiterations'});
+                plugins.push('rallygridboardmanageiterations');
             }
 
             this.gridboard = this.add({
