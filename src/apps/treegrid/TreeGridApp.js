@@ -11,7 +11,7 @@
         componentCls: 'treegrid',
 
 //        modelNames: ['User Story'],// 'Defect', 'Defect Suite', 'Test Set'],
-        modelNames: ['PortfolioItem/Project'],
+        modelNames: ['PortfolioItem/Initiative'],
 
         columnNames: ['FormattedID', 'Name', 'Owner', 'Project'],
 
