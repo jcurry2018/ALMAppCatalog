@@ -57,6 +57,7 @@
                         filterChildren: false,
                         filterControlConfig: {
                             blackListFields: ['PortfolioItemType', 'Release'],
+                            whiteListFields: [this.getContext().isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE') ? 'Milestones' : ''],
                             context: this.getContext(),
                             modelNames: [piTypePath],
                             stateful: true,
