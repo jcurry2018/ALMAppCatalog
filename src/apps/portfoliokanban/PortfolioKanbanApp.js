@@ -289,27 +289,13 @@
                         {
                             ptype: 'rallygridboardfieldpicker',
                             boardFieldBlackList: [
-                                'ObjectID',
-                                'Description',
-                                'DisplayColor',
-                                'FormattedID',
-                                'Name',
-                                'Notes',
-                                'Ready',
                                 'AcceptedLeafStoryCount',
                                 'AcceptedLeafStoryPlanEstimateTotal',
                                 'DirectChildrenCount',
+                                'LastUpdateDate',
                                 'LeafStoryCount',
                                 'LeafStoryPlanEstimateTotal',
-                                'Rank',
-                                'DragAndDropRank',
-                                'UnEstimatedLeafStoryCount',
-                                'CreationDate',
-                                'Subscription',
-                                'Workspace',
-                                'Changesets',
-                                'LastUpdateDate',
-                                'Owner'
+                                'UnEstimatedLeafStoryCount'
                             ],
                             boardFieldDefaults: this.getSetting('fields').split(','),
                             headerPosition: 'left'

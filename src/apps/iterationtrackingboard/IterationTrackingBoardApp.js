@@ -346,19 +346,6 @@
                     'Predecessors'
                 ],
                 boardFieldBlackList: [
-                    'ObjectID',
-                    'Description',
-                    'DisplayColor',
-                    'Notes',
-                    'Rank',
-                    'DragAndDropRank',
-                    'Subscription',
-                    'Workspace',
-                    'Changesets',
-                    'RevisionHistory',
-                    'PortfolioItemType',
-                    'StateChangedDate',
-                    'Children',
                     'PredecessorsAndSuccessors'
                 ],
                 alwaysSelectedValues: alwaysSelectedValues,

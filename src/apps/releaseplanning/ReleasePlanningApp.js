@@ -67,28 +67,13 @@
                     {
                         ptype: 'rallygridboardfieldpicker',
                         boardFieldBlackList: [
-                            'ObjectID',
-                            'Description',
-                            'DisplayColor',
-                            'FormattedID',
-                            'Name',
-                            'Notes',
-                            'Ready',
                             'AcceptedLeafStoryCount',
                             'AcceptedLeafStoryPlanEstimateTotal',
                             'DirectChildrenCount',
                             'LeafStoryCount',
                             'LeafStoryPlanEstimateTotal',
-                            'Rank',
-                            'DragAndDropRank',
-                            'UnEstimatedLeafStoryCount',
-                            'CreationDate',
-                            'Subscription',
-                            'Workspace',
-                            'Changesets',
                             'LastUpdateDate',
-                            'Owner',
-                            'PortfolioItemType'
+                            'UnEstimatedLeafStoryCount'
                         ],
                         boardFieldDefaults: ['Discussion', 'PreliminaryEstimate', 'UserStories'],
                         headerPosition: 'left'
