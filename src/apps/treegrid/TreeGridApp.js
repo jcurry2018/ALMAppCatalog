@@ -13,7 +13,7 @@
 //        modelNames: ['User Story'],// 'Defect', 'Defect Suite', 'Test Set'],
         modelNames: ['PortfolioItem/Initiative'],
 
-        columnNames: ['FormattedID', 'Name', 'Owner', 'Project'],
+        columnNames: ['Name', 'Owner', 'Project'],
 
         storeConfig: {},
 
