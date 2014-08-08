@@ -57,7 +57,7 @@
                         filterChildren: false,
                         filterControlConfig: {
                             blackListFields: ['PortfolioItemType', 'Release'],
-                            whiteListFields: [this.getContext().isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE') ? 'Milestones' : ''],
+                            whiteListFields: [this._milestonesAreEnabled() ? 'Milestones' : ''],
                             context: this.getContext(),
                             modelNames: [piTypePath],
                             stateful: true,
@@ -75,7 +75,7 @@
                             'LastUpdateDate',
                             'UnEstimatedLeafStoryCount'
                         ],
-                        boardFieldDefaults: ['Discussion', 'PreliminaryEstimate', 'UserStories'],
+                        boardFieldDefaults: this._getDefaultFields(),
                         headerPosition: 'left'
                     }
                 ],
@@ -109,6 +109,18 @@
 
         _publishPreferenceSaved: function(record) {
             this.fireEvent('preferencesaved', record);
+        },
+
+        _getDefaultFields: function() {
+            var fields = ['Discussion', 'PreliminaryEstimate', 'UserStories'];
+            if (this._milestonesAreEnabled()) {
+                fields.push('Milestones');
+            }
+            return fields;
+        },
+
+        _milestonesAreEnabled: function() {
+            return this.getContext().isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE');
         }
     });
 })();

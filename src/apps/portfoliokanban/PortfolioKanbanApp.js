@@ -55,6 +55,14 @@
             }
         ],
 
+        constructor: function(config) {
+            if (this._milestonesAreEnabled()) {
+                this.config.defaultSettings.fields += ',Milestones';
+            }
+
+            this.callParent([config]);
+        },
+
         launch: function () {
             if (!Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
                 this.add({
@@ -278,7 +286,7 @@
                             filterChildren: false,
                             filterControlConfig: {
                                 blackListFields: ['PortfolioItemType', 'State'],
-                                whiteListFields: [this.getContext().isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE') ? 'Milestones' : ''],
+                                whiteListFields: [this._milestonesAreEnabled() ? 'Milestones' : ''],
                                 context: this.getContext(),
                                 margin: '3 10',
                                 modelNames: [currentTypePath],
@@ -348,7 +356,7 @@
             }
         },
 
-       setHeight: function(height) {
+        setHeight: function(height) {
             this.callParent(arguments);
             if(this.gridboard) {
                 this.gridboard.setHeight(height);
@@ -473,7 +481,11 @@
 
         _publishContentUpdatedNoDashboardLayout: function () {
             this.fireEvent('contentupdated', {dashboardLayout: false});
-        }
+        },
 
+        _milestonesAreEnabled: function() {
+            var context = this.getContext() ? this.getContext() : Rally.environment.getContext();
+            return context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE');
+        }
     });
 })();
