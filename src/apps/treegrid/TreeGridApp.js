@@ -15,7 +15,7 @@
 
         config: {
             defaultSettings: {
-                modelNames: ['PortfolioItem/Feature'],
+                modelNames: ['PortfolioItem/Project'],
                 columnNames: ['Name', 'Owner', 'Project']
             }
         },
