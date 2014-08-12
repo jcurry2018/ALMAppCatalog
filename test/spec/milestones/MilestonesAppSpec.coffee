@@ -82,3 +82,9 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
         TargetProject: null
       ).then =>
         expect(@app.getEl().down('.targetproject').getHTML()).toContain 'All projects in default workspace'
+
+    it 'should indicate insufficient permissions for target project', ->
+      @_createAppWithData(
+        TargetProject: ''
+      ).then =>
+        expect(@app.getEl().down('.targetproject').getHTML()).toContain 'Project Permissions Required'

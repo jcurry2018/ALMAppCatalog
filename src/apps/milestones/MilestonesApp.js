@@ -35,7 +35,13 @@
                         {
                             dataIndex: 'TargetProject',
                             renderer: function(project) {
-                                return project ? project.Name : 'All projects in ' + context.getWorkspace().Name;
+                                if (project === ''){
+                                    return '<div class="permission-required">Project Permissions Required</div>';
+                                }
+                                if (project === null) {
+                                    return 'All projects in ' +  context.getWorkspace().Name;
+                                }
+                                return project.Name;
                             },
                             text: 'Project'
                         }
