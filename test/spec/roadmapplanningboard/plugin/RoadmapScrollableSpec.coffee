@@ -6,6 +6,7 @@ Ext.require [
   'Rally.apps.roadmapplanningboard.PlanningBoard'
   'Rally.apps.roadmapplanningboard.AppModelFactory'
   'Rally.data.PreferenceManager'
+  'Rally.app.Context'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
@@ -84,6 +85,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
           ]
 
           slideDuration: 10
+
+          context: Ext.create 'Rally.app.Context'
+
         , config
 
       @plugin = @cardboard.plugins[0]
