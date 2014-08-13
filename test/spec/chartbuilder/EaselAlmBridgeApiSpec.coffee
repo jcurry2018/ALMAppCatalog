@@ -47,9 +47,12 @@ describe 'Rally.apps.chartbuilder.EaselAlmBridgeApi', ->
 	it 'returns the appropriate project from the ALM Bridge', ->
 		expect(@api.getProject().ObjectID).toBe Rally.environment.getContext().getProject().ObjectID
 
-	it 'returns settings passed in', ->
-		api = @createApi({x : 1});
-		expect(api.getPreference('x')).toBe 1
+	it 'returns project settings', ->
+		settings =
+			project: 12345
+		api = @createApi(settings)
+		api.registerPreferences({ type: 'project-select', name:'project' })
+		expect(api.getSettings().project).toBe settings.project
 
 	it 'has no default settings by default', ->
 		expect(@api.getDefaultSettings()).toEqual {}

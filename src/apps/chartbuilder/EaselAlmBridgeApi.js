@@ -12,6 +12,8 @@
      */
 	Ext.define("Rally.apps.chartbuilder.EaselAlmBridgeApi", {
 
+		requires: ['Rally.apps.chartbuilder.EaselPreferenceTransformer'],
+
 		defaultSettings : {},
 		easelPreferences : {},
 		config: {
@@ -22,6 +24,8 @@
 			 */
 			app: null
 		},
+
+		transformer: Ext.create("Rally.apps.chartbuilder.EaselPreferenceTransformer"),
 
 		constructor: function(config) {
 			this.initConfig(config);
@@ -60,7 +64,7 @@
 		},
 
 		getPreference : function(name) {
-			return this.getSettings()[name];
+			return this.transformer.getValue(this.easelPreferences, this.getSettings(), name);
 		},
 
 		getContext : function() {
@@ -76,8 +80,7 @@
 		},
 
 		getSettingsFields : function() {
-			var transformer = Ext.create("Rally.apps.chartbuilder.EaselPreferenceTransformer");
-			var listOfTransformedSettings = transformer.transform(this.easelPreferences);
+			var listOfTransformedSettings = this.transformer.transform(this.easelPreferences);
 			return listOfTransformedSettings;
 		},
 
