@@ -100,7 +100,7 @@
                 }
             ];
 
-            this.cardBoardConfig = {
+            this.cardBoardConfig = Ext.merge({
                 xtype: 'roadmapplanningboard',
                 context: this.context,
                 roadmap: this.roadmap,
@@ -114,7 +114,7 @@
                     { ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 3 },
                     { ptype: 'rallyroadmapcollapsableheader' }
                 ]
-            };
+            }, this.cardBoardConfig);
 
             this.callParent(arguments);
         },

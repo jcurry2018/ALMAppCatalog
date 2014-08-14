@@ -15,6 +15,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningGridBoard', ->
         context: Rally.environment.getContext()
         modelNames: ['PortfolioItem/Feature']
         renderTo: 'testDiv'
+        cardBoardConfig:
+          loadMask: false
 
       if includeTypeNames
         config.typeNames =
