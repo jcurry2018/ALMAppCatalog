@@ -7,10 +7,11 @@
       "Column.js",
       "ColumnCardFieldPicker.js",
       "ColumnSettingsField.js",
+      "RowSettingsField.js",
       "Settings.js",
       "KanbanApp.js"
    ],
    "css": [
-      "KanbanApp.css"
+      "KanbanApp.less"
    ]
 }

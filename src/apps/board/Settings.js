@@ -73,7 +73,7 @@
                 },
                 {
                     name: 'groupByField',
-                    fieldLabel: 'Group By',
+                    fieldLabel: 'Columns',
                     xtype: 'rallyfieldcombobox',
                     readyEvent: 'ready',
                     handlesEvents: {

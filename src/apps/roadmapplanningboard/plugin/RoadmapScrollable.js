@@ -162,11 +162,13 @@
         },
 
         _syncColumns: function () {
-            this._reindexColumns();
-            this._adjustCurrentColumnIndex();
-            this._updatePlaceholderColumns();
-            this._renderScrollableColumns();
-            this._renderButtons();
+            if(!this.cmp.destroying) {
+                this._reindexColumns();
+                this._adjustCurrentColumnIndex();
+                this._updatePlaceholderColumns();
+                this._renderScrollableColumns();
+                this._renderButtons();
+            }
         },
 
         _scroll: function (forwards) {

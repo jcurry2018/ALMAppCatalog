@@ -48,6 +48,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       roadmapStore = Deft.Injector.resolve('roadmapStore')
       timelineStore = Deft.Injector.resolve('timelineStore')
       config = _.extend
+        loadMask: false,
         roadmap: roadmapStore.first()
         timeline: timelineStore.first()
         timeframeColumnCount: 4
@@ -456,7 +457,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
         @scrollBackwards().then =>
           expect(@plugin.getFirstVisibleScrollableColumn().getColumnHeaderCell().dom).toBe @getColumnHeaderCells()[1]
-          expect(@plugin.getFirstVisibleScrollableColumn().getContentCell().dom).toBe @getColumnContentCells()[1]
+          expect(@plugin.getFirstVisibleScrollableColumn().getContentCellContainers()[0].dom).toBe @getColumnContentCells()[1]
 
     it 'should re-render scroll buttons', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
@@ -523,7 +524,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
         @scrollForwards().then =>
           expect(@plugin.getLastVisibleScrollableColumn().getColumnHeaderCell().dom).toBe (_.last @getColumnHeaderCells())
-          expect(@plugin.getLastVisibleScrollableColumn().getContentCell().dom).toBe (_.last @getColumnContentCells())
+          expect(@plugin.getLastVisibleScrollableColumn().getContentCellContainers()[0].dom).toBe (_.last @getColumnContentCells())
 
     it 'should re-render scroll buttons', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>

@@ -6,7 +6,8 @@ Ext.require [
   'Rally.util.Element',
   'Rally.ui.notify.Notifier',
   'Rally.app.Context',
-  'Rally.test.helpers.CardBoard'
+  'Rally.test.helpers.CardBoard',
+  'Rally.data.Ranker'
 ]
 
 describe 'Rally.apps.kanban.KanbanApp', ->
@@ -39,6 +40,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
           wip: ''
       )
       expect(@app.getSetting('cardFields')).toBe 'FormattedID,Name,Owner,Discussion,Tasks,Defects'
+      expect(@app.getSetting('showRows')).toBe false
 
   it 'does not show add new when user is not a project editor', ->
     Rally.environment.getContext().getPermissions().userPermissions[0].Role = 'Viewer'
@@ -329,6 +331,65 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(storeConfig.filters[0].toString()).toBe query
       expect(storeConfig.filters[1].toString()).toBe timeboxScope.getQueryFilter().toString()
 
+  describe 'Swim Lanes is toggled ON', ->
+    beforeEach ->
+      @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('F5684_KANBAN_SWIM_LANES').returns(true)
+
+    it 'should include rows configuration with rowsField when showRows setting is true', ->
+      @createApp(showRows: true, rowsField: 'Owner').then =>
+        expect(@app.cardboard.rowConfig.field).toBe 'Owner'
+        expect(@app.cardboard.rowConfig.sortDirection).toBe 'ASC'
+
+    it 'should include correct rank sorter in manual rank workspace', ->
+      @createApp(
+        showRows: true,
+        rowsField: 'Owner',
+      ,
+        DragDropRankingEnabled: false
+      ).then =>
+        expect(@app.cardboard.storeConfig.sorters).toEqual [
+          property: Rally.data.Ranker.RANK_FIELDS.MANUAL
+          direction: 'ASC'
+        ]
+
+    it 'should include correct rank sorter in drag and drop rank workspace', ->
+      @createApp(
+        showRows: true,
+        rowsField: 'Owner',
+      ,
+        DragDropRankingEnabled: true
+      ).then =>
+        expect(@app.cardboard.storeConfig.sorters).toEqual [
+          property: Rally.data.Ranker.RANK_FIELDS.DND
+          direction: 'ASC'
+        ]
+
+    it 'should not include rows configuration when showRows setting is false', ->
+      @createApp(showRows: false, rowsField: 'Owner').then =>
+        expect(@app.cardboard.rowConfig).toBeNull()
+
+    it 'passes shouldShowRowSettings correctly', ->
+      @createApp().then =>
+        getFieldsSpy = @spy Rally.apps.kanban.Settings, 'getFields'
+        @app.getSettingsFields()
+        expect(getFieldsSpy.callCount).toBe 1
+        expect(getFieldsSpy.getCall(0).args[0].shouldShowRowSettings).toBe true
+
+  describe 'Swim Lanes is toggled OFF', ->
+    beforeEach ->
+      @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('F5684_KANBAN_SWIM_LANES').returns(false)
+
+    it 'should not include rows configuration', ->
+      @createApp(showRows: true, rowsField: 'Owner').then =>
+        expect(@app.cardboard.rowConfig).toBeNull()
+
+    it 'passes shouldShowRowSettings correctly', ->
+      @createApp().then =>
+        getFieldsSpy = @spy Rally.apps.kanban.Settings, 'getFields'
+        @app.getSettingsFields()
+        expect(getFieldsSpy.callCount).toBe 1
+        expect(getFieldsSpy.getCall(0).args[0].shouldShowRowSettings).toBe false
+
   helpers
     createApp: (settings = {}, options = {}, context = {}) ->
       @app = Ext.create 'Rally.apps.kanban.KanbanApp',
@@ -346,7 +407,8 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         settings: settings
         renderTo: options.renderTo || 'testDiv'
 
-      @waitForComponentReady @app
+      @waitForComponentReady(@app).then =>
+        @app.down('rallycardboard').hideMask()
 
     assertPolicyCmpConfig: (settingsKey, policy) ->
       column = @app.down('rallycardboard').getColumns()[0]

@@ -19,7 +19,8 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
       @target = 'testDiv'
       columnReadyStub = @stub()
 
-      @backlogColumn = Ext.create('Rally.apps.roadmapplanningboard.BacklogBoardColumn', Ext.merge
+      @backlogColumn = @cardboardHelper.createColumn(Ext.merge
+        columnClass: 'Rally.apps.roadmapplanningboard.BacklogBoardColumn'
         renderTo: @target
         contentCell: @target
         headerCell: @target
@@ -39,6 +40,7 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
+    @cardboardHelper = Rally.test.helpers.CardBoard
 
   afterEach ->
     Deft.Injector.reset()

@@ -341,7 +341,6 @@
                             scope: this
                         },
                         loadDescription: 'Portfolio Kanban',
-                        loadMask: false,
                         plugins: [{ ptype: 'rallyfixedheadercardboard' }],
                         storeConfig: {
                             filters: filters,

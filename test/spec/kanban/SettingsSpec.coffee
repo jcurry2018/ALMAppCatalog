@@ -6,36 +6,44 @@ Ext.require [
 
 describe 'Rally.apps.kanban.Settings', ->
   helpers
-    getSettingsFields: (isDndWorkspace, isPageScoped) ->
-      config =
+    getSettingsFields: (config) ->
+      config = Ext.merge {
         shouldShowColumnLevelFieldPicker: false
         defaultCardFields: []
-
-      if isDndWorkspace?
-        config.isDndWorkspace = isDndWorkspace
-      if isPageScoped?
-        config.isPageScoped = isPageScoped
+      }, config
 
       Rally.apps.kanban.Settings.getFields config
 
+    getFieldByName: (fieldName, fields) ->
+      return _.filter fields, (field) ->
+        field.name == fieldName
+
     isRankInBlackList: (fields) ->
-      fieldInBlackList = false
-      cardFields = _.filter(fields, (field) ->
-        field.fieldLabel == 'Card Fields'
-      )
-      if (cardFields.length == 1 && cardFields[0]?.fieldBlackList?.indexOf('Rank') > -1)
-        fieldInBlackList = true
-      fieldInBlackList
+      return fields.length == 1 && fields[0]?.fieldBlackList?.indexOf('Rank') > -1
 
   describe 'fieldBlackList', ->
     it 'includes Rank if isDndWorkspace is not specified', ->
       fields = @getSettingsFields()
-      expect(@isRankInBlackList(fields)).toBe true
+      cardFields = @getFieldByName 'cardFields', fields
+      expect(@isRankInBlackList cardFields).toBe true
 
     it 'includes Rank if isDndWorkspace is specified as true', ->
-      fields = @getSettingsFields true
-      expect(@isRankInBlackList(fields)).toBe true
+      fields = @getSettingsFields isDndWorkspace: true
+      cardFields = @getFieldByName('cardFields', fields)
+      expect(@isRankInBlackList cardFields).toBe true
 
     it 'does not includes Rank if isDndWorkspace is specified as false', ->
-      fields = @getSettingsFields false
-      expect(@isRankInBlackList(fields)).toBe false
+      fields = @getSettingsFields isDndWorkspace: false
+      cardFields = @getFieldByName('cardFields', fields)
+      expect(@isRankInBlackList cardFields).toBe false
+
+  describe 'RowSettings', ->
+    it 'includes row settings when configured to show', ->
+      fields = @getSettingsFields shouldShowRowSettings: true
+      rowField = @getFieldByName 'groupHorizontallyByField', fields
+      expect(rowField.length).toBe 1
+
+    it 'excludes row settings when configured not to show', ->
+      fields = @getSettingsFields shouldShowRowSettings: false
+      rowField = @getFieldByName 'groupHorizontallyByField', fields
+      expect(rowField.length).toBe 0

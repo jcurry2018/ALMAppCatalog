@@ -79,7 +79,8 @@
             return Rally.ui.cardboard.Column.prototype.getMinWidth();
         },
 
-        filter: function () {}
-    });
+        filter: Ext.emptyFn,
 
+        onRowAdded: Ext.emptyFn
+    });
 })();

@@ -32,6 +32,7 @@
         config: {
             defaultSettings: {
                 groupByField: 'ScheduleState',
+                showRows: false,
                 columns: Ext.JSON.encode({
                     Defined: {wip: ''},
                     'In-Progress': {wip: ''},
@@ -78,7 +79,8 @@
             return Rally.apps.kanban.Settings.getFields({
                 shouldShowColumnLevelFieldPicker: this._shouldShowColumnLevelFieldPicker(),
                 defaultCardFields: this.getSetting('cardFields'),
-                isDndWorkspace: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled
+                isDndWorkspace: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled,
+                shouldShowRowSettings: this._shouldShowSwimLanes()
             });
         },
 
@@ -91,6 +93,10 @@
             this.callParent(arguments);
             this.gridboard.destroy();
             this.launch();
+        },
+
+        _shouldShowSwimLanes: function() {
+            return this.getContext().isFeatureEnabled('F5684_KANBAN_SWIM_LANES');
         },
 
         _shouldShowColumnLevelFieldPicker: function() {
@@ -213,7 +219,7 @@
         },
 
         _getCardboardConfig: function() {
-            return {
+            var config = {
                 xtype: 'rallycardboard',
                 plugins: [
                     {ptype: 'rallycardboardprinting', pluginId: 'print'},
@@ -243,11 +249,28 @@
                     showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1,
                     showBlockedReason: true
                 },
-                loadMask: false,
                 storeConfig: {
                     context: this.getContext().getDataContext()
                 }
             };
+            if (this._shouldShowSwimLanes() && this.getSetting('showRows')) {
+                Ext.merge(config, {
+                    rowConfig: {
+                        field: this.getSetting('rowsField'),
+                        sortDirection: 'ASC'
+                    },
+                    storeConfig: {
+                        sorters: [
+                            {
+                                property: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ?
+                                    Rally.data.Ranker.RANK_FIELDS.DND : Rally.data.Ranker.RANK_FIELDS.MANUAL,
+                                direction: 'ASC'
+                            }
+                        ]
+                    }
+                });
+            }
+            return config;
         },
 
         _getFilters: function() {
@@ -397,7 +420,12 @@
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
             }
-            this.recordComponentReady();
+            this.recordComponentReady({
+                miscData: {
+                    swimLanes: this.getSetting('showRows'),
+                    swimLaneField: this.getSetting('rowsField')
+                }
+            });
         },
 
         _publishContentUpdatedNoDashboardLayout: function() {

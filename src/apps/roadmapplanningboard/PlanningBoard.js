@@ -304,10 +304,6 @@
             return column;
         },
 
-        destroy: function () {
-            this.callParent(arguments);
-        },
-
         _addColumnFromTimeframeAndPlan: function (timeframe, plan) {
             return {
                 xtype: 'timeframeplanningcolumn',

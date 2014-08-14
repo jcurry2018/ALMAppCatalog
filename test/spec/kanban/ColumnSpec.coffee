@@ -9,6 +9,7 @@ Ext.require [
 
     beforeEach ->
       @stub(Rally.app.Context.prototype, 'getSubscription').returns StoryHierarchyEnabled: true
+      @cardboardHelper = Rally.test.helpers.CardBoard
 
       @Model = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
 
@@ -28,7 +29,8 @@ Ext.require [
 
     helpers
       createColumn: (config = {}) ->
-        Ext.create('Rally.apps.kanban.Column', Ext.apply(
+        @cardboardHelper.createColumn(Ext.apply(
+          columnClass: 'Rally.apps.kanban.Column'
           context: Rally.environment.getContext()
           value: 'Defined'
           attribute: 'ScheduleState'

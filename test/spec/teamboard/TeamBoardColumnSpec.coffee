@@ -1,19 +1,23 @@
 Ext = window.Ext4 || window.Ext
 
 describe 'Rally.apps.teamboard.TeamBoardColumn', ->
+  beforeEach ->
+    @cardboardHelper = Rally.test.helpers.CardBoard
   helpers
     createColumn: (config) ->
       @ajax.whenQuerying('iteration').respondWith()
       @ajax.whenQuerying('user').respondWith()
 
-      @column = Ext.create 'Rally.apps.teamboard.TeamBoardColumn', Ext.apply
+      @column = @cardboardHelper.createColumn(Ext.apply(
+        columnClass: 'Rally.apps.teamboard.TeamBoardColumn'
         attribute: 'TeamMemberships'
         contentCell: Ext.get('testDiv')
         headerCell: Ext.get('testDiv')
         model: 'User'
         renderTo: 'testDiv'
         value: '/project/123'
-      , config
+      , config)
+      )
 
       @waitForComponentReady @column
 

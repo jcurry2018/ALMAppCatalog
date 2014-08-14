@@ -8,6 +8,7 @@
         singleton: true,
         requires: [
             'Rally.apps.kanban.ColumnSettingsField',
+            'Rally.apps.kanban.RowSettingsField',
             'Rally.ui.combobox.FieldComboBox',
             'Rally.ui.picker.FieldPicker',
             'Rally.ui.CheckboxField',
@@ -22,7 +23,7 @@
                     xtype: 'rallyfieldcombobox',
                     model: Ext.identityFn('UserStory'),
                     margin: '10px 0 0 0',
-                    fieldLabel: 'Group By',
+                    fieldLabel: 'Columns',
                     listeners: {
                         select: function(combo) {
                             this.fireEvent('fieldselected', combo.getRecord().get('fieldDefinition'));
@@ -60,6 +61,17 @@
                     bubbleEvents: 'columnsettingsready'
                 }
             ];
+
+            if (config.shouldShowRowSettings) {
+                items.push({
+                    name: 'groupHorizontallyByField',
+                    xtype: 'kanbanrowsettingsfield',
+                    fieldLabel: 'Swimlanes',
+                    margin: '10 0 0 0',
+                    mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
+                    readyEvent: 'ready'
+                });
+            }
 
             if (!config.shouldShowColumnLevelFieldPicker) {
                 var fieldBlackList = ['DefectStatus', 'TaskStatus', 'DisplayColor', 'DragAndDropRank', 'Rank'];

@@ -55,7 +55,7 @@
 
             this.on('beforerender', function () {
                 var cls = 'planning-column';
-                this.getContentCell().addCls(cls);
+                _.invoke(this.getContentCellContainers(), 'addCls', cls);
                 return this.getColumnHeaderCell().addCls(cls);
             }, this, {
                 single: true

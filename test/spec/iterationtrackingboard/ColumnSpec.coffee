@@ -8,6 +8,7 @@ Ext.require [
 describe 'Rally.apps.iterationtrackingboard.Column', ->
 
   beforeEach ->
+    @cardboardHelper = Rally.test.helpers.CardBoard
     @stub(Rally.app.Context.prototype, 'getSubscription').returns StoryHierarchyEnabled: true
 
     @Model = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
@@ -35,7 +36,8 @@ describe 'Rally.apps.iterationtrackingboard.Column', ->
 
   helpers
     createColumn: (config = {}) ->
-      Ext.create 'Rally.apps.iterationtrackingboard.Column', Ext.apply
+      @cardboardHelper.createColumn(Ext.apply(
+        columnClass: 'Rally.apps.iterationtrackingboard.Column'
         context: Rally.environment.getContext()
         value: 'Defined'
         attribute: 'ScheduleState'
@@ -44,4 +46,5 @@ describe 'Rally.apps.iterationtrackingboard.Column', ->
         headerCell: Ext.get 'testDiv'
         contentCell: Ext.get 'testDiv'
         models: [@Model]
-        , config
+        , config)
+      )

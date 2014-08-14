@@ -10,7 +10,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
     createColumn: ->
       target = 'testDiv'
 
-      @column = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', Ext.merge {},
+      @column = @cardboardHelper.createColumn(Ext.merge {},
+        columnClass: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn'
         store: Deft.Injector.resolve('featureStore')
         context:
           getProject: -> Rally.environment.getContext().getProject()
@@ -23,10 +24,12 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
         contentCell: target
         headerCell: target, @columnConfig
         filterCollection: Ext.create 'Rally.data.filter.FilterCollection'
+      )
       @waitForComponentReady @column
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
+    @cardboardHelper = Rally.test.helpers.CardBoard
     @columnConfig =
       typeNames:
         child:
@@ -63,7 +66,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
   it 'should have the planning-column css class on header and content', ->
     @createColumn().then =>
-      expect(@column.getContentCell().hasCls 'planning-column').toBeTruthy()
+      expect(@column.getContentCellContainers()[0].hasCls 'planning-column').toBeTruthy()
       expect(@column.getColumnHeaderCell().hasCls 'planning-column').toBeTruthy()
 
   describe '#refreshRecords', ->

@@ -16,8 +16,9 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
         config.store = Deft.Injector.resolve 'featureStore'
 
       @columnReadyStub = @stub()
-      @column = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
+      @column = @cardboardHelper.createColumn(
         Ext.merge {},
+          columnClass: 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
           contentCell: 'testDiv'
           headerCell: 'testDiv'
           displayValue: 'My column'
@@ -47,7 +48,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
             deleteplan: => @deletePlanStub()
             daterangechange: => @dateRangeChangeStub()
           filterCollection: Ext.create 'Rally.data.filter.FilterCollection'
-        , config
+        , config)
       @waitForColumnReady()
 
     createPlanRecord: (config) ->
@@ -99,6 +100,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
+    @cardboardHelper = Rally.test.helpers.CardBoard
     @deletePlanStub = @stub()
     @dateRangeChangeStub = @stub()
 
