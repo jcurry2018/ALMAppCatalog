@@ -166,10 +166,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     @createApp().then =>
       expect(@app.gridboard.getGridOrBoard().columnConfig.additionalFetchFields).toContain 'PortfolioItem'
 
-  it 'should use shallow fetch for the cardboard', ->
-    @createApp().then =>
-      expect(@app.gridboard.getGridOrBoard().storeConfig.useShallowFetch).toBe(true)
-
   it 'should have a default card fields setting', ->
     @createApp().then =>
       expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']
@@ -313,7 +309,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     it 'should add common storeConfig to gridboard', ->
       @createApp().then =>
         gridBoard = @app.down 'rallygridboard'
-        expect(gridBoard.storeConfig.useShallowFetch).toBe true
         expect(gridBoard.storeConfig.filters.length).toBe 1
         expect(gridBoard.storeConfig.filters[0].toString()).toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
