@@ -11,6 +11,8 @@
         alias: 'widget.treegridapp',
         componentCls: 'treegrid',
 
+        statePrefix: 'custom',
+
         config: {
             defaultSettings: {
                 modelNames: ['PortfolioItem/Strategy'],
@@ -21,7 +23,6 @@
         launch: function () {
             if(!this.rendered) {
                 this.on('afterrender', this._loadApp, this, {single: true});
-                return;
             } else {
                 this._loadApp();
             }
@@ -38,13 +39,14 @@
 
         _addGridBoard: function(gridStore) {
             var context = this.getContext(),
-                stateString = 'custom-treegrid',
+                stateString = this.statePrefix + '-treegrid',
                 stateId = context.getScopedStateId(stateString),
                 gridboardPlugins = [];
+
             this.add({
                 itemId: 'gridBoard',
                 xtype: 'rallygridboard',
-                stateId: 'iterationtracking-gridboard',
+                stateId: this.statePrefix + '-gridboard',
                 context: context,
                 plugins: gridboardPlugins,
                 toggleState: 'grid',
@@ -69,7 +71,12 @@
                 enableBulkEdit: false,
                 plugins: [],
                 stateId: stateId,
-                stateful: true
+                stateful: true,
+                listeners: {
+                    staterestore: this._onGridStateRestore,
+                    single: true,
+                    scope: gridStore
+                }
             };
 
             if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
@@ -88,7 +95,7 @@
 
             var storeConfig = Ext.apply(this.storeConfig || {}, {
                     models: modelNames,
-                    autoLoad: true,
+                    autoLoad: false,
                     remoteSort: true,
                     root: {expanded: true},
                     pageSize: 200,
@@ -98,6 +105,11 @@
                 });
 
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(storeConfig);
+        },
+
+        _onGridStateRestore: function() {
+            //scope of this function is the grid's store
+            this.load();
         }
     });
 

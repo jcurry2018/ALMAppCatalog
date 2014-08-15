@@ -1,0 +1,14 @@
+{
+   "name": "Portfolio Items Tree Grid",
+   "className": "Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "../treegrid/ArtifactTypeComboBox.js",
+      "../treegrid/TreeGridApp.js",
+      "PortfolioItemsTreeGridApp.js"
+   ],
+   "css": [
+      "PortfolioItemsTreeGridApp.less"
+   ]
+}

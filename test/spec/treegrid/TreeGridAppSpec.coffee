@@ -15,6 +15,12 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
         get: ->
         isFeatureEnabled: -> featureEnabled
         getScopedStateId: -> 'someStateId'
+    createTreeGridApp: (config) ->
+      appCfg = _.extend(@getTreeGridAppConfig(true), config || {})
+
+      treeGridApp = Ext.create 'Rally.apps.treegrid.TreeGridApp', appCfg
+      treeGridApp.fireEvent('afterrender')
+      treeGridApp
 
   beforeEach ->
     @ajax.whenReading("project", 431439).respondWith _ref: "/project/431439"
@@ -33,21 +39,28 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
     treeGridApp.destroy()
 
   it 'should use the row expansion plugin', ->
-    appCfg = _.extend @getTreeGridAppConfig(true)
-    treeGridApp = Ext.create 'Rally.apps.treegrid.TreeGridApp', appCfg
-    treeGridApp._loadApp()
+    treeGridApp = @createTreeGridApp()
     plugins = treeGridApp.down('#gridBoard').gridConfig.plugins
     expect(_.find(plugins, ptype: 'rallytreegridexpandedrowpersistence')).toBeTruthy()
     treeGridApp.destroy()
 
   it 'should accept model strings', ->
-    appCfg = _.extend @getTreeGridAppConfig(true),
+    treeGridApp = @createTreeGridApp
       defaultSettings:
         modelNames: 'hierarchicalrequirement,defect'
 
-    treeGridApp = Ext.create 'Rally.apps.treegrid.TreeGridApp', appCfg
-    treeGridApp._loadApp()
     parentTypes = treeGridApp.down('#gridBoard').gridConfig.store.parentTypes
     expect(parentTypes.length).toBe 2
     expect(parentTypes).toContainAll ['hierarchicalrequirement','defect']
     treeGridApp.destroy()
+
+#  this test is too implementation-specific but the staterestore is well-baked into the grid which isn't able to render in the test.
+#  The true problem is the grid not rendering in the test, but hoping to come back to this when we need more grid-specific tests.
+  it 'should wait to load grid\'s store until after grid\'s state is restored', ->
+    treeGridApp = @createTreeGridApp()
+    gridConfig = treeGridApp.down('#gridBoard').gridConfig
+    gridStore = gridConfig.store
+    stateRestoreListener = gridConfig.listeners.staterestore
+    loadSpy = @spy(gridStore, 'load')
+    stateRestoreListener.call(gridStore)
+    @waitForCallback(loadSpy)
