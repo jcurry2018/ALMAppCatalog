@@ -36,11 +36,3 @@
     padding-top: 5px;
     width: 70px;
 }
-
-.team-board-app .rui-card .artifact-color {
-    background-color: #3a874f;
-}
-
-.team-board-app .rui-card.non-team-member-card .artifact-color {
-    background-color: #F66349;
-}
