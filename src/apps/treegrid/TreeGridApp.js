@@ -6,15 +6,14 @@
         requires: [
           'Rally.ui.grid.TreeGrid',
           'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
-          'Rally.ui.gridboard.GridBoard',
-          'Rally.apps.treegrid.ArtifactTypeComboBox'
+          'Rally.ui.gridboard.GridBoard'
         ],
         alias: 'widget.treegridapp',
         componentCls: 'treegrid',
 
         config: {
             defaultSettings: {
-                modelNames: ['PortfolioItem/Initiative'],
+                modelNames: ['PortfolioItem/Strategy'],
                 columnNames: ['Name', 'Owner', 'Project']
             }
         },
@@ -26,16 +25,6 @@
                 },
                 scope: this
             });
-        },
-
-        getSettingsFields: function() {
-            return [{
-                name: 'modelNames',
-                xtype: 'rallyartifactypecombobox',
-                fieldLabel: 'Object',
-                context: this.getContext(),
-                width: 300
-            }];
         },
 
         _addGridBoard: function(gridStore) {

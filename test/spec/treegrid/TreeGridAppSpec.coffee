@@ -42,10 +42,3 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
     parentTypes = treeGridApp.down('#gridBoard').gridConfig.store.parentTypes
     expect(parentTypes.length).toBe 2
     expect(parentTypes).toContainAll ['hierarchicalrequirement','defect']
-
-  it 'should show type picker in settings', ->
-    treeGridApp = Ext.create 'Rally.apps.treegrid.TreeGridApp', @getTreeGridAppConfig(true)
-
-    settings = treeGridApp.getSettingsFields()
-    expect(settings[0].xtype).toBe 'rallyartifactypecombobox'
-    expect(settings[0].fieldLabel).toBe 'Object'
