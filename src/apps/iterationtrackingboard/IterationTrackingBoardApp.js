@@ -134,7 +134,8 @@
                     root: {expanded: true},
                     enableHierarchy: true,
                     pageSize: this.getGridPageSizes()[1],
-                    childPageSizeEnabled: context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')
+                    childPageSizeEnabled: context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN'),
+                    useShallowFetch: context.isFeatureEnabled('COMPACT_WSAPI_REQUESTS') ? false : true
                 };
 
             if(!context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP')) {
@@ -177,7 +178,7 @@
                 cardBoardConfig: this._getBoardConfig(),
                 gridConfig: this._getGridConfig(gridStore),
                 storeConfig: {
-                    useShallowFetch: false,
+                    useShallowFetch: context.isFeatureEnabled('COMPACT_WSAPI_REQUESTS') ? false : true,
                     filters: [context.getTimeboxScope().getQueryFilter()]
                 },
                 addNewPluginConfig: {

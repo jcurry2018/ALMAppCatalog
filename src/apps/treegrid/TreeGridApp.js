@@ -84,7 +84,8 @@
             var modelNames = this.getSetting('modelNames') || this.modelNames;
             modelNames = _.isString(modelNames) ? modelNames.split(',') : modelNames;
 
-            var storeConfig = Ext.apply(this.storeConfig || {}, {
+            var context = this.getContext(),
+                storeConfig = Ext.apply(this.storeConfig || {}, {
                     models: modelNames,
                     autoLoad: true,
                     remoteSort: true,
@@ -92,6 +93,7 @@
                     pageSize: 200,
                     enableHierarchy: true,
                     childPageSizeEnabled: true,
+                    useShallowFetch: context.isFeatureEnabled('COMPACT_WSAPI_REQUESTS') ? false : true,
                     fetch: this.columnNames
                 });
 
