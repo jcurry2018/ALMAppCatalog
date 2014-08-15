@@ -7,8 +7,7 @@
           'Rally.ui.grid.TreeGrid',
           'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
           'Rally.ui.gridboard.GridBoard',
-          'Rally.ui.picker.PillPicker',
-          'Rally.ui.picker.MultiObjectPicker'
+          'Rally.apps.treegrid.ArtifactTypeComboBox'
         ],
         alias: 'widget.treegridapp',
         componentCls: 'treegrid',
@@ -30,30 +29,12 @@
         },
 
         getSettingsFields: function() {
-            var artifactQuery = '((((((TypePath = "hierarchicalrequirement") OR (TypePath = "defect")) OR (TypePath = "defectsuite")) OR (TypePath = "testset")) OR (TypePath = "testcase")) OR (Parent.TypePath = "portfolioitem"))';
-
             return [{
-                xtype: 'rallypillpicker',
-                showPills: true,
                 name: 'modelNames',
-                comboBoxCfg: {
-                    xtype: 'rallymultiobjectpicker',
-                    name: 'modelNames',
-                    fieldLabel: 'Objects',
-                    labelWidth: 75,
-                    labelSeparator: '',
-                    width: 400,
-                    remoteFilter: false,
-                    modelType: 'TypeDefinition',
-                    selectionKey: 'TypePath',
-                    storeLoadOptions: {
-                        params: {
-                            order: 'Name ASC',
-                            fetch: 'Name,TypePath',
-                            query: artifactQuery
-                        }
-                    }
-                }
+                xtype: 'rallyartifactypecombobox',
+                fieldLabel: 'Object',
+                context: this.getContext(),
+                width: 300
             }];
         },
 

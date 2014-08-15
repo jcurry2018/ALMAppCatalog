@@ -47,6 +47,5 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
     treeGridApp = Ext.create 'Rally.apps.treegrid.TreeGridApp', @getTreeGridAppConfig(true)
 
     settings = treeGridApp.getSettingsFields()
-    expect(settings[0].xtype).toBe 'rallypillpicker'
-    expect(settings[0].comboBoxCfg.fieldLabel).toBe 'Objects'
-    expect(settings[0].comboBoxCfg.modelType).toBe 'TypeDefinition'
+    expect(settings[0].xtype).toBe 'rallyartifactypecombobox'
+    expect(settings[0].fieldLabel).toBe 'Object'
