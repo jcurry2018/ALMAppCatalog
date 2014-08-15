@@ -27,7 +27,9 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
     expect(Ext.isDefined(treeGridApp)).toBeTruthy()
 
   it 'should use the row expansion plugin', ->
-    appCfg = _.extend @getTreeGridAppConfig(true)
+    appCfg = _.extend @getTreeGridAppConfig(true),
+      defaultSettings:
+        modelNames: 'hierarchicalrequirement,defect'
     treeGridApp = Ext.create 'Rally.apps.treegrid.TreeGridApp', appCfg
     plugins = treeGridApp.down('#gridBoard').gridConfig.plugins
 
