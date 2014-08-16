@@ -19,6 +19,15 @@
         },
 
         launch: function () {
+            if(!this.rendered) {
+                this.on('afterrender', this._loadApp, this, {single: true});
+                return;
+            } else {
+                this._loadApp();
+            }
+        },
+
+        _loadApp: function() {
             this._getGridStore().then({
                 success: function(gridStore) {
                     this._addGridBoard(gridStore);
@@ -30,21 +39,25 @@
         _addGridBoard: function(gridStore) {
             var context = this.getContext(),
                 stateString = 'custom-treegrid',
-                stateId = context.getScopedStateId(stateString);
-
+                stateId = context.getScopedStateId(stateString),
+                gridboardPlugins = [];
             this.add({
                 itemId: 'gridBoard',
                 xtype: 'rallygridboard',
                 stateId: 'iterationtracking-gridboard',
                 context: context,
-                plugins: [],
+                plugins: gridboardPlugins,
                 toggleState: 'grid',
                 modelNames: this.modelNames,
                 cardBoardConfig: {},
                 gridConfig: this._getGridConfig(gridStore, context, stateId),
                 storeConfig: {},
-                height: this.getHeight()
+                height: this._getHeight()
             });
+        },
+
+        _getHeight: function() {
+            return this.getHeight() || 300;
         },
 
         _getGridConfig: function(gridStore, context, stateId) {
