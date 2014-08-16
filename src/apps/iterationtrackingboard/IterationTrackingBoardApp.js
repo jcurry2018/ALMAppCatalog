@@ -21,9 +21,7 @@
             'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
-            'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
-            'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
@@ -221,7 +219,6 @@
 
         _getBoardConfig: function() {
             var config = {
-                serverSideFiltering: this.getContext().isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 plugins: [
                     {ptype: 'rallycardboardprinting', pluginId: 'print'},
                     {ptype: 'rallyfixedheadercardboard'}
@@ -304,8 +301,6 @@
                         }
                     });
                 }
-            } else {
-                plugins.push('rallygridboardownerfilter');
             }
 
             plugins.push('rallygridboardtoggleable');

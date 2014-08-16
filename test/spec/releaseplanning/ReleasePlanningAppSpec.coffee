@@ -1,10 +1,5 @@
 Ext = window.Ext4 || window.Ext
 
-Ext.require [
-#  'Rally.ui.cardboard.CardBoard'
-#  'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser'
-]
-
 describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
   helpers
     getTimeboxColumns: ->

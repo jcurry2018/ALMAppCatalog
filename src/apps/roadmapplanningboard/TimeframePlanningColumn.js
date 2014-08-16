@@ -421,7 +421,7 @@
 
             var fraction = Ext.create('Rally.apps.roadmapplanningboard.util.Fraction', {
                 denominator: highCapacity,
-                numeratorItems: this.getCards(true),
+                numeratorItems: this.getCards(),
                 numeratorItemValueFunction: function (card) {
                     var value = _.find(_.map(pointFields, function(pointField) {
                         var fieldValue = card.getRecord().get(pointField);

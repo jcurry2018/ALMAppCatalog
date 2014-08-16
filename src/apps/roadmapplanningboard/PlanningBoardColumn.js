@@ -70,11 +70,11 @@
             return '<div></div>';
         },
 
-        findCardInfo: function (searchCriteria, includeHiddenCards) {
+        findCardInfo: function (searchCriteria) {
             var card, index, _i, _len, _ref;
 
             searchCriteria = searchCriteria.get && searchCriteria.getId() ? searchCriteria.getId() : searchCriteria;
-            _ref = this.getCards(includeHiddenCards);
+            _ref = this.getCards();
             for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
                 card = _ref[index];
                 if (card.getRecord().getId() === searchCriteria || card.getEl() === searchCriteria || card.getEl() === Ext.get(searchCriteria)) {

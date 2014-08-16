@@ -474,12 +474,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         @scrollBackwards().then =>
           expect(@cardboard.getEl().query('.scroll-button').length).toBe 2
 
-    it 'should filter newly added column', ->
-      @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
-        filterSpy = @spy @cardboard, 'applyLocalFilters'
-        @scrollBackwards().then =>
-          expect(filterSpy.callCount).toBe 1
-
     it 'should add temp filters to newly added column when board is filtered', ->
       nameFilter = new Rally.data.QueryFilter
         property: 'Name',
@@ -540,12 +534,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(pastColumnCount: 2, presentColumnCount: 6, timeframeColumnCount: 4).then =>
         @scrollForwards().then =>
           expect(@cardboard.getEl().query('.scroll-button').length).toBe 2
-
-    it 'should filter newly added column', ->
-      @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
-        filterSpy = @spy @cardboard, 'applyLocalFilters'
-        @scrollForwards().then =>
-          expect(filterSpy.callCount).toBe 1
 
     it 'should add temp filters to newly added column when board is filtered', ->
       nameFilter = new Rally.data.QueryFilter

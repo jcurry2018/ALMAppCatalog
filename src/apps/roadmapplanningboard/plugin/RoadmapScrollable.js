@@ -40,10 +40,10 @@
 
             this.originalOnColumnDateRangeChange = cmp._onColumnDateRangeChange;
             cmp._onColumnDateRangeChange = Ext.bind(this._onColumnDateRangeChange, this);
-            
+
             this.originalFilter = cmp.filter;
             cmp.filter = Ext.bind(this.filter, this);
-            
+
 
             this.callParent(arguments);
         },
@@ -60,7 +60,7 @@
 
             this.originalFilter.call(this.cmp, filter, clearFilterKeys, ignoreDefaultFilters);
         },
-        
+
         drawAddNewColumnButton: function () {
             if (this._isForwardsButtonHidden()) {
                 this.originalDrawAddNewColumnButton.call(this.cmp);
@@ -225,7 +225,6 @@
         _drawColumn: function (columnConfig) {
             var displayIndex = this._getDisplayIndexForScrollableColumn(columnConfig);
             var column = this.cmp.addColumn(columnConfig, displayIndex);
-            column.on('ready', this._onNewlyAddedColumnReady, this, {single: true});
             this.cmp.renderColumn(column, this._createColumnEls(displayIndex));
         },
 
@@ -311,10 +310,6 @@
 
         _getFirstPlaceholderColumn: function () {
             return _.find(this.getScrollableColumns(), this._isPlaceholderColumn);
-        },
-
-        _onNewlyAddedColumnReady: function () {
-            this.cmp.applyLocalFilters();
         },
 
         _sizeButtonToColumnHeader: function (button, column) {
