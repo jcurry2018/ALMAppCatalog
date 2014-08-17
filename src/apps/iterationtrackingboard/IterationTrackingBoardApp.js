@@ -43,7 +43,8 @@
             'Rally.apps.iterationtrackingboard.StatsBannerField',
             'Rally.clientmetrics.ClientMetricsRecordable',
             'Rally.apps.iterationtrackingboard.PrintDialog',
-            'Rally.ui.grid.plugin.ColumnAutoSizer'
+            'Rally.ui.grid.plugin.ColumnAutoSizer',
+            'Rally.apps.common.RowSettingsField'
         ],
 
         mixins: [
@@ -110,6 +111,17 @@
                 }
             });
 
+            if (this._shouldShowSwimLanes()) {
+                fields.push({
+                    name: 'groupHorizontallyByField',
+                    xtype: 'rowsettingsfield',
+                    fieldLabel: 'Swimlanes',
+                    margin: '10 0 0 0',
+                    mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
+                    readyEvent: 'ready'
+                });
+            }
+
             return fields;
         },
 
@@ -142,6 +154,10 @@
             }
 
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
+        },
+
+        _shouldShowSwimLanes: function() {
+            return this.getContext().isFeatureEnabled('F5684_KANBAN_SWIM_LANES');
         },
 
         _shouldShowStatsBanner: function() {
@@ -197,7 +213,7 @@
         },
 
         _getBoardConfig: function() {
-            return {
+            var config = {
                 serverSideFiltering: this.getContext().isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 plugins: [
                     {ptype: 'rallycardboardprinting', pluginId: 'print'},
@@ -219,6 +235,17 @@
                     filtercomplete: this._onBoardFilterComplete
                 }
             };
+
+            if (this._shouldShowSwimLanes() && this.getSetting('showRows')) {
+                Ext.merge(config, {
+                    rowConfig: {
+                        field: this.getSetting('rowsField'),
+                        sortDirection: 'ASC'
+                    }
+                });
+            }
+
+            return config;
         },
 
         /**
@@ -629,7 +656,19 @@
 
         _onLoad: function () {
             this._publishContentUpdated();
-            this.recordComponentReady();
+
+            var additionalMetricData = {};
+
+            if  (this.gridboard.getToggleState() === 'board') {
+                additionalMetricData = {
+                    miscData: {
+                        swimLanes: this.getSetting('showRows'),
+                        swimLaneField: this.getSetting('rowsField')
+                    }
+                };
+            }
+
+            this.recordComponentReady(additionalMetricData);
         },
 
         _onBoardFilter: function () {

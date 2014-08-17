@@ -8,7 +8,7 @@
         singleton: true,
         requires: [
             'Rally.apps.kanban.ColumnSettingsField',
-            'Rally.apps.kanban.RowSettingsField',
+            'Rally.apps.common.RowSettingsField',
             'Rally.ui.combobox.FieldComboBox',
             'Rally.ui.picker.FieldPicker',
             'Rally.ui.CheckboxField',
@@ -65,7 +65,7 @@
             if (config.shouldShowRowSettings) {
                 items.push({
                     name: 'groupHorizontallyByField',
-                    xtype: 'kanbanrowsettingsfield',
+                    xtype: 'rowsettingsfield',
                     fieldLabel: 'Swimlanes',
                     margin: '10 0 0 0',
                     mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
@@ -101,7 +101,7 @@
                     }
                 });
             }
-            
+
             items.push(
                 {
                     name: 'hideReleasedCards',

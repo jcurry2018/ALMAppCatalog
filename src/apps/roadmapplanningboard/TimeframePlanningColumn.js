@@ -107,6 +107,14 @@
             });
         },
 
+        _getSortDirection: function() {
+            if (this.store && this.store.sorters && this.store.sorters.getCount()) {
+                return this.store.sorters.getAt(0).direction;
+            }
+
+            return 'ASC';
+        },
+
         /**
          * Override
          * @returns {boolean}

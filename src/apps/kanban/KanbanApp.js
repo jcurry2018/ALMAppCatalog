@@ -258,15 +258,6 @@
                     rowConfig: {
                         field: this.getSetting('rowsField'),
                         sortDirection: 'ASC'
-                    },
-                    storeConfig: {
-                        sorters: [
-                            {
-                                property: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ?
-                                    Rally.data.Ranker.RANK_FIELDS.DND : Rally.data.Ranker.RANK_FIELDS.MANUAL,
-                                direction: 'ASC'
-                            }
-                        ]
                     }
                 });
             }

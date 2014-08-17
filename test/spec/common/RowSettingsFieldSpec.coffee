@@ -1,14 +1,14 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.apps.kanban.RowSettingsField'
+  'Rally.apps.common.RowSettingsField'
 ]
 
-describe 'Rally.apps.kanban.RowSettingsField', ->
+describe 'Rally.apps.common.RowSettingsField', ->
   helpers
     createField: ->
       onReady = @stub()
-      @field = Ext.create 'Rally.apps.kanban.RowSettingsField',
+      @field = Ext.create 'Rally.apps.common.RowSettingsField',
         renderTo: 'testDiv'
         context: Rally.environment.getContext()
         value:

@@ -8,7 +8,7 @@
      *      @example
      *      Ext.create('Ext.Container', {
          *          items: [{
-         *              xtype: 'kanbanrowsettingsfield',
+         *              xtype: 'rowsettingsfield',
          *              value: {
          *                  show: true,
          *                  field: 'c_ClassofService'
@@ -18,8 +18,8 @@
          *      });
      *
      */
-    Ext.define('Rally.apps.kanban.RowSettingsField', {
-        alias: 'widget.kanbanrowsettingsfield',
+    Ext.define('Rally.apps.common.RowSettingsField', {
+        alias: 'widget.rowsettingsfield',
         extend: 'Ext.form.FieldContainer',
         requires: [
             'Rally.ui.CheckboxField',

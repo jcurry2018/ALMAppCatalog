@@ -59,7 +59,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       addNewHelper.addWithDetails('foo').then =>
         expect(editorOpenedStub).toHaveBeenCalledOnce()
         expect(editorOpenedStub.getCall(0).args[1][@app.getSetting('groupByField')]).toBe @app.cardboard.getColumns()[0].getValue()
-        
+
   it 'should set custom group by field to first column value', ->
     @createApp(
       groupByField: 'KanbanState'
@@ -339,30 +339,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       @createApp(showRows: true, rowsField: 'Owner').then =>
         expect(@app.cardboard.rowConfig.field).toBe 'Owner'
         expect(@app.cardboard.rowConfig.sortDirection).toBe 'ASC'
-
-    it 'should include correct rank sorter in manual rank workspace', ->
-      @createApp(
-        showRows: true,
-        rowsField: 'Owner',
-      ,
-        DragDropRankingEnabled: false
-      ).then =>
-        expect(@app.cardboard.storeConfig.sorters).toEqual [
-          property: Rally.data.Ranker.RANK_FIELDS.MANUAL
-          direction: 'ASC'
-        ]
-
-    it 'should include correct rank sorter in drag and drop rank workspace', ->
-      @createApp(
-        showRows: true,
-        rowsField: 'Owner',
-      ,
-        DragDropRankingEnabled: true
-      ).then =>
-        expect(@app.cardboard.storeConfig.sorters).toEqual [
-          property: Rally.data.Ranker.RANK_FIELDS.DND
-          direction: 'ASC'
-        ]
 
     it 'should not include rows configuration when showRows setting is false', ->
       @createApp(showRows: false, rowsField: 'Owner').then =>
