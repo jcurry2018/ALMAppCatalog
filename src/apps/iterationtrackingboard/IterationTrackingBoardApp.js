@@ -236,7 +236,7 @@
                 }
             };
 
-            if (this._shouldShowSwimLanes() && this.getSetting('showRows')) {
+            if (this._shouldShowSwimLanes() && this.getSetting('showRows') && this.getSetting('rowsField')) {
                 Ext.merge(config, {
                     rowConfig: {
                         field: this.getSetting('rowsField'),
@@ -669,6 +669,10 @@
             }
 
             this.recordComponentReady(additionalMetricData);
+
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
         },
 
         _onBoardFilter: function () {

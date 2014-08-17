@@ -191,9 +191,10 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(@app.gridboard.getGridOrBoard().config.rowConfig).toBeDefined()
 
   it 'does not add the rowConfig property to the boardConfig if swimlanes are disabled', ->
+
     @stubFeatureToggle ['F5684_KANBAN_SWIM_LANES']
     @createApp().then =>
-      expect(@app.gridboard.getGridOrBoard().config.rowConfig).not.toBeDefined()
+      expect(@app.gridboard.getGridOrBoard().config.rowConfig).toBe null
 
   it 'should show the field picker in board mode', ->
     @createApp().then =>
