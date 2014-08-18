@@ -39,8 +39,8 @@
 
         _addGridBoard: function(gridStore) {
             var context = this.getContext(),
-                stateString = this.statePrefix + '-treegrid',
-                stateId = context.getScopedStateId(stateString),
+                gridStateString = this.statePrefix + '-treegrid',
+                gridStateId = context.getScopedStateId(gridStateString),
                 gridboardPlugins = [];
 
             this.add({
@@ -52,7 +52,7 @@
                 toggleState: 'grid',
                 modelNames: this.modelNames,
                 cardBoardConfig: {},
-                gridConfig: this._getGridConfig(gridStore, context, stateId),
+                gridConfig: this._getGridConfig(gridStore, context, gridStateId),
                 storeConfig: {},
                 height: this._getHeight()
             });
@@ -74,9 +74,18 @@
                 stateful: true,
                 alwaysShowDefaultColumns: true,
                 listeners: {
-                    staterestore: this._onGridStateRestore,
-                    single: true,
-                    scope: gridStore
+                    'staterestore': {
+                        fn: this._onGridStateRestore,
+                        single: true,
+                        store: gridStore
+                    },
+                    'render': {
+                        fn: this._onGridRender,
+                        single: true,
+                        stateId: stateId,
+                        store: gridStore
+                    },
+                    scope: this
                 }
             };
 
@@ -108,9 +117,19 @@
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(storeConfig);
         },
 
-        _onGridStateRestore: function() {
-            //scope of this function is the grid's store
-            this.load();
+        _onGridStateRestore: function(grid) {
+            grid.getStore().load();
+        },
+
+        _onGridRender: function(grid, options) {
+            this._handleInitialStatelessLoad(options.store, options.stateId);
+        },
+
+        _handleInitialStatelessLoad: function(store, stateId) {
+            var state = Ext.state.Manager.get(stateId);
+            if (!state) {
+                store.load();
+            }
         }
     });
 

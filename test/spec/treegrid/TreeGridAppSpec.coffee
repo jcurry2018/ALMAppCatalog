@@ -60,7 +60,26 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
     treeGridApp = @createTreeGridApp()
     gridConfig = treeGridApp.down('#gridBoard').gridConfig
     gridStore = gridConfig.store
-    stateRestoreListener = gridConfig.listeners.staterestore
+    stateRestoreListener = gridConfig.listeners.staterestore.fn
     loadSpy = @spy(gridStore, 'load')
-    stateRestoreListener.call(gridStore)
+    stateRestoreListener.call(treeGridApp,
+      getStore: -> gridStore
+    )
+    @waitForCallback(loadSpy)
+
+  it 'should load the grid\'s store if there is no state for the grid', ->
+    @stub(Ext.state.Manager, 'get').returns null
+    treeGridApp = @createTreeGridApp()
+    gridConfig = treeGridApp.down('#gridBoard').gridConfig
+    gridStore = gridConfig.store
+    renderListener = gridConfig.listeners.render.fn
+    loadSpy = @spy(gridStore, 'load')
+    renderListener.call(
+      treeGridApp,
+      null,
+      {
+        store: gridStore
+        stateId: 'someState'
+      }
+    )
     @waitForCallback(loadSpy)
