@@ -16,7 +16,7 @@
         config: {
             defaultSettings: {
                 modelNames: ['PortfolioItem/Strategy'],
-                columnNames: ['Name', 'Owner', 'Project']
+                columnNames: ['Name', 'Owner', 'Project', 'PlannedStartDate', 'PlannedEndDate']
             }
         },
 
@@ -72,6 +72,7 @@
                 plugins: [],
                 stateId: stateId,
                 stateful: true,
+                alwaysShowDefaultColumns: true,
                 listeners: {
                     staterestore: this._onGridStateRestore,
                     single: true,
