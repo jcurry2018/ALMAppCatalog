@@ -70,6 +70,7 @@
                     plugins: ['rallyfieldvalidationui'],
                     name: 'rowsField',
                     margin: '0 5px',
+                    emptyText: 'Choose Field...',
                     displayField: 'name',
                     valueField: 'value',
                     disabled: this.getValue().showRows !== 'true',
@@ -135,11 +136,12 @@
          * @return {Object}
          */
         getSubmitData: function() {
-            var data = {};
-            var showRows = this.down('rallycheckboxfield');
-            data[showRows.name] = showRows.getValue();
-            if (showRows.getValue()) {
-                var rowsField = this.down('rallycombobox');
+            var data = {},
+                showField = this.down('rallycheckboxfield'),
+                rowsField = this.down('rallycombobox'),
+                showRows = showField.getValue() && !_.isEmpty(rowsField.getValue());
+            data[showField.name] = showRows;
+            if (showRows) {
                 data[rowsField.name] = rowsField.getValue();
             }
             return data;

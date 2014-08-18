@@ -6,9 +6,9 @@ Ext.require [
 
 describe 'Rally.apps.common.RowSettingsField', ->
   helpers
-    createField: ->
+    createField: (config={}) ->
       onReady = @stub()
-      @field = Ext.create 'Rally.apps.common.RowSettingsField',
+      @field = Ext.create 'Rally.apps.common.RowSettingsField', Ext.apply
         renderTo: 'testDiv'
         context: Rally.environment.getContext()
         value:
@@ -16,6 +16,7 @@ describe 'Rally.apps.common.RowSettingsField', ->
           rowsField: 'Owner'
         listeners:
           ready: onReady
+      , config
 
       @waitForCallback onReady
 
@@ -28,6 +29,16 @@ describe 'Rally.apps.common.RowSettingsField', ->
   it 'should not return rowsField value if not checked', ->
     @createField().then =>
       @field.down('rallycheckboxfield').setValue false
+      data = @field.getSubmitData()
+      expect(data.showRows).toBe false
+      expect(data.rowsField).toBeUndefined()
+
+  it 'should not return rowsField value if not selected', ->
+    @createField(
+      value:
+        showRows: true
+        rowsField: null
+    ).then =>
       data = @field.getSubmitData()
       expect(data.showRows).toBe false
       expect(data.rowsField).toBeUndefined()
