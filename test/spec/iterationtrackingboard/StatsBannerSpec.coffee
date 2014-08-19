@@ -14,6 +14,7 @@ describe 'Rally.apps.iterationtrackingboard.StatsBanner', ->
         renderTo: 'testDiv'
         context:
           getTimeboxScope: -> timeboxScope
+          getScopedStateId: -> 'stateId'
           getDataContext: -> Rally.environment.getContext().getDataContext()
         items: [{xtype: 'bannerwidget'}]
         , config)

@@ -43,11 +43,6 @@
             {xtype: 'statsbannercollapseexpand', flex: 0}
         ],
 
-        constructor: function() {
-            this.stateId = Rally.environment.getContext().getScopedStateId('stats-banner');
-            this.callParent(arguments);
-        },
-
         initComponent: function() {
             this.addEvents(
                 /**
@@ -61,6 +56,8 @@
                  */
                 'collapse'
             );
+
+            this.stateId = this.context.getScopedStateId('stats-banner');
 
             this.subscribe(this, Rally.Message.objectDestroy, this._update, this);
             this.subscribe(this, Rally.Message.objectCreate, this._update, this);

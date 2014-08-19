@@ -11,12 +11,13 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.IterationProgress', ->
   helpers
     createIterationProgress: () ->
       Ext.create 'Rally.apps.iterationtrackingboard.statsbanner.IterationProgress',
-        context: {}
+        context: @createContext()
         store: Ext.create('Rally.data.wsapi.artifact.Store')
     createContext: (withRecord = true) ->
       @iterationRecord = @mom.getRecord('iteration', values: { _ref: '/iteration/1' }) if withRecord
       @context =
         getProject: -> Rally.environment.getContext().getProject()
+        getScopedStateId: -> 'stateId'
         getTimeboxScope: =>
           Ext.create 'Rally.app.TimeboxScope', record: @iterationRecord, type: 'iteration'
 

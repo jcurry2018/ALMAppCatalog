@@ -45,15 +45,12 @@
             '</div>'
         ],
 
-        constructor: function(config) {
-            this.stateId = Rally.environment.getContext().getScopedStateId(this.stateId);
-            this.callParent(arguments);
-        },
-
         initComponent: function(){
             this.mon(this.store, 'datachanged', this.onDataChanged, this);
             this.callParent(arguments);
             var boundClickHandler = Ext.bind(this._onChartClick, this);
+
+            this.stateId = this.context.getScopedStateId(this.stateId);
 
             this.carouselItems = [
                 {
