@@ -68,7 +68,13 @@
                     fieldLabel: 'Swimlanes',
                     margin: '10 0 0 0',
                     mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
-                    readyEvent: 'ready'
+                    readyEvent: 'ready',
+                    explicitFields: [
+                        {name: 'Blocked', value: 'Blocked'},
+                        {name: 'Owner', value: 'Owner'},
+                        {name: 'Sizing', value: 'PlanEstimate'},
+                        {name: 'Expedite', value: 'Expedite'}
+                   ]
                 });
             }
 

@@ -7,15 +7,15 @@
      *
      *      @example
      *      Ext.create('Ext.Container', {
-         *          items: [{
-         *              xtype: 'rowsettingsfield',
-         *              value: {
-         *                  show: true,
-         *                  field: 'c_ClassofService'
-         *              }
-         *          }],
-         *          renderTo: Ext.getBody().dom
-         *      });
+     *          items: [{
+     *              xtype: 'rowsettingsfield',
+     *              value: {
+     *                  show: true,
+     *                  field: 'c_ClassofService'
+     *              }
+     *          }],
+     *          renderTo: Ext.getBody().dom
+     *      });
      *
      */
     Ext.define('Rally.apps.common.RowSettingsField', {
@@ -43,7 +43,22 @@
              *
              * The row settings value for this field
              */
-            value: undefined
+            value: undefined,
+
+            /**
+             * @cfg {Boolean}
+             *
+             * To include custom fields
+             */
+            includeCustomFields: true,
+
+            /**
+             * @cfg {Object[]}
+             *
+             * Array of objects with name and value keys to be used by the row combobox
+             * [{'name': 'Blocked', 'value': 'Blocked'},{'name': 'Owner', 'value': 'Owner'}]
+             */
+            explicitFields: []
         },
 
         initComponent: function() {
@@ -94,14 +109,11 @@
         },
 
         _onModelsRetrieved: function (models) {
-            var explicitFields = [
-                    {'name': 'Blocked', 'value': 'Blocked'},
-                    {'name': 'Owner', 'value': 'Owner'},
-                    {'name': 'Sizing', 'value': 'PlanEstimate'},
-                    {'name': 'Expedite', value: 'Expedite'}
-                    //TODO: type?
-                ],
-                fields = explicitFields.concat(this._getRowableFields(_.values(models)));
+            var fields = this.explicitFields;
+
+            if (this.includeCustomFields) {
+                fields = this.explicitFields.concat(this._getRowableFields(_.values(models)));
+            }
 
             var combobox = this.down('rallycombobox');
             combobox.getStore().loadData(_.sortBy(fields, 'name'));

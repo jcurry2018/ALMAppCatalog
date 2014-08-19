@@ -14,6 +14,10 @@ describe 'Rally.apps.common.RowSettingsField', ->
         value:
           showRows: true
           rowsField: 'Owner'
+        explicitFields: [
+          'name': 'Owner'
+          'value': 'Owner'
+        ]
         listeners:
           ready: onReady
       , config
@@ -46,15 +50,17 @@ describe 'Rally.apps.common.RowSettingsField', ->
   it 'should include explicit rowable fields', ->
     @createField().then =>
       combobox = @field.down 'rallycombobox'
-      expect(combobox.findRecordByValue('Blocked')).toBeTruthy()
       expect(combobox.findRecordByValue('Owner')).toBeTruthy()
-      expect(combobox.findRecordByValue('PlanEstimate')).toBeTruthy()
-      expect(combobox.findRecordByValue('Expedite')).toBeTruthy()
 
   it 'should include a custom dropdown field', ->
     @createField().then =>
       combobox = @field.down 'rallycombobox'
       expect(combobox.findRecordByValue('c_KanbanState')).toBeTruthy()
+
+  it 'should not include a custom dropdown field if configured to not have them', ->
+    @createField({includeCustomFields: false}).then =>
+      combobox = @field.down 'rallycombobox'
+      expect(combobox.findRecordByValue('c_KanbanState')).toBeFalsy()
 
   it 'should sort the values in the combobox', ->
     @createField().then =>
