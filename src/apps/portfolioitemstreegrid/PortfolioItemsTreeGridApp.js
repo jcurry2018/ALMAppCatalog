@@ -18,7 +18,7 @@
         config: {
             defaultSettings: {
                 modelNames: ['PortfolioItem/Initiative'],
-                columnNames: ['Name', 'PreliminaryEstimate', 'ValueScore', 'RiskScore', 'InvestmentCategory']
+                columnNames: ['Name', 'PreliminaryEstimate', 'ValueScore', 'RiskScore', 'InvestmentCategory', 'PlannedStartDate', 'PlannedEndDate']
             }
         }
     });
