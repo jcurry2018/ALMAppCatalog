@@ -15,7 +15,7 @@
 
         config: {
             defaultSettings: {
-                modelNames: ['PortfolioItem/Strategy'],
+                modelNames: ['PortfolioItem/Initiative'],
                 columnNames: ['Name', 'Owner', 'Project', 'PlannedStartDate', 'PlannedEndDate']
             }
         },
@@ -99,7 +99,7 @@
                     autoLoad: false,
                     remoteSort: true,
                     root: {expanded: true},
-                    pageSize: 200,
+                    pageSize: 25,
                     enableHierarchy: true,
                     childPageSizeEnabled: true,
                     fetch: this.columnNames
