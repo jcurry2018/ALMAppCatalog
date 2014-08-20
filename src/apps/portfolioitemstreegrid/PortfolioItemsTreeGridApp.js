@@ -8,7 +8,8 @@
           'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
           'Rally.ui.gridboard.GridBoard',
           'Rally.ui.picker.PillPicker',
-          'Rally.ui.picker.MultiObjectPicker'
+          'Rally.ui.picker.MultiObjectPicker',
+          'Rally.ui.gridboard.plugin.GridBoardFieldPicker'
         ],
         alias: 'widget.portfolioitemstreegridapp',
         componentCls: 'pitreegrid',

@@ -15,6 +15,10 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
         get: ->
         isFeatureEnabled: -> featureEnabled
         getScopedStateId: -> 'someStateId'
+        getWorkspace: ->
+          WorkspaceConfiguration:
+            DragDropRankingEnabled: true
+
     createTreeGridApp: (config) ->
       appCfg = _.extend(@getTreeGridAppConfig(true), config || {})
 
@@ -83,3 +87,14 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
       }
     )
     @waitForCallback(loadSpy)
+
+  it 'should set the grid\'s plugins to an empty array', ->
+    @stub(Ext.state.Manager, 'get').returns null
+    treeGridApp = @createTreeGridApp()
+    gridConfig = treeGridApp.down('#gridBoard')
+    gridPlugins = gridConfig.plugins
+
+    expect(gridPlugins).not.toBeNull
+    expect(gridPlugins.length).toBeGreaterThan 0
+    expect(_.find(gridPlugins, (plugin)->
+      plugin.ptype == 'rallygridboardfieldpicker')).toBeTruthy()

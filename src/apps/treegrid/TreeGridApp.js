@@ -7,8 +7,8 @@
           'Rally.ui.grid.TreeGrid',
           'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
           'Rally.ui.gridboard.GridBoard',
-          'Rally.ui.picker.PillPicker',
-          'Rally.ui.picker.MultiObjectPicker'
+          'Rally.ui.picker.MultiObjectPicker',
+          'Rally.ui.gridboard.plugin.GridBoardFieldPicker'
         ],
         alias: 'widget.treegridapp',
         componentCls: 'treegrid',
@@ -43,9 +43,9 @@
             var context = this.getContext(),
                 gridStateString = this.statePrefix + '-treegrid',
                 gridStateId = context.getScopedStateId(gridStateString),
-                gridboardPlugins = [];
+                gridboardPlugins = this._getGridBoardPlugins();
 
-            this.add({
+            this.gridboard = this.add({
                 itemId: 'gridBoard',
                 xtype: 'rallygridboard',
                 stateId: this.statePrefix + '-gridboard',
@@ -58,6 +58,39 @@
                 storeConfig: {},
                 height: this._getHeight()
             });
+        },
+
+        _getGridBoardPlugins: function() {
+            var plugins = [],
+                context = this.getContext();
+
+            var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner'];
+            if (context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
+                alwaysSelectedValues.push('DragAndDropRank');
+            }
+
+            plugins.push({
+                ptype: 'rallygridboardfieldpicker',
+                headerPosition: 'left',
+                gridFieldBlackList: [
+                    'ObjectID',
+                    'Description',
+                    'DisplayColor',
+                    'Notes',
+                    'Subscription',
+                    'Workspace',
+                    'Changesets',
+                    'RevisionHistory',
+                    'Children',
+                    'Successors',
+                    'Predecessors'
+                ],
+                margin: '3 9 14 0',
+                alwaysSelectedValues: alwaysSelectedValues,
+                modelNames: this.modelNames
+            });
+
+            return plugins;
         },
 
         _getHeight: function() {
@@ -74,7 +107,7 @@
                 plugins: [],
                 stateId: stateId,
                 stateful: true,
-                alwaysShowDefaultColumns: true,
+                alwaysShowDefaultColumns: false,
                 listeners: {
                     'staterestore': {
                         fn: this._onGridStateRestore,
