@@ -6,7 +6,9 @@
         requires: [
           'Rally.ui.grid.TreeGrid',
           'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
-          'Rally.ui.gridboard.GridBoard'
+          'Rally.ui.gridboard.GridBoard',
+          'Rally.ui.picker.PillPicker',
+          'Rally.ui.picker.MultiObjectPicker'
         ],
         alias: 'widget.treegridapp',
         componentCls: 'treegrid',
@@ -15,8 +17,8 @@
 
         config: {
             defaultSettings: {
-                modelNames: ['PortfolioItem/Strategy'],
-                columnNames: ['Name', 'Owner', 'Project', 'PlannedStartDate', 'PlannedEndDate']
+                modelNames: ['PortfolioItem/Initiative'],
+                columnNames: ['Name', 'Owner', 'Project', 'PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount', 'PlannedStartDate', 'PlannedEndDate']
             }
         },
 
