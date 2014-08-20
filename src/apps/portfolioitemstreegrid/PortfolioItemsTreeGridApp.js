@@ -17,7 +17,7 @@
 
         config: {
             defaultSettings: {
-                modelNames: ['PortfolioItem/Initiative'],
+                modelNames: ['PortfolioItem/Strategy'],
                 columnNames: ['Name', 'PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount', 'PreliminaryEstimate', 'PlannedStartDate', 'PlannedEndDate', 'ValueScore', 'RiskScore', 'InvestmentCategory']
             }
         }

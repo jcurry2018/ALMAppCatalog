@@ -17,7 +17,7 @@
 
         config: {
             defaultSettings: {
-                modelNames: ['PortfolioItem/Initiative'],
+                modelNames: ['PortfolioItem/Strategy'],
                 columnNames: ['Name', 'Owner', 'Project', 'PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount', 'PlannedStartDate', 'PlannedEndDate']
             }
         },
