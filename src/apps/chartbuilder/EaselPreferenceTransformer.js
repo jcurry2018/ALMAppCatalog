@@ -3,9 +3,15 @@
 
 	Ext.define("Rally.apps.chartbuilder.EaselPreferenceTransformer", {
 
-
 		settingsFieldTransformers: {
-			'project-select': function(easelPreferenceSpec) {
+			'milestone-picker': function(easelPreferenceSpec) {
+				return {
+					xtype: "rallymilestonecombobox",
+					name: easelPreferenceSpec.name,
+					label: "Milestone"
+				};
+			},
+			'project-picker': function(easelPreferenceSpec) {
 				return {
 					type: "project",
 					name: easelPreferenceSpec.name,
@@ -34,8 +40,16 @@
 		 * to a value for the given 'key'
 		 */
 		settingsTransformers: {
-			'project-select' : function(settings, key) {
-				// key is ignored in 'project-select' because the
+			'milestone-picker' : function(settings, key) {
+				var val = settings[key];
+				if (!val || '' === val) {
+					return null;
+				}
+				return parseInt(val.match(/\d+/),10);
+			},
+
+			'project-picker' : function(settings, key) {
+				// key is ignored in 'project-picker' because the
 				// project scope field doesn't honor it's 'name'. it just
 				// pollutes the settings with project, projectScopeUp and projectScopeDown
 				if (!settings.project || '' === settings.project) {
@@ -52,7 +66,7 @@
 		/**
 		 * Based on the easelPreference definitions and the values that have been
 		 * pushed into 'settings' from the ALM Settings Mechanism, return a
-		 * value for the 'key' provided.  In the case of a 'project-select',
+		 * value for the 'key' provided.  In the case of a 'project-picker',
 		 * the value is an object that has project,scopeUp and scopeDown OR null
 		 * if 'follow global' is selected.
 		 */

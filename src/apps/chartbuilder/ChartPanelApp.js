@@ -7,7 +7,8 @@
 		componentCls: 'cbchart-app',
 		config: {
 		},
-		requires: [],
+		/** any xtypes being used by preferences need to be put here */
+		requires: [ 'Rally.ui.combobox.MilestoneComboBox' ],
 		items: [
 			{
 				xtype: 'container',

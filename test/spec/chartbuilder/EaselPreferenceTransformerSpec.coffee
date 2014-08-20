@@ -77,9 +77,9 @@ describe 'Rally.apps.chartbuilder.EaselPreferenceTransformer', ->
 
 
 
-	it 'converts project-select into settings project picker', ->
+	it 'converts project-picker into settings project picker', ->
 		preferences = [
-			{ type: 'project-select', name: 'xyzy' }
+			{ type: 'project-picker', name: 'xyzy' }
 		]
 
 		expected = [
@@ -94,9 +94,9 @@ describe 'Rally.apps.chartbuilder.EaselPreferenceTransformer', ->
 		expect(converted).toEqual expected
 
 
-	it 'should convert flat project-select settings to a nice object', ->
+	it 'should convert flat project-picker settings to a nice object', ->
 		preferences = [
-			{ type: 'project-select', name:'zzzz' }
+			{ type: 'project-picker', name:'zzzz' }
 		]
 
 		settings=
@@ -110,3 +110,38 @@ describe 'Rally.apps.chartbuilder.EaselPreferenceTransformer', ->
 		expect(value.project).toBe 1234
 		expect(value.scopeUp).toBe true
 		expect(value.scopeDown).toBe false
+
+
+
+
+
+	it 'converts milestone-picker into settings milestone picker', ->
+		preferences = [
+			{ type: 'milestone-picker', name: 'xyzy' }
+		]
+
+		expected = [
+			{
+				xtype: 'rallymilestonecombobox'
+				name: 'xyzy'
+				label: 'Milestone'
+			}
+		]
+
+		converted = @xformer.transform(preferences)
+		expect(converted).toEqual expected
+
+
+
+	it 'should convert milestone-picker settings to a nice object', ->
+		preferences = [
+			{ type: 'milestone-picker', name:'zzzz' }
+		]
+
+		settings=
+			zzzz: '/milestone/1234'
+
+		key = 'zzzz'
+
+		value = @xformer.getValue(preferences, settings, key)
+		expect(value).toBe 1234

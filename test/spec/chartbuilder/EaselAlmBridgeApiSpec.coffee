@@ -51,7 +51,7 @@ describe 'Rally.apps.chartbuilder.EaselAlmBridgeApi', ->
 		settings =
 			project: 12345
 		api = @createApi(settings)
-		api.registerPreferences({ type: 'project-select', name:'project' })
+		api.registerPreferences({ type: 'project-picker', name:'project' })
 		expect(api.getSettings().project).toBe settings.project
 
 	it 'has no default settings by default', ->
