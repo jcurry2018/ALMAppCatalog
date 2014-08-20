@@ -20,8 +20,9 @@ module.exports = function(grunt) {
     };
 
     var getBuildVersion = function(revision) {
+        var artifactPrefix = process.env.ARTIFACT_PREFIX ? process.env.ARTIFACT_PREFIX + '-' : '';
         var counter = process.env.PIPELINE_COUNTER || process.env.BUILD_NUMBER || 'dev';
-        return "" + counter + "-" + (revision.substr(0, 7)) + '-sdk-' + getSdkVersion();
+        return "" + artifactPrefix + counter + "-" + (revision.substr(0, 7)) + '-sdk-' + getSdkVersion();
     };
 
     var version = function() {
