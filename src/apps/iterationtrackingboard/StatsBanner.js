@@ -70,6 +70,9 @@
                 fetch: ['Defects:summary[State;ScheduleState+Blocked]', 'PlanEstimate', 'Requirement', 'FormattedID', 'Name', 'Blocked', 'BlockedReason',
                     'ScheduleState', 'State', 'Tasks:summary[State+Blocked]', 'TestCases'],
                 useShallowFetch: true,
+                sorters: [
+                    {property: 'ScheduleState'}
+                ],
                 filters: [this.context.getTimeboxScope().getQueryFilter()],
                 context: this.context.getDataContext(),
                 limit: Infinity,

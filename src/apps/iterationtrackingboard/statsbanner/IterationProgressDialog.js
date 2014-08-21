@@ -23,6 +23,7 @@
             width: 820,
             height: 650,
             closable: true,
+            constrain: true,
             store: null,
             context: null
         },

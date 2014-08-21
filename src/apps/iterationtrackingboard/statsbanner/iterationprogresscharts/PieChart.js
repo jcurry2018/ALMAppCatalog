@@ -63,11 +63,14 @@
         _loadArtifacts: function() {
             this._chartData = [];
             this._childChartData = [];
-            
+
             this.store = Ext.create('Rally.data.wsapi.artifact.Store', {
                 models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
                 fetch: ['Defects', 'PlanEstimate', 'Requirement', 'FormattedID', 'Name', 'Blocked', 'BlockedReason', 'ScheduleState', 'State', 'Tasks', 'TestCases'],
                 filters: [this.context.getTimeboxScope().getQueryFilter()],
+                sorters: [
+                    {property: 'ScheduleState'}
+                ],
                 context: this.context.getDataContext(),
                 limit: Infinity,
                 requester: this,

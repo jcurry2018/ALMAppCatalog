@@ -73,6 +73,7 @@
                             'LeafStoryCount',
                             'LeafStoryPlanEstimateTotal',
                             'LastUpdateDate',
+                            'State',
                             'UnEstimatedLeafStoryCount'
                         ],
                         boardFieldDefaults: this._getDefaultFields(),
