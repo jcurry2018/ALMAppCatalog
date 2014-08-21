@@ -4,11 +4,12 @@ def appSdkSrcVersion = build.buildVariables.APPSDK_SRC_VERSION
 def env = build.characteristicEnvVars
 
 def jsDep = new hudson.FilePath(build.workspace, 'js_dependencies.json').readToString()
-def prevSdkVersionMatcher = jsDep =~ /appsdk-src:tgz:(\d+)/
+def prevSdkVersionMatcher = jsDep =~ /appsdk-src:tgz:\D*(\d+)/
 def prevSdkBuildNumber = prevSdkVersionMatcher[0][1] as int
 def buildName = build.buildVariables.UPSTREAM_JOB_NAME ?: 'appsdk-alm-bridge'
 def upstreamProject = Jenkins.instance.getItem(buildName)
-def newBuildNumber = appSdkSrcVersion.split('-')[0] as int
+def newBuildNumberMatcher = appSdkSrcVersion =~ /-(\d+)-/
+def newBuildNumber = newBuildNumberMatcher[0][1] as int
 
 StringBuilder commitMsg = new StringBuilder() << "${env.JOB_NAME} ${env.BUILD_NUMBER} bumping sdk to ${appSdkSrcVersion}" << "\n\n"
 
