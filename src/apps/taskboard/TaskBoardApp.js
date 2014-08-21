@@ -1,6 +1,8 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
+    //TODO: update screenshot when done
+    //TODO: update github src link when done
     Ext.define('Rally.apps.taskboard.TaskBoardApp', {
         extend: 'Rally.app.TimeboxScopedApp',
         requires: [
