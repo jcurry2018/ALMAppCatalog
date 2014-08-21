@@ -204,16 +204,13 @@ describe 'Rally.apps.kanban.KanbanApp', ->
   it 'should exclude items with a release set in the last column', ->
     @createApp(hideReleasedCards: true).then =>
       columns = @cardboard.getColumns()
-      lastColumn = columns[columns.length-1]
-
-      expect(lastColumn.storeConfig).toOnlyHaveFilters [['Release', '=', null]]
+      _.each columns, (column, index) ->
+        expect(column.hideReleasedCards).toBe index == columns.length - 1
 
   it 'should not exclude items with a release set in the last column', ->
     @createApp(hideReleasedCards: false).then =>
-      columns = @cardboard.getColumns()
-      lastColumn = columns[columns.length-1]
-
-      expect(lastColumn.storeConfig).toHaveNoFilters()
+      _.each @cardboard.getColumns(), (column) ->
+        expect(column.hideReleasedCards).toBe false
 
   it 'should show plan estimate when plan estimate field is enabled', ->
     @createApp(cardFields: "Name,Discussion,Tasks,Defects,PlanEstimate").then =>

@@ -201,9 +201,7 @@
                 columns.push(columnConfig);
             }, this);
 
-            columns[columns.length - 1].storeConfig = {
-                filters: this._getLastColumnFilter()
-            };
+            columns[columns.length - 1].hideReleasedCards = this.getSetting('hideReleasedCards');
 
             return columns;
         },
@@ -280,16 +278,6 @@
                 filters.push(this.getContext().getTimeboxScope().getQueryFilter());
             }
             return filters;
-        },
-
-        _getLastColumnFilter: function() {
-            return this.getSetting('hideReleasedCards') ?
-                [
-                    {
-                        property: 'Release',
-                        value: null
-                    }
-                ] : [];
         },
 
         _getColumnSetting: function() {

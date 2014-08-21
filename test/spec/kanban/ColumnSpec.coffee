@@ -27,6 +27,13 @@ Ext.require [
       expect(storeFilterSpy.returnValues[0][1].property).toBe 'DirectChildrenCount'
       expect(storeFilterSpy.returnValues[0][1].value).toBe 0
 
+    it 'should have correct filter settings if hideReleasedCards is true', ->
+      storeFilterSpy = @spy(Rally.apps.kanban.Column.prototype, 'getStoreFilter')
+      @createColumn(hideReleasedCards:true)
+
+      expect(storeFilterSpy.returnValues[0][2].property).toBe 'Release'
+      expect(storeFilterSpy.returnValues[0][2].value).toBe null
+
     helpers
       createColumn: (config = {}) ->
         @cardboardHelper.createColumn(Ext.apply(
@@ -37,7 +44,6 @@ Ext.require [
           wipLimit: 0
           renderTo: 'testDiv'
           headerCell: Ext.get 'testDiv'
-          contentCell: Ext.get 'testDiv'
           models: [@Model]
           , config)
         )
