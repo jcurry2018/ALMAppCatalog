@@ -58,7 +58,8 @@
             this.addNewPluginConfig = {
                 listeners: {
                     beforecreate: this._onBeforeCreate,
-                    beforeeditorshow: this._onBeforeCreate
+                    beforeeditorshow: this._onBeforeCreate,
+                    scope: this
                 },
                 style: {
                     'float': 'left'
@@ -160,7 +161,6 @@
 
         /**
          * This method is fired by AddNew and will run before the artifact is created.
-         * Scoping will be the GridBoardAddNew plugin (because of issues with deep merging of the listener config and the scope)
          * @private
          */
         _onBeforeCreate: function (addNew, record, params) {
@@ -168,7 +168,7 @@
             if (!record.isModel) {
                 params = record;
             }
-            var rankRecord = this.gridboard.getGridOrBoard().getFirstRecord();
+            var rankRecord = this.getGridOrBoard().getFirstRecord();
             if (rankRecord) {
                 params.rankAbove = rankRecord.getUri();
             }
