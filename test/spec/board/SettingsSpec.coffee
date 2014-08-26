@@ -13,21 +13,29 @@ describe 'Rally.apps.board.Settings', ->
           DisplayName: 'User Story'
           ElementName: 'HierarchicalRequirement'
           TypePath: 'HierarchicalRequirement'
+          Parent:
+            ElementName: 'Requirement'
         }
         {
           DisplayName: 'Defect'
           ElementName: 'Defect'
           TypePath: 'Defect'
+          Parent:
+            ElementName: 'SchedulableArtifact'
         }
         {
           DisplayName: 'Portfolio Item Project'
           ElementName: 'Project'
           TypePath: 'PortfolioItem/Project'
+          Parent:
+            ElementName: 'PortfolioItem'
         }
         {
           DisplayName: 'Attachment'
           ElementName: 'Attachment'
           TypePath: 'Attachment'
+          Parent:
+            ElementName: 'WorkspaceDomainObject'
         }
       ]
     })
@@ -67,10 +75,9 @@ describe 'Rally.apps.board.Settings', ->
       expect(refreshSpy).toHaveBeenCalledOnce()
       expect(refreshSpy.getCall(0).args[0]).toBe newContext
 
-  it 'refreshes the group by combo and fields picker when the type changes', ->
+  it 'refreshes the group by combo when the type changes', ->
     @createSettings(type: 'Defect').then =>
       groupByRefreshSpy = @spy(@_getGroupByCombo(), 'refreshWithNewModelType')
-      fieldsPickerRefreshSpy = @spy(@_getFieldsPicker(), 'refreshWithNewModelTypes')
       typeCombo = @_getTypeCombo()
       newValue = 'HierarchicalRequirement'
       typeCombo.fireEvent('select', typeCombo, [typeCombo.findRecordByValue(newValue)])
@@ -79,10 +86,6 @@ describe 'Rally.apps.board.Settings', ->
       expect(groupByRefreshSpy.getCall(0).args[0]).toBe newValue
       expect(groupByRefreshSpy.getCall(0).args[1]).toBe typeCombo.context
 
-      expect(fieldsPickerRefreshSpy).toHaveBeenCalledOnce()
-      expect(fieldsPickerRefreshSpy.getCall(0).args[0]).toEqual [newValue]
-      expect(fieldsPickerRefreshSpy.getCall(0).args[1]).toBe typeCombo.context
-
   it 'displays only writable fields with allowed values in group by combo', ->
     @createSettings().then =>
       Ext.Array.each(@_getGroupByCombo().getStore().getRange(), (record) ->
@@ -90,10 +93,22 @@ describe 'Rally.apps.board.Settings', ->
         expect(attr && !attr.ReadOnly && attr.Constrained && attr.AttributeType != 'COLLECTION').toBe true
       )
 
-  it 'displays the fields picker correctly', ->
-    @createSettings(type: 'PortfolioItem/Project').then =>
-      expect(@_getFieldsPicker().getModelTypes()).toEqual ['PortfolioItem/Project']
+  it 'refreshes the swimlanes setting when the type changes', ->
+    @createSettings(type: 'Defect').then =>
+      swimLanesRefreshSpy = @spy(@_getSwimLanes(), 'refreshWithNewModelType')
+      typeCombo = @_getTypeCombo()
+      newValue = 'HierarchicalRequirement'
+      typeCombo.fireEvent('select', typeCombo, [typeCombo.findRecordByValue(newValue)])
 
+      expect(swimLanesRefreshSpy).toHaveBeenCalledOnce()
+      expect(swimLanesRefreshSpy.getCall(0).args[0]).toBe newValue
+
+  it 'includes the correct swimlane fields', ->
+    @createSettings().then =>
+      swimLanes = @_getSwimLanes()
+      expect(swimLanes.includeCustomFields).toBe true
+      expect(swimLanes.includeConstrainedNonCustomFields).toBe true
+      expect(swimLanes.includeConstrainedNonCustomFields).toBe true
   helpers
     createSettings: (settings={}, contextValues)->
       settingsReady = @stub()
@@ -131,7 +146,5 @@ describe 'Rally.apps.board.Settings', ->
     _getGroupByCombo: ->
       @_getFieldAt(1)
 
-    _getFieldsPicker: ->
+    _getSwimLanes: ->
       @_getFieldAt(2)
-
-
