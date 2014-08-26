@@ -99,6 +99,10 @@
 
 		getChartType: function() {
 			return this.config.chartType;
+		},
+
+		setLoading: function(isLoading) {
+			this.getApp().setLoading(isLoading);
 		}
 	});
 }());
