@@ -85,9 +85,11 @@
                             }
                         },
                         column: {
-                            events: {
-                                click: clickChartHandler
-                            }
+                            point: {
+                               events: {
+                                   click: clickChartHandler
+                               }
+                           }
                         }
                     },
                     legend: { enabled: true },

@@ -16,7 +16,6 @@
         width: undefined,
         displayTitle: 'Cumulative Flow',
         minimalMode: false,
-
         initComponent: function() {
             this.callParent(arguments);
 
@@ -114,10 +113,12 @@
                             }
                         },
                         area: {
-                            stacking: 'normal',
-                            events: {
-                                click: clickChartHandler
-                            }
+                            point: {
+                                events: {
+                                    click: clickChartHandler
+                                }
+                            },
+                            stacking: 'normal'
                         }
                     },
                     legend: {
@@ -175,6 +176,7 @@
 
             this.add(this.chartComponentConfig);
         },
+
 
         _onLoad: function() {
             this.fireEvent('contentupdated', this);
