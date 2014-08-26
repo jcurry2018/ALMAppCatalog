@@ -132,11 +132,15 @@
                         filterControlConfig: {
                             blackListFields: [],
                             whiteListFields: [],
-                            context: context,
                             margin: '3 9 3 30',
                             modelNames: modelNames,
                             stateful: true,
                             stateId: context.getScopedStateId('kanban-custom-filter-button')
+                        },
+                        showOwnerFilter: true,
+                        ownerFilterControlConfig: {
+                            stateful: true,
+                            stateId: context.getScopedStateId('kanban-owner-filter')
                         }
                     },
                     {

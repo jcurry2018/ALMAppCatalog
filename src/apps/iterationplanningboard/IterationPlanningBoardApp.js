@@ -26,12 +26,17 @@
                 },
                 {
                     ptype: 'rallygridboardcustomfiltercontrol',
-                    context: this.getContext(),
                     filterControlConfig: {
+                        margin: '3 9 3 30',
                         blackListFields: ['Iteration', 'PortfolioItem'],
                         modelNames: this.modelNames,
                         stateful: true,
                         stateId: this.getContext().getScopedStateId('iteration-planning-custom-filter-button')
+                    },
+                    showOwnerFilter: true,
+                    ownerFilterControlConfig: {
+                        stateful: true,
+                        stateId: this.getContext().getScopedStateId('iteration-planning-owner-filter')
                     }
                 }
             ];

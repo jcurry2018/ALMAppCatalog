@@ -365,6 +365,10 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
           expect(plugin.filterControlConfig.stateful).toBe true
           expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-custom-filter-button')
 
+          expect(plugin.showOwnerFilter).toBe true
+          expect(plugin.ownerFilterControlConfig.stateful).toBe true
+          expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-owner-filter')
+
     describe 'EXPAND_ALL_TREE_GRID_CHILDREN is true', ->
       beforeEach ->
         @featureEnabledStub.withArgs('EXPAND_ALL_TREE_GRID_CHILDREN').returns(true)

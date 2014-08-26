@@ -360,8 +360,11 @@ describe 'Rally.apps.kanban.KanbanApp', ->
           expect(plugin.filterChildren).toBe true
           expect(plugin.filterControlConfig.stateful).toBe true
           expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('kanban-custom-filter-button')
-          expect(plugin.filterControlConfig.context).toBe @app.context
           expect(plugin.filterControlConfig.modelNames).toEqual ['User Story', 'Defect']
+
+          expect(plugin.showOwnerFilter).toBe true
+          expect(plugin.ownerFilterControlConfig.stateful).toBe true
+          expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('kanban-owner-filter')
 
     describe 'field picker', ->
       it 'should use rallygridboard field picker', ->

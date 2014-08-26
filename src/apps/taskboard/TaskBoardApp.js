@@ -38,11 +38,15 @@
                         ptype: 'rallygridboardcustomfiltercontrol',
                         filterChildren: false,
                         filterControlConfig: {
-                            context: context,
                             margin: '3 9 3 30',
                             modelNames: modelNames,
                             stateful: true,
                             stateId: context.getScopedStateId('taskboard-custom-filter-button')
+                        },
+                        showOwnerFilter: true,
+                        ownerFilterControlConfig: {
+                            stateful: true,
+                            stateId: context.getScopedStateId('taskboard-owner-filter')
                         }
                     },
                     {

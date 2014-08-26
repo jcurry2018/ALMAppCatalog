@@ -56,12 +56,17 @@
                         ptype: 'rallygridboardcustomfiltercontrol',
                         filterChildren: false,
                         filterControlConfig: {
+                            margin: '3 9 3 30',
                             blackListFields: ['PortfolioItemType', 'Release'],
                             whiteListFields: [this._milestonesAreEnabled() ? 'Milestones' : ''],
-                            context: this.getContext(),
                             modelNames: [piTypePath],
                             stateful: true,
                             stateId: this.getContext().getScopedStateId('release-planning-custom-filter-button')
+                        },
+                        showOwnerFilter: true,
+                        ownerFilterControlConfig: {
+                            stateful: true,
+                            stateId: this.getContext().getScopedStateId('release-planning-owner-filter')
                         }
                     },
                     {

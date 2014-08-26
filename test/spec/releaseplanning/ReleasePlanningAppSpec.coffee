@@ -56,3 +56,16 @@ describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
   it 'should order the release columns based on end date', ->
     sortedReleaseNames = _.pluck _.sortBy(@releaseData, (release) -> new Date(release.ReleaseDate)), 'Name'
     expect(_.map(@getTimeboxColumns(), (column) -> column.getTimeboxRecords()[0].get('Name'))).toEqual sortedReleaseNames
+
+  it 'should use rallygridboard custom filter control', ->
+    gridBoard = @app.down 'rallygridboard'
+    plugin = _.find gridBoard.plugins, (plugin) ->
+      plugin.ptype == 'rallygridboardcustomfiltercontrol'
+    expect(plugin).toBeDefined()
+    expect(plugin.filterControlConfig.stateful).toBe true
+    expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('release-planning-custom-filter-button')
+
+    expect(plugin.showOwnerFilter).toBe true
+    expect(plugin.ownerFilterControlConfig.stateful).toBe true
+    expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('release-planning-owner-filter')
+

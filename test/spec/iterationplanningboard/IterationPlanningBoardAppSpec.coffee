@@ -93,3 +93,17 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
   it 'should have a default card fields setting', ->
     @createApp().then =>
       expect(@app.getSetting('cardFields')).toBe 'Parent,Tasks,Defects,Discussion,PlanEstimate'
+
+  it 'should use rallygridboard custom filter control', ->
+    @createApp().then =>
+      gridBoard = @app.down 'rallygridboard'
+      plugin = _.find gridBoard.plugins, (plugin) ->
+        plugin.ptype == 'rallygridboardcustomfiltercontrol'
+      expect(plugin).toBeDefined()
+      expect(plugin.filterControlConfig.stateful).toBe true
+      expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-planning-custom-filter-button')
+
+      expect(plugin.showOwnerFilter).toBe true
+      expect(plugin.ownerFilterControlConfig.stateful).toBe true
+      expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-planning-owner-filter')
+

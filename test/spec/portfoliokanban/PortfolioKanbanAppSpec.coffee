@@ -30,7 +30,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     waitForAppReady: ->
       readyStub = @stub()
       Rally.environment.getMessageBus().subscribe Rally.Message.piKanbanBoardReady, readyStub
-      @waitForCallback readyStub, 2
+      @waitForCallback readyStub
 
   beforeEach ->
     Rally.environment.getContext().context.subscription.Modules = ['Rally Portfolio Manager']
@@ -188,6 +188,20 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp().then =>
       expect(loadSpy.callCount).toBe 0
       expect(@app.getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
+
+  it 'should use rallygridboard filter control', ->
+    @_createApp().then =>
+      gridBoard = @app.down 'rallygridboard'
+      plugin = _.find gridBoard.plugins, (plugin) ->
+        plugin.ptype == 'rallygridboardcustomfiltercontrol'
+      expect(plugin).toBeDefined()
+      expect(plugin.filterControlConfig.stateful).toBe true
+      expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('portfolio-kanban-custom-filter-button')
+
+      expect(plugin.showOwnerFilter).toBe true
+      expect(plugin.ownerFilterControlConfig.stateful).toBe true
+      expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('portfolio-kanban-owner-filter')
+
 
   describe 'when the type is changed', ->
 

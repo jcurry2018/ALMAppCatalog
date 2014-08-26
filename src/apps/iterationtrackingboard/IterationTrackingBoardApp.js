@@ -278,11 +278,15 @@
                         filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
                         filterControlConfig: {
                             blackListFields: ['Iteration', 'PortfolioItem'],
-                            context: context,
                             margin: '3 9 3 30',
                             modelNames: this.modelNames,
                             stateful: true,
                             stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
+                        },
+                        showOwnerFilter: true,
+                        ownerFilterControlConfig: {
+                            stateful: true,
+                            stateId: context.getScopedStateId('iteration-tracking-owner-filter')
                         }
                     });
                 } else {

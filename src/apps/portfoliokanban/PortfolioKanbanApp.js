@@ -285,11 +285,15 @@
                             filterControlConfig: {
                                 blackListFields: ['PortfolioItemType', 'State'],
                                 whiteListFields: [this._milestonesAreEnabled() ? 'Milestones' : ''],
-                                context: this.getContext(),
-                                margin: '3 10',
+                                margin: '3 9 3 30',
                                 modelNames: [currentTypePath],
                                 stateful: true,
                                 stateId: this.getContext().getScopedStateId('portfolio-kanban-custom-filter-button')
+                            },
+                            showOwnerFilter: true,
+                            ownerFilterControlConfig: {
+                                stateful: true,
+                                stateId: this.getContext().getScopedStateId('portfolio-kanban-owner-filter')
                             }
                         },
                         {
