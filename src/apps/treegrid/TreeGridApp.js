@@ -15,6 +15,8 @@
 
         statePrefix: 'custom',
 
+        autoScroll: false,
+
         config: {
             defaultSettings: {
                 modelNames: ['PortfolioItem/Strategy'],
