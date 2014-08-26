@@ -3,29 +3,32 @@
     /**
      * This is the bridge API that is used by the Alm Shim Environment class (in analytics-easel).
      * This class provides information about the ALM runtime environment and context as well
-     * as managing the shuffling of preferences around.
+     * as managing the shuffling of settings around.
      *
-     * this.almBridge = Ext.create("Rally.apps.chartbuilder.EaselAlmBridgeApi", {
+     * this.almBridge = Ext.create("Rally.apps.chartbuilder.EaselAlmBridge", {
      *   chartType : chartToLoad, < string value >
      *   app: this < a reference to the app, or something that has getSettings() and getContext()
      *  });
      */
-	Ext.define("Rally.apps.chartbuilder.EaselAlmBridgeApi", {
+	Ext.define("Rally.apps.chartbuilder.EaselAlmBridge", {
 
-		requires: ['Rally.apps.chartbuilder.EaselPreferenceTransformer'],
+		requires: ['Rally.apps.chartbuilder.EaselSettingsTransformer'],
 
 		defaultSettings : {},
-		easelPreferences : {},
+		/**
+		 * These are the settings fields coming from the chart definition
+		 */
+		easelSettingsFields : {},
 		config: {
 			chartType : 'none',
 			/**
-			 *  settings from which getPreference is delivered. it's assumed this structure
+			 *  settings from which getSetting is delivered. it's assumed this structure
 			 *  is updated in place and is passed in during construction from the app
 			 */
 			app: null
 		},
 
-		transformer: Ext.create("Rally.apps.chartbuilder.EaselPreferenceTransformer"),
+		transformer: Ext.create("Rally.apps.chartbuilder.EaselSettingsTransformer"),
 
 		constructor: function(config) {
 			this.initConfig(config);
@@ -63,15 +66,19 @@
 			c.log(a,b);
 		},
 
-		getPreference : function(name) {
-			return this.transformer.getValue(this.easelPreferences, this.getSettings(), name);
+		getSetting : function(name) {
+			return this.transformer.getValue(this.easelSettingsFields, this.getAppSettings(), name);
+		},
+
+		getSettings: function() {
+			return this.transformer.getValues(this.easelSettingsFields, this.getAppSettings());
 		},
 
 		getContext : function() {
 			return this.getApp().getContext();
 		},
 
-		getSettings : function() {
+		getAppSettings : function() {
 			return this.getApp().getSettings();
 		},
 
@@ -80,19 +87,17 @@
 		},
 
 		getSettingsFields : function() {
-			var listOfTransformedSettings = this.transformer.transform(this.easelPreferences);
+			var listOfTransformedSettings = this.transformer.transform(this.easelSettingsFields);
 			return listOfTransformedSettings;
 		},
 
-		registerPreferences : function(easelPreferences) {
+		registerSettingsFields : function(easelSettingsFields) {
 			var self = this;
+			this.easelSettingsFields = easelSettingsFields;
 
-			this.easelPreferences = easelPreferences;
-			this.defaultSettings = self.defaultSettings;
-
-			_.each(this.easelPreferences, function(pref) {
-				if (pref['default']) {
-					self.defaultSettings[pref.name] = pref['default'];
+			_.each(this.easelSettingsFields, function(settingField) {
+				if (settingField['default']) {
+					self.defaultSettings[settingField.name] = settingField['default'];
 				}
 			});
 		},

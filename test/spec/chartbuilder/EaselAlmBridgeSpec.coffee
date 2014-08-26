@@ -1,10 +1,10 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-	'Rally.apps.chartbuilder.EaselAlmBridgeApi'
+	'Rally.apps.chartbuilder.EaselAlmBridge'
 ]
 
-describe 'Rally.apps.chartbuilder.EaselAlmBridgeApi', ->
+describe 'Rally.apps.chartbuilder.EaselAlmBridge', ->
 
 	helpers
 		getContext: (initialValues) ->
@@ -18,19 +18,19 @@ describe 'Rally.apps.chartbuilder.EaselAlmBridgeApi', ->
 					subscription:globalContext.getSubscription()
 					, initialValues
 
-		createApi: (settings = {}) ->
+		createBridge: (settings = {}) ->
 			context = @getContext()
 			app = {
 				getContext : -> context
 				getSettings : -> settings
 			}
-			api = Ext.create 'Rally.apps.chartbuilder.EaselAlmBridgeApi',
+			api = Ext.create 'Rally.apps.chartbuilder.EaselAlmBridge',
 				chartType: 'xxx'
 				app: app
 			return api
 
 	beforeEach ->
-		@api = @createApi()
+		@api = @createBridge()
 
 	it 'maintains the reference to the passed in chartType', ->
 		expect(@api.getChartType()).toBe "xxx"
@@ -50,15 +50,15 @@ describe 'Rally.apps.chartbuilder.EaselAlmBridgeApi', ->
 	it 'returns project settings', ->
 		settings =
 			project: 12345
-		api = @createApi(settings)
-		api.registerPreferences({ type: 'project-picker', name:'project' })
-		expect(api.getSettings().project).toBe settings.project
+		api = @createBridge(settings)
+		api.registerSettingsFields({ type: 'project-picker', name:'project' })
+		expect(api.getAppSettings().project).toBe settings.project
 
 	it 'has no default settings by default', ->
 		expect(@api.getDefaultSettings()).toEqual {}
 
 	it 'calculates default settings when registered', ->
-		@api.registerPreferences([
+		@api.registerSettingsFields([
 			{type: 'text', name: 'has-default', label: 'Chart Title', default: 'the default value'},
 			{type: 'text', name: 'has-no-default', label: 'Chart Sub-Title2'}
 		])

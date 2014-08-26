@@ -1,34 +1,34 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-	'Rally.apps.chartbuilder.EaselPreferenceTransformer'
+	'Rally.apps.chartbuilder.EaselSettingsTransformer'
 ]
 
-describe 'Rally.apps.chartbuilder.EaselPreferenceTransformer', ->
+describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 
 	helpers
 		createXformer: ->
-			return Ext.create 'Rally.apps.chartbuilder.EaselPreferenceTransformer'
+			return Ext.create 'Rally.apps.chartbuilder.EaselSettingsTransformer'
 
 	beforeEach ->
 		@xformer = @createXformer()
 
-	it 'properly handles an empty preferences list', ->
-		preferences = []
+	it 'properly handles an empty settings fields list', ->
+		settingsFields = []
 		expected = []
 
-		converted = @xformer.transform(preferences)
+		converted = @xformer.transform(settingsFields)
 		expect(converted).toEqual expected
 
-	it 'properly handles a null preferences list', ->
-		preferences = null
+	it 'properly handles a null settings fields list', ->
+		settingsFields = null
 		expected = []
 
-		converted = @xformer.transform(preferences)
+		converted = @xformer.transform(settingsFields)
 		expect(converted).toEqual expected
 
 	it 'converts combobox into rallycombobox', ->
-		preferences = [
+		settingsFields = [
 			{
 				type: 'combobox',
 				name: 'color',
@@ -59,11 +59,11 @@ describe 'Rally.apps.chartbuilder.EaselPreferenceTransformer', ->
 			}
 		]
 
-		converted = @xformer.transform(preferences)
+		converted = @xformer.transform(settingsFields)
 		expect(converted).toEqual expected
 
 	it 'does nothing to textbox', ->
-		preferences = [
+		settingsFields = [
 			{
 				type: 'text',
 				name: 'chart-title',
@@ -72,13 +72,13 @@ describe 'Rally.apps.chartbuilder.EaselPreferenceTransformer', ->
 			}
 		]
 
-		converted = @xformer.transform(preferences)
-		expect(converted).toEqual preferences
+		converted = @xformer.transform(settingsFields)
+		expect(converted).toEqual settingsFields
 
 
 
 	it 'converts project-picker into settings project picker', ->
-		preferences = [
+		settingsFields = [
 			{ type: 'project-picker', name: 'xyzy' }
 		]
 
@@ -90,12 +90,12 @@ describe 'Rally.apps.chartbuilder.EaselPreferenceTransformer', ->
 			}
 		]
 
-		converted = @xformer.transform(preferences)
+		converted = @xformer.transform(settingsFields)
 		expect(converted).toEqual expected
 
 
 	it 'should convert flat project-picker settings to a nice object', ->
-		preferences = [
+		settingsFields = [
 			{ type: 'project-picker', name:'zzzz' }
 		]
 
@@ -106,17 +106,35 @@ describe 'Rally.apps.chartbuilder.EaselPreferenceTransformer', ->
 
 		key = 'zzzz'
 
-		value = @xformer.getValue(preferences, settings, key)
+		value = @xformer.getValue(settingsFields, settings, key)
 		expect(value.project).toBe 1234
 		expect(value.scopeUp).toBe true
 		expect(value.scopeDown).toBe false
 
 
+	it 'should convert all values', ->
+		settingsFields = [
+			{ type: 'project-picker', name:'zzzz' },
+			{ type: 'text', name:'yyyy' }
+		]
+
+		settings=
+			yyyy: 'wassup?'
+			project: '/project/1234'
+			projectScopeUp : 'true'
+			projectScopeDown: 'false'
+
+
+		value = @xformer.getValues(settingsFields, settings)
+		expect(value.yyyy).toBe "wassup?"
+		expect(value.zzzz.project).toBe 1234
+		expect(value.zzzz.scopeUp).toBe true
+		expect(value.zzzz.scopeDown).toBe false
 
 
 
 	it 'converts milestone-picker into settings milestone picker', ->
-		preferences = [
+		settingsFields = [
 			{ type: 'milestone-picker', name: 'xyzy' }
 		]
 
@@ -128,13 +146,13 @@ describe 'Rally.apps.chartbuilder.EaselPreferenceTransformer', ->
 			}
 		]
 
-		converted = @xformer.transform(preferences)
+		converted = @xformer.transform(settingsFields)
 		expect(converted).toEqual expected
 
 
 
 	it 'should convert milestone-picker settings to a nice object', ->
-		preferences = [
+		settingsFields = [
 			{ type: 'milestone-picker', name:'zzzz' }
 		]
 
@@ -143,5 +161,5 @@ describe 'Rally.apps.chartbuilder.EaselPreferenceTransformer', ->
 
 		key = 'zzzz'
 
-		value = @xformer.getValue(preferences, settings, key)
+		value = @xformer.getValue(settingsFields, settings, key)
 		expect(value).toBe 1234

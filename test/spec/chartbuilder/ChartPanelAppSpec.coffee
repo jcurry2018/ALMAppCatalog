@@ -40,10 +40,10 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 			return app.el.dom.firstChild
 
 
-	it 'uses default almshim.html as the iframe source', ->
+	it 'uses default almchart.html as the iframe source', ->
 		@createApp().then (app) =>
 			iframe = @getIFrame(app)
-			expect(iframe.src).toContain "/analytics/chart/latest/almshim.min.html"
+			expect(iframe.src).toContain "/analytics/chart/latest/almchart.min.html"
 
 	it 'sets up the almbridge on the iframe', ->
 		@createApp().then (app) =>
@@ -68,11 +68,20 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 	it 'changes shim location if packtag=false', ->
 		@createApp({}, { searchString : "?packtag=false" }).then (app) =>
 			iframe = @getIFrame(app)
-			expect(iframe.src).toContain "/analytics/chart/latest/almshim.html"
+			expect(iframe.src).toContain "/analytics/chart/latest/almchart.html"
 
 	it 'keeps minified shim location if packtag != false', ->
 		@createApp({}, { searchString : "?packtag=true" }).then (app) =>
 			iframe = @getIFrame(app)
-			expect(iframe.src).toContain "/analytics/chart/latest/almshim.min.html"
+			expect(iframe.src).toContain "/analytics/chart/latest/almchart.min.html"
 
+	it 'returns latest if chart version is not specified', ->
+		@createApp({}, { searchString : "" }).then (app) =>
+			iframe = @getIFrame(app)
+			expect(iframe.src).toContain "/analytics/chart/latest/almchart.min.html"
+
+	it 'uses the appropriate version specified', ->
+		@createApp({}, { searchString : "?chartVersion=xxx" }).then (app) =>
+			iframe = @getIFrame(app)
+			expect(iframe.src).toContain "/analytics/chart/xxx/almchart.min.html"
 

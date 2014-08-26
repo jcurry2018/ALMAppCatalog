@@ -1,35 +1,35 @@
 (function () {
 	var Ext = window.Ext4 || window.Ext;
 
-	Ext.define("Rally.apps.chartbuilder.EaselPreferenceTransformer", {
+	Ext.define("Rally.apps.chartbuilder.EaselSettingsTransformer", {
 
 		settingsFieldTransformers: {
-			'milestone-picker': function(easelPreferenceSpec) {
+			'milestone-picker': function(easelSettingsField) {
 				return {
 					xtype: "rallymilestonecombobox",
-					name: easelPreferenceSpec.name,
+					name: easelSettingsField.name,
 					label: "Milestone"
 				};
 			},
-			'project-picker': function(easelPreferenceSpec) {
+			'project-picker': function(easelSettingsField) {
 				return {
 					type: "project",
-					name: easelPreferenceSpec.name,
+					name: easelSettingsField.name,
 					label: "Project"
 				};
 			},
-			'combobox': function(easelPreferenceSpec) {
+			'combobox': function(easelSettingsField) {
 				return {
 					xtype: 'rallycombobox',
 					valueField: 'value',
 					displayField: 'label',
-					name: easelPreferenceSpec.name,
+					name: easelSettingsField.name,
 					store: {
 						xtype: "store",
 						fields: [
 							'label','value'
 						],
-						data: easelPreferenceSpec.values || [{label:'data expected is \'label\' and \'value\'',value:''}]
+						data: easelSettingsField.values || [{label:'data expected is \'label\' and \'value\'',value:''}]
 					}
 				};
 			}
@@ -70,20 +70,39 @@
 		 * the value is an object that has project,scopeUp and scopeDown OR null
 		 * if 'follow global' is selected.
 		 */
-		getValue: function(easelPreferences, settings, key) {
+		getValue: function(easelSettingsFields, settings, key) {
 			// based on the easelPreference definitions,
 			// interrogate settings to find the property value for 'key'
-			var pref = _.find(easelPreferences, function(pref) {
-				return key === pref.name;
+			var settingsField = _.find(easelSettingsFields, function(settingsField) {
+				return key === settingsField.name;
 			});
-			if (!pref) { return null; }
+			return this.convert(settingsField, settings);
+		},
 
-			if (this.settingsTransformers[pref.type]) {
-				return this.settingsTransformers[pref.type](settings, key);
+		getValues: function(easelSettingsFields, settings) {
+			// based on the easelPreference definitions,
+			// interrogate settings to find the property value for 'key'
+			var result = {};
+
+			var _this = this;
+			_.each(easelSettingsFields, function(settingsField) {
+				var value = _this.convert(settingsField, settings);
+				if (value) {
+					result[settingsField.name] = value;
+				}
+			});
+
+			return result;
+		},
+
+		convert: function(settingsField, settings) {
+			if (!settingsField) { return null; }
+
+			if (this.settingsTransformers[settingsField.type]) {
+				return this.settingsTransformers[settingsField.type](settings, settingsField.name);
 			} else {
-				return settings[pref.name];
+				return settings[settingsField.name];
 			}
-
 		},
 		/**
 		 * takes in an easel 'preferences' block and transforms it into a list
@@ -91,17 +110,17 @@
 		 * settings mechanism.
 		 * see the list of settingsFieldTransformers above.
 		 */
-		transform: function(easelPreferences) {
+		transform: function(easelSettingsFields) {
 			var self = this;
 			var fields = [];
-			if (! Array.isArray(easelPreferences)) {
+			if (! Array.isArray(easelSettingsFields)) {
 				return fields;
 			}
 
-			_.each(easelPreferences, function(pref) {
-				var p = pref;
-				if (self.settingsFieldTransformers[pref.type]) {
-					p = self.settingsFieldTransformers[pref.type](pref);
+			_.each(easelSettingsFields, function(settingsField) {
+				var p = settingsField;
+				if (self.settingsFieldTransformers[settingsField.type]) {
+					p = self.settingsFieldTransformers[settingsField.type](settingsField);
 				}
 				fields.push(p);
 			});
