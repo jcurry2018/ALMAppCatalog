@@ -323,13 +323,13 @@
                 handler: this._exportHandler,
                 scope: this
             }];
-            if (context.isFeatureEnabled('S68103_ITERATION_TRACKING_APP_PRINT')) {
-                actionsMenuItems.push({
-                    text: 'Print...',
-                    handler: this._printHandler,
-                    scope: this
-                });
-            }
+
+            actionsMenuItems.push({
+                text: 'Print...',
+                handler: this._printHandler,
+                scope: this
+            });
+
             plugins.push({
                 ptype: 'rallygridboardactionsmenu',
                 itemId: 'printExportMenuButton',
@@ -688,7 +688,7 @@
         _hidePrintButton: function(hide, gridboard) {
             var button, menuItem;
 
-            if (this.getContext().isFeatureEnabled('S68103_ITERATION_TRACKING_APP_PRINT') && gridboard) {
+            if (gridboard) {
                 button = _.find(gridboard.plugins, {itemId: 'printExportMenuButton'});
 
                 if (button) {
