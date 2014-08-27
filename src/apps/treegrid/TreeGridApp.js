@@ -54,7 +54,7 @@
                 context: context,
                 plugins: gridboardPlugins,
                 toggleState: 'grid',
-                modelNames: this.modelNames,
+                modelNames: this._getModelNames(),
                 cardBoardConfig: {},
                 gridConfig: this._getGridConfig(gridStore, context, gridStateId),
                 storeConfig: {},
@@ -69,6 +69,18 @@
             var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner'];
             if (context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
                 alwaysSelectedValues.push('DragAndDropRank');
+            }
+
+            if (this.filterControlConfig) {
+                plugins.push({
+                    ptype: 'rallygridboardcustomfiltercontrol',
+                    filterChildren: false,
+                    filterControlConfig: Ext.merge({
+                        context: this.getContext(),
+                        margin: '3 10',
+                        modelNames: this._getModelNames()
+                    }, this.filterControlConfig)
+                });
             }
 
             plugins.push({
@@ -89,7 +101,7 @@
                 ],
                 margin: '3 9 14 0',
                 alwaysSelectedValues: alwaysSelectedValues,
-                modelNames: this.modelNames
+                modelNames: this._getModelNames()
             });
 
             return plugins;
@@ -137,7 +149,7 @@
         },
 
         _getGridStore: function() {
-            var modelNames = this.getSetting('modelNames') || this.modelNames;
+            var modelNames = this._getModelNames();
             modelNames = _.isString(modelNames) ? modelNames.split(',') : modelNames;
 
             var storeConfig = Ext.apply(this.storeConfig || {}, {
@@ -154,8 +166,14 @@
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(storeConfig);
         },
 
+        _getModelNames: function() {
+            return this.getSetting('modelNames') || this.modelNames;
+        },
+
         _onGridStateRestore: function(grid) {
-            grid.getStore().load();
+            if (!this.filterControlConfig) {
+                grid.getStore().load();
+            }
         },
 
         _onGridRender: function(grid, options) {
@@ -164,7 +182,7 @@
 
         _handleInitialStatelessLoad: function(store, stateId) {
             var state = Ext.state.Manager.get(stateId);
-            if (!state) {
+            if (!state && !this.filterControlConfig) {
                 store.load();
             }
         }

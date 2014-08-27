@@ -88,7 +88,7 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
     )
     @waitForCallback(loadSpy)
 
-  it 'should set the grid\'s plugins to an empty array', ->
+  it 'should add the field picker plugin', ->
     @stub(Ext.state.Manager, 'get').returns null
     treeGridApp = @createTreeGridApp()
     gridConfig = treeGridApp.down('#gridBoard')
@@ -98,3 +98,44 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
     expect(gridPlugins.length).toBeGreaterThan 0
     expect(_.find(gridPlugins, (plugin)->
       plugin.ptype == 'rallygridboardfieldpicker')).toBeTruthy()
+
+  it 'should not include the custom filter plugin by default', ->
+    @stub(Ext.state.Manager, 'get').returns null
+    treeGridApp = @createTreeGridApp()
+    gridPlugins = treeGridApp.down('#gridBoard').plugins
+
+    expect(_.find(gridPlugins, (plugin)->
+      plugin.ptype == 'rallygridboardcustomfiltercontrol')).toBeFalsy()
+
+  describe 'when including the custom filter plugin', ->
+    beforeEach ->
+      @stub(Ext.state.Manager, 'get').returns true
+      @treeGridApp = @createTreeGridApp
+        filterControlConfig:
+          stateId: 'some-fake-test-state'
+
+    it 'should be added to the array of plugins', ->
+      gridPlugins = @treeGridApp.down('#gridBoard').plugins
+
+      expect(_.find(gridPlugins, (plugin)->
+        plugin.ptype == 'rallygridboardcustomfiltercontrol')).toBeTruthy()
+
+    it 'should not load the grid on state restore', ->
+      gridConfig = @treeGridApp.down('#gridBoard').gridConfig
+      gridStore = gridConfig.store
+
+      stateRestoreListener = gridConfig.listeners.staterestore.fn
+      loadSpy = @spy(gridStore, 'load')
+      stateRestoreListener.call @treeGridApp, getStore: -> gridStore
+
+      expect(loadSpy.callCount).toBe 0
+
+    it 'should not reload the grid on render', ->
+      gridBoard = @treeGridApp.down('#gridBoard')
+      gridStore = gridBoard.gridConfig.store
+
+      renderListener = gridBoard.gridConfig.listeners.render.fn
+      loadSpy = @spy(gridStore, 'load')
+      renderListener.call @treeGridApp, gridBoard, store: gridStore
+
+      expect(loadSpy.callCount).toBe 0
