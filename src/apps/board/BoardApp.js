@@ -6,121 +6,52 @@
         alias: 'widget.boardapp',
         requires: [
             'Rally.apps.board.Settings',
-            'Rally.ui.gridboard.GridBoard',
-            'Rally.ui.gridboard.plugin.GridBoardAddNew',
-            'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
-            'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
-            'Rally.data.util.Sorter'
+            'Rally.ui.cardboard.CardBoard'
         ],
 
         config: {
             defaultSettings: {
                 type: 'HierarchicalRequirement',
                 groupByField: 'ScheduleState',
+                fields: 'FormattedID,Name,Owner',
                 query: '',
-                order: 'Rank',
-                showRows: false
+                order: 'Rank'
             }
         },
 
         launch: function() {
-            this.add(this._getGridBoardConfig());
-        },
-
-        _getGridBoardConfig: function() {
-            var context = this.getContext(),
-                modelNames = [this.getSetting('type')];
-            return {
-                xtype: 'rallygridboard',
-                stateful: false,
-                toggleState: 'board',
-                cardBoardConfig: this._getBoardConfig(),
-                plugins: [
-                    'rallygridboardaddnew',
-                    {
-                        ptype: 'rallygridboardcustomfiltercontrol',
-                        filterChildren: false,
-                        filterControlConfig: {
-                            margin: '3 9 3 30',
-                            modelNames: modelNames,
-                            stateful: true,
-                            stateId: context.getScopedStateId('board-custom-filter-button')
-                        },
-                        showOwnerFilter: true,
-                        ownerFilterControlConfig: {
-                            stateful: true,
-                            stateId: context.getScopedStateId('board-owner-filter')
-                        }
-                    },
-                    {
-                        ptype: 'rallygridboardfieldpicker',
-                        headerPosition: 'left',
-                        boardFieldBlackList: ['PredecessorsAndSuccessors', 'DefectStatus', 'TaskStatus', 'DisplayColor'],
-                        alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'],
-                        modelNames: modelNames,
-                        boardFieldDefaults: (this.getSetting('fields')
-                            && this.getSetting('fields').split(',')) || []
-                    }
-                ],
-                context: context,
-                modelNames: modelNames,
-                addNewPluginConfig: {
-                    style: {
-                        'float': 'left'
-                    }
-                },
-                storeConfig: {
-                    filters: this._getFilters()
-                }
-            };
-        },
-
-        _getBoardConfig: function() {
-            var boardConfig = {
+            this.add({
+                xtype: 'rallycardboard',
                 margin: '10px 0 0 0',
+                types: [this.getSetting('type')],
                 attribute: this.getSetting('groupByField'),
                 context: this.getContext(),
+                storeConfig: {
+                    filters: this._getQueryFilters()
+                },
                 cardConfig: {
                     editable: true,
-                    showIconMenus: true
+                    showIconMenus: true,
+                    fields: this.getSetting('fields').split(',')
                 },
                 loadMask: true
-            };
-            if (this.getSetting('showRows')) {
-                Ext.merge(boardConfig, {
-                    rowConfig: {
-                        field: this.getSetting('rowsField'),
-                        sortDirection: 'ASC'
-                    }
-                });
-            } else {
-                Ext.merge(boardConfig, {
-                    storeConfig: {
-                        sorters: Rally.data.util.Sorter.sorters(this.getSetting('order'))
-                    }
-                });
-            }
-            return boardConfig;
+            });
         },
 
         getSettingsFields: function() {
             return Rally.apps.board.Settings.getFields(this.getContext());
         },
 
-        _addBoard: function() {
-            var gridBoard = this.down('rallygridboard');
-            if(gridBoard) {
-                gridBoard.destroy();
-            }
-            this.add(this._getGridBoardConfig());
-        },
-
-        onTimeboxScopeChange: function(timeboxScope) {
+        onTimeboxScopeChange: function() {
             this.callParent(arguments);
-            this._addBoard();
+            this.down('rallycardboard').refresh({
+                storeConfig: {
+                    filters: this._getQueryFilters()
+                }
+            });
         },
 
-        _getFilters: function() {
+        _getQueryFilters: function() {
             var queries = [];
             if (this.getSetting('query')) {
                 queries.push(Rally.data.QueryFilter.fromQueryString(this.getSetting('query')));

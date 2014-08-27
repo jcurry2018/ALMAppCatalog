@@ -53,28 +53,12 @@
             includeCustomFields: true,
 
             /**
-             * @cfg {Boolean}
-             */
-            includeConstrainedNonCustomFields: false,
-
-            /**
-             * @cfg {Boolean}
-             */
-            includeObjectFields: false,
-
-            /**
              * @cfg {Object[]}
              *
              * Array of objects with name and value keys to be used by the row combobox
              * [{'name': 'Blocked', 'value': 'Blocked'},{'name': 'Owner', 'value': 'Owner'}]
              */
-            explicitFields: [],
-
-            /**
-             * @cfg {String[]}
-             * Array of models for which to list fields for
-             */
-            modelNames: ['userstory', 'defect']
+            explicitFields: []
         },
 
         initComponent: function() {
@@ -116,12 +100,8 @@
                 }
             ]);
 
-            this._loadModels();
-        },
-
-        _loadModels: function() {
             Rally.data.ModelFactory.getModels({
-                types: this.getModelNames(),
+                types: ['userstory', 'defect'],
                 context: this.context,
                 success: this._onModelsRetrieved,
                 scope: this
@@ -129,7 +109,12 @@
         },
 
         _onModelsRetrieved: function (models) {
-            var fields = _.uniq(Ext.Array.merge(this.explicitFields, this._getRowableFields(_.values(models))), 'name');
+            var fields = this.explicitFields;
+
+            if (this.includeCustomFields) {
+                fields = this.explicitFields.concat(this._getRowableFields(_.values(models)));
+            }
+
             var combobox = this.down('rallycombobox');
             combobox.getStore().loadData(_.sortBy(fields, 'name'));
             combobox.setValue(this.getValue().rowsField);
@@ -143,14 +128,10 @@
                     var attr = field.attributeDefinition;
                     return !field.hidden &&
                         attr &&
-                        (!attr.Custom || this.includeCustomFields) &&
-                        ((attr.Constrained &&
-                        attr.AttributeType.toLowerCase() !== 'collection') ||
-                            (this.includeObjectFields && attr.AttributeType.toLowerCase() === 'object')) &&
-                        !attr.ReadOnly &&
-                        (attr.Custom || this.includeConstrainedNonCustomFields) &&
+                        attr.Custom &&
+                        attr.Constrained &&
                         artifactModel.getModelsForField(field).length === models.length;
-                }, this);
+                });
 
             return _.map(rowableFields, function(field) {
                 return {
@@ -176,11 +157,6 @@
                 data[rowsField.name] = rowsField.getValue();
             }
             return data;
-        },
-
-        refreshWithNewModelType: function(type) {
-            this.setModelNames([type]);
-            this._loadModels();
         }
     });
 })();

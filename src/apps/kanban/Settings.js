@@ -69,9 +69,6 @@
                     margin: '10 0 0 0',
                     mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
                     readyEvent: 'ready',
-                    includeCustomFields: true,
-                    includeConstrainedNonCustomFields: false,
-                    includeObjectFields: false,
                     explicitFields: [
                         {name: 'Blocked', value: 'Blocked'},
                         {name: 'Owner', value: 'Owner'},

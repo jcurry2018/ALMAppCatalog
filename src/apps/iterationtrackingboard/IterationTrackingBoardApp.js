@@ -118,8 +118,6 @@
                     mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
                     readyEvent: 'ready',
                     includeCustomFields: false,
-                    includeConstrainedNonCustomFields: false,
-                    includeObjectFields: false,
                     explicitFields: [
                         {name: 'Blocked', value: 'Blocked'},
                         {name: 'Owner', value: 'Owner'},

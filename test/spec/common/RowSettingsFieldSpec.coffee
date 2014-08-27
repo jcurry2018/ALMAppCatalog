@@ -52,49 +52,19 @@ describe 'Rally.apps.common.RowSettingsField', ->
       combobox = @field.down 'rallycombobox'
       expect(combobox.findRecordByValue('Owner')).toBeTruthy()
 
+  it 'should include a custom dropdown field', ->
+    @createField().then =>
+      combobox = @field.down 'rallycombobox'
+      expect(combobox.findRecordByValue('c_KanbanState')).toBeTruthy()
+
+  it 'should not include a custom dropdown field if configured to not have them', ->
+    @createField({includeCustomFields: false}).then =>
+      combobox = @field.down 'rallycombobox'
+      expect(combobox.findRecordByValue('c_KanbanState')).toBeFalsy()
+
   it 'should sort the values in the combobox', ->
     @createField().then =>
       combobox = @field.down 'rallycombobox'
       records = combobox.getStore().getRange()
       fieldNames = _.pluck records, 'name'
       expect(fieldNames).toEqual [].concat(fieldNames).sort()
-
-  it 'should refresh the values in the combobox', ->
-    @createField(includeConstrainedNonCustomFields: true).then =>
-      @field.refreshWithNewModelType('defect')
-      @waitForEvent(@field, 'ready').then =>
-        combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('Severity')).toBeTruthy()
-
-  describe '#includeCustomFields', ->
-    it 'should include a custom dropdown field', ->
-      @createField(includeCustomFields: true).then =>
-        combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('c_KanbanState')).toBeTruthy()
-
-    it 'should not include a custom dropdown field if configured to not have them', ->
-      @createField(includeCustomFields: false).then =>
-        combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('c_KanbanState')).toBeFalsy()
-
-  describe '#includeObjectFields', ->
-    it 'should include an object field', ->
-      @createField(includeConstrainedNonCustomFields: true, includeObjectFields: true, modelNames: ['user story']).then =>
-        combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('Parent')).toBeTruthy()
-
-    it 'should not include an object field', ->
-      @createField(includeObjectFields: false, modelNames: ['user story']).then =>
-        combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('Parent')).toBeFalsy()
-
-  describe '#includeConstrainedNonCustomFields', ->
-    it 'should include a constrained non custom field', ->
-      @createField(includeConstrainedNonCustomFields: true, modelNames: ['defect']).then =>
-        combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('Severity')).toBeTruthy()
-
-    it 'should not include a constrained non custom field', ->
-      @createField(includeConstrainedNonCustomFields: false, modelNames: ['defect']).then =>
-        combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('Severity')).toBeFalsy()
