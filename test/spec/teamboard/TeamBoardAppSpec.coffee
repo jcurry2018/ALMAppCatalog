@@ -23,9 +23,10 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
 
       @app = Ext.create 'Rally.apps.teamboard.TeamBoardApp', Ext.apply(
         context: Ext.create 'Rally.app.Context'
+        renderTo: 'testDiv'
       , options.appConfig)
 
-      if options.appConfig?.renderTo then @waitForComponentReady(@app) else webdriver.promise.fulfilled(@app)
+      @waitForComponentReady @app
 
     stubIsAdmin: (isAdmin) ->
       @stub(Rally.environment.getContext().getPermissions(), 'isWorkspaceOrSubscriptionAdmin').returns isAdmin
@@ -44,11 +45,7 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
     @app?.destroy()
 
   it 'should show a message when user does not have access to any of the teams chosen', ->
-    @createApp(
-      projectRecords: []
-      appConfig:
-        renderTo: 'testDiv'
-    ).then =>
+    @createApp(projectRecords: []).then =>
       expect(@app.getEl().down('.no-data')).not.toBe null
 
   it 'should show a board with one column per team', ->
@@ -56,32 +53,22 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
       expect(@cardboard().columns.length).toBe @projectRecords.length
 
   it 'should show non-disabled team members in each column', ->
-    @createApp(
-      appConfig:
-        renderTo: 'testDiv'
-    ).then =>
+    @createApp().then =>
       expect(@cardboard().getColumns()[0].store).toOnlyHaveFilters [
         ['TeamMemberships', 'contains', @projectRecords[0].get('_ref')]
         ['Disabled', '=', 'false']
       ]
 
   it 'should create a readOnly board when current user is not an admin', ->
-    @createApp(
-      isAdmin: false
-    ).then =>
+    @createApp(isAdmin: false).then =>
       expect(@cardboard().readOnly).toBe true
 
   it 'should create a drag-n-drop-able board when current user is an admin', ->
-    @createApp(
-      isAdmin: true
-    ).then =>
+    @createApp(isAdmin: true).then =>
       expect(@cardboard().readOnly).toBe false
 
   it 'should show the team name in the column header', ->
-    @createApp(
-      appConfig:
-        renderTo: 'testDiv'
-    ).then =>
+    @createApp().then =>
       headerHtml = @cardboard().getColumns()[0].getHeaderTitle().getEl().down('.columnTpl').getHTML()
       Assert.contains headerHtml, @projectRecords[0].get('_refObjectName')
 
@@ -90,7 +77,6 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
       createAppWithCardFields: (cardFields, isAdmin = true) ->
         @createApp
           appConfig:
-            renderTo: 'testDiv'
             settings:
               cardFields: cardFields
           isAdmin: isAdmin
