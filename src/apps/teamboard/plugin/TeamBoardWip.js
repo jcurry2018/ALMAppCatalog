@@ -41,7 +41,11 @@
 
             this.wipContainer.removeAll();
 
-            var store = Ext.create('Rally.data.wsapi.Store', {
+            Ext.create('Rally.data.wsapi.Store', {
+                autoLoad: {
+                    callback: this._onWipLoaded,
+                    scope: this
+                },
                 context: {
                     project: this.cmp.getValue(),
                     projectScopeDown: false,
@@ -53,10 +57,6 @@
                     iterationRecord ? this.self._inProgressDuring(iterationRecord) : this.self._inProgressNow()
                 ]),
                 model: Ext.identityFn('PortfolioItem')
-            });
-            store.load({
-                callback: this._onWipLoaded,
-                scope: this
             });
         },
 
