@@ -71,7 +71,7 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
       lookbackquery = @ajax.whenReadingEndpoint("/snapshot/query").respondWithHtml snapshots,
       { url: "/analytics/v2.0/service/rally/workspace/"+@getContext().getWorkspace().ObjectID+"/artifact/snapshot/query.js", method: 'POST' }
 
-      addSpy = @spy()p
+      addSpy = @spy()
       app = Ext.create 'Rally.apps.charts.burndown.BurnDownApp',
         context: @getContext()
         scopeType: 'iteration'
