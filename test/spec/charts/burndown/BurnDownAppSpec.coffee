@@ -71,7 +71,7 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
       lookbackquery = @ajax.whenReadingEndpoint("/snapshot/query").respondWithHtml snapshots,
       { url: "/analytics/v2.0/service/rally/workspace/"+@getContext().getWorkspace().ObjectID+"/artifact/snapshot/query.js", method: 'POST' }
 
-      addSpy = @spy()
+      addSpy = @spy()p
       app = Ext.create 'Rally.apps.charts.burndown.BurnDownApp',
         context: @getContext()
         scopeType: 'iteration'
@@ -84,9 +84,9 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
       app._getNow = () -> testToday
 
       @waitForCallback(lookbackquery).then =>
-        rallychartAdds = _.where(_.map(addSpy.args, (arg) -> arg[1]), xtype: 'rallychart').length
-        expect(rallychartAdds).toBe 1
-        rallychart = _.where(_.map(addSpy.args, (arg) -> arg[1]), xtype: 'rallychart')[0]
+        rallycharts = _.where(_.map(addSpy.args, (arg) -> arg[1]), xtype: 'rallychart')
+        expect(rallycharts.length).toBe 1
+        rallychart = rallycharts[0]
 
         expect(_.max(rallychart.chartData.series[3].data)).toBe (1.25 * rallychart.chartData.series[2].data[0])
 
