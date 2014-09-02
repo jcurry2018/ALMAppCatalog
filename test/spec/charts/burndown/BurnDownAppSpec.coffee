@@ -49,9 +49,10 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
         listeners:
           add: addSpy
 
-      @waitForCallback(iterReadRequest).then =>
-        rallychartAdds = _.where(_.map(addSpy.args, (arg) -> arg[1]), xtype: 'rallychart').length
-        expect(rallychartAdds).toBe 1
+      @waitForCallback(addSpy, 2).then =>
+        expect(iterReadRequest.callCount).toBe 1
+        expect(app.query('rallychart').length).toBe 1
+        expect(app.down('rallychart').isVisible()).toBe true
 
     it 'maxs prediction line at 1.25 times the first ideal value', ->
       iterations = @mom.getData 'iteration', values:
@@ -83,11 +84,9 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
       testToday = new Date(2013, 10, 6, 0, 0, 0, 0) # Nov 19
       app._getNow = () -> testToday
 
-      @waitForCallback(lookbackquery).then =>
-        rallycharts = _.where(_.map(addSpy.args, (arg) -> arg[1]), xtype: 'rallychart')
-        expect(rallycharts.length).toBe 1
-        rallychart = rallycharts[0]
-
+      @waitForCallback(addSpy, 2).then =>
+        rallychart = app.down 'rallychart'
+        expect(rallychart.isVisible()).toBe true
         expect(_.max(rallychart.chartData.series[3].data)).toBe (1.25 * rallychart.chartData.series[2].data[0])
 
     it 'chartComponentConfig data structure should not be shared between apps', ->
