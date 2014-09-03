@@ -84,7 +84,7 @@
                     headerPosition: 'left',
                     boardFieldDefaults: ['PreliminaryEstimate', 'Discussions', 'UserStories', 'Name'],
                     gridFieldBlackList: ['DragAndDropRank', 'DisplayColor'],
-                    boardFieldBlackList: ['State'],
+                    boardFieldBlackList: ['State', 'CreationDate', 'Description', 'Notes'],
                     stateful: true,
                     stateId: this.getContext().getScopedStateId('fields')
                 },
