@@ -19,22 +19,22 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.CollapseExpand', ->
     @createPane()
 
     expect(@pane.expanded).toBeTruthy()
-    expect(@pane.getEl().down('.icon-chevron-up').isVisible()).toBe true
-    expect(@pane.getEl().down('.icon-chevron-down').isVisible()).toBe false
+    expect(@pane.getEl().down('.icon-collapse-row').isVisible()).toBe true
+    expect(@pane.getEl().down('.icon-expand-row').isVisible()).toBe false
 
   it 'should show collapse icon when toggled while collapsed', ->
     @createPane expanded: false
     @pane.expand()
 
-    expect(@pane.getEl().down('.icon-chevron-up').isVisible()).toBe true
-    expect(@pane.getEl().down('.icon-chevron-down').isVisible()).toBe false
+    expect(@pane.getEl().down('.icon-collapse-row').isVisible()).toBe true
+    expect(@pane.getEl().down('.icon-expand-row').isVisible()).toBe false
 
   it 'should show expand icon when toggled while expanded', ->
     @createPane expanded: true
     @pane.collapse()
 
-    expect(@pane.getEl().down('.icon-chevron-up').isVisible()).toBe false
-    expect(@pane.getEl().down('.icon-chevron-down').isVisible()).toBe true
+    expect(@pane.getEl().down('.icon-collapse-row').isVisible()).toBe false
+    expect(@pane.getEl().down('.icon-expand-row').isVisible()).toBe true
 
   it 'should fire collapse event when collapse-expand is clicked and initially expanded', ->
     @createPane expanded: true

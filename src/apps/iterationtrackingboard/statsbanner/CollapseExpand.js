@@ -11,10 +11,10 @@
 
         tpl: [
             '<div class="expanded-widget">',
-            '<div class="toggle-icon icon-chevron-up"></div>',
+            '<div class="toggle-icon icon-collapse-row"></div>',
             '</div>',
             '<div class="collapsed-widget">',
-            '<div class="toggle-icon icon-chevron-down"></div>',
+            '<div class="toggle-icon icon-expand-row"></div>',
             '</div>'
         ],
 

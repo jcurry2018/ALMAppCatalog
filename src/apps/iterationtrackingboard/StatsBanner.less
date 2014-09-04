@@ -159,6 +159,7 @@
       .toggle-icon {
         color: @grey4;
         font-size: 18px;
+        padding-top: 3px;
         position: relative;
         right: 1px;
       }
@@ -177,6 +178,12 @@
     .stat-panel {
       height: 25px;
       padding-top: 2px;
+
+      &.collapse-expand {
+        .toggle-icon {
+          padding-top: 0;
+        }
+      }
 
       .metric-icon {
         color: @grey6;
