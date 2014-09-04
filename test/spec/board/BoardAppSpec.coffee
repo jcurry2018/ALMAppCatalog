@@ -25,12 +25,12 @@ describe 'Rally.apps.board.BoardApp', ->
       expect(@app.getSetting('query')).toBe ''
 
   it 'shows the correct type on the board', ->
-    @createApp(type: 'Defect', groupByField: 'State').then =>
+    @createApp(type: 'defect', groupByField: 'State').then =>
       expect(@_getBoard().getTypes().length).toBe 1
-      expect(@_getBoard().getTypes()[0]).toBe 'Defect'
+      expect(@_getBoard().getTypes()[0]).toBe 'defect'
 
   it 'groups by the correct attribute on the board', ->
-    @createApp(type: 'Defect', groupByField: 'State').then =>
+    @createApp(type: 'defect', groupByField: 'State').then =>
       expect(@_getBoard().getAttribute()).toBe 'State'
 
   it 'passes the current context to the board', ->
