@@ -88,3 +88,20 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
         TargetProject: ''
       ).then =>
         expect(@app.getEl().down('.targetproject').getHTML()).toContain 'Project Permissions Required'
+
+  describe 'add new', ->
+    beforeEach ->
+      @_createAppWithData().then =>
+        @addNew = @app.down 'rallyaddnew'
+
+    it 'includes a field for target date', ->
+      targetDateField = @addNew.additionalFields[0]
+      expect(targetDateField.xtype).toBe 'rallydatefield'
+      expect(targetDateField.emptyText).toBe 'Select Date'
+      expect(targetDateField.name).toBe 'TargetDate'
+
+    it 'includes a field for target project', ->
+      targetDateField = @addNew.additionalFields[1]
+      expect(targetDateField.xtype).toBe 'rallymilestoneprojectcombobox'
+      expect(targetDateField.name).toBe 'TargetProject'
+      expect(targetDateField.value).toBe @app.getContext().getProjectRef()

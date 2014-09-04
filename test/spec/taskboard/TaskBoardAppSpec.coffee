@@ -1,0 +1,182 @@
+Ext = window.Ext4 || window.Ext
+
+describe 'Rally.apps.taskboard.TaskBoardApp', ->
+
+  beforeEach ->
+    @workProducts = @mom.getData 'userstory', count: 3
+    @artifactStub = @ajax.whenQuerying('artifact').respondWith @workProducts
+    @taskStub = @ajax.whenQuerying('task').respondWithCount 3
+    @taskStateValues = ['Defined', 'In-Progress', 'Completed']
+    @ajax.whenQueryingAllowedValues('task', 'State').respondWith @taskStateValues
+
+  afterEach ->
+    Rally.test.destroyComponentsOfQuery 'taskboardapp'
+
+  helpers
+    createApp: (settings = {}, options = {}, context = {}) ->
+      @app = Ext.create 'Rally.apps.taskboard.TaskBoardApp',
+        context: Ext.create 'Rally.app.Context',
+          initialValues: Ext.merge
+            project:
+              _ref: '/project/1'
+              Name: 'Project 1'
+            workspace:
+              WorkspaceConfiguration:
+                DragDropRankingEnabled: true
+            timebox: Ext.create Rally.test.mock.data.WsapiModelFactory.getIterationModel(),
+              _ref: '/iteration/1'
+              Name: 'Iteration 1'
+              StartDate: '2013-01-01'
+              EndDate: '2013-01-15'
+            , context
+        settings: settings
+        renderTo: options.renderTo || 'testDiv'
+      @waitForLoad()
+
+    getPlugin: (xtype) ->
+      gridBoard = @app.down 'rallygridboard'
+      _.find gridBoard.plugins, (plugin) ->
+        plugin.ptype == xtype
+
+    waitForLoad: ->
+      @once(condition: => @app.down 'rallygridboard').then =>
+        @gridboard = @app.down 'rallygridboard'
+        @waitForComponentReady @gridboard
+
+  describe 'plugins', ->
+    describe 'filtering', ->
+      it 'should use rallygridboard custom filter control', ->
+        @createApp().then =>
+          plugin = @getPlugin('rallygridboardcustomfiltercontrol')
+          expect(plugin).toBeDefined()
+          expect(plugin.filterChildren).toBe false
+          expect(plugin.filterControlConfig.stateful).toBe true
+          expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('taskboard-custom-filter-button')
+          expect(plugin.filterControlConfig.modelNames).toEqual ['Task']
+
+          expect(plugin.showOwnerFilter).toBe true
+          expect(plugin.ownerFilterControlConfig.stateful).toBe true
+          expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('taskboard-owner-filter')
+
+    describe 'field picker', ->
+      it 'should use rallygridboard field picker', ->
+        @createApp().then =>
+          plugin = @getPlugin('rallygridboardfieldpicker')
+          expect(plugin).toBeDefined()
+          expect(plugin.headerPosition).toBe 'left'
+          expect(plugin.modelNames).toEqual ['Task']
+          expect(plugin.boardFieldDefaults).toEqual ['Estimate', 'ToDo']
+          expect(plugin.alwaysSelectedValues).toEqual ['FormattedID', 'Name', 'Owner']
+
+  describe '#hideAcceptedWork', ->
+    it 'has the correct default settings', ->
+      @createApp().then =>
+        expect(@app.getSetting('hideAcceptedWork')).toBe false
+
+    it 'does not include an accepted work filter when setting off', ->
+      @createApp(hideAcceptedWork: false).then =>
+        expect(@artifactStub).not.toBeWsapiRequestWith
+          filters: [
+            { property: 'ScheduleState', operator: '<', value: 'Accepted' }
+          ]
+        expect(@taskStub).not.toBeWsapiRequestWith
+          filters: [
+            { property: 'WorkProduct.ScheduleState', operator: '<', value: 'Accepted' }
+          ]
+
+    it 'does include an accepted work filter when setting on', ->
+      @createApp(hideAcceptedWork: true).then =>
+        expect(@artifactStub).toBeWsapiRequestWith
+          filters: [
+            { property: 'ScheduleState', operator: '<', value: 'Accepted' }
+          ]
+        expect(@taskStub).toBeWsapiRequestWith
+          filters: [
+            { property: 'WorkProduct.ScheduleState', operator: '<', value: 'Accepted' }
+          ]
+
+  describe 'board config', ->
+    it 'sets up columns by state', ->
+      @createApp().then =>
+        board = @app.down 'rallycardboard'
+        expect(board.attribute).toBe 'State'
+        expect(_.pluck board.getColumns(), 'value').toEqual @taskStateValues
+
+    it 'adds rows for each work scheduled workproduct', ->
+      @createApp().then =>
+        board = @app.down 'rallycardboard'
+        expect(_.pluck board.rowConfig.values, '_ref').toEqual _.pluck @workProducts, '_ref'
+        expect(@artifactStub).toBeWsapiRequestWith
+          sorters: [{property: Rally.data.Ranker.RANK_FIELDS.DND, direction: 'ASC'}]
+
+    it 'includes explicit sorters', ->
+      @createApp().then =>
+        board = @app.down 'rallycardboard'
+        sorters = board.rowConfig.sorters
+        expect(sorters.length).toBe 2
+        expect(sorters[0].property).toBe Rally.data.Ranker.RANK_FIELDS.DND
+        expect(sorters[0].direction).toBe 'ASC'
+        expect(sorters[1].property).toBe Rally.data.Ranker.RANK_FIELDS.TASK
+        expect(sorters[1].direction).toBe 'ASC'
+
+  describe 'timebox scoping', ->
+    it 'includes the timebox scope filter', ->
+      @createApp().then =>
+        expect(@artifactStub).toBeWsapiRequestWith
+          filters: [@app.getContext().getTimeboxScope().getQueryFilter()]
+        expect(@taskStub).toBeWsapiRequestWith
+          filters: [@app.getContext().getTimeboxScope().getQueryFilter()]
+
+    it 'destroys the old board when the timebox scope changes', ->
+      @createApp().then =>
+        iteration = @mom.getRecord 'iteration'
+        scope = Ext.create 'Rally.app.TimeboxScope',
+          record: iteration
+        destroySpy = @spy @gridboard, 'destroy'
+        @app.onTimeboxScopeChange scope
+        @waitForCallback destroySpy
+
+    it 'adds a new board when the timebox scope changes', ->
+      @createApp().then =>
+        @artifactStub.reset()
+        @taskStub.reset()
+        iteration = @mom.getRecord 'iteration'
+        scope = Ext.create 'Rally.app.TimeboxScope',
+          record: iteration
+        @app.onTimeboxScopeChange scope
+        @waitForLoad().then =>
+          expect(@artifactStub).toBeWsapiRequestWith filters: [scope.getQueryFilter()]
+          expect(@taskStub).toBeWsapiRequestWith filters: [scope.getQueryFilter()]
+
+    it 'removes the board when the timebox scope changes to unscheduled', ->
+      @createApp().then =>
+        scope = Ext.create 'Rally.app.TimeboxScope',
+          type: 'iteration'
+        @app.onTimeboxScopeChange scope
+        expect(@app.down('rallygridboard')).toBeNull()
+
+  describe 'gridboard config', ->
+    it 'should disable store auto smarts around rank fields parameters', ->
+      @createApp().then =>
+        expect(@gridboard.storeConfig.enableRankFieldParameterAutoMapping).toBe false
+
+    it 'should pass context', ->
+      @createApp().then =>
+        expect(@gridboard.getContext()).toBe @app.getContext()
+
+    it 'should pass modelNames', ->
+      @createApp().then =>
+        expect(@gridboard.modelNames).toEqual ['Task']
+
+  describe '#addNew', ->
+    it 'adds a workproduct field with the correct data', ->
+    it 'specifies correct record types', ->
+    it 'shows the work product field when task is chosen', ->
+    it 'hides the work product field when something other than task is chosen', ->
+    it 'adds a row to the board when a non task is created', ->
+    it 'adds a task to the board when a task is created', ->
+    it 'adds an entry to the work product field when a non task is created', ->
+
+  describe 'editing plan estimate', ->
+    it 'sets todo if not set', ->
+    it 'does not set todo if already set', ->
