@@ -20,11 +20,10 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 
 		createApp: (config={}, contextValues={}) ->
 			context = @getContext()
-
 			@container = Ext.create 'Ext.Container',
 				renderTo:'testDiv'
 
-			@app = Ext.create 'Rally.apps.chartbuilder.ChartPanelApp',
+			@app = Ext.create 'Rally.apps.chartbuilder.ChartPanelApp', Ext.merge
 				appContainer:
 					slug: config.slug || 'theslug'
 				context: context
@@ -33,6 +32,10 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 			@app.getUrlSearchString = -> contextValues.searchString || ''
 
 			@container.add(@app)
+			@app
+
+		createAppAndWait: (config={}, contextValues={}) ->
+			@createApp(config,contextValues)
 			@once condition: => @app.down '#mrcontainer'
 
 		getIFrame : (app) ->
@@ -41,53 +44,81 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 
 
 	it 'uses default almchart.html as the iframe source', ->
-		@createApp().then (app) =>
+		@createAppAndWait().then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.src).toContain "/analytics/chart/latest/almchart.min.html"
 
 	it 'sets up the almbridge on the iframe', ->
-		@createApp().then (app) =>
+		@createAppAndWait().then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.almBridge).toBeDefined()
 
 	it 'returns the slug value from getChartType', ->
-		@createApp().then (app) =>
+		@createAppAndWait().then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.almBridge.getChartType()).toBe 'theslug'
 
 	it 'ignores any path information in the slug', ->
-		@createApp({ slug:'xxx/yyy/theslug' }).then (app) =>
+		@createAppAndWait({ slug:'xxx/yyy/theslug' }).then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.almBridge.getChartType()).toBe 'theslug'
 
 
 	it 'returns the appropriate workspace from the ALM Bridge', ->
-		@createApp().then (app) =>
+		@createAppAndWait().then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.almBridge.getWorkspace().ObjectID).toBe Rally.environment.getContext().getWorkspace().ObjectID
 
 	it 'returns the appropriate project from the ALM Bridge', ->
-		@createApp().then (app) =>
+		@createAppAndWait().then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.almBridge.getProject().ObjectID).toBe Rally.environment.getContext().getProject().ObjectID
 
 	it 'changes shim location if packtag=false', ->
-		@createApp({}, { searchString : "?packtag=false" }).then (app) =>
+		@createAppAndWait({}, { searchString : "?packtag=false" }).then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.src).toContain "/analytics/chart/latest/almchart.html"
 
 	it 'keeps minified shim location if packtag != false', ->
-		@createApp({}, { searchString : "?packtag=true" }).then (app) =>
+		@createAppAndWait({}, { searchString : "?packtag=true" }).then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.src).toContain "/analytics/chart/latest/almchart.min.html"
 
 	it 'returns latest if chart version is not specified', ->
-		@createApp({}, { searchString : "" }).then (app) =>
+		@createAppAndWait({}, { searchString : "" }).then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.src).toContain "/analytics/chart/latest/almchart.min.html"
 
 	it 'uses the appropriate version specified', ->
-		@createApp({}, { searchString : "?chartVersion=xxx" }).then (app) =>
+		@createAppAndWait({}, { searchString : "?chartVersion=xxx" }).then (app) =>
 			iframe = @getIFrame(app)
 			expect(iframe.src).toContain "/analytics/chart/xxx/almchart.min.html"
+
+	describe 'help link', ->
+		it 'should register a help topic when help is supplied',->
+			topic = Rally.util.Help.findTopic({resource:'x'})
+			expect(topic).not.toBeDefined()
+
+			app = @createApp({help:'x'})
+			topic = Rally.util.Help.findTopic({resource:'x'})
+			expect(topic).toBeDefined()
+
+		it 'should add a link to the header when theres help',->
+			app = @createApp({help:'x'})
+			icon = app.down("helpicon")
+			expect(icon).toBeDefined()
+
+		it 'should not add a link to the header when theres no help',->
+			app = @createApp()
+			icon = app.down("helpicon")
+			expect(icon).toBeNull()
+
+	describe '_hasHelp',->
+		it 'should return true if config has help',->
+			app = @createApp({help:'x'})
+			expect(app._hasHelp()).toBe true
+
+		it 'should return false if config does not have a help value',->
+			app = @createApp({})
+			expect(app._hasHelp()).toBe false
 
