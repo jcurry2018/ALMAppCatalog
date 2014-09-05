@@ -8,6 +8,8 @@
         extend: 'Ext.Component',
         alias: 'widget.bannerwidget',
 
+        _isLayoutRoot: true,
+
         config: {
             expanded: true
         },
