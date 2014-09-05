@@ -33,7 +33,7 @@
 
         config: {
             context: null,
-            expanded: false
+            expanded: true
         },
 
         items: [
@@ -46,11 +46,7 @@
             {xtype: 'statsbannercollapseexpand', flex: 0}
         ],
 
-        initComponent: function () {
-            this.recordLoadBegin({
-                description: 'initializing'
-            });
-
+        initComponent: function() {
             this.addEvents(
                 /**
                  * @event
@@ -63,8 +59,6 @@
                  */
                 'collapse'
             );
-
-            this._readyCount = 0;
 
             this.stateId = this.context.getScopedStateId('stats-banner');
 
@@ -98,7 +92,7 @@
             this._update();
         },
 
-        onRender: function () {
+        onRender: function() {
             if (this.expanded) {
                 this.removeCls('collapsed');
             } else {
@@ -115,25 +109,23 @@
             this._setExpandedOnChildItems();
         },
 
-        getState: function () {
+        getState: function(){
             return {
                 expanded: this.expanded
             };
         },
 
-        _setExpandedOnChildItems: function () {
+        _setExpandedOnChildItems: function() {
             _.each(this.items.getRange(), function(item) {
                 item.setExpanded(this.expanded);
             }, this);
         },
 
-        _getItemDefaults: function () {
+        _getItemDefaults: function() {
             return {
                 flex: 1,
                 context: this.context,
                 store: this.store,
-                expanded: this.expanded,
-                parentComponent: this,
                 listeners: {
                     ready: this._onReady,
                     scope: this
@@ -141,34 +133,33 @@
             };
         },
 
-        _onReady: function () {
-            this._readyCount = this._readyCount + 1;
-            if (this._readyCount === this.items.getCount()) {
+        _onReady: function() {
+            this._readyCount = (this._readyCount || 0) + 1;
+            if(this._readyCount === this.items.getCount()) {
                 this.recordComponentReady();
-                this._readyCount = 0;
-                this._recordLoadEnd();
+                delete this._readyCount;
             }
         },
 
-        _onCollapse: function () {
+        _onCollapse: function() {
             this.addCls('collapsed');
             this.setExpanded(false);
 
             _.invoke(this.items.getRange(), 'collapse');
         },
 
-        _onExpand: function () {
+        _onExpand: function() {
             this.removeCls('collapsed');
             this.setExpanded(true);
 
             _.invoke(this.items.getRange(), 'expand');
         },
 
-        _hasTimebox: function () {
+        _hasTimebox: function() {
             return !!this.context.getTimeboxScope().getRecord();
         },
 
-        _configureItems: function (items) {
+        _configureItems: function(items) {
             var defaults = this._getItemDefaults();
 
             return _.map(items, function(item) {
@@ -176,15 +167,9 @@
             });
         },
 
-        _recordLoadEnd: function () {
-            this.recordLoadEnd();
-        },
-
         _update: function () {
             if(this._hasTimebox()) {
                 this.store.load();
-            } else {
-                this._recordLoadEnd();
             }
         }
     });

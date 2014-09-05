@@ -85,27 +85,15 @@ describe 'Rally.apps.iterationtrackingboard.StatsBanner', ->
         expect(loadSpy).not.toHaveBeenCalled()
 
   describe 'persisting state', ->
-    it 'should initialize to collapsed when no state is stored', ->
+    it 'should initialize to expanded when no state is stored', ->
       @createBanner()
       @banner.applyState({})
-      expect(@banner.expanded).toBeFalsy()
-
-    it 'should set item\'s expanded states to the banner\'s default expanded state', ->
-      @createBanner()
-      @banner.applyState({})
-      _.each @banner.items.getRange(), (item) ->
-          expect(item.expanded).toBeFalsy()
-
-    it 'should apply state when stored as expanded', ->
-      @createBanner()
-      @banner.applyState(expanded: true)
       expect(@banner.expanded).toBeTruthy()
 
-    it 'should apply expanded state to items', ->
+    it 'should apply state when stored as collapsed', ->
       @createBanner()
-      @banner.applyState(expanded: true)
-      _.each @banner.items.getRange(), (item) ->
-          expect(item.expanded).toBeTruthy()
+      @banner.applyState(expanded: false)
+      expect(@banner.expanded).toBeFalsy()
 
     it 'should apply state when stored as expanded', ->
       @createBanner()

@@ -8,9 +8,6 @@
         extend: 'Rally.apps.iterationtrackingboard.statsbanner.BannerWidget',
         alias:'widget.statsbannercollapseexpand',
         requires: [],
-        mixins: [
-            'Rally.clientmetrics.ClientMetricsRecordable'
-        ],
 
         tpl: [
             '<div class="expanded-widget">',
@@ -27,32 +24,24 @@
 
         afterRender: function() {
             this.callParent(arguments);
-            this.parentComponent.getEl().on('click', this._onCollapseExpandClick, this);
+            this.getEl().on('click', this._onCollapseExpandClick, this);
             this.fireEvent('ready', this);
         },
 
-        _onCollapseExpandClick: function (event, target) {
+        _onCollapseExpandClick: function() {
             if (this.expanded) {
-                if (target.getAttribute('class').indexOf('toggle-icon') > -1 || Ext.get(target).down('div .toggle-icon')) {
-                    this.fireEvent('collapse', this);
-                }
+                this.fireEvent('collapse', this);
             } else {
                 this.fireEvent('expand', this);
             }
         },
 
         expand: function() {
-            this.recordAction({
-                description: 'Expand statsbanner'
-            });
             this.callParent(arguments);
             this.doComponentLayout();
         },
 
         collapse: function() {
-            this.recordAction({
-                description: 'Collapse statsbanner'
-            });
             this.callParent(arguments);
             this.doComponentLayout();
         }

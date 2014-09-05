@@ -45,7 +45,7 @@
             '</div>'
         ],
 
-        initComponent: function () {
+        initComponent: function(){
             this.mon(this.store, 'datachanged', this.onDataChanged, this);
             this.callParent(arguments);
             var boundClickHandler = Ext.bind(this._onChartClick, this);
@@ -90,12 +90,6 @@
             }, this);
 
             this._pendingChartReadies = this.carouselItems.length;
-
-            if (!this.expanded) {
-                this.fireEvent('ready', this);
-            } else {
-                this.onDataChanged();
-            }
         },
 
         expand: function() {
@@ -161,20 +155,13 @@
         onDataChanged: function() {
             this._cleanupCarousel();
 
-            var addCarousel = _.bind(function() {
+            if(this.rendered) {
                 if (this.getContext().getTimeboxScope().getRecord()) {
                     this.update();
 
                     this.createCarousel();
                 } else {
                     this._addPlaceholder();
-                }
-            }, this);
-            if (this.expanded) {
-                if (this.rendered) {
-                    addCarousel();
-                } else {
-                    this.on('afterrender', addCarousel);
                 }
             }
         },
