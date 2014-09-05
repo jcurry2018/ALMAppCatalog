@@ -23,7 +23,7 @@
                     };
                 }));
             }else{
-                config.pageSize = 25;
+                config.pageSize = 10;
             }
 
             var store = Ext.create('Rally.data.wsapi.Store', config);
