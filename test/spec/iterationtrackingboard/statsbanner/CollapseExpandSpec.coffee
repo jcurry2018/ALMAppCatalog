@@ -19,8 +19,8 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.CollapseExpand', ->
     @createPane()
 
     expect(@pane.expanded).toBeTruthy()
-    expect(@pane.getEl().down('.icon-chevron-up').isVisible()).toBe true
-    expect(@pane.getEl().down('.icon-chevron-down').isVisible()).toBe false
+    expect(@pane.getEl().down('.icon-collapse-row').isVisible()).toBe true
+    expect(@pane.getEl().down('.icon-expand-row').isVisible()).toBe false
 
   it 'should show collapse icon when toggled while collapsed', ->
     @createPane expanded: false
