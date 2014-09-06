@@ -3,7 +3,10 @@
 
     Ext.define('Rally.apps.milestones.MilestonesApp', {
         extend: 'Rally.app.App',
-        requires: [],
+        requires: [
+            'Rally.ui.DateField',
+            'Rally.ui.combobox.MilestoneProjectComboBox'
+        ],
         cls: 'milestones-app',
 
         launch: function() {
