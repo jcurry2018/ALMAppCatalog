@@ -21,9 +21,6 @@
             'Rally.Messageable',
             'Rally.clientmetrics.ClientMetricsRecordable'
         ],
-
-        _isLayoutRoot: true,
-
         cls: 'stats-banner',
         layout: 'hbox',
         border: 0,
