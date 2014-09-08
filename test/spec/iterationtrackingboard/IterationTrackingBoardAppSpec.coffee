@@ -94,6 +94,18 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     @app?.destroy()
     Rally.ui.gridboard.GridBoard.prototype.toggleState = @defaultToggleState
 
+  it 'should use auto layout by default', ->
+    @createApp(
+      optimizeLayouts: false
+    ).then =>
+      expect(@app.layout.$className).toBe 'Ext.layout.container.Auto'
+
+  it 'should use anchor layout when the optimizeLayouts flag is passed into the config', ->
+    @createApp(
+      optimizeLayouts: true
+    ).then =>
+      expect(@app.layout.$className).toBe 'Ext.layout.container.Anchor'
+
   it 'resets view on scope change', ->
     @createApp().then =>
       removeSpy = @spy(@app, 'remove')
