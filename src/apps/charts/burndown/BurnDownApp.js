@@ -36,7 +36,7 @@
 
         scopeObject: undefined,
 
-        customScheduleStates: ['Accepted'],	// a reasonable default
+        customScheduleStates: null, // defaults hide problems
 
         config: {
             defaultSettings: {
@@ -71,7 +71,7 @@
                     return;
                 }
             }
-
+            this.customScheduleStates = null;
             this.chartComponentConfig = Ext.create('Rally.apps.charts.burndown.BurnDownChart', this).defaultChartComponentConfig();
 
             Ext.create('Rally.apps.charts.IntegrationHeaders',this).applyTo(this.chartComponentConfig.storeConfig);
@@ -195,7 +195,6 @@
 
             this._addDateBounds();
             this._addAggregationTypeToCalculator();
-            this._updateCompletedScheduleStates();
             this._loadTimeboxes();
         },
 
@@ -203,7 +202,11 @@
             if (this._getScopeType() === 'release') {
                 this._fetchIterations();
             } else {
-                this._addChart();
+                if ( this.customScheduleStates === null) { // wait until we get the schedule states
+                    this.deferredAddChart = this._addChart;
+                } else {
+                    this._addChart();
+                }
             }
         },
 
@@ -229,11 +232,19 @@
 
         },
 
+        _addChartWithIterationLines: function () {
+            this._addChart();
+            this.down('rallychart').on('snapshotsAggregated', this._addIterationLines, this);
+        },
+
         _onIterationsLoaded: function (store) {
             this.iterations = store.getItems();
 
-            this._addChart();
-            this.down('rallychart').on('snapshotsAggregated', this._addIterationLines, this);
+            if ( this.customScheduleStates === null) {
+                this.deferredAddChart = this._addChartWithIterationLines;
+            } else {
+                this._addChartWithIterationLines();
+            }
         },
 
         _addDateBounds: function () {
@@ -433,6 +444,7 @@
         },
 
         _addChart: function () {
+            this._updateCompletedScheduleStates();
             this._updateChartConfigDateFormat();
             this._updateChartConfigWorkdays();
             var chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
@@ -722,6 +734,9 @@
 
                         if(values.length > 0) {
                             this.customScheduleStates = values;
+                            if (this.deferredAddChart) {
+                                this.deferredAddChart.call(this);
+                            }
                         }
                     },
                     scope: this

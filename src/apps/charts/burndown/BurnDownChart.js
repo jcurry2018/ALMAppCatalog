@@ -31,7 +31,7 @@
                 calculatorType: "Rally.apps.charts.burndown.BurnDownCalculator",
                 calculatorConfig: {
                     timeZone: "GMT",
-                    completedScheduleStateNames: ["Accepted", "Released"],
+                    completedScheduleStateNames: null, // defaults hide problems
                     enableProjections: true
 
                     //chartAggregationType: ''
