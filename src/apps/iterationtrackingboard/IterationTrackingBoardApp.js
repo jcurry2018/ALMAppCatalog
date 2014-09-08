@@ -67,6 +67,13 @@
 
         modelNames: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
 
+        constructor: function(config) {
+            if (config) {
+                config.layout = config.optimizeLayouts ? 'anchor' : 'auto';
+            }
+            this.callParent(arguments);
+        },
+
         onScopeChange: function() {
             if(!this.rendered) {
                 this.on('afterrender', this.onScopeChange, this, {single: true});
@@ -199,6 +206,7 @@
                 modelNames: this.modelNames,
                 cardBoardConfig: this._getBoardConfig(),
                 gridConfig: this._getGridConfig(gridStore),
+                layout: this.getContext().isFeatureEnabled('ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE') ? 'anchor' : 'auto',
                 storeConfig: {
                     useShallowFetch: false,
                     filters: [context.getTimeboxScope().getQueryFilter()]
