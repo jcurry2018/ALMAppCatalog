@@ -26,6 +26,10 @@
 			}
 		],
 
+		showSettings: function() {
+			this.owner.showSettings();
+		},
+
 		getSettingsFields: function () {
 			var fields = this.callParent(arguments) || [];
 			// get the settings fields that the chart requires

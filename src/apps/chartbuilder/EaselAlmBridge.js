@@ -41,6 +41,10 @@
 			};
 		},
 
+		showSettings: function() {
+			this.app.showSettings();
+		},
+
 		lbapiBaseUrl: function() {
 			return Rally.environment.getServer().getLookbackUrl();
 		},
