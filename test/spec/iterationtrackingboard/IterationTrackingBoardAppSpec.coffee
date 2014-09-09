@@ -258,6 +258,11 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @toggleToGrid()
         expect(@app.down('rallytreegrid').getStore().parentTypes).toContain 'testset'
 
+    it 'should include dataContext', ->
+      buildSpy = @spy(Rally.data.wsapi.TreeStoreBuilder::, 'build')
+      @createApp().then (app) ->
+        expect(buildSpy.getCall(0).args[0].context).toEqual app.getContext().getDataContext()
+
   describe 'toggle grid/board cls to ensure overflow-y gets set for fixed header plugin', ->
     it 'should add board-toggled class to app on initial load in board view', ->
       @stub(Rally.ui.gridboard.GridBoard::, 'toggleState', 'board')

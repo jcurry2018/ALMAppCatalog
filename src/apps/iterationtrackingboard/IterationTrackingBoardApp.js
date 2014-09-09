@@ -154,6 +154,7 @@
         _buildGridStore: function() {
             var context = this.getContext(),
                 config = {
+                    context: context.getDataContext(),
                     models: this.modelNames,
                     autoLoad: false,
                     remoteSort: true,
