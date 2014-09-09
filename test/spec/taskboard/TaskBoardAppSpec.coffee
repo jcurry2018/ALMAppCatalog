@@ -18,8 +18,7 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
         context: Ext.create 'Rally.app.Context',
           initialValues: Ext.merge
             project:
-              _ref: '/project/1'
-              Name: 'Project 1'
+              _ref: Rally.environment.getContext().getProjectRef()
             workspace:
               WorkspaceConfiguration:
                 DragDropRankingEnabled: true
@@ -169,13 +168,55 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
         expect(@gridboard.modelNames).toEqual ['Task']
 
   describe '#addNew', ->
+    beforeEach ->
+      @createApp().then =>
+        @addNew = @app.down 'rallyaddnew'
+        @addNewHelper = new Helpers.AddNewHelper this, '#testDiv'
+        @addNewHelper.clickAddNew()
+
     it 'adds a workproduct field with the correct data', ->
+      workProductCombo = @addNew.down '#workProduct'
+      expect(workProductCombo).not.toBeNull()
+      expect(_.invoke workProductCombo.store.getRange(), 'get', '_ref').toEqual _.pluck @workProducts, '_ref'
+
     it 'specifies correct record types', ->
+      expect(@addNew.recordTypes).toEqual ['Task', 'Defect', 'Defect Suite', 'Test Set', 'User Story']
+
     it 'shows the work product field when task is chosen', ->
+      workProductCombo = @addNew.down '#workProduct'
+      typeCombo = @addNew.down '#type'
+      typeCombo.setValue 'Defect'
+      typeCombo.setValue 'Task'
+      expect(workProductCombo.isVisible()).toBe true
+
     it 'hides the work product field when something other than task is chosen', ->
+      workProductCombo = @addNew.down '#workProduct'
+      typeCombo = @addNew.down '#type'
+      typeCombo.setValue 'Defect'
+      expect(workProductCombo.isVisible()).toBe false
+
     it 'adds a row to the board when a non task is created', ->
-    it 'adds a task to the board when a task is created', ->
+      newStory = ObjectID: 555, _ref: '/hierarchicalrequirement/555'
+      @ajax.whenCreating('userstory').respondWith newStory
+      typeCombo = @addNew.down '#type'
+      typeCombo.setValue 'User Story'
+      @addNewHelper.sendKeysForNameField().then =>
+        @addNewHelper.clickAdd().then =>
+          rows = @gridboard.getGridOrBoard().getRows()
+          expect(rows.length).toBe @workProducts.length + 1
+          expect(_.last(rows).getRowValue()).toBe newStory._ref
+
     it 'adds an entry to the work product field when a non task is created', ->
+      newStory = ObjectID: 555, _ref: '/hierarchicalrequirement/555'
+      @ajax.whenCreating('userstory').respondWith newStory
+      typeCombo = @addNew.down '#type'
+      typeCombo.setValue 'User Story'
+      @addNewHelper.sendKeysForNameField().then =>
+        @addNewHelper.clickAdd().then =>
+          workProductCombo = @addNew.down '#workProduct'
+          records = workProductCombo.store.getRange()
+          expect(records.length).toBe @workProducts.length + 1
+          expect(_.last(records).get('_ref')).toBe newStory._ref
 
   describe 'editing plan estimate', ->
     it 'sets todo if not set', ->

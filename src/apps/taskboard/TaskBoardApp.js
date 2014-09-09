@@ -160,12 +160,13 @@
                     data: _.invoke(rowRecords, 'getData'),
                     fields: ['_ref', 'FormattedID']
                 }),
-                emptyText: 'Select Work Product...',
-                defaultSelectionPosition: 'none',
+                emptyText: 'Work Product',
+                defaultSelectionPosition: null,
                 allowBlank: false,
                 validateOnChange: false,
                 validateOnBlur: false,
-                name: 'WorkProduct'
+                name: 'WorkProduct',
+                itemId: 'workProduct'
             });
             return this._workProductCombo;
         },
