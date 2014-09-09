@@ -189,24 +189,16 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     ).then =>
       expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['HelloKitty']
 
-  it 'should have the rowSettings field if swimlane toggle is enabled', ->
-    @stubFeatureToggle ['F5684_KANBAN_SWIM_LANES']
+  it 'should have the rowSettings field', ->
     @createApp().then =>
       expect(_.find(@app.getSettingsFields(), {xtype: 'rowsettingsfield'})).toBeDefined()
 
-  it 'adds the rowConfig property to the boardConfig if swimlanes are enabled', ->
-    @stubFeatureToggle ['F5684_KANBAN_SWIM_LANES']
+  it 'adds the rowConfig property to the boardConfig', ->
     @createApp(
       settings:
         showRows: true
     ).then =>
       expect(@app.gridboard.getGridOrBoard().config.rowConfig).toBeDefined()
-
-  it 'does not add the rowConfig property to the boardConfig if swimlanes are disabled', ->
-
-    @stubFeatureToggle ['F5684_KANBAN_SWIM_LANES']
-    @createApp().then =>
-      expect(@app.gridboard.getGridOrBoard().config.rowConfig).toBe null
 
   it 'should show the field picker in board mode', ->
     @createApp().then =>

@@ -76,8 +76,7 @@
         getSettingsFields: function() {
             return Rally.apps.kanban.Settings.getFields({
                 shouldShowColumnLevelFieldPicker: this._shouldShowColumnLevelFieldPicker(),
-                defaultCardFields: this.getSetting('cardFields'),
-                shouldShowRowSettings: this._shouldShowSwimLanes()
+                defaultCardFields: this.getSetting('cardFields')
             });
         },
 
@@ -90,10 +89,6 @@
             this.callParent(arguments);
             this.gridboard.destroy();
             this.launch();
-        },
-
-        _shouldShowSwimLanes: function() {
-            return this.getContext().isFeatureEnabled('F5684_KANBAN_SWIM_LANES');
         },
 
         _shouldShowColumnLevelFieldPicker: function() {
@@ -262,7 +257,7 @@
                     context: this.getContext().getDataContext()
                 }
             };
-            if (this._shouldShowSwimLanes() && this.getSetting('showRows')) {
+            if (this.getSetting('showRows')) {
                 Ext.merge(config, {
                     rowConfig: {
                         field: this.getSetting('rowsField'),

@@ -315,10 +315,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(storeConfig.filters[0].toString()).toBe query
       expect(storeConfig.filters[1].toString()).toBe timeboxScope.getQueryFilter().toString()
 
-  describe 'Swim Lanes is toggled ON', ->
-    beforeEach ->
-      @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('F5684_KANBAN_SWIM_LANES').returns(true)
-
+  describe 'Swim Lanes', ->
     it 'should include rows configuration with rowsField when showRows setting is true', ->
       @createApp(showRows: true, rowsField: 'Owner').then =>
         expect(@cardboard.rowConfig.field).toBe 'Owner'
@@ -327,28 +324,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
     it 'should not include rows configuration when showRows setting is false', ->
       @createApp(showRows: false, rowsField: 'Owner').then =>
         expect(@cardboard.rowConfig).toBeNull()
-
-    it 'passes shouldShowRowSettings correctly', ->
-      @createApp().then =>
-        getFieldsSpy = @spy Rally.apps.kanban.Settings, 'getFields'
-        @app.getSettingsFields()
-        expect(getFieldsSpy.callCount).toBe 1
-        expect(getFieldsSpy.getCall(0).args[0].shouldShowRowSettings).toBe true
-
-  describe 'Swim Lanes is toggled OFF', ->
-    beforeEach ->
-      @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('F5684_KANBAN_SWIM_LANES').returns(false)
-
-    it 'should not include rows configuration', ->
-      @createApp(showRows: true, rowsField: 'Owner').then =>
-        expect(@cardboard.rowConfig).toBeNull()
-
-    it 'passes shouldShowRowSettings correctly', ->
-      @createApp().then =>
-        getFieldsSpy = @spy Rally.apps.kanban.Settings, 'getFields'
-        @app.getSettingsFields()
-        expect(getFieldsSpy.callCount).toBe 1
-        expect(getFieldsSpy.getCall(0).args[0].shouldShowRowSettings).toBe false
 
   describe 'plugins', ->
 

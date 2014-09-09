@@ -61,25 +61,23 @@
                 }
             ];
 
-            if (config.shouldShowRowSettings) {
-                items.push({
-                    name: 'groupHorizontallyByField',
-                    xtype: 'rowsettingsfield',
-                    fieldLabel: 'Swimlanes',
-                    margin: '10 0 0 0',
-                    mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
-                    readyEvent: 'ready',
-                    includeCustomFields: true,
-                    includeConstrainedNonCustomFields: false,
-                    includeObjectFields: false,
-                    explicitFields: [
-                        {name: 'Blocked', value: 'Blocked'},
-                        {name: 'Owner', value: 'Owner'},
-                        {name: 'Sizing', value: 'PlanEstimate'},
-                        {name: 'Expedite', value: 'Expedite'}
-                   ]
-                });
-            }
+            items.push({
+                name: 'groupHorizontallyByField',
+                xtype: 'rowsettingsfield',
+                fieldLabel: 'Swimlanes',
+                margin: '10 0 0 0',
+                mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
+                readyEvent: 'ready',
+                includeCustomFields: true,
+                includeConstrainedNonCustomFields: false,
+                includeObjectFields: false,
+                explicitFields: [
+                    {name: 'Blocked', value: 'Blocked'},
+                    {name: 'Owner', value: 'Owner'},
+                    {name: 'Sizing', value: 'PlanEstimate'},
+                    {name: 'Expedite', value: 'Expedite'}
+               ]
+            });
 
             items.push(
                 {

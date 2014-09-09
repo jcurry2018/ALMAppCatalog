@@ -115,25 +115,23 @@
                 }
             });
 
-            if (this._shouldShowSwimLanes()) {
-                fields.push({
-                    name: 'groupHorizontallyByField',
-                    xtype: 'rowsettingsfield',
-                    fieldLabel: 'Swimlanes',
-                    margin: '10 0 0 0',
-                    mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
-                    readyEvent: 'ready',
-                    includeCustomFields: false,
-                    includeConstrainedNonCustomFields: false,
-                    includeObjectFields: false,
-                    explicitFields: [
-                        {name: 'Blocked', value: 'Blocked'},
-                        {name: 'Owner', value: 'Owner'},
-                        {name: 'Sizing', value: 'PlanEstimate'},
-                        {name: 'Expedite', value: 'Expedite'}
-                    ]
-                });
-            }
+            fields.push({
+                name: 'groupHorizontallyByField',
+                xtype: 'rowsettingsfield',
+                fieldLabel: 'Swimlanes',
+                margin: '10 0 0 0',
+                mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
+                readyEvent: 'ready',
+                includeCustomFields: false,
+                includeConstrainedNonCustomFields: false,
+                includeObjectFields: false,
+                explicitFields: [
+                    {name: 'Blocked', value: 'Blocked'},
+                    {name: 'Owner', value: 'Owner'},
+                    {name: 'Sizing', value: 'PlanEstimate'},
+                    {name: 'Expedite', value: 'Expedite'}
+                ]
+            });
 
             return fields;
         },
@@ -164,10 +162,6 @@
                 };
 
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
-        },
-
-        _shouldShowSwimLanes: function() {
-            return this.getContext().isFeatureEnabled('F5684_KANBAN_SWIM_LANES');
         },
 
         _shouldShowStatsBanner: function() {
@@ -246,7 +240,7 @@
                 }
             };
 
-            if (this._shouldShowSwimLanes() && this.getSetting('showRows') && this.getSetting('rowsField')) {
+            if (this.getSetting('showRows') && this.getSetting('rowsField')) {
                 Ext.merge(config, {
                     rowConfig: {
                         field: this.getSetting('rowsField'),
