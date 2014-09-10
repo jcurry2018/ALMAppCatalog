@@ -26,6 +26,17 @@ describe 'Rally.apps.iterationtrackingboard.StatsBanner', ->
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'statsbanner'
 
+  describe 'constructor', ->
+    it 'should set _isRootLayout to true when optimizeLayouts is passed', ->
+      @createBanner(
+        optimizeLayouts: true
+      )
+      expect(@banner.isLayoutRoot()).toBe true
+
+    it 'should default to isRootLayout to false', ->
+      @createBanner()
+      expect(@banner.isLayoutRoot()).toBe false
+
   describe 'initComponent', ->
 
     describe 'item defaults', ->
