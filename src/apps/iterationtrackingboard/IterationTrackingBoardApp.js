@@ -24,8 +24,6 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
-            'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
             'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
             'Rally.ui.grid.plugin.TreeGridChildPager',
@@ -164,10 +162,6 @@
                     childPageSizeEnabled: context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')
                 };
 
-            if(!context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP')) {
-                config.filters = [context.getTimeboxScope().getQueryFilter()];
-            }
-
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
         },
 
@@ -283,39 +277,22 @@
             }
 
             if (context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
-                if (context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP')) {
-                    plugins.push({
-                        ptype: 'rallygridboardcustomfiltercontrol',
-                        filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
-                        filterControlConfig: {
-                            blackListFields: ['Iteration', 'PortfolioItem'],
-                            margin: '3 9 3 30',
-                            modelNames: this.modelNames,
-                            stateful: true,
-                            stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
-                        },
-                        showOwnerFilter: true,
-                        ownerFilterControlConfig: {
-                            stateful: true,
-                            stateId: context.getScopedStateId('iteration-tracking-owner-filter')
-                        }
-                    });
-                } else {
-                    plugins.push({
-                        ptype: 'rallygridboardfiltercontrol',
-                        filterControlConfig: {
-                            cls: 'small gridboard-filter-control',
-                            context: context,
-                            items: [
-                                this._createOwnerFilterItem(context),
-                                this._createTagFilterItem(context),
-                                this._createModelFilterItem(context)
-                            ],
-                            stateful: true,
-                            stateId: context.getScopedStateId('iteration-tracking-filter-button')
-                        }
-                    });
-                }
+                plugins.push({
+                    ptype: 'rallygridboardcustomfiltercontrol',
+                    filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
+                    filterControlConfig: {
+                        blackListFields: ['Iteration', 'PortfolioItem'],
+                        margin: '3 9 3 30',
+                        modelNames: this.modelNames,
+                        stateful: true,
+                        stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
+                    },
+                    showOwnerFilter: true,
+                    ownerFilterControlConfig: {
+                        stateful: true,
+                        stateId: context.getScopedStateId('iteration-tracking-owner-filter')
+                    }
+                });
             }
 
             plugins.push('rallygridboardtoggleable');

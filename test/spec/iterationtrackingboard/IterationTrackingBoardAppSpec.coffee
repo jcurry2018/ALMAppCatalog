@@ -337,7 +337,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @waitForCallback(setHeightSpy).then =>
           expect(gridBoard.getHeight()).toBe currentHeight + 10
 
-  describe 'custom filter popover toggle', ->
+  describe 'custom filter popover', ->
     beforeEach ->
       @featureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
       @featureEnabledStub.withArgs('BETA_TRACKING_EXPERIENCE').returns true
@@ -348,43 +348,18 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         expect(gridBoard.storeConfig.filters.length).toBe 1
         expect(gridBoard.storeConfig.filters[0].toString()).toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
-    describe 'USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP is false', ->
-      beforeEach ->
-        @featureEnabledStub.withArgs('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP').returns(false)
+    it 'should use rallygridboard custom filter control', ->
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardcustomfiltercontrol'
+        expect(plugin).toBeDefined()
+        expect(plugin.filterControlConfig.stateful).toBe true
+        expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-custom-filter-button')
 
-      it 'should set useFilterCollection to true', ->
-        @createApp().then =>
-          expect(@app.gridboard.useFilterCollection).toBeTruthy()
-
-      it 'should use rallygridboard filter control', ->
-        @createApp().then =>
-          gridBoard = @app.down 'rallygridboard'
-          plugin = _.find gridBoard.plugins, (plugin) ->
-            plugin.ptype == 'rallygridboardfiltercontrol'
-          expect(plugin).toBeDefined()
-          expect(plugin.filterControlConfig.stateful).toBe true
-          expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-filter-button')
-
-    describe 'USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP is true', ->
-      beforeEach ->
-        @featureEnabledStub.withArgs('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP').returns(true)
-
-      it 'should set useFilterCollection to false', ->
-        @createApp().then =>
-          expect(@app.gridboard.useFilterCollection).toBeFalsy()
-
-      it 'should use rallygridboard custom filter control', ->
-        @createApp().then =>
-          gridBoard = @app.down 'rallygridboard'
-          plugin = _.find gridBoard.plugins, (plugin) ->
-            plugin.ptype == 'rallygridboardcustomfiltercontrol'
-          expect(plugin).toBeDefined()
-          expect(plugin.filterControlConfig.stateful).toBe true
-          expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-custom-filter-button')
-
-          expect(plugin.showOwnerFilter).toBe true
-          expect(plugin.ownerFilterControlConfig.stateful).toBe true
-          expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-owner-filter')
+        expect(plugin.showOwnerFilter).toBe true
+        expect(plugin.ownerFilterControlConfig.stateful).toBe true
+        expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-owner-filter')
 
     describe 'EXPAND_ALL_TREE_GRID_CHILDREN is true', ->
       beforeEach ->
