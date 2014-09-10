@@ -67,8 +67,13 @@
         modelNames: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
 
         constructor: function(config) {
-            if (config) {
-                config.layout = config.optimizeLayouts ? 'anchor' : 'auto';
+            _.defaults(config, { layout: 'auto'});
+            if (config && config.optimizeFrontEndPerformanceIterationStatus) {
+                config.layout = 'anchor';
+            }
+
+            if (config.optimizeFrontEndPerformanceIterationStatus) {
+                Rally.domain.WsapiField.shouldDisableConvertMethod = true;
             }
             this.callParent(arguments);
         },
@@ -102,6 +107,8 @@
                 },
                 scope: this
             });
+
+            this.on('destroy', this._cleanUpToggles, this);
         },
 
         getSettingsFields: function () {
@@ -146,6 +153,10 @@
             });
 
             return fields;
+        },
+
+        _cleanUpToggles: function () {
+            Rally.domain.WsapiField.shouldDisableConvertMethod = false;
         },
 
         _buildGridStore: function() {
