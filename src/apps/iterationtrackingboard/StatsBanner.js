@@ -30,8 +30,7 @@
 
         config: {
             context: null,
-            expanded: false,
-            optimizeLayouts: false
+            expanded: false
         },
 
         items: [
@@ -43,13 +42,6 @@
             {xtype: 'statsbanneriterationprogress', flex: 2},
             {xtype: 'statsbannercollapseexpand', flex: 0}
         ],
-
-        constructor: function(config) {
-            if (config.optimizeLayouts) {
-                config._isLayoutRoot = true;
-            }
-            this.callParent(arguments);
-        },
 
         initComponent: function () {
             this.recordLoadBegin({

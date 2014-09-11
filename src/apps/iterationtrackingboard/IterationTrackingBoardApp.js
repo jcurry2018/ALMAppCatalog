@@ -178,9 +178,8 @@
                 listeners: {
                     resize: this._resizeGridBoardToFillSpace,
                     scope: this
-                },
-               optimizeLayouts: this.config.optimizeLayouts
-           });
+                }
+            });
         },
 
         _addGridBoard: function (gridStore) {
