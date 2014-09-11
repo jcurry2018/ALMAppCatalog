@@ -147,7 +147,7 @@
                 store: gridStore,
                 columnCfgs: this.getSetting('columnNames') || this.columnNames,
                 summaryColumns: [],
-                enableBulkEdit: false,
+                enableBulkEdit: true,
                 plugins: [],
                 stateId: stateId,
                 stateful: true,
