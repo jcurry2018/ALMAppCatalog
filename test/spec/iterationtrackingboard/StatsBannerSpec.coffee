@@ -26,6 +26,21 @@ describe 'Rally.apps.iterationtrackingboard.StatsBanner', ->
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'statsbanner'
 
+  describe 'constructor', ->
+    it 'should set _isRootLayout to true when optimizeLayouts is passed', ->
+      @createBanner(
+        optimizeLayouts: true
+      )
+      expect(@banner.isLayoutRoot()).toBe true
+
+    it 'should default to isRootLayout to false when it has a parent container', ->
+      @createBanner()
+      try
+        container = Ext.create('Ext.container.Container', items: [@banner])
+        expect(@banner.isLayoutRoot()).toBe false
+      finally
+        container.destroy()
+
   describe 'initComponent', ->
 
     describe 'item defaults', ->
