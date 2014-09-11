@@ -141,7 +141,7 @@
                     {
                         ptype: 'rallygridboardfieldpicker',
                         headerPosition: 'left',
-                        boardFieldBlackList: ['PredecessorsAndSuccessors', 'DisplayColor'],
+                        boardFieldBlackList: ['Successors', 'Predecessors', 'DisplayColor'],
                         alwaysSelectedValues: ['FormattedID', 'Name', 'Owner', 'BlockedReason'],
                         modelNames: modelNames,
                         boardFieldDefaults: this.getSetting('cardFields').split(',')
