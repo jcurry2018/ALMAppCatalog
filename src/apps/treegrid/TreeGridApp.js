@@ -54,16 +54,12 @@
         },
 
         _addGridBoard: function(gridStore, modelNamesArray) {
-            this.gridboard = this.add(this._getGridBoardConfig(gridStore, modelNamesArray));
-        },
-
-        _getGridBoardConfig: function (gridStore, modelNamesArray) {
             var context = this.getContext(),
                 gridStateString = this.statePrefix + '-treegrid',
                 gridStateId = context.getScopedStateId(gridStateString),
                 gridboardPlugins = this._getGridBoardPlugins(modelNamesArray);
 
-            return {
+            this.gridboard = this.add({
                 itemId: 'gridBoard',
                 xtype: 'rallygridboard',
                 stateId: this.statePrefix + '-gridboard',
@@ -75,7 +71,7 @@
                 gridConfig: this._getGridConfig(gridStore, context, gridStateId),
                 storeConfig: {},
                 height: this._getHeight()
-            };
+            });
         },
 
         _getGridBoardPlugins: function(modelNamesArray) {
