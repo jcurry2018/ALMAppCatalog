@@ -39,7 +39,6 @@
             'Rally.apps.iterationtrackingboard.StatsBannerField',
             'Rally.clientmetrics.ClientMetricsRecordable',
             'Rally.apps.iterationtrackingboard.PrintDialog',
-            'Rally.ui.grid.plugin.ColumnAutoSizer',
             'Rally.apps.common.RowSettingsField',
             'Rally.ui.grid.plugin.BufferedRenderer'
         ],
@@ -605,7 +604,7 @@
                 columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
-                plugins: ['rallycolumnautosizerplugin', 'rallytreegridchildpager'],
+                plugins: ['rallytreegridchildpager'],
                 stateId: stateId,
                 stateful: true,
                 shouldOptimizeLayouts: this.config.optimizeLayouts

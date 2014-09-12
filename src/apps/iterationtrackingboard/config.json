@@ -6,7 +6,6 @@
    "javascript": [
       "../common/RowSettingsField.js",
       "Column.js",
-      "IterationTrackingTreeView.js",
       "IterationTrackingTreeGrid.js",
       "statsbanner/BannerWidget.js",
       "statsbanner/Gauge.js",
