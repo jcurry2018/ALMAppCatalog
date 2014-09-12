@@ -607,7 +607,8 @@
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 plugins: ['rallycolumnautosizerplugin', 'rallytreegridchildpager'],
                 stateId: stateId,
-                stateful: true
+                stateful: true,
+                shouldOptimizeLayouts: this.config.optimizeLayouts
             };
 
             if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
