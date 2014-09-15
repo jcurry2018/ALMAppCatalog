@@ -188,7 +188,13 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 # Due to how the tests are wired up, they only failed once we added the type picker to other pages(S69900).
 # NOTE: these only seem to fail when the whole test suite is run.
 
-#  describe 'when the type is changed', ->
+  describe 'when the type is changed', ->
+    it 'should reload the gridboard', ->
+      @_createApp().then =>
+        loadGridBoardSpy = @spy @app, 'loadGridBoard'
+        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@theme._ref))
+        @waitForCallback(loadGridBoardSpy).then =>
+          expect(loadGridBoardSpy).toHaveBeenCalledOnce()
 #
 #    beforeEach ->
 #      @ajax.whenQuerying('state').respondWith(@initiativeStates)

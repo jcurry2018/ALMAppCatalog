@@ -358,6 +358,16 @@
 
         _publishContentUpdatedNoDashboardLayout: function () {
             this.fireEvent('contentupdated', {dashboardLayout: false});
+        },
+
+        _onTypeChange: function (picker) {
+            var changed = this._pickerTypeChanged(picker);
+
+            this.callParent(arguments);
+
+            if (changed) {
+                this.loadGridBoard();
+            }
         }
     });
 })();
