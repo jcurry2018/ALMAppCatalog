@@ -59,7 +59,7 @@
 		 */
 		getChartVersionFromRequest: function() {
 			var parameters = Ext.Object.fromQueryString(this.getUrlSearchString());
-			return (parameters.chartVersion || 'latest');
+			return (parameters.chartVersion || 'releases/current');
 		},
 		/**
 		 * Builds an iframe in the panel, using the version from getChartVersionFromRequest
