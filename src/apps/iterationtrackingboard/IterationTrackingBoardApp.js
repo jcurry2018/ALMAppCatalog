@@ -185,11 +185,11 @@
                 itemId: 'statsBanner',
                 context: this.getContext(),
                 margin: '0 0 5px 0',
+                shouldOptimizeLayouts: this.config.optimizeFrontEndPerformanceIterationStatus,
                 listeners: {
                     resize: this._resizeGridBoardToFillSpace,
                     scope: this
-                },
-               optimizeLayouts: this.config.optimizeLayouts
+                }
            });
         },
 
@@ -607,7 +607,7 @@
                 plugins: ['rallytreegridchildpager'],
                 stateId: stateId,
                 stateful: true,
-                shouldOptimizeLayouts: this.config.optimizeLayouts
+                shouldOptimizeLayouts: this.config.optimizeFrontEndPerformanceIterationStatus
             };
 
             if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
