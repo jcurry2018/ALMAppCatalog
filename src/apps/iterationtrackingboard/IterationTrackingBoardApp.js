@@ -168,7 +168,7 @@
                     root: {expanded: true},
                     enableHierarchy: true,
                     pageSize: this.getGridPageSizes()[1],
-                    childPageSizeEnabled: context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')
+                    childPageSizeEnabled: true
                 };
 
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
@@ -278,7 +278,7 @@
             var plugins = ['rallygridboardaddnew'];
             var context = this.getContext();
 
-            if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN') && !Ext.isIE) {
+            if (!Ext.isIE) {
                 plugins.push('rallygridboardexpandall');
             }
 
@@ -610,12 +610,9 @@
                 shouldOptimizeLayouts: this.config.optimizeFrontEndPerformanceIterationStatus
             };
 
-            if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
-                gridConfig.plugins.push({
-                    ptype: 'rallytreegridexpandedrowpersistence',
-                    enableExpandLoadingMask: !context.isFeatureEnabled('EXPAND_ALL_LOADING_MASK_DISABLE')
-                });
-            }
+            gridConfig.plugins.push({
+                ptype: 'rallytreegridexpandedrowpersistence'
+            });
 
             if (context.isFeatureEnabled('S69537_BUFFERED_RENDERER_TREE_GRID')) {
                 gridConfig.plugins.push({

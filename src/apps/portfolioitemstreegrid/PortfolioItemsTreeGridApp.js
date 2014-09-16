@@ -120,12 +120,9 @@
                 }
             };
 
-            if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
-                gridConfig.plugins.push({
-                    ptype: 'rallytreegridexpandedrowpersistence',
-                    enableExpandLoadingMask: !context.isFeatureEnabled('EXPAND_ALL_LOADING_MASK_DISABLE')
-                });
-            }
+            gridConfig.plugins.push({
+                ptype: 'rallytreegridexpandedrowpersistence'
+            });
 
             return gridConfig;
         },

@@ -368,9 +368,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         expect(plugin.ownerFilterControlConfig.stateful).toBe true
         expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-owner-filter')
 
-    describe 'EXPAND_ALL_TREE_GRID_CHILDREN is true', ->
-      beforeEach ->
-        @featureEnabledStub.withArgs('EXPAND_ALL_TREE_GRID_CHILDREN').returns(true)
+    describe 'Expand All', ->
 
       it 'should configure plugin', ->
         @createApp().then =>
