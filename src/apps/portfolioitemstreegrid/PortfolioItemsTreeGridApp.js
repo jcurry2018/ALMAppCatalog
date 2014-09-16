@@ -7,7 +7,6 @@
           'Rally.ui.grid.TreeGrid',
           'Rally.data.wsapi.TreeStoreBuilder',
           'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
-          //'Rally.ui.gridboard.plugin.GridBoardPortfolioItemTypeCombobox',
           'Rally.data.util.PortfolioItemTypeDefList'
         ],
 
@@ -21,7 +20,7 @@
 
         config: {
             defaultSettings: {
-                columnNames: ['Name', 'PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount', 'PreliminaryEstimate', 'PlannedStartDate', 'PlannedEndDate', 'ValueScore', 'RiskScore', 'InvestmentCategory']
+                columnNames: ['Name', 'Owner', 'PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount', 'PreliminaryEstimate', 'PlannedStartDate', 'PlannedEndDate', 'ValueScore', 'RiskScore', 'InvestmentCategory']
             }
         },
 
