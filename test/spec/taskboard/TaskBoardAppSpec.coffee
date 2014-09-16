@@ -217,7 +217,3 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
           records = workProductCombo.store.getRange()
           expect(records.length).toBe @workProducts.length + 1
           expect(_.last(records).get('_ref')).toBe newStory._ref
-
-  describe 'editing plan estimate', ->
-    it 'sets todo if not set', ->
-    it 'does not set todo if already set', ->

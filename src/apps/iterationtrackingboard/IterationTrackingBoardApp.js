@@ -359,17 +359,19 @@
                 ptype: 'rallygridboardfieldpicker',
                 headerPosition: 'left',
                 gridFieldBlackList: [
-                    'ObjectID',
+                    'Changesets',
+                    'Children',
                     'Description',
                     'DisplayColor',
+                    'Estimate',
                     'Notes',
-                    'Subscription',
-                    'Workspace',
-                    'Changesets',
+                    'ObjectID',
+                    'Predecessors',
                     'RevisionHistory',
-                    'Children',
+                    'Subscription',
                     'Successors',
-                    'Predecessors'
+                    'ToDo',
+                    'Workspace'
                 ],
                 boardFieldBlackList: [
                     'PredecessorsAndSuccessors'
@@ -550,49 +552,6 @@
             });
 
             return customViewConfig;
-        },
-
-        _createOwnerFilterItem: function (context) {
-            var isPillPickerEnabled = context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
-                projectRef = context.getProjectRef();
-
-            if (isPillPickerEnabled) {
-                return {
-                    xtype: 'rallyownerpillfilter',
-                    margin: '-15 0 5 0',
-                    filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
-                    project: projectRef,
-                    showPills: false,
-                    showClear: true
-                };
-            } else {
-                return {
-                    xtype: 'rallyownerfilter',
-                    margin: '5 0 5 0',
-                    filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
-                    project: projectRef
-                };
-            }
-
-        },
-
-        _createTagFilterItem: function (context) {
-            var filterUiImprovementsToggleEnabled = context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE');
-            return {
-                xtype: 'rallytagpillfilter',
-                margin: filterUiImprovementsToggleEnabled ? '-15 0 5 0' : '5 0 5 0',
-                showPills: filterUiImprovementsToggleEnabled,
-                showClear: filterUiImprovementsToggleEnabled,
-                remoteFilter: filterUiImprovementsToggleEnabled
-            };
-        },
-
-        _createModelFilterItem: function (context) {
-            return {
-                xtype: 'rallymodelfilter',
-                models: this.modelNames,
-                context: context
-            };
         },
 
         _getGridConfig: function (gridStore) {

@@ -189,13 +189,7 @@
                     ],
                     values: _.pluck(rowRecords, 'data')
                 },
-                margin: '10px 0 0 0',
-                cardConfig: {
-                    listeners: {
-                        inlineedit: this._onInlineEdit,
-                        scope: this
-                    }
-                }
+                margin: '10px 0 0 0'
             };
         },
 
@@ -217,16 +211,6 @@
                 }
             }
             return timeboxFilters;
-        },
-
-        _onInlineEdit: function(editingPlugin, context) {
-            var fieldName = context.fieldName,
-                record = context.record;
-            if(fieldName === 'Estimate' &&
-                record.get('Estimate') &&
-                !context.record.get('ToDo')) {
-                record.set('ToDo', record.get('Estimate'));
-            }
         }
     });
 })();
