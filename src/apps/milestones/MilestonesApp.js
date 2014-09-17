@@ -29,11 +29,9 @@
                         'Name',
                         'TargetDate',
                         {
-                            dataIndex: 'Artifacts',
-                            renderer: function(artifactsCollection) {
-                                return artifactsCollection.Count;
-                            },
-                            text: 'Item Count'
+                            dataIndex: 'TotalArtifactCount',
+                            text: 'Item Count',
+                            tdCls: 'artifacts'
                         },
                         {
                             dataIndex: 'TargetProject',
@@ -51,7 +49,7 @@
                     ],
                     enableRanking: true,
                     storeConfig: {
-                        fetch: 'FormattedID,Name,TargetDate,Artifacts,TargetProject',
+                        fetch: 'FormattedID,Name,TargetDate,Artifacts,TargetProject,TotalArtifactCount',
                         sorters: [{
                             property: 'TargetDate',
                             direction: 'DESC'
