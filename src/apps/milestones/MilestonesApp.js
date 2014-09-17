@@ -5,7 +5,8 @@
         extend: 'Rally.app.App',
         requires: [
             'Rally.ui.DateField',
-            'Rally.ui.combobox.MilestoneProjectComboBox'
+            'Rally.ui.combobox.MilestoneProjectComboBox',
+            'Rally.ui.grid.MilestoneProjectEditor'
         ],
         cls: 'milestones-app',
 
@@ -35,6 +36,9 @@
                         },
                         {
                             dataIndex: 'TargetProject',
+                            isCellEditable: function(project){
+                                return !Rally.ui.grid.MilestoneProjectEditor.shouldDisableEditing(project);
+                            },
                             renderer: function(project) {
                                 if (project === ''){
                                     return '<div class="permission-required">Project Permissions Required</div>';
