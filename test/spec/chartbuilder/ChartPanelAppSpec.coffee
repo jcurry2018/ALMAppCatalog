@@ -94,6 +94,23 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 			iframe = @getIFrame(app)
 			expect(iframe.src).toContain "/analytics/chart/xxx/almchart.min.html"
 
+	it 'uses a random number formatted hourly to bust caching', (done) ->
+		now = new Date()
+		expectedNumber = Ext.Date.format(now, 'YmdH')
+
+		fulfilled = (appContainer) =>
+			expect(@app._getCacheGeneration(now)).toEqual expectedNumber
+			iframe = @getIFrame(appContainer)
+			expect(iframe.src).toMatch '.+\?.*_gen=[0-9]{10}'
+
+		rejected = (err) ->
+			throw err
+
+		@createAppAndWait({}, { searchString : "" })
+		.then(fulfilled, rejected)
+		.then(done, done)
+
+
 	describe 'help link', ->
 		it 'should register a help topic when help is supplied',->
 			topic = Rally.util.Help.findTopic({resource:'x'})

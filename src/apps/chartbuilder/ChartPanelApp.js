@@ -69,7 +69,8 @@
 		constructIFrame: function() {
 			var filename = this.isDebugMode() ? 'almchart.html' : 'almchart.min.html';
 			var version = this.getChartVersionFromRequest();
-			var ifr = '<iframe width="100%" height="480" src="/analytics/chart/' + version + '/' + filename + '"></iframe>';
+			var url = '/analytics/chart/' + version + '/' + filename + '?_gen=' + this._getCacheGeneration();
+			var ifr = '<iframe width="100%" height="480" src="' + url + '"></iframe>';
 			this.down("#mrcontainer").el.dom.innerHTML = ifr;
 		},
 
@@ -126,6 +127,11 @@
 
 		_slugValue: function() {
 			return this.appContainer.slug;
+		},
+
+		_getCacheGeneration : function(theDate) {
+			theDate = theDate || new Date();
+			return Ext.Date.format(theDate, 'YmdH');
 		},
 		/**
 		 * Conditionally constructs the help component in the header.
