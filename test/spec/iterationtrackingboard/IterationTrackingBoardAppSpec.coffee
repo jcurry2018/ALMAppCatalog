@@ -253,7 +253,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     it 'returns the columns with the FormattedID removed', ->
       @createApp().then =>
         @toggleToGrid()
-        expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.columnCfgs).toEqual ['Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion']
+        expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.columnCfgs).toEqual ['Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'Tasks', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'Defects', 'Discussion']
 
     it 'enables the summary row on the treegrid when the toggle is on', ->
       @createApp().then =>
