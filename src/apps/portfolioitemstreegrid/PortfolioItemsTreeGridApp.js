@@ -95,7 +95,10 @@
                     'Successors',
                     'Predecessors'
                 ],
-                margin: '3 9 14 0'
+                margin: '3 9 14 0',
+                alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'].concat(
+                    this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ? ['DragAndDropRank'] : []
+                )
             };
         },
 
