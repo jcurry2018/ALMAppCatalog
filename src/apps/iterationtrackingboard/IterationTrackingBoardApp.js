@@ -83,6 +83,13 @@
                 return;
             }
 
+            var me = this,
+                racingStripes = this.getContext().isFeatureEnabled('ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE');
+
+            if (racingStripes) {
+                this.suspendLayouts();
+            }
+
             var grid = this.down('rallytreegrid');
             if (grid) {
                 // reset page count to 1.
@@ -90,7 +97,7 @@
                 grid.fireEvent('storecurrentpagereset');
             }
 
-            if(this._shouldShowStatsBanner()){
+            if (this._shouldShowStatsBanner()){
                 this._addStatsBanner();
             }
 
@@ -105,6 +112,10 @@
                     this._addGridBoard(gridStore);
                 },
                 scope: this
+            }).always(function() {
+                if (racingStripes) {
+                    me.resumeLayouts(true);
+                }
             });
 
             this.on('destroy', this._cleanUpToggles, this);
