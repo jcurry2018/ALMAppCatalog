@@ -615,6 +615,9 @@
                 columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
+                editingConfig: {
+                    reduceLayouts: context.isFeatureEnabled('ADD_SPEED_HOLES_TO_TREE_GRID_APPS')
+                },
                 plugins: ['rallytreegridchildpager'],
                 stateId: stateId,
                 stateful: true,
