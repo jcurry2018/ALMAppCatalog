@@ -5,8 +5,7 @@ Ext.require [
   'Rally.ui.gridboard.GridBoard'
   'Rally.util.DateTime'
   'Rally.app.Context',
-  'Rally.domain.Subscription',
-  'Rally.domain.WsapiField'
+  'Rally.domain.Subscription'
 ]
 
 describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
@@ -101,7 +100,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     ).then =>
       expect(@app.layout.$className).toBe 'Ext.layout.container.Auto'
 
-  it 'should use anchor layout when the optimizeLayouts flag is passed into the config', ->
+  it 'should use anchor layout when the optimizeFrontEndPerformanceIterationStatus flag is passed into the config', ->
     @createApp(
       optimizeFrontEndPerformanceIterationStatus: true
     ).then =>
@@ -139,20 +138,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @app.onTimeboxScopeChange newScope
 
       expect(storeCurrentPageResetStub).toHaveBeenCalledOnce()
-
-  it 'should not set shouldDisableConvertMethod when config.optimizeFrontEndPerformanceIterationStatus is falsy', ->
-    @createApp(
-      optimizeFrontEndPerformanceIterationStatus: undefined
-    ).then =>
-      expect(Rally.domain.WsapiField.shouldDisableConvertMethod).toBeFalsy()
-
-  it 'should set shouldDisableConvertMethod based on config and unset when destroying', ->
-    @createApp(
-      optimizeFrontEndPerformanceIterationStatus: true
-    ).then =>
-      expect(Rally.domain.WsapiField.shouldDisableConvertMethod).toBe(true)
-      @app.fireEvent('destroy')
-      expect(Rally.domain.WsapiField.shouldDisableConvertMethod).toBe(false)
 
   describe 'stats banner', ->
     it 'should add the stats banner by default', ->

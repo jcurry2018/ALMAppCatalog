@@ -71,9 +71,6 @@
                 config.layout = 'anchor';
             }
 
-            if (config.optimizeFrontEndPerformanceIterationStatus) {
-                Rally.domain.WsapiField.shouldDisableConvertMethod = true;
-            }
             this.callParent(arguments);
         },
 
@@ -117,8 +114,6 @@
                     me.resumeLayouts(true);
                 }
             });
-
-            this.on('destroy', this._cleanUpToggles, this);
         },
 
         getSettingsFields: function () {
@@ -163,10 +158,6 @@
             });
 
             return fields;
-        },
-
-        _cleanUpToggles: function () {
-            Rally.domain.WsapiField.shouldDisableConvertMethod = false;
         },
 
         _buildGridStore: function() {
