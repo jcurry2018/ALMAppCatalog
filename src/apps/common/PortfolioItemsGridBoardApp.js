@@ -59,7 +59,10 @@
                     }
                 },
                 plugins: _.union([
-                    'rallygridboardaddnew',
+                    {
+                        ptype: 'rallygridboardaddnew',
+                        reduceLayouts: this.getContext().isFeatureEnabled('ADD_SPEED_HOLES_TO_TREE_GRID_APPS')
+                    },
                     {
                         ptype: 'rallygridboardcustomfiltercontrol',
                         filterChildren: false,

@@ -277,7 +277,10 @@
         },
 
         _getGridBoardPlugins: function() {
-            var plugins = ['rallygridboardaddnew'];
+            var plugins = [{
+                ptype: 'rallygridboardaddnew',
+                reduceLayouts: this.getContext().isFeatureEnabled('ADD_SPEED_HOLES_TO_TREE_GRID_APPS')
+            }];
             var context = this.getContext();
 
             if (!Ext.isIE) {
