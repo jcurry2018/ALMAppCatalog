@@ -13,16 +13,26 @@
 			'Rally.ui.combobox.MilestoneComboBox',
 			'Rally.util.Help'
 		],
+		autoScroll: false,
+
+		layout: {
+			type: 'border',
+			align : 'stretch',
+			pack  : 'start'
+		},
 		items: [
 			{
 				xtype: 'container',
 				itemId: 'header',
-				cls: 'header'
+				cls: 'header',
+				region: 'north'
 			},
 			{
 				xtype: 'container',
 				itemId: 'mrcontainer',
-				cls: 'mrcontainer'
+				cls: 'mrcontainer',
+				region: 'center',
+				layout: 'fit'
 			}
 		],
 
@@ -70,7 +80,7 @@
 			var filename = this.isDebugMode() ? 'almchart.html' : 'almchart.min.html';
 			var version = this.getChartVersionFromRequest();
 			var url = '/analytics/chart/' + version + '/' + filename + '?_gen=' + this._getCacheGeneration();
-			var ifr = '<iframe width="100%" height="480" src="' + url + '"></iframe>';
+			var ifr = '<iframe frameborder="0" style="overflow:hidden;" width="100%" height="100%" src="' + url + '"></iframe>';
 			this.down("#mrcontainer").el.dom.innerHTML = ifr;
 		},
 
