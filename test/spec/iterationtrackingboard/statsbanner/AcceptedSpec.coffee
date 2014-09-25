@@ -33,15 +33,12 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.Accepted', ->
       @waitForCallback(updateSpy)
 
   beforeEach ->
-    @ajax.whenQuerying('iteration').respondWith([], {
+    @ajax.whenQuerying('iteration').respondWith [],
       schema:
         properties:
           EndDate:
             format:
               tzOffset: 300
-    })
-
-    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(['Defined', 'In-Progress', 'Completed', 'Accepted'])
 
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'statsbanneraccepted'

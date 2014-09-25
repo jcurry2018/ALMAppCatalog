@@ -182,6 +182,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:2.0
           ScheduleState:"In-Progress"
+          AcceptedDate:null
           Summary:
             TestCases:
               LastVerdict:
@@ -191,6 +192,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:2.0
           ScheduleState:"In-Progress"
+          AcceptedDate:null
           Summary:
             TestCases:
               LastVerdict:
@@ -463,6 +465,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:2.0
           ScheduleState:"Accepted"
+          AcceptedDate:"2011-05-11T16:45:05Z"
           Summary:
             TestCases:
               LastVerdict:
@@ -472,6 +475,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:2.0
           ScheduleState:"In-Progress"
+          AcceptedDate:"2011-05-11T16:45:05Z"
           Summary:
             TestCases:
               LastVerdict:
@@ -614,6 +618,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:2.0
           ScheduleState:"Accepted"
+          AcceptedDate:"2011-05-11T16:45:05Z"
           Summary:
             TestCases:
               LastVerdict:
@@ -623,6 +628,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:null
           ScheduleState:"Accepted"
+          AcceptedDate:"2011-05-11T16:45:05Z"
           Summary:
             TestCases:
               LastVerdict:
@@ -632,6 +638,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:2.0
           ScheduleState:"Accepted"
+          AcceptedDate:"2011-05-11T16:45:05Z"
           Summary:
             TestCases:
               LastVerdict:
@@ -726,25 +733,24 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       @waitForCallback(displayStatusRowsSpy)
 
   it "getPostAcceptedState with no before or after state", ->
-    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Defined", "In-Progress", "Completed", "Accepted"]
     @createApp({}).then (app) =>
       app._getPostAcceptedState().always (postAcceptedState) ->
         expect(postAcceptedState).toBeNull()
 
   it "getPostAcceptedState with only a before state", ->
-    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Idea", "Defined", "In-Progress", "Completed", "Accepted"]
+    @stub Rally.test.mock.data.WsapiModelFactory.getUserStoryModel().getField('ScheduleState'), 'getAllowedStringValues', -> ["Idea", "Defined", "In-Progress", "Completed", "Accepted"]
     @createApp({}).then (app) =>
       app._getPostAcceptedState().always (postAcceptedState) ->
         expect(postAcceptedState).toBeNull()
 
   it "getPostAcceptedState with only an after state", ->
-    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Defined", "In-Progress", "Completed", "Accepted", "Released"]
+    @stub Rally.test.mock.data.WsapiModelFactory.getUserStoryModel().getField('ScheduleState'), 'getAllowedStringValues', -> ["Defined", "In-Progress", "Completed", "Accepted", "Released"]
     @createApp({}).then (app) =>
       app._getPostAcceptedState().always (postAcceptedState) ->
         expect(postAcceptedState).toBe "Released"
 
   it "getPostAcceptedState with a before and after state", ->
-    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Idea", "Defined", "In-Progress", "Completed", "Accepted", "Really Really Done"]
+    @stub Rally.test.mock.data.WsapiModelFactory.getUserStoryModel().getField('ScheduleState'), 'getAllowedStringValues', -> ["Idea", "Defined", "In-Progress", "Completed", "Accepted", "Really Really Done"]
     @createApp({}).then (app) =>
       app._getPostAcceptedState().always (postAcceptedState) ->
         expect(postAcceptedState).toBe "Really Really Done"
@@ -849,17 +855,6 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       app.calculateTimeboxInfo().then ->
         expect(httpGetSpy).toHaveBeenCalledOnce()
-
-  it "only gets scheduleStates once", ->
-    scheduleStates = ['Defined', 'In-Progress', 'Completed']
-    ajaxRequest = @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith scheduleStates
-    @createApp({}).then (app) =>
-      expect(ajaxRequest).toHaveBeenCalledOnce()
-
-      ajaxRequest = @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ['Defined', 'In-Progress', 'Accepted']
-      app.getScheduleStates().then (scheduleStates2) ->
-        expect(scheduleStates2).toEqual scheduleStates
-        expect(ajaxRequest).not.toHaveBeenCalled()
 
   it "rounds estimates to two decimal places", ->
     @ajax.whenQuerying('defectsuite').respondWith()
@@ -1158,16 +1153,14 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
     it "displays positive acceptance stats when all work accepted for past timebox", ->
       @prepareAllAcceptedData()
 
-      @stubApp(
+      @stubApp
         startDate:new Date(2011, 4, 2)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 5, 5)
-      )
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
       @createApp({}).then (app) =>
-
         acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
           expect(configAcceptance.title).toBe "100% Accepted"
           expect(configAcceptance.subtitle).toBe "(27 of 27 Points)"
@@ -1175,7 +1168,6 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
           expect(configAcceptance.message).toBe ""
 
     it "displays positive acceptance stats when all work accepted or released for past timebox", ->
-
       @ajax.whenQuerying('userstory').respondWith([
         {
           PlanEstimate:1.0
@@ -1309,6 +1301,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:2.0
           ScheduleState:"Accepted"
+          AcceptedDate:"2011-05-11T16:45:05Z"
           Summary:
             TestCases:
               LastVerdict:
@@ -1318,6 +1311,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:null
           ScheduleState:"Accepted"
+          AcceptedDate:"2011-05-11T16:45:05Z"
           Summary:
             TestCases:
               LastVerdict:
@@ -1327,6 +1321,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:2.0
           ScheduleState:"Released"
+          AcceptedDate:"2011-05-11T16:45:05Z"
           Summary:
             TestCases:
               LastVerdict:
@@ -1335,12 +1330,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
-      @stubApp({
+      @stubApp
         scheduleStates:["Defined", "In-Progress", "Completed", "Accepted", "Released"],
         startDate:new Date(2011, 4, 2),
         endDate:new Date(2011, 4, 20, 23, 59, 59),
         today:new Date(2011, 5, 5)
-      })
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
@@ -1477,6 +1471,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:null
           ScheduleState:"Accepted"
+          AcceptedDate:"2011-05-11T16:45:05Z"
           Summary:
             TestCases:
               LastVerdict:
@@ -1486,6 +1481,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         {
           PlanEstimate:2.0
           ScheduleState:"Accepted"
+          AcceptedDate:"2011-05-11T16:45:05Z"
           Summary:
             TestCases:
               LastVerdict:

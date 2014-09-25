@@ -174,42 +174,20 @@
         },
 
         getAcceptanceData: function () {
-            return this._getScheduleStates().then({
-                success: function (scheduleStates) {
-                    var acceptanceData = {
-                        accepted: 0,
-                        total: 0
-                    };
-                    var accepted = _.indexOf(scheduleStates, 'Accepted');
-                    _.each(this.store.getRange(), function (record) {
-                        var estimate = record.get('PlanEstimate') || 0;
-                        if (_.indexOf(scheduleStates, record.get('ScheduleState')) >= accepted) {
-                            acceptanceData.accepted += estimate;
-                        }
-                        acceptanceData.total += estimate;
-                    }, this);
-                    return acceptanceData;
-                },
-                scope: this,
-                requester: this
-            });
-        },
-
-        _getScheduleStates: function () {
-            if (this._scheduleStates) {
-                return Deft.Promise.when(this._scheduleStates);
-            } else {
-                return this.store.model.getField('ScheduleState').getAllowedValueStore().load().then({
-                    success: function (records) {
-                        this._scheduleStates = _.map(records, function (record) {
-                            return record.get('StringValue');
-                        });
-                        return this._scheduleStates;
-                    },
-                    scope: this,
-                    requester: this
-                });
-            }
+            var scheduleStates = this.store.model.getField('ScheduleState').getAllowedStringValues();
+            var acceptanceData = {
+                accepted: 0,
+                total: 0
+            };
+            var accepted = _.indexOf(scheduleStates, 'Accepted');
+            _.each(this.store.getRange(), function (record) {
+                var estimate = record.get('PlanEstimate') || 0;
+                if (_.indexOf(scheduleStates, record.get('ScheduleState')) >= accepted) {
+                    acceptanceData.accepted += estimate;
+                }
+                acceptanceData.total += estimate;
+            }, this);
+            return acceptanceData;
         }
     });
 })();

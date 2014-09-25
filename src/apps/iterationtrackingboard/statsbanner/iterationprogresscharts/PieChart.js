@@ -28,32 +28,23 @@
                     context: this.getContext(),
                     scope: this,
                     requester: this,
-                    success: function(models){
-                        models.UserStory.getField('ScheduleState').getAllowedValueStore().load({
-                            callback: this._createStateMap,
-                            requester: this,
-                            scope: this
-                        });
-                    }
+                    success: this._createStateMap
                 });
             } else {
                 this._loadArtifacts();
             }
         },
 
-        _createStateMap: function(allowedValues) {
+        _createStateMap: function(models) {
             var stateMap = ['Defined', 'In-Progress', 'Completed'],
                 stateMapIndex = 0,
                 storyStates = {};
 
-            _.each(allowedValues, function(value) {
-                var state = value.data.StringValue;
-                if (state) {
-                    if (state === stateMap[stateMapIndex + 1]) {
-                        stateMapIndex++;
-                    }
-                    storyStates[state] = stateMap[stateMapIndex];
+            _.each(models.UserStory.getField('ScheduleState').getAllowedStringValues(), function(state) {
+                if (state === stateMap[stateMapIndex + 1]) {
+                    stateMapIndex++;
                 }
+                storyStates[state] = stateMap[stateMapIndex];
             });
 
             this._storyStates = storyStates;

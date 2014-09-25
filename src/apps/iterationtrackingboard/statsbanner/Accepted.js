@@ -36,13 +36,10 @@
         },
 
         onDataChanged: function () {
-            Deft.Promise.all([
-                    this.getAcceptanceData(),
-                    this.getTimeboxData()
-                ]).then({
-                    success: this._onDataAssembled,
-                    scope: this
-                });
+            this.getTimeboxData().then({
+                success: this._onDataAssembled,
+                scope: this
+            });
         },
 
         getChartEl: function() {
@@ -55,11 +52,11 @@
                     this.getContext().getWorkspace().WorkspaceConfiguration.ReleaseEstimateUnitName;
         },
 
-        _getRenderData: function() {
+        _getRenderData: function(timeboxData) {
             var data = _.merge(
                 {unit: this._getTimeboxUnits()},
-                this.acceptanceData,
-                this.timeboxData
+                this.getAcceptanceData(),
+                timeboxData
             );
 
             data.accepted = Ext.util.Format.round(data.accepted, 2);
@@ -69,11 +66,8 @@
             return data;
         },
 
-        _onDataAssembled: function (results) {
-            this.acceptanceData = results[0];
-            this.timeboxData = results[1];
-
-            var renderData = this._getRenderData();
+        _onDataAssembled: function (timeboxData) {
+            var renderData = this._getRenderData(timeboxData);
             this.update(renderData);
 
             this.refreshChart(this._getChartConfig(renderData));

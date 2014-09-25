@@ -131,16 +131,8 @@
                     type: 'UserStory',
                     context: this.getContext().getDataContext(),
                     success: function(model) {
-                        model.getField('ScheduleState').getAllowedValueStore().load({
-                            requester: this,
-                            callback: function(records, operation, success) {
-                                this._scheduleStates = _.map(records, function(record) {
-                                    return record.get('StringValue');
-                                });
-                                deferred.resolve(this._scheduleStates);
-                            },
-                            scope: this
-                        });
+                        this._scheduleStates = model.getField('ScheduleState').getAllowedStringValues();
+                        deferred.resolve(this._scheduleStates);
                     },
                     scope: this
                 });

@@ -18,12 +18,10 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
         , initialValues)
 
     getDefaultSettings: ->
-      settings =
-        chartAggregationType: 'planestimate'
-        chartDisplayType: 'line'
-        chartTimebox: 'iteration'
-        customScheduleStates: ['Accepted']
-      return settings
+      chartAggregationType: 'planestimate'
+      chartDisplayType: 'line'
+      chartTimebox: 'iteration'
+      customScheduleStates: ['Accepted']
 
   describe 'app-scoped', ->
     it 'does not load twice when an iteration is current', ->
@@ -33,7 +31,6 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
 
       settings = @getDefaultSettings()
       settings.chartAggregationType = 'storycount'
-      @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Defined", "In-Progress", "Completed", "Accepted"]
       @ajax.whenQuerying('iteration').respondWith iterations
       iterReadRequest = @ajax.whenReading('iteration', iterations[0].ObjectID).respondWith iterations[0]
 
@@ -63,15 +60,13 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
 
       snapshots = "[{'_ValidFrom':'2013-11-03T23:29:44.672Z','_ValidTo':'9999-01-01T00:00:00.000Z',ObjectID:14600336849,Project:4527959100,PlanEstimate:1},{'_ValidFrom':'2013-11-04T23:29:44.672Z','_ValidTo':'9999-01-01T00:00:00.000Z',ObjectID:14600336850,Project:4527959100,PlanEstimate:10}]"
 
-      @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Defined", "In-Progress", "Completed", "Accepted"]
-      iterquery = @ajax.whenQuerying('iteration').respondWith iterations
-      iterReadRequest = @ajax.whenReading('iteration', iterations[0].ObjectID).respondWith iterations[0]
+      @ajax.whenQuerying('iteration').respondWith iterations
+      @ajax.whenReading('iteration', iterations[0].ObjectID).respondWith iterations[0]
 
       prefNameValues = _.map(Ext.merge({iteration: iterations[0]._ref}, settings), (value, key) -> Name: key, Value: value)
-      prefRequest = @ajax.whenQuerying('preference').respondWith @mom.getData('preference', values: prefNameValues)
+      @ajax.whenQuerying('preference').respondWith @mom.getData('preference', values: prefNameValues)
 
-      lookbackquery = @ajax.whenReadingEndpoint("/snapshot/query").respondWithHtml snapshots,
-      { url: "/analytics/v2.0/service/rally/workspace/"+@getContext().getWorkspace().ObjectID+"/artifact/snapshot/query.js", method: 'POST' }
+      @ajax.whenReadingEndpoint("/snapshot/query").respondWithHtml snapshots, { url: "/analytics/v2.0/service/rally/workspace/"+@getContext().getWorkspace().ObjectID+"/artifact/snapshot/query.js", method: 'POST' }
 
       addSpy = @spy()
       app = Ext.create 'Rally.apps.charts.burndown.BurnDownApp',
