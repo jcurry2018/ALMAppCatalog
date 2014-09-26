@@ -5,7 +5,6 @@
    "sdk": "x",
    "javascript": [
       "../common/RowSettingsField.js",
-      "Column.js",
       "IterationTrackingTreeGrid.js",
       "statsbanner/BannerWidget.js",
       "statsbanner/Gauge.js",

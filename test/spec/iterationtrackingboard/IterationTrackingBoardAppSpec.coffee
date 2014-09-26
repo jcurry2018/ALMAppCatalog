@@ -23,17 +23,19 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       ]
 
       @iterationRecord = @mom.getRecord('iteration', values: @iterationData[0])
+      scopeRecord = if Ext.isDefined(config?.iterationRecord) then config.iterationRecord else @iterationRecord
 
       @app = Ext.create('Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', Ext.apply(
         context: Ext.create('Rally.app.Context',
           initialValues:
-            timebox: Ext.create 'Rally.app.TimeboxScope', record: @iterationRecord
+            timebox: Ext.create 'Rally.app.TimeboxScope', type: 'iteration', record: scopeRecord
             project:
               _ref: @projectRef
             workspace:
               WorkspaceConfiguration:
                 DragDropRankingEnabled: true
                 WorkDays: "Monday,Friday"
+            subscription: Rally.environment.getContext().getSubscription()
         ),
         renderTo: 'testDiv'
         height: 400
@@ -204,6 +206,10 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     ).then =>
       expect(@app.gridboard.getGridOrBoard().config.rowConfig).toBeDefined()
 
+  it 'adds the requiresModelSpecificFilters property to the boardConfig', ->
+    @createApp().then =>
+      expect(@app.gridboard.getGridOrBoard().columnConfig.requiresModelSpecificFilters).toBe false
+
   it 'should show the field picker in board mode', ->
     @createApp().then =>
       @toggleToBoard()
@@ -215,27 +221,60 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @toggleToGrid()
       expect(@app.down('#gridBoard').getGridOrBoard().enableBulkEdit).toBe true
 
-  it 'should filter the grid to the currently selected iteration', ->
-    requestStub = @stubRequests()
-
-    @createApp().then =>
-      @toggleToGrid()
-
-      expect(requestStub).toBeWsapiRequestWith filters: @getIterationFilter()
-
-  it 'should filter the board to the currently selected iteration', ->
-    requests = @stubRequests()
-
-    @createApp().then =>
-      @toggleToBoard()
-
-      expect(request).toBeWsapiRequestWith(filters: @getIterationFilter()) for request in requests
-
   it 'should show a treegrid when treegrid toggled on', ->
     @createApp().then =>
       @toggleToGrid()
       expect(@app.down('rallytreegrid')).not.toBeNull()
       expect(@app.down('rallygrid')).toBeNull()
+
+  describe 'iteration filtering', ->
+    describe 'with a scope', ->
+      it 'should filter the grid to the currently selected iteration', ->
+        requestStub = @stubRequests()
+
+        @createApp().then =>
+          @toggleToGrid()
+
+          expect(requestStub).toBeWsapiRequestWith filters: @getIterationFilter()
+
+      it 'should filter the board to the currently selected iteration', ->
+        requests = @stubRequests()
+
+        @createApp().then =>
+          @toggleToBoard()
+
+          expect(request).toBeWsapiRequestWith(filters: @getIterationFilter()) for request in requests
+
+    describe 'unscheduled', ->
+      helpers
+        createLeafStoriesOnlyFilter: (storyTypeDefOid) ->
+          storyTypeDefOid = Rally.test.mock.data.WsapiModelFactory.getModel('UserStory').typeDefOid
+          Ext.create('Rally.data.wsapi.Filter',
+            property: 'TypeDefOid'
+            value: storyTypeDefOid
+          ).and(Ext.create('Rally.data.wsapi.Filter',
+            property: 'DirectChildrenCount'
+            value: 0
+          )).or(Ext.create('Rally.data.wsapi.Filter',
+            property: 'TypeDefOid'
+            operator: '!='
+            value: storyTypeDefOid
+          ))
+
+      it 'should exclude epic stories from the grid', ->
+        requestStub = @stubRequests()
+        @createApp(iterationRecord: null).then =>
+          @toggleToGrid()
+          expect(requestStub).toBeWsapiRequestWith
+            filters: [@createLeafStoriesOnlyFilter()]
+
+      it 'should not attach leaf-stories-only filter if iteration is not null', ->
+        requestStub = @stubRequests()
+        @createApp().then =>
+          @toggleToGrid()
+          expect(requestStub).not.toBeWsapiRequestWith
+            filters: [@createLeafStoriesOnlyFilter()]
+
 
   describe 'tree grid config', ->
 

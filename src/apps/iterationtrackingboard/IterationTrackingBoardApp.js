@@ -34,7 +34,6 @@
             'Rally.ui.filter.view.OwnerPillFilter',
             'Rally.ui.filter.view.TagPillFilter',
             'Rally.app.Message',
-            'Rally.apps.iterationtrackingboard.Column',
             'Rally.apps.iterationtrackingboard.StatsBanner',
             'Rally.apps.iterationtrackingboard.StatsBannerField',
             'Rally.clientmetrics.ClientMetricsRecordable',
@@ -213,7 +212,7 @@
                 layout: this.getContext().isFeatureEnabled('ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE') ? 'anchor' : 'auto',
                 storeConfig: {
                     useShallowFetch: false,
-                    filters: [context.getTimeboxScope().getQueryFilter()]
+                    filters: this._getGridboardFilters(gridStore.model)
                 },
                 addNewPluginConfig: {
                     style: {
@@ -231,6 +230,39 @@
             });
         },
 
+        _getGridboardFilters: function(model) {
+            var timeboxScope = this.getContext().getTimeboxScope(),
+                timeboxFilter = timeboxScope.getQueryFilter(),
+                filters = [timeboxFilter];
+
+            if (!timeboxScope.getRecord() && this.getContext().getSubscription().StoryHierarchyEnabled) {
+                filters.push(this._createLeafStoriesOnlyFilter(model));
+            }
+            return filters;
+        },
+
+        _createLeafStoriesOnlyFilter: function(model) {
+            var typeDefOid = model.getArtifactComponentModel('HierarchicalRequirement').typeDefOid;
+
+            var userStoryFilter = Ext.create('Rally.data.wsapi.Filter', {
+                property: 'TypeDefOid',
+                value: typeDefOid
+            });
+
+            var noChildrenFilter = Ext.create('Rally.data.wsapi.Filter', {
+                property: 'DirectChildrenCount',
+                value: 0
+            });
+
+            var notUserStoryFilter = Ext.create('Rally.data.wsapi.Filter', {
+                property: 'TypeDefOid',
+                value: typeDefOid,
+                operator: '!='
+            });
+
+            return userStoryFilter.and(noChildrenFilter).or(notUserStoryFilter);
+        },
+
         _getBoardConfig: function() {
             var config = {
                 plugins: [
@@ -238,12 +270,12 @@
                     {ptype: 'rallyfixedheadercardboard'}
                 ],
                 columnConfig: {
-                    xtype: 'iterationtrackingboardcolumn',
                     additionalFetchFields: ['PortfolioItem'],
                     plugins: [{
                         ptype: 'rallycolumnpolicy',
                         app: this
-                    }]
+                    }],
+                    requiresModelSpecificFilters: false
                 },
                 cardConfig: {
                     showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
