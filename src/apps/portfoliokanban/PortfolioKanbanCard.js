@@ -36,21 +36,38 @@
                             },
                             gridConfig: {
                                 columnCfgs: [
-                                    'FormattedID',
-                                    'Name',
-                                    'Release',
-                                    'Iteration',
+                                    {
+                                        dataIndex: 'FormattedID',
+                                        width: 90
+                                    },
+                                    {
+                                        dataIndex: 'Name',
+                                        flex: 1
+                                    },
+                                    {
+                                        dataIndex: 'Release',
+                                        width: 90
+                                    },
+                                    {
+                                        dataIndex: 'Iteration',
+                                        width: 90
+                                    },
                                     {
                                         dataIndex: 'ScheduleState', // 'dataIndex' is the actual field name
-                                        text: 'State' // 'text' is the display name
+                                        text: 'State', // 'text' is the display name
+                                        width: 90
                                     },
                                     {
                                         dataIndex: 'PlanEstimate',
                                         editor: {
                                             decimalPrecision: 0
-                                        }
+                                        },
+                                        width: 90
                                     },
-                                    'Project'
+                                    {
+                                        dataIndex: 'Project',
+                                        width: 60
+                                    }
                                 ]
                             }
                         }
