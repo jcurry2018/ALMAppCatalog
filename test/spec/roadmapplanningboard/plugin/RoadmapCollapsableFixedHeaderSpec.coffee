@@ -53,7 +53,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapCollapsableFixedHeader',
       _.map(@cardboard.getEl().query('.roadmap-header-collapsable'), Ext.get)
 
     clickAddNewButton: ->
-      @click(css: '.scroll-button.right')
+      @click(css: '.scroll-button.rly-right')
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()

@@ -51,4 +51,4 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.IterationProgressDialog'
       @waitForVisible(css: '.rally-iteration-progress-cumulative-flow-chart').then ->
         expect(dialog.carousel.getCurrentItem().xtype).toBe 'statsbannercumulativeflowchart'
         button = Ext.DomQuery.selectNode('a.cumulativeflow')
-        expect(button).toHaveCls('active')
+        expect(button).toHaveCls('rly-active')

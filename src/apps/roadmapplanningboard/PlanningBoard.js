@@ -163,7 +163,7 @@
                     border: 1,
                     text: '<i class="icon-add"></i>',
                     elTooltip: 'Add Timeframe',
-                    cls: 'scroll-button right',
+                    cls: 'scroll-button rly-right',
                     height: 28,
                     frame: false,
                     handler: this._addNewColumn,
