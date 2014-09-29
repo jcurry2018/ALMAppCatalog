@@ -156,6 +156,10 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then =>
         expect(@app.down('#statsBanner')).not.toBeNull()
 
+    it 'should not add the stats banner when includeStatsBanner is set to false', ->
+      @createApp(includeStatsBanner: false).then =>
+        expect(@app.down('#statsBanner')).toBeNull()
+
     it 'should resize the grid board when stats banner is toggled', ->
       @createApp().then =>
         statsBanner = @app.down '#statsBanner'

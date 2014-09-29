@@ -60,7 +60,8 @@
                 showCardAge: true,
                 showStatsBanner: true,
                 cardAgeThreshold: 3
-            }
+            },
+            includeStatsBanner: true
         },
 
         modelNames: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
@@ -177,7 +178,7 @@
         },
 
         _shouldShowStatsBanner: function() {
-            return this.getSetting('showStatsBanner');
+            return this.includeStatsBanner && this.getSetting('showStatsBanner');
         },
 
         _addStatsBanner: function() {
