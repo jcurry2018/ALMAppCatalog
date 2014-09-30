@@ -288,6 +288,17 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @toggleToGrid()
         expect(@app.down('#gridBoard').getGridOrBoard().summaryColumns.length).toBe 3
 
+    it 'should optimize summary row when toggled on', ->
+      @stubFeatureToggle ['ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE']
+      @createApp().then =>
+        @toggleToGrid()
+        expect(@app.down('#gridBoard').getGridOrBoard().shouldOptimizeSummaryRow).toBe true
+
+    it 'should not optimize summary row when toggled off', ->
+      @createApp().then =>
+        @toggleToGrid()
+        expect(@app.down('#gridBoard').getGridOrBoard().shouldOptimizeSummaryRow).not.toBe true
+
     it 'should include test sets', ->
       @createApp().then =>
         @toggleToGrid()
