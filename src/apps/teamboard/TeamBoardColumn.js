@@ -28,7 +28,7 @@
             this.callParent(arguments);
 
             this.addEvents('iterationcomboready');
-            this.on('storeload', this._addIterationCombo, this);
+            this.on('ready', this._addIterationCombo, this);
         },
 
         assign: function(record){
