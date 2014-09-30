@@ -34,7 +34,7 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 				name: 'color',
 				label: 'Color Fool',
 				default: 'red',
-				values: [
+				items: [
 					{label:'Red', value: 'red'},
 					{label:'Blue', value: 'blue'},
 					{label:'Black', value: 'black'}
@@ -47,6 +47,7 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 				"xtype":"rallycombobox"
 				"valueField":"value"
 				"displayField":"label"
+				"label":"Color Fool"
 				"name":"color"
 				"store":
 					"xtype":"store"

@@ -23,13 +23,14 @@
 					xtype: 'rallycombobox',
 					valueField: 'value',
 					displayField: 'label',
+					label: easelSettingsField.label,
 					name: easelSettingsField.name,
 					store: {
 						xtype: "store",
 						fields: [
 							'label','value'
 						],
-						data: easelSettingsField.values || [{label:'data expected is \'label\' and \'value\'',value:''}]
+						data: easelSettingsField.items || [{label:'data expected is \'label\' and \'value\'',value:''}]
 					}
 				};
 			}
