@@ -31,15 +31,8 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
 
       @waitForCallback milestoneQuery
 
-    _createAppWithData: (config = {}) ->
-      @_createApp [ _.extend(
-        {
-          FormattedID: 'MI6'
-          Name: 'Milestones are awesome'
-          TargetDate: new Date()
-          TotalArtifactCount: 3
-        }, config)
-      ]
+    _createAppWithData: (values = {}) ->
+      @_createApp @mom.getData 'Milestone', values: values
 
     _createAppWithNoData: (canEdit = true) ->
       @_createApp [], canEdit
@@ -48,7 +41,6 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
     @app?.destroy()
 
   describe 'when application is rendered', ->
-
     it 'should have a button to add new if allowed to edit', ->
       @_createAppWithNoData(true).then =>
         expect(@app.getEl().down('#addNewContainer .x-btn-inner').getHTML()).toBe '+ Add New'
@@ -58,7 +50,7 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
         expect(@app.getEl().down('#addNewContainer .x-btn-inner')).toBeNull()
 
     it 'should display data in the grid', ->
-      @_createAppWithData().then =>
+      @_createAppWithData(TargetDate: new Date).then =>
         expect(@app.getEl().down('.formatted-id-template').getHTML()).toContain @milestoneData[0].FormattedID
         expect(@app.getEl().down('.name').getHTML()).toContain @milestoneData[0].Name
         expect(@app.getEl().down('.targetdate').getHTML()).toContain @milestoneData[0].TargetDate.getFullYear()
@@ -104,3 +96,20 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
       expect(targetDateField.xtype).toBe 'rallymilestoneprojectcombobox'
       expect(targetDateField.name).toBe 'TargetProject'
       expect(targetDateField.value).toBe @app.getContext().getProjectRef()
+
+  describe 'row actions', ->
+    helpers
+      createAppAndClickGear: (isAdmin) ->
+        @stub Rally.environment.getContext().getPermissions(), 'isWorkspaceOrSubscriptionAdmin', -> isAdmin
+        @_createAppWithData(TargetProject: null).then =>
+          @click(css: ".btid-row-action-#{@milestoneData[0].ObjectID} .row-action-icon").then ->
+            Ext.query('.rally-menu .' + Ext.baseCSSPrefix + 'menu-item-link')
+
+    it 'should have only a delete option when can edit target project', ->
+      @createAppAndClickGear(true).then (menuItems) ->
+        expect(menuItems.length).toBe 1
+        expect(menuItems[0].textContent).toBe 'Delete'
+
+    it 'should not have any options when cannot edit target project', ->
+      @createAppAndClickGear(false).then (menuItems) ->
+        expect(menuItems.length).toBe 0

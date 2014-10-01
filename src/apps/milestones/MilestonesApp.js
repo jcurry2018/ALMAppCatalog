@@ -6,7 +6,9 @@
         requires: [
             'Rally.ui.DateField',
             'Rally.ui.combobox.MilestoneProjectComboBox',
-            'Rally.ui.grid.MilestoneProjectEditor'
+            'Rally.ui.grid.MilestoneProjectEditor',
+            'Rally.ui.grid.RowActionColumn',
+            'Rally.ui.menu.item.DeleteMenuItem'
         ],
         cls: 'milestones-app',
 
@@ -17,6 +19,17 @@
                 addNewConfig: this._addNewConfig(),
                 gridConfig: {
                     columnCfgs: [
+                        {
+                            xtype: 'rallyrowactioncolumn',
+                            rowActionsFn: function (record) {
+                                return Rally.ui.grid.MilestoneProjectEditor.shouldDisableEditing(record.get('TargetProject')) ? [] : [
+                                    {
+                                        xtype: 'rallyrecordmenuitemdelete',
+                                        record: record
+                                    }
+                                ];
+                            }
+                        },
                         {
                             dataIndex: 'FormattedID',
                             renderer: function(formattedID) {
