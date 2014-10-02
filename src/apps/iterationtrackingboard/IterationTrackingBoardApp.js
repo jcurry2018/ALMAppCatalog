@@ -606,6 +606,12 @@
                 editingConfig: {
                     reduceLayouts: context.isFeatureEnabled('ADD_SPEED_HOLES_TO_TREE_GRID_APPS')
                 },
+                pagingToolbarCfg: {
+                    pageSizes: this.getGridPageSizes(),
+                    comboboxConfig: {
+                        defaultSelectionPosition: 'last'
+                    }
+                },
                 plugins: ['rallytreegridchildpager'],
                 stateId: stateId,
                 stateful: true,
@@ -623,12 +629,6 @@
                     leadingBufferZone: 10,
                     variableRowHeight: true
                 });
-            }
-
-            if (context.isFeatureEnabled('S67643_LIMIT_TREEGRID_PAGE_SIZE')) {
-                gridConfig.pagingToolbarCfg = {
-                    pageSizes: this.getGridPageSizes()
-                };
             }
 
             return gridConfig;
@@ -728,7 +728,7 @@
         },
 
         getGridPageSizes: function() {
-            return Ext.isIE ? [10, 25, 50] : [10, 25, 50, 100];
+            return [10, 25, 50];
         }
     });
 })();

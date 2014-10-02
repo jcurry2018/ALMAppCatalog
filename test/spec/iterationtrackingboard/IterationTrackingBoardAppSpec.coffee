@@ -425,88 +425,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
           @createApp().then =>
             expect(_.find(@app.gridboard.plugins, {ptype: 'rallygridboardexpandall'})).toBeFalsy()
 
-  describe 'page sizes', ->
-    beforeEach ->
-      @_isIE = Ext.isIE
-
-    afterEach ->
-      Ext.isIE = @_isIE
-
-    it 'should give the correct page sizes for non-ie', ->
-      @createApp().then =>
-        Ext.isIE = false
-        expect(@app.getGridPageSizes()).toEqual [10, 25, 50, 100]
-
-    it 'should give the correct page sizes for ie', ->
-      @createApp().then =>
-        Ext.isIE = true
-        expect(@app.getGridPageSizes()).toEqual [10, 25, 50]
-
   describe 'grid configurations', ->
-    beforeEach ->
-      @_isIE = Ext.isIE
-
-    afterEach ->
-      Ext.isIE = @_isIE
-
-    it 'should create a grid store with the correct page size for non-ie', ->
-      Ext.isIE = false
+    it 'should create a grid store with the correct page size', ->
       @createApp().then =>
-
         @toggleToGrid()
 
         expect(@app.gridboard.getGridOrBoard().store.pageSize).toEqual 25
-
-    it 'should create a grid store with the correct page size for ie', ->
-      Ext.isIE = true
-      @createApp().then =>
-
-        @toggleToGrid()
-
-        expect(@app.gridboard.getGridOrBoard().store.pageSize).toEqual 25
-
-    describe 'with S67643_LIMIT_TREEGRID_PAGE_SIZE enabled', ->
-      beforeEach ->
-        featureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
-        featureEnabledStub.withArgs('S67643_LIMIT_TREEGRID_PAGE_SIZE').returns(true)
-
-      it 'should create a paging toolbar with the correct page sizes for non-ie', ->
-        Ext.isIE = false
-        @createApp().then =>
-
-          @toggleToGrid()
-
-          pagingToolbar = @app.gridboard.getGridOrBoard().down '#pagingToolbar'
-          expect(pagingToolbar.pageSizes).toEqual [10, 25, 50, 100]
-
-      it 'should create a paging toolbar with the correct page sizes for ie', ->
-        Ext.isIE = true
-        @createApp().then =>
-
-          @toggleToGrid()
-
-          pagingToolbar = @app.gridboard.getGridOrBoard().down '#pagingToolbar'
-          expect(pagingToolbar.pageSizes).toEqual [10, 25, 50]
-
-    describe 'with S67643_LIMIT_TREEGRID_PAGE_SIZE disabled', ->
-      beforeEach ->
-        featureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
-        featureEnabledStub.withArgs('S67643_LIMIT_TREEGRID_PAGE_SIZE').returns(false)
-
-      it 'should create a paging toolbar with the correct page sizes for non-ie', ->
-        Ext.isIE = false
-        @createApp().then =>
-
-          @toggleToGrid()
-
-          pagingToolbar = @app.gridboard.getGridOrBoard().down '#pagingToolbar'
-          expect(pagingToolbar.pageSizes).toEqual [25, 50, 100, 200]
-
-      it 'should create a paging toolbar with the correct page sizes for ie', ->
-        Ext.isIE = true
-        @createApp().then =>
-
-          @toggleToGrid()
-
-          pagingToolbar = @app.gridboard.getGridOrBoard().down '#pagingToolbar'
-          expect(pagingToolbar.pageSizes).toEqual [25, 50, 100, 200]
