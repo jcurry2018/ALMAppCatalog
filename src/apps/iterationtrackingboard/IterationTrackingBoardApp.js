@@ -615,7 +615,8 @@
                 plugins: ['rallytreegridchildpager'],
                 stateId: stateId,
                 stateful: true,
-                shouldOptimizeLayouts: this.config.optimizeFrontEndPerformanceIterationStatus
+                shouldOptimizeLayouts: this.config.optimizeFrontEndPerformanceIterationStatus,
+                variableRowHeight: !this.getContext().isFeatureEnabled('S75353_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT')
             };
 
             gridConfig.plugins.push({
@@ -627,7 +628,7 @@
                     ptype: 'rallybufferedrenderer',
                     trailingBufferZone: 10, // increasing these values to 15 significantly degrades grid refresh performance
                     leadingBufferZone: 10,
-                    variableRowHeight: true
+                    variableRowHeight: gridConfig.variableRowHeight
                 });
             }
 
