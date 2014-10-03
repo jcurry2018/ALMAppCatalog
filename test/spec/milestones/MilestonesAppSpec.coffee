@@ -6,13 +6,13 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
       globalContext = Rally.environment.getContext()
 
       context = Ext.create 'Rally.app.Context',
-        project:globalContext.getProject()
-        workspace:globalContext.getWorkspace()
-        user:globalContext.getUser()
-        subscription:globalContext.getSubscription()
+        project: globalContext.getProject()
+        workspace: globalContext.getWorkspace()
+        user: globalContext.getUser()
+        subscription: globalContext.getSubscription()
 
       context.getPermissions = ->
-        isProjectEditor: ->
+        hasEditorAccessToAnyProject: ->
           canEdit
 
       context.getWorkspace = ->
@@ -58,7 +58,7 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
 
     it 'should display some canned text if the grid is empty', ->
       @_createAppWithNoData().then =>
-        expect(@app.getEl().down('.no-data-container').getHTML()).toContain 'Looks like milestones have not yet been defined for the current project'
+        expect(@app.getEl().down('.no-data-container').getHTML()).toContain 'Looks like no milestones have been created'
 
   describe 'project column text', ->
     it 'should indicate project scoping', ->
@@ -81,27 +81,36 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
         expect(@app.getEl().down('.targetproject').getHTML()).toContain 'Project Permissions Required'
 
   describe 'add new', ->
-    beforeEach ->
-      @_createAppWithData().then =>
-        @addNew = @app.down 'rallyaddnew'
+    describe 'fields', ->
+      beforeEach ->
+        @_createAppWithData().then =>
+          @addNew = @app.down 'rallyaddnew'
 
-    it 'includes a field for target date', ->
-      targetDateField = @addNew.additionalFields[0]
-      expect(targetDateField.xtype).toBe 'rallydatefield'
-      expect(targetDateField.emptyText).toBe 'Select Date'
-      expect(targetDateField.name).toBe 'TargetDate'
+      it 'includes a field for target date', ->
+        targetDateField = @addNew.additionalFields[0]
+        expect(targetDateField.xtype).toBe 'rallydatefield'
+        expect(targetDateField.emptyText).toBe 'Select Date'
+        expect(targetDateField.name).toBe 'TargetDate'
 
-    it 'includes a field for target project', ->
-      targetDateField = @addNew.additionalFields[1]
-      expect(targetDateField.xtype).toBe 'rallymilestoneprojectcombobox'
-      expect(targetDateField.name).toBe 'TargetProject'
-      expect(targetDateField.value).toBe @app.getContext().getProjectRef()
+      it 'includes a field for target project', ->
+        targetDateField = @addNew.additionalFields[1]
+        expect(targetDateField.xtype).toBe 'rallymilestoneprojectcombobox'
+        expect(targetDateField.name).toBe 'TargetProject'
+        expect(targetDateField.value).toBe @app.getContext().getProjectRef()
+
+    describe 'existence (not in a philosophical sense)', ->
+      it 'should exist when project editor in any project', ->
+        @_createAppWithNoData(true).then =>
+          expect(@app.down 'rallyaddnew').not.toBeNull()
+
+      it 'should not exist when not project editor in any project', ->
+        @_createAppWithNoData(false).then =>
+          expect(@app.down 'rallyaddnew').toBeNull()
 
   describe 'row actions', ->
     helpers
       createAppAndClickGear: (isAdmin) ->
-        @stub Rally.environment.getContext().getPermissions(), 'isWorkspaceOrSubscriptionAdmin', -> isAdmin
-        @_createAppWithData(TargetProject: null).then =>
+        @_createAppWithData(TargetProject: null, _p: 2 + 5 * isAdmin).then =>
           @click(css: ".btid-row-action-#{@milestoneData[0].ObjectID} .row-action-icon").then ->
             Ext.query('.rally-menu .' + Ext.baseCSSPrefix + 'menu-item-link')
 

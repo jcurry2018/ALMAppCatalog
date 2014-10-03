@@ -22,7 +22,7 @@
                         {
                             xtype: 'rallyrowactioncolumn',
                             rowActionsFn: function (record) {
-                                return Rally.ui.grid.MilestoneProjectEditor.shouldDisableEditing(record.get('TargetProject')) ? [] : [
+                                return [
                                     {
                                         xtype: 'rallyrecordmenuitemdelete',
                                         record: record
@@ -82,32 +82,29 @@
         },
 
         _addNewConfig: function() {
-            if (this.context.getPermissions().isProjectEditor(this.context.getProjectRef())) {
-                return {
-                    recordTypes: ['Milestone'],
-                    showAddWithDetails: false,
-                    openEditorAfterAddFailure: false,
-                    minWidth: 800,
-                    additionalFields: [
-                        {
-                            xtype: 'rallydatefield',
-                            emptyText: 'Select Date',
-                            name: 'TargetDate'
-                        },
-                        {
-                            xtype: 'rallymilestoneprojectcombobox',
-                            minWidth: 250,
-                            name: 'TargetProject',
-                            value: Rally.util.Ref.getRelativeUri(this.getContext().getProject())
-                        }
-                    ]
-                };
-            }
-            return {};
+            return this.context.getPermissions().hasEditorAccessToAnyProject() ? {
+                recordTypes: ['Milestone'],
+                showAddWithDetails: false,
+                openEditorAfterAddFailure: false,
+                minWidth: 800,
+                additionalFields: [
+                    {
+                        xtype: 'rallydatefield',
+                        emptyText: 'Select Date',
+                        name: 'TargetDate'
+                    },
+                    {
+                        xtype: 'rallymilestoneprojectcombobox',
+                        minWidth: 250,
+                        name: 'TargetProject',
+                        value: Rally.util.Ref.getRelativeUri(this.getContext().getProject())
+                    }
+                ]
+            } : {};
         },
 
         _getEmptyText: function() {
-            return '<div class="no-data-container"><div class="primary-message">Looks like milestones have not yet been defined for the current project.</div><div class="secondary-message">Add a milestone with the Add New button above.</div></div>';
+            return '<div class="no-data-container"><div class="primary-message">Looks like no milestones have been created.</div><div class="secondary-message">Add a milestone with the Add New button above.</div></div>';
         }
     });
 })();
