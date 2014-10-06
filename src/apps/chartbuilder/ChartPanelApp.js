@@ -11,6 +11,7 @@
 		requires: [
 			'Rally.apps.chartbuilder.EaselAlmBridge',
 			'Rally.ui.combobox.MilestoneComboBox',
+			"Rally.apps.chartbuilder.StateFieldPicker",
 			'Rally.util.Help'
 		],
 		autoScroll: false,
@@ -37,6 +38,8 @@
 		],
 
 		showSettings: function() {
+			// this feels like a hack
+			this.owner.defaultSettings = this.getDefaultSettings();
 			this.owner.showSettings();
 		},
 

@@ -18,6 +18,12 @@
 					label: "Project"
 				};
 			},
+			'state-field-picker': function(easelSettingsField) {
+				return {
+					xtype: 'rallychartbuildersettingsstatefieldpicker',
+					name: easelSettingsField.name
+				};
+			},
 			'combobox': function(easelSettingsField) {
 				return {
 					xtype: 'rallycombobox',
@@ -33,6 +39,17 @@
 						data: easelSettingsField.items || [{label:'data expected is \'label\' and \'value\'',value:''}]
 					}
 				};
+			}
+		},
+
+		defaultsTransformers: {
+			'state-field-picker' : function(settingsField) {
+				var tmp = {};
+				for (var i=0;i< settingsField.fields.length;i++) {
+					var field = settingsField.fields[i];
+					tmp[field.name] = field['default'];
+				}
+				return JSON.stringify(tmp);
 			}
 		},
 
@@ -61,6 +78,15 @@
 					scopeUp : (settings.projectScopeUp === 'true'),
 					scopeDown : (settings.projectScopeDown === 'true')
 				};
+			},
+
+			'state-field-picker' : function(settings, key) {
+				try {
+					return JSON.parse(settings[key]);
+				} catch (e) {
+					console.error(e);
+					return null;
+				}
 			}
 		},
 
@@ -126,6 +152,21 @@
 				fields.push(p);
 			});
 			return fields;
+		},
+
+		transformDefaults: function(easelSettingsFields) {
+			var self = this;
+			var defaults = {};
+
+			_.each(easelSettingsFields, function(settingsField) {
+				if (self.defaultsTransformers[settingsField.type]) {
+					defaults[settingsField.name] = self.defaultsTransformers[settingsField.type](settingsField);
+				} else {
+					defaults[settingsField.name] = settingsField['default'];
+				}
+			});
+
+			return defaults;
 		}
 	});
 }());

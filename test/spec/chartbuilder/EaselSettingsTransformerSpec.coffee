@@ -76,8 +76,6 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 		converted = @xformer.transform(settingsFields)
 		expect(converted).toEqual settingsFields
 
-
-
 	it 'converts project-picker into settings project picker', ->
 		settingsFields = [
 			{ type: 'project-picker', name: 'xyzy' }
@@ -93,7 +91,6 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 
 		converted = @xformer.transform(settingsFields)
 		expect(converted).toEqual expected
-
 
 	it 'should convert flat project-picker settings to a nice object', ->
 		settingsFields = [
@@ -112,7 +109,6 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 		expect(value.scopeUp).toBe true
 		expect(value.scopeDown).toBe false
 
-
 	it 'should convert all values', ->
 		settingsFields = [
 			{ type: 'project-picker', name:'zzzz' },
@@ -125,14 +121,11 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 			projectScopeUp : 'true'
 			projectScopeDown: 'false'
 
-
 		value = @xformer.getValues(settingsFields, settings)
 		expect(value.yyyy).toBe "wassup?"
 		expect(value.zzzz.project).toBe 1234
 		expect(value.zzzz.scopeUp).toBe true
 		expect(value.zzzz.scopeDown).toBe false
-
-
 
 	it 'converts milestone-picker into settings milestone picker', ->
 		settingsFields = [
@@ -150,8 +143,6 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 		converted = @xformer.transform(settingsFields)
 		expect(converted).toEqual expected
 
-
-
 	it 'should convert milestone-picker settings to a nice object', ->
 		settingsFields = [
 			{ type: 'milestone-picker', name:'zzzz' }
@@ -164,3 +155,39 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 
 		value = @xformer.getValue(settingsFields, settings, key)
 		expect(value).toBe 1234
+
+	it 'converts state-field-picker into settings milestone picker', ->
+		settingsFields = [
+			{
+				type: 'state-field-picker', name: 'xyz', label: 'State Field', multi: true, fields: [
+					{ name: 'name', default: 'alphabet', label: 'State Field Name' },
+					{ name: 'values', default: 'a,b,c,d,e,f', label: 'State Field Values' }
+				]
+			}
+		]
+
+		expected = [
+			{
+				xtype: 'rallychartbuildersettingsstatefieldpicker',
+				name: 'xyz'
+			}
+		]
+
+		converted = @xformer.transform(settingsFields)
+		expect(converted).toEqual expected
+
+	it 'should convert state-field-picker settings to a nice object', ->
+		settingsFields = [
+			{
+				type: 'state-field-picker', name: 'xyz', label: 'State Field', multi: true, fields: [
+					{ name: 'name', default: 'alphabet', label: 'State Field Name' },
+					{ name: 'values', default: 'a,b,c,d,e,f', label: 'State Field Values' }
+				]
+			}
+		]
+
+		settings =
+			xyz: '{"name":"n","values":[1,2,3]}'
+
+		expect(@xformer.getValue(settingsFields, settings, 'xyz').name).toEqual 'n'
+		expect(@xformer.getValue(settingsFields, settings, 'xyz').values).toEqual [1,2,3]

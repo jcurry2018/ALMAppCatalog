@@ -14,13 +14,15 @@
 
 		requires: ['Rally.apps.chartbuilder.EaselSettingsTransformer'],
 
-		defaultSettings : {},
+		defaultSettings: {},
+
 		/**
 		 * These are the settings fields coming from the chart definition
 		 */
-		easelSettingsFields : {},
+		easelSettingsFields: {},
+
 		config: {
-			chartType : 'none',
+			chartType: 'none',
 			/**
 			 *  settings from which getSetting is delivered. it's assumed this structure
 			 *  is updated in place and is passed in during construction from the app
@@ -34,7 +36,7 @@
 			this.initConfig(config);
 		},
 
-		getApp : function() {
+		getApp: function() {
 			return this.config.app || {
 				getSettings : function() { return {}; },
 				getContext : function() { return Rally.environment.getContext(); }
@@ -70,7 +72,7 @@
 			c.log(a,b);
 		},
 
-		getSetting : function(name) {
+		getSetting: function(name) {
 			return this.transformer.getValue(this.easelSettingsFields, this.getAppSettings(), name);
 		},
 
@@ -78,32 +80,27 @@
 			return this.transformer.getValues(this.easelSettingsFields, this.getAppSettings());
 		},
 
-		getContext : function() {
+		getContext: function() {
 			return this.getApp().getContext();
 		},
 
-		getAppSettings : function() {
+		getAppSettings: function() {
 			return this.getApp().getSettings();
 		},
 
-		getDefaultSettings : function() {
+		getDefaultSettings: function() {
 			return this.defaultSettings;
 		},
 
-		getSettingsFields : function() {
+		getSettingsFields: function() {
 			var listOfTransformedSettings = this.transformer.transform(this.easelSettingsFields);
 			return listOfTransformedSettings;
 		},
 
-		registerSettingsFields : function(easelSettingsFields) {
-			var self = this;
+		registerSettingsFields: function(easelSettingsFields) {
+			// var self = this;
 			this.easelSettingsFields = easelSettingsFields;
-
-			_.each(this.easelSettingsFields, function(settingField) {
-				if (settingField['default']) {
-					self.defaultSettings[settingField.name] = settingField['default'];
-				}
-			});
+			this.defaultSettings = this.transformer.transformDefaults(easelSettingsFields);
 		},
 
 		getChartType: function() {

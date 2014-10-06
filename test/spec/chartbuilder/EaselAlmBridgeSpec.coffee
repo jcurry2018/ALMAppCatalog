@@ -64,3 +64,12 @@ describe 'Rally.apps.chartbuilder.EaselAlmBridge', ->
 		])
 		expect(@api.getDefaultSettings()['has-default']).toBe 'the default value'
 		expect(@api.getDefaultSettings()['has-no-default']).toBeUndefined()
+
+	it 'picks up default setting for top-level setting when no fields are specified for a multi-field setting', ->
+		@api.registerSettingsFields([
+			{type: 'text', name: 'top-level-field', label: 'Top Level', multi: true, default: 'z' }
+		])
+		expect(@api.getDefaultSettings()['sub-field-1']).toBeUndefined()
+		expect(@api.getDefaultSettings()['sub-field-2']).toBeUndefined()
+		expect(@api.getDefaultSettings()['top-level-field']).toBe 'z'
+
