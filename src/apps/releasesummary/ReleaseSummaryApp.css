@@ -1,29 +1,3 @@
-.releasesummary .header {
-    padding-top: 10px;
-}
-
-.releasesummary .grid {
-    padding-top: 5px;
-}
-
-.releasesummary .releaseInfo {
-    padding-left: 30px;
-    font-family: NotoSans, Helvetica, Arial;
-}
-
-.releasesummary .gridTitle {
-    font-family: ProximaNova, Helvetica, Arial;
-    padding: 10px 0px 10px 5px;
-    font-weight: bold;
-    font-size: 14px;
-}
-
-.releasesummary {
-    color: #000;
-    font-size: 11px;
-    font-family: NotoSans,helvetica,sans-serif;
-}
-
 /* While printing, show entire app height-wise */
 .print-page .releasesummary {
     height: 100%;

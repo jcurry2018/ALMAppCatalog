@@ -13,68 +13,96 @@
             ptype: 'rallyappprinting'
         }],
         scopeType: 'release',
+        supportsUnscheduled: false,
 
         launch: function() {
-            this.add(
-                {
-                    xtype: 'container',
-                    itemId: 'releaseInfo',
-                    tpl: [
-                        '<div class="releaseInfo"><p><b>About this release: </b><br />',
-                        '<p class="release-notes">{notes}</p>',
-                        'Additional information is available <a href="{detailUrl}" target="_top">here.</a></p></div>'
-                    ]
-                },
-                {
-                    xtype: 'container',
-                    itemId: 'stories',
-                    items: [{
-                        xtype: 'label',
-                        itemId: 'story-title',
-                        componentCls: 'gridTitle',
-                        text: 'Stories:'
-                    }]
-                },
-                {
-                    xtype: 'container',
-                    itemId: 'defects',
-                    items: [{
-                        xtype: 'label',
-                        itemId: 'defect-title',
-                        text: 'Defects:',
-                        componentCls: 'gridTitle'
-                    }]
-                }
-            );
+            this.add({
+                xtype: 'component',
+                itemId: 'release-info',
+                tpl: [
+                    '<div class="release-info"><p><b>About this release: </b><br />',
+                    '<p class="release-notes">{notes}</p>',
+                    'Additional information is available <a href="{detailUrl}" target="_top">here.</a></p></div>'
+                ]
+            });
+
             this.callParent(arguments);
         },
 
         onScopeChange: function(scope) {
-            if(!this.models) {
+            this._loadReleaseDetails(scope);
+
+            if(!this.down('#story-grid')) {
                 Rally.data.ModelFactory.getModels({
-                    types: ['UserStory', 'Defect'],
+                    types: ['UserStory', 'Defect']
+                }).then({
                     success: function(models) {
-                        this.models = models;
-                        this._buildGrids();
-                        this._loadReleaseDetails(scope);
+                        this._buildGrids(models);
                     },
                     scope: this
                 });
             } else {
                 this._refreshGrids();
-                this._loadReleaseDetails(scope);
             }
+        },
+
+        onNoAvailableTimeboxes: function() {
+            var storyGrid = this.down('#story-grid'),
+                defectGrid = this.down('#defect-grid'),
+                releaseInfo = this.down('#release-info');
+
+            if (storyGrid) {
+                storyGrid.destroy();
+            }
+            if (defectGrid) {
+                defectGrid.destroy();
+            }
+            if (releaseInfo) {
+                releaseInfo.getEl().setHTML('');
+            }
+        },
+
+        _buildGrids: function(models) {
+            this.add(this._getGridConfig({
+                    itemId: 'story-grid',
+                    title: 'Stories',
+                    enableBulkEdit: false,
+                    store: Ext.create('Rally.data.wsapi.TreeStore', this._getStoreConfig({
+                        model: models.UserStory,
+                        parentTypes: [models.UserStory.typePath]
+                    })),
+                    listeners: {
+                        storeload: function (store) {
+                            this.down('#story-grid').setTitle('Stories: ' + store.getTotalCount());
+                        },
+                        scope: this
+                    }
+                })
+            );
+
+            this.add(this._getGridConfig({
+                itemId: 'defect-grid',
+                title: 'Defects',
+                store: Ext.create('Rally.data.wsapi.TreeStore', this._getStoreConfig({
+                    model: models.Defect,
+                    parentTypes: [models.Defect.typePath]
+                })),
+                listeners: {
+                    storeload: function(store) {
+                        this.down('#defect-grid').setTitle('Defects: ' + store.getTotalCount());
+                    },
+                    scope: this
+                }
+            }));
         },
 
         _loadReleaseDetails: function(scope) {
             var release = scope.getRecord();
             if (release) {
-                var releaseModel = release.self;
-
-                releaseModel.load(Rally.util.Ref.getOidFromRef(release), {
+                release.self.load(Rally.util.Ref.getOidFromRef(release), {
                     fetch: ['Notes'],
                     success: function(record) {
-                        this.down('#releaseInfo').update({
+                        this.down('#release-info').update({
                             detailUrl: Rally.nav.Manager.getDetailUrl(release),
                             notes: record.get('Notes')
                         });
@@ -84,92 +112,47 @@
             }
         },
 
-        _buildGrids: function() {
-            var storyStoreConfig = this._getStoreConfig({
-                model: this.models.UserStory,
-                listeners: {
-                    load: this._onStoriesDataLoaded,
-                    scope: this
-                }
-            });
-            this.down('#stories').add(this._getGridConfig({
-                itemId: 'story-grid',
-                model: this.models.UserStory,
-                storeConfig: storyStoreConfig
-            }));
-
-            var defectStoreConfig = this._getStoreConfig({
-                model: this.models.Defect,
-                listeners: {
-                    load: this._onDefectsDataLoaded,
-                    scope: this
-                }
-            });
-            this.down('#defects').add(this._getGridConfig({
-                itemId: 'defect-grid',
-                model: this.models.Defect,
-                storeConfig: defectStoreConfig
-            }));
-        },
-
         _getStoreConfig: function(storeConfig) {
             return Ext.apply({
                 autoLoad: true,
+                context: this.getContext().getDataContext(),
+                requester: this,
                 fetch: ['FormattedID', 'Name', 'ScheduleState'],
                 filters: [this.getContext().getTimeboxScope().getQueryFilter()],
                 sorters: [{
-                    property: 'FormattedID',
+                    property: 'Rank',
                     direction: 'ASC'
-                }],
-                pageSize: 25
+                }]
             }, storeConfig);
         },
 
-
         _getGridConfig: function(config) {
             return Ext.apply({
-                xtype: 'rallygrid',
-                componentCls: 'grid',
+                xtype: 'rallytreegrid',
+                style: {
+                    width: '99%' //fix scrollbar issue, better way to do this?
+                },
                 showRowActionsColumn: false,
                 columnCfgs: [
                     'FormattedID',
-                    {text: 'Name', dataIndex: 'Name', flex: 3},
-                    {text: 'Schedule State', dataIndex: 'ScheduleState', flex: 1, renderer: function(value) {
-                        return value;
-                    }}
+                    'Name',
+                    'ScheduleState'
                 ]
             }, config);
         },
 
         _refreshGrids: function() {
-            var filter = [this.getContext().getTimeboxScope().getQueryFilter()];
-            this.down('#defect-grid').filter(filter, true, true);
-            this.down('#story-grid').filter(filter, true, true);
-        },
-
-        _onStoriesDataLoaded: function (store) {
-            this.down('#story-title').update('Stories: ' + store.getTotalCount());
-            this._storiesLoaded = true;
-            this._fireReady();
-        },
-
-        _onDefectsDataLoaded: function (store) {
-            this.down('#defect-title').update('Defects: ' + store.getTotalCount());
-            this._defectsLoaded = true;
-            this._fireReady();
-        },
-
-        _fireReady: function() {
-            if(Rally.BrowserTest && this._storiesLoaded && this._defectsLoaded && !this._readyFired) {
-                this._readyFired = true;
-                Rally.BrowserTest.publishComponentReady(this);
-            }
+            var timeboxFilter = [this.getContext().getTimeboxScope().getQueryFilter()],
+                defectGrid = this.down('#defect-grid'),
+                storyGrid = this.down('#story-grid');
+            defectGrid.store.clearFilter(true);
+            storyGrid.store.clearFilter(true);
+            storyGrid.store.filter(timeboxFilter);
+            defectGrid.store.filter(timeboxFilter);
         },
 
         getOptions: function() {
-            return [
-                this.getPrintMenuOption({title: 'Release Summary App'}) //from printable mixin
-            ];
+            return [this.getPrintMenuOption({title: 'Release Summary App'})]; //from printable mixin
         }
     });
 })();
