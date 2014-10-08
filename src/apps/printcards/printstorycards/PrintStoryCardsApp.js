@@ -14,6 +14,7 @@
         }],
         componentCls: 'printcards',
         scopeType: 'iteration',
+        autoScroll: false,
 
         launch: function() {
             this.add({
@@ -24,7 +25,7 @@
         },
 
         onScopeChange: function(scope) {
-            this.down('#cards').getEl().dom.innerHTML = '';
+            this.down('#cards').getEl().setHTML('');
             this._loadStories(scope);
         },
 
