@@ -1,16 +1,14 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    //TODO: update github src link when done
-    //TODO: enable inline editing of addl fields on cards
-    //TODO: need to update attr defs to enable filtering by workproduct.schedulestate
     Ext.define('Rally.apps.taskboard.TaskBoardApp', {
         extend: 'Rally.app.TimeboxScopedApp',
         requires: [
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
-            'Rally.ui.gridboard.plugin.GridBoardAddNew'
+            'Rally.ui.gridboard.plugin.GridBoardAddNew',
+            'Rally.apps.taskboard.TaskBoardHeader'
         ],
         cls: 'taskboard',
         alias: 'widget.taskboardapp',
@@ -187,7 +185,10 @@
                             direction: 'ASC'
                         }
                     ],
-                    values: _.pluck(rowRecords, 'data')
+                    values: _.pluck(rowRecords, 'data'),
+                    headerConfig: {
+                        xtype: 'rallytaskboardrowheader'
+                    }
                 },
                 margin: '10px 0 0 0'
             };

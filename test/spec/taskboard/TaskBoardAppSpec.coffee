@@ -108,6 +108,11 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
         expect(@artifactStub).toBeWsapiRequestWith
           sorters: [{property: Rally.data.Ranker.RANK_FIELDS.DND, direction: 'ASC'}]
 
+    it 'uses task board header for each row', ->
+      @createApp().then =>
+        board = @app.down 'rallycardboard'
+        expect(board.rowConfig.headerConfig.xtype).toEqual 'rallytaskboardrowheader'
+
     it 'includes explicit sorters', ->
       @createApp().then =>
         board = @app.down 'rallycardboard'
