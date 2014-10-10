@@ -23,6 +23,20 @@
                 '</td>' +
                 '</tr>' +
                 '</table>';
+        },
+
+        getHtml: function() {
+            return this.callParent(arguments).replace(/<div class="status-content">/,
+                    '<div class="status-content">' +
+                    this._statusFieldHtml('AssociatedUserStories', 'story') +
+                    this._statusFieldHtml('AssociatedDefects', 'defect') +
+                    this._statusFieldHtml('AssociatedTasks', 'task') +
+                    this._statusFieldHtml('AssociatedDiscussion', 'comment')
+            );
+        },
+
+        _statusFieldHtml: function(fieldName, iconName) {
+            return '<div class="field-content status-field ' + fieldName + '"><div class="status-value"><span class="icon-' + iconName + ' associated-artifacts-icon"></span></div></div>';
         }
     });
 })();

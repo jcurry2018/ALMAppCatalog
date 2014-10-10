@@ -75,7 +75,7 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
         assertFieldsShownOnCard: (fieldNames) ->
           cardEl = @cardboard().getColumns()[0].getCards()[0].getEl()
 
-          expect(cardEl.query('.field-content').length).toBe fieldNames.length
+          expect(cardEl.query('.rui-card-content > .field-content').length).toBe fieldNames.length
 
           for fieldName in fieldNames
             expect(cardEl.down('.field-content.' + fieldName)).not.toBeNull()

@@ -8,6 +8,7 @@
         requires: [
             'Rally.apps.teamboard.TeamBoardCardContentLeft',
             'Rally.apps.teamboard.TeamBoardCardContentRight',
+            'Rally.apps.teamboard.TeamBoardCardPopover',
             'Rally.apps.teamboard.TeamBoardUtil',
             'Rally.util.User'
         ],
@@ -31,11 +32,7 @@
         },
 
         setupPlugins: function(){
-            return [{
-                ptype: 'rallyteamboardcardcontentleft'
-            }, {
-                ptype: 'rallyteamboardcardcontentright'
-            }];
+            return ['rallyteamboardcardcontentleft', 'rallyteamboardcardcontentright', 'rallyteamboardcardpopover'];
         },
 
         _buildHtml: function() {
