@@ -39,10 +39,6 @@
             return this.groupBy ? _.union(this.callParent(arguments), [this.groupBy]) : this.callParent(arguments);
         },
 
-        getIterationRef: function() {
-            return this.getColumnHeader().down('rallyiterationcombobox').getValue();
-        },
-
         getStoreFilter: function(model) {
             return {
                 property: this.attribute,

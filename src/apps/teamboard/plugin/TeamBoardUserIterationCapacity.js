@@ -102,7 +102,6 @@
                     }
                 }],
                 target: target,
-                title: 'Tasks',
                 width: 700
             });
         },
