@@ -6,10 +6,10 @@
         alias: 'widget.rallyteamboardcard',
         extend: 'Rally.ui.cardboard.Card',
         requires: [
+            'Rally.apps.teamboard.TeamBoardCardContentLeft',
+            'Rally.apps.teamboard.TeamBoardCardContentRight',
+            'Rally.apps.teamboard.TeamBoardCardPopover',
             'Rally.apps.teamboard.TeamBoardUtil',
-            'Rally.apps.teamboard.plugin.TeamBoardCardContentLeft',
-            'Rally.apps.teamboard.plugin.TeamBoardCardContentRight',
-            'Rally.apps.teamboard.plugin.TeamBoardCardPopover',
             'Rally.util.User'
         ],
 
