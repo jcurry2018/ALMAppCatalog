@@ -1,7 +1,7 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define('Rally.apps.teamboard.TeamBoardCardPopover', {
+    Ext.define('Rally.apps.teamboard.plugin.TeamBoardCardPopover', {
         alias: 'plugin.rallyteamboardcardpopover',
         extend: 'Rally.ui.cardboard.plugin.CardPopover',
         requires: ['Rally.ui.discussion.DiscussionRichTextStreamView', 'Rally.ui.grid.Grid'],

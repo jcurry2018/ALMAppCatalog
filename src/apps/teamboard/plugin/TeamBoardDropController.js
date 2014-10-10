@@ -1,7 +1,7 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define('Rally.apps.teamboard.TeamBoardDropController', {
+    Ext.define('Rally.apps.teamboard.plugin.TeamBoardDropController', {
         alias: 'plugin.rallyteamboarddropcontroller',
         extend: 'Rally.ui.cardboard.plugin.ColumnDropController',
         requires: ['Rally.data.util.RecordCollection'],

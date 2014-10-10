@@ -5,7 +5,7 @@
         extend: 'Rally.ui.cardboard.Column',
         alias: 'widget.rallyteamcolumn',
         requires: [
-            'Rally.apps.teamboard.TeamBoardDropController',
+            'Rally.apps.teamboard.plugin.TeamBoardDropController',
             'Rally.apps.teamboard.plugin.TeamBoardUserIterationCapacity',
             'Rally.apps.teamboard.plugin.TeamBoardWip',
             'Rally.ui.cardboard.plugin.ColumnCardCounter',
