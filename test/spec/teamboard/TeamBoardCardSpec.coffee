@@ -9,23 +9,6 @@ describe 'Rally.apps.teamboard.TeamBoardCard', ->
   afterEach ->
     @card.destroy()
 
-  describe 'color', ->
-    helpers
-      cardColor: ->
-        @card.getEl().down('.artifact-color').getStyle 'background-color'
-
-    it 'should be default color when groupBy not specified', ->
-      @createCard()
-
-      expect(@cardColor()).toBe 'rgb(169, 169, 169)'
-
-    it 'should be a hash of the groupBy field value', ->
-      @record.set 'Role', 'Developer'
-
-      @createCard groupBy: 'Role'
-
-      expect(@cardColor()).toBe 'rgb(170, 7, 163)'
-
   describe 'header', ->
     helpers
       cardHeader: ->
@@ -71,8 +54,7 @@ describe 'Rally.apps.teamboard.TeamBoardCard', ->
       expect(@rightSide().down('.' + Rally.ui.cardboard.plugin.CardContentRight.BOTTOM_SIDE_CLS)).not.toBeNull()
 
   helpers
-    createCard: (config) ->
-      @card = Ext.create 'Rally.apps.teamboard.TeamBoardCard', Ext.apply
+    createCard: ->
+      @card = Ext.create 'Rally.apps.teamboard.TeamBoardCard',
         record: @record
         renderTo: 'testDiv'
-      , config

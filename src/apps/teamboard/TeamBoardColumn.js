@@ -35,10 +35,6 @@
             // Don't need to do anything to the User record
         },
 
-        getAllFetchFields: function() {
-            return this.groupBy ? _.union(this.callParent(arguments), [this.groupBy]) : this.callParent(arguments);
-        },
-
         getStoreFilter: function(model) {
             return {
                 property: this.attribute,
@@ -49,25 +45,6 @@
 
         isMatchingRecord: function(record){
             return true;
-        },
-
-        _sortRecords: function(records) {
-            var groupBy = this.groupBy;
-            if(groupBy) {
-                var groupedRecords = _.groupBy(this.getStore().getRange(), function(record){
-                    return record.get(groupBy);
-                });
-
-                records.sort(function(record1, record2){
-                    var value1 = record1.get(groupBy);
-                    var value2 = record2.get(groupBy);
-                    var frequency1 = value1 && value1 !== 'None' ? (groupedRecords[value1] ? groupedRecords[value1].length : 1) : Infinity;
-                    var frequency2 = value2 && value2 !== 'None' ? (groupedRecords[value2] ? groupedRecords[value2].length : 1) : Infinity;
-                    return (frequency1 - frequency2) || value1.localeCompare(value2) || record1.get('FirstName').localeCompare(record2.get('FirstName'));
-                }, this);
-            } else {
-                this.callParent(arguments);
-            }
         },
 
         _addIterationCombo: function() {

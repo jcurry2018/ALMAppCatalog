@@ -37,6 +37,6 @@
     width: 70px;
 }
 
-.team-board-app .rui-card.non-team-member-card {
-    background-color: #e0e0e0;
+.team-board-app .rui-card.non-team-member-card .artifact-color {
+    background-color: #BDD7EA;
 }

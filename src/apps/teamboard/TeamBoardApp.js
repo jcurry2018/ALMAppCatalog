@@ -9,15 +9,17 @@
             'Rally.apps.teamboard.TeamBoardProjectRecordsLoader',
             'Rally.apps.teamboard.TeamBoardSettings',
             'Rally.apps.teamboard.TeamBoardUtil',
-            'Rally.data.ModelFactory',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.plugin.Scrollable'
         ],
 
+        statics: {
+            ATTRIBUTES_VISIBLE_TO_WS_NON_ADMIN_USERS: ['ObjectID', 'EmailAddress', 'Phone', 'UserName', 'DisplayName', 'FirstName', 'MiddleName', 'LastName', 'Disabled', 'Role', 'Department', 'OfficeLocation', 'CostCenter', 'LoginName']
+        },
+
         config: {
             defaultSettings: {
-                cardFields: 'OfficeLocation,Phone',
-                groupBy: 'Role'
+                cardFields: 'OfficeLocation,Phone'
             }
         },
 
@@ -25,21 +27,11 @@
         settingsScope: 'workspace',
 
         launch: function() {
-            Rally.data.ModelFactory.getModel({
-                type: 'User',
-                scope: this,
-                success: this._onUserModelLoaded
-            });
+            Rally.apps.teamboard.TeamBoardProjectRecordsLoader.load(this.getSetting('teamOids'), this._onTeamsLoaded, this);
         },
 
         getSettingsFields: function() {
-            return Rally.apps.teamboard.TeamBoardSettings.getFields(this.userModel);
-        },
-
-        _onUserModelLoaded: function(userModel) {
-            this.userModel = userModel;
-
-            Rally.apps.teamboard.TeamBoardProjectRecordsLoader.load(this.getSetting('teamOids'), this._onTeamsLoaded, this);
+            return Rally.apps.teamboard.TeamBoardSettings.getFields();
         },
 
         _showNoDataMessage: function(msg){
@@ -61,16 +53,15 @@
         },
 
         _getCardboardConfig: function(teams) {
-            var groupBy = this.getSetting('groupBy');
-            groupBy = groupBy && this.userModel.hasField(groupBy) ? groupBy : undefined;
-
             return {
                 xtype: 'rallycardboard',
                 attribute: 'TeamMemberships',
                 cardConfig: {
                     xtype: 'rallyteamboardcard',
-                    fields: this.getSetting('cardFields') ? this.getSetting('cardFields').split(',') : [],
-                    groupBy: groupBy
+                    fields: this.getSetting('cardFields') ? Ext.Array.filter(this.getSetting('cardFields').split(','), function(field){
+                        return Rally.environment.getContext().getPermissions().isWorkspaceOrSubscriptionAdmin() ||
+                            Ext.Array.contains(this.self.ATTRIBUTES_VISIBLE_TO_WS_NON_ADMIN_USERS, field);
+                    }, this) : []
                 },
                 context: this.getContext(),
                 columns: Ext.Array.map(teams, function(team) {
@@ -80,7 +71,6 @@
                             xtype: 'rallycardboardcolumnheader',
                             headerTpl: Rally.apps.teamboard.TeamBoardUtil.linkToAdminPage(team, team.get('_refObjectName'), 'users')
                         },
-                        groupBy: groupBy,
                         value: team.get('_ref')
                     };
                 }, this),
@@ -99,8 +89,17 @@
                 ],
                 readOnly: !Rally.environment.getContext().getPermissions().isWorkspaceOrSubscriptionAdmin(),
                 storeConfig: {
-                    filters: [ {property: 'Disabled', value: 'false'} ],
-                    sorters: [ {direction: 'ASC', property: 'FirstName'} ]
+                    filters: [
+                        {
+                            property: 'Disabled',
+                            operator: '=',
+                            value: 'false'
+                        }
+                    ],
+                    sorters: [{
+                        direction: 'ASC',
+                        property: 'FirstName'
+                    }]
                 },
                 types: ['User']
             };

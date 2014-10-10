@@ -1,4 +1,3 @@
-/*jshint bitwise: false*/
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
@@ -15,18 +14,6 @@
         inheritableStatics: {
             getFetchFields: function() {
                 return ['FirstName', 'LastName', 'Role'];
-            },
-
-            //From http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
-            stringToColour: function(str) {
-                var i, hash = 0, colour = '#';
-                for (i = 0; i < str.length; ){
-                    hash = str.charCodeAt(i++) + ((hash << 5) - hash);
-                }
-                for (i = 0; i < 3; ){
-                    colour += ("00" + ((hash >> i++ * 8) & 0xFF).toString(16)).slice(-2);
-                }
-                return colour;
             }
         },
 
@@ -36,14 +23,6 @@
             }, {
                 ptype: 'rallyteamboardcardcontentright'
             }];
-        },
-
-        _buildHtml: function() {
-            if(this.groupBy) {
-                this.record.set('DisplayColor', this.self.stringToColour(this.record.get(this.groupBy)));
-            }
-
-            return this.callParent(arguments);
         }
     });
 
