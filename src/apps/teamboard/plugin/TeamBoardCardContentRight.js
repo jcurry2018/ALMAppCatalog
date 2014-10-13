@@ -1,7 +1,7 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define('Rally.apps.teamboard.TeamBoardCardContentRight', {
+    Ext.define('Rally.apps.teamboard.plugin.TeamBoardCardContentRight', {
         alias: 'plugin.rallyteamboardcardcontentright',
         extend: 'Ext.AbstractPlugin',
         requires: ['Rally.ui.cardboard.plugin.CardContentRight'],

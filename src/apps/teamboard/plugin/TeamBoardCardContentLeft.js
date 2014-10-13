@@ -1,7 +1,7 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define('Rally.apps.teamboard.TeamBoardCardContentLeft', {
+    Ext.define('Rally.apps.teamboard.plugin.TeamBoardCardContentLeft', {
         alias: 'plugin.rallyteamboardcardcontentleft',
         extend: 'Rally.ui.cardboard.plugin.CardContentLeft',
 
@@ -23,6 +23,20 @@
                 '</td>' +
                 '</tr>' +
                 '</table>';
+        },
+
+        getHtml: function() {
+            return this.callParent(arguments).replace(/<div class="status-content">/,
+                    '<div class="status-content">' +
+                    this._statusFieldHtml('AssociatedUserStories', 'story') +
+                    this._statusFieldHtml('AssociatedDefects', 'defect') +
+                    this._statusFieldHtml('AssociatedTasks', 'task') +
+                    this._statusFieldHtml('AssociatedDiscussion', 'comment')
+            );
+        },
+
+        _statusFieldHtml: function(fieldName, iconName) {
+            return '<div class="field-content status-field ' + fieldName + '"><div class="status-value"><span class="icon-' + iconName + ' associated-artifacts-icon"></span></div></div>';
         }
     });
 })();
