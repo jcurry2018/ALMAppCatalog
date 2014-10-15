@@ -43,7 +43,6 @@
         ],
 
         mixins: [
-            'Rally.app.CardFieldSelectable',
             'Rally.clientmetrics.ClientMetricsRecordable'
         ],
         componentCls: 'iterationtrackingboard',
@@ -378,7 +377,7 @@
                 }
             });
 
-            var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner'];
+            var alwaysSelectedValues = ['FormattedID', 'Name'];
             if (context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
                 alwaysSelectedValues.push('DragAndDropRank');
             }
@@ -413,7 +412,8 @@
                     'Successors',
                     'Predecessors'
                 ],
-                alwaysSelectedValues: alwaysSelectedValues,
+                gridAlwaysSelectedValues: alwaysSelectedValues,
+                boardAlwaysSelectedValues: alwaysSelectedValues.concat(['Owner']),
                 modelNames: this.modelNames,
                 boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
                     ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']

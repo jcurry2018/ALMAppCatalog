@@ -349,7 +349,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
           expect(plugin.headerPosition).toBe 'left'
           expect(plugin.modelNames).toEqual ['User Story', 'Defect']
           expect(plugin.boardFieldDefaults).toEqual @app.getSetting('cardFields').split(',')
-          expect(plugin.alwaysSelectedValues).toEqual ['FormattedID', 'Name', 'Owner', 'BlockedReason']
 
   helpers
     createApp: (settings = {}, options = {}, context = {}) ->

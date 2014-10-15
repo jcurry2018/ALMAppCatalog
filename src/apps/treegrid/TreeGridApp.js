@@ -82,7 +82,7 @@
             var plugins = [],
                 context = this.getContext();
 
-            var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner'];
+            var alwaysSelectedValues = ['FormattedID', 'Name'];
             if (context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
                 alwaysSelectedValues.push('DragAndDropRank');
             }
@@ -116,7 +116,7 @@
                     'Predecessors'
                 ],
                 margin: '3 9 14 0',
-                alwaysSelectedValues: alwaysSelectedValues,
+                gridAlwaysSelectedValues: alwaysSelectedValues,
                 modelNames: modelNamesArray
             });
 

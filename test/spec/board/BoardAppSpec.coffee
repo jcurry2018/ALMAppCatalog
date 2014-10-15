@@ -131,7 +131,6 @@ describe 'Rally.apps.board.BoardApp', ->
           expect(plugin.headerPosition).toBe 'left'
           expect(plugin.modelNames).toEqual [@app.getSetting('type')]
           expect(plugin.boardFieldDefaults).toEqual @app.getSetting('fields').split(',')
-          expect(plugin.alwaysSelectedValues).toEqual ['FormattedID', 'Name', 'Owner']
 
   helpers
     createApp: (settings = {}, options = {}) ->

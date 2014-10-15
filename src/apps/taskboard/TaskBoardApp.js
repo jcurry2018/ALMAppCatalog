@@ -105,7 +105,6 @@
                     {
                         ptype: 'rallygridboardfieldpicker',
                         headerPosition: 'left',
-                        alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'],
                         modelNames: modelNames,
                         boardFieldDefaults: ['Estimate', 'ToDo']
                     }

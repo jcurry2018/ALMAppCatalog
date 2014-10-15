@@ -56,7 +56,6 @@
                         ptype: 'rallygridboardfieldpicker',
                         headerPosition: 'left',
                         boardFieldBlackList: ['Successors', 'Predecessors', 'DisplayColor'],
-                        alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'],
                         modelNames: modelNames,
                         boardFieldDefaults: (this.getSetting('fields')
                             && this.getSetting('fields').split(',')) || []
