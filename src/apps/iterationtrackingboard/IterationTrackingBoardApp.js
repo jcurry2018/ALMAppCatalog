@@ -601,7 +601,8 @@
                 store: gridStore,
                 columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
-                shouldOptimizeSummaryRow: this.getContext().isFeatureEnabled('ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE'),
+                shouldOptimizeSummaryRow: context.isFeatureEnabled('ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE'),
+                enableInlineAdd: context.isFeatureEnabled('F6038_ENABLE_INLINE_ADD'),
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 editingConfig: {
                     reduceLayouts: context.isFeatureEnabled('ADD_SPEED_HOLES_TO_TREE_GRID_APPS')
@@ -616,7 +617,7 @@
                 stateId: stateId,
                 stateful: true,
                 shouldOptimizeLayouts: this.config.optimizeFrontEndPerformanceIterationStatus,
-                variableRowHeight: !this.getContext().isFeatureEnabled('S75353_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT')
+                variableRowHeight: !context.isFeatureEnabled('S75353_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT')
             };
 
             gridConfig.plugins.push({
