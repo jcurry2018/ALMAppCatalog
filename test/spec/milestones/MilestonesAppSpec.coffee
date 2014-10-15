@@ -50,9 +50,10 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
         expect(@app.getEl().down('#addNewContainer .x-btn-inner')).toBeNull()
 
     it 'should display data in the grid', ->
-      @_createAppWithData(TargetDate: new Date).then =>
+      @_createAppWithData(TargetDate: new Date, DisplayColor: '#FF0000').then =>
         expect(@app.getEl().down('.formatted-id-template').getHTML()).toContain @milestoneData[0].FormattedID
         expect(@app.getEl().down('.name').getHTML()).toContain @milestoneData[0].Name
+        expect(@app.getEl().down('.displaycolor').getHTML()).toContain @milestoneData[0].DisplayColor
         expect(@app.getEl().down('.targetdate').getHTML()).toContain @milestoneData[0].TargetDate.getFullYear()
         expect(@app.getEl().down('.artifacts').getHTML()).toContain @milestoneData[0].TotalArtifactCount
 

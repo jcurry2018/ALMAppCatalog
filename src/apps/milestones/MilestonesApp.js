@@ -32,13 +32,19 @@
                         },
                         {
                             dataIndex: 'FormattedID',
-                            renderer: function(formattedID) {
+                            renderer: function(formattedID, obj, record) {
                                 return Ext.create('Rally.ui.renderer.template.FormattedIDTemplate').apply({
                                    _type: 'milestone',
                                    FormattedID: formattedID,
+                                   DisplayColor: record.get('DisplayColor'),
                                    Recycled: true
                                 });
                             }
+                        },
+                        {
+                            dataIndex: 'DisplayColor',
+                            width: 60,
+                            text: 'Color'
                         },
                         'Name',
                         'TargetDate',
