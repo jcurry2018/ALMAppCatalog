@@ -7,5 +7,7 @@
       "TaskBoardHeader.js",
       "TaskBoardApp.js"
    ],
-   "css": []
+   "css": [
+      "TaskBoardApp.css"
+   ]
 }
