@@ -604,6 +604,7 @@
                 shouldOptimizeSummaryRow: context.isFeatureEnabled('ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE'),
                 enableInlineAdd: context.isFeatureEnabled('F6038_ENABLE_INLINE_ADD'),
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
+                enableBulkEditMilestones: context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE'),
                 editingConfig: {
                     reduceLayouts: context.isFeatureEnabled('ADD_SPEED_HOLES_TO_TREE_GRID_APPS')
                 },
