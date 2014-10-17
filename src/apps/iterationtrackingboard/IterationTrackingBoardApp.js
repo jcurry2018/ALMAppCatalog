@@ -225,7 +225,7 @@
                     recordcreate: this._publishContentUpdatedNoDashboardLayout,
                     scope: this
                 },
-                height: Math.max(this.getAvailableGridBoardHeight(), 150)
+                height: Math.max(this._getAvailableGridBoardHeight(), 150)
             });
         },
 
@@ -297,13 +297,13 @@
             return config;
         },
 
-        /**
-         * @private
-         */
-        getAvailableGridBoardHeight: function() {
+        _getAvailableGridBoardHeight: function() {
             var height = this.getHeight();
-            if(this._shouldShowStatsBanner() && this.down('#statsBanner').rendered) {
+            if (this._shouldShowStatsBanner() && this.down('#statsBanner').rendered) {
                 height -= this.down('#statsBanner').getHeight();
+            }
+            if (this.getHeader()) {
+                height -= this.getHeader().getHeight();
             }
             return height;
         },
@@ -490,7 +490,7 @@
 
         _resizeGridBoardToFillSpace: function() {
             if (this.gridboard) {
-                this.gridboard.setHeight(this.getAvailableGridBoardHeight());
+                this.gridboard.setHeight(this._getAvailableGridBoardHeight());
             }
         },
 

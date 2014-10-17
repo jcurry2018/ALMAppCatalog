@@ -11,8 +11,8 @@ Ext.require [
 describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   helpers
-    createApp: (config)->
-      @stub(Rally.apps.iterationtrackingboard.StatsBanner::, 'getHeight').returns 0
+    createApp: (config, stubStatsBannerHeight = true) ->
+      if (stubStatsBannerHeight) then @stub(Rally.apps.iterationtrackingboard.StatsBanner::, 'getHeight').returns 0
       now = new Date(1384305300 * 1000);
       tomorrow = Rally.util.DateTime.add(now, 'day', 1)
       nextDay = Rally.util.DateTime.add(tomorrow, 'day', 1)
@@ -108,6 +108,18 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     ).then =>
       expect(@app.layout.$className).toBe 'Ext.layout.container.Anchor'
 
+  it 'should not render a header if optimizeHeaderLayout is true', ->
+    originalOptimizeHeaderLayout = Rally.app.TimeboxScopedApp.optimizeHeaderLayout
+    Rally.app.TimeboxScopedApp.optimizeHeaderLayout = true
+    try
+      @createApp(
+        optimizeHeaderLayout: true
+      ).then =>
+        header = @app.down('container[cls=header]')
+        expect(header == null).toBe true
+    finally
+      Rally.app.TimeboxScopedApp.optimizeHeaderLayout = originalOptimizeHeaderLayout
+
   it 'resets view on scope change', ->
     @createApp().then =>
       removeSpy = @spy(@app, 'remove')
@@ -128,7 +140,8 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
   it 'fires storecurrentpagereset on scope change', ->
     @createApp().then =>
       treeGrid = Ext.create 'Ext.Component'
-      @stub(@app, 'down').returns treeGrid
+      downStub = @stub(@app, 'down').withArgs('rallytreegrid').returns treeGrid
+      downStub.withArgs('#statsBanner').returns(Ext.create('Ext.Component'))
 
       storeCurrentPageResetStub = @stub()
       @app.down('rallytreegrid').on 'storecurrentpagereset', storeCurrentPageResetStub
@@ -372,7 +385,23 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
   describe 'sizing', ->
     it 'should set an initial gridboard height', ->
       @createApp().then =>
-        expect(@app.down('rallygridboard').getHeight()).toBe @app.getAvailableGridBoardHeight()
+        expect(@app.down('rallygridboard').getHeight()).toBe @app._getAvailableGridBoardHeight()
+
+    it 'should set gridboard height to available height in app', ->
+      @createApp({}, false).then =>
+        statsBanner = @app.down('#statsBanner')
+        gridBoard = @app.down('rallygridboard')
+        setHeightSpy = @spy gridBoard, 'setHeight'
+
+        header = @app.down('container[cls=header]')
+        # adding something to the header so that it has a height
+        header.add
+          html: '<div>some component</div>'
+
+        @app.setHeight(500);
+
+        @waitForCallback(setHeightSpy).then =>
+          expect(gridBoard.getHeight()).toBe(@app.getHeight() - statsBanner.getHeight() - header.getHeight())
 
     it 'should update the grid or board height', ->
       @createApp().then =>
