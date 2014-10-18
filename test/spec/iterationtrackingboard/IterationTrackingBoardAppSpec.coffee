@@ -96,29 +96,15 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     @app?.destroy()
     Rally.ui.gridboard.GridBoard.prototype.toggleState = @defaultToggleState
 
-  it 'should use auto layout by default', ->
-    @createApp(
-      optimizeFrontEndPerformanceIterationStatus: false
-    ).then =>
-      expect(@app.layout.$className).toBe 'Ext.layout.container.Auto'
-
-  it 'should use anchor layout when the optimizeFrontEndPerformanceIterationStatus flag is passed into the config', ->
-    @createApp(
-      optimizeFrontEndPerformanceIterationStatus: true
-    ).then =>
+  it 'should use anchor layout by default', ->
+    @createApp().then =>
       expect(@app.layout.$className).toBe 'Ext.layout.container.Anchor'
 
-  it 'should not render a header if optimizeHeaderLayout is true', ->
-    originalOptimizeHeaderLayout = Rally.app.TimeboxScopedApp.optimizeHeaderLayout
-    Rally.app.TimeboxScopedApp.optimizeHeaderLayout = true
+  it 'should not render a header', ->
     try
-      @createApp(
-        optimizeHeaderLayout: true
-      ).then =>
+      @createApp().then =>
         header = @app.down('container[cls=header]')
         expect(header == null).toBe true
-    finally
-      Rally.app.TimeboxScopedApp.optimizeHeaderLayout = originalOptimizeHeaderLayout
 
   it 'resets view on scope change', ->
     @createApp().then =>
@@ -301,17 +287,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @toggleToGrid()
         expect(@app.down('#gridBoard').getGridOrBoard().summaryColumns.length).toBe 3
 
-    it 'should optimize summary row when toggled on', ->
-      @stubFeatureToggle ['ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE']
-      @createApp().then =>
-        @toggleToGrid()
-        expect(@app.down('#gridBoard').getGridOrBoard().shouldOptimizeSummaryRow).toBe true
-
-    it 'should not optimize summary row when toggled off', ->
-      @createApp().then =>
-        @toggleToGrid()
-        expect(@app.down('#gridBoard').getGridOrBoard().shouldOptimizeSummaryRow).not.toBe true
-
     it 'should include test sets', ->
       @createApp().then =>
         @toggleToGrid()
@@ -387,16 +362,18 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then =>
         expect(@app.down('rallygridboard').getHeight()).toBe @app._getAvailableGridBoardHeight()
 
-    it 'should set gridboard height to available height in app', ->
+    it 'should factor in header height and stats banner height when determining gridboard height', ->
       @createApp({}, false).then =>
         statsBanner = @app.down('#statsBanner')
         gridBoard = @app.down('rallygridboard')
-        setHeightSpy = @spy gridBoard, 'setHeight'
+        
+        header = @app.add({
+          xtype: 'container',
+          cls: 'header',
+          height: 20
+        });
 
-        header = @app.down('container[cls=header]')
-        # adding something to the header so that it has a height
-        header.add
-          html: '<div>some component</div>'
+        setHeightSpy = @spy gridBoard, 'setHeight'
 
         @app.setHeight(500);
 

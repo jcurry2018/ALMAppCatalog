@@ -65,10 +65,7 @@
         modelNames: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
 
         constructor: function(config) {
-            _.defaults(config, { layout: 'auto'});
-            if (config && config.optimizeFrontEndPerformanceIterationStatus) {
-                config.layout = 'anchor';
-            }
+            _.defaults(config, { layout: 'anchor'});
 
             this.callParent(arguments);
         },
@@ -79,12 +76,9 @@
                 return;
             }
 
-            var me = this,
-                racingStripes = this.getContext().isFeatureEnabled('ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE');
+            var me = this;
 
-            if (racingStripes) {
-                this.suspendLayouts();
-            }
+            this.suspendLayouts();
 
             var grid = this.down('rallytreegrid');
             if (grid) {
@@ -109,9 +103,7 @@
                 },
                 scope: this
             }).always(function() {
-                if (racingStripes) {
-                    me.resumeLayouts(true);
-                }
+                me.resumeLayouts(true);
             });
         },
 
@@ -208,8 +200,8 @@
                 modelNames: this.modelNames,
                 cardBoardConfig: this._getBoardConfig(),
                 gridConfig: this._getGridConfig(gridStore),
-                layout: this.getContext().isFeatureEnabled('ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE') ? 'anchor' : 'auto',
                 shouldDestroyTreeStore: this.getContext().isFeatureEnabled('S73617_GRIDBOARD_SHOULD_DESTROY_TREESTORE'),
+                layout: 'anchor',
                 storeConfig: {
                     useShallowFetch: false,
                     filters: this._getGridboardFilters(gridStore.model)
@@ -601,7 +593,6 @@
                 store: gridStore,
                 columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
-                shouldOptimizeSummaryRow: context.isFeatureEnabled('ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE'),
                 enableInlineAdd: context.isFeatureEnabled('F6038_ENABLE_INLINE_ADD'),
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 enableBulkEditMilestones: context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE'),
@@ -614,7 +605,6 @@
                 plugins: ['rallytreegridchildpager'],
                 stateId: stateId,
                 stateful: true,
-                shouldOptimizeLayouts: this.config.optimizeFrontEndPerformanceIterationStatus,
                 variableRowHeight: !context.isFeatureEnabled('S75353_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT')
             };
 
