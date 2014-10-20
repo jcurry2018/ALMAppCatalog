@@ -6,8 +6,8 @@ def env = build.characteristicEnvVars
 def jsDep = new hudson.FilePath(build.workspace, 'js_dependencies.json').readToString()
 def prevSdkVersionMatcher = jsDep =~ /appsdk-src:tgz:\D*(\d+)/
 def prevSdkBuildNumber = prevSdkVersionMatcher[0][1] as int
-def buildName = build.buildVariables.UPSTREAM_JOB_NAME ?: 'appsdk-alm-bridge'
-def upstreamProject = Jenkins.instance.getItem(buildName)
+def buildName = build.buildVariables.UPSTREAM_JOB_NAME ?: 'bridge/appsdk-alm-bridge'
+def upstreamProject = Jenkins.instance.getItemByFullName(buildName)
 def newBuildNumberMatcher = appSdkSrcVersion =~ /-(\d+)-/
 def newBuildNumber = newBuildNumberMatcher[0][1] as int
 
