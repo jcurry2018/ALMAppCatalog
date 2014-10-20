@@ -119,6 +119,7 @@
                 stateful: false,
                 toggleState: 'board',
                 cardBoardConfig: cardboardConfig,
+                shouldDestroyTreeStore: this.getContext().isFeatureEnabled('S73617_GRIDBOARD_SHOULD_DESTROY_TREESTORE'),
                 plugins: [
                     'rallygridboardaddnew',
                     {

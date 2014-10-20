@@ -209,6 +209,7 @@
                 cardBoardConfig: this._getBoardConfig(),
                 gridConfig: this._getGridConfig(gridStore),
                 layout: this.getContext().isFeatureEnabled('ADD_RACING_STRIPES_TO_ITERATION_STATUS_PAGE') ? 'anchor' : 'auto',
+                shouldDestroyTreeStore: this.getContext().isFeatureEnabled('S73617_GRIDBOARD_SHOULD_DESTROY_TREESTORE'),
                 storeConfig: {
                     useShallowFetch: false,
                     filters: this._getGridboardFilters(gridStore.model)

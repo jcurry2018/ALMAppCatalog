@@ -185,6 +185,7 @@
                 isAdmin: this.isAdmin,
                 typeNames: this.typeNames,
                 modelNames: this.types,
+                shouldDestroyTreeStore: this.getContext().isFeatureEnabled('S73617_GRIDBOARD_SHOULD_DESTROY_TREESTORE'),
                 listeners: {
                     load: this._onLoad,
                     scope: this

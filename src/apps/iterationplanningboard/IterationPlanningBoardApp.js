@@ -50,6 +50,7 @@
                 context: this.getContext(),
                 modelNames: this.modelNames,
                 timeboxType: 'Iteration',
+                shouldDestroyTreeStore: this.getContext().isFeatureEnabled('S73617_GRIDBOARD_SHOULD_DESTROY_TREESTORE'),
                 plugins: plugins,
                 cardBoardConfig: {
                     cardConfig: {
