@@ -118,6 +118,7 @@
         _buildStoreConfig: function() {
             var timeboxFilter = this.timeboxScope.getQueryFilter();
             var includeChildren = Ext.getCmp('whattoprint').getChecked()[0].inputValue === 'includechildren';
+            var gridStore = this.grid.getStore();
 
             return {
                 models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
@@ -127,8 +128,9 @@
                 root: {expanded: includeChildren},
                 enableHierarchy: includeChildren,
                 childPageSizeEnabled: false,
+                fetch: gridStore.fetch,
                 filters: [timeboxFilter],
-                sorters: this.grid.getStore().getSorters(),
+                sorters: gridStore.getSorters(),
                 listeners: {
                     load: this._onStoreLoad,
                     scope: this
