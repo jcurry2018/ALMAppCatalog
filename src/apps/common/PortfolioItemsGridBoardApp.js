@@ -2,124 +2,191 @@
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define('Rally.apps.common.PortfolioItemsGridBoardApp', {
-        extend: 'Rally.app.App',
+        extend: 'Rally.apps.common.GridBoardApp',
         requires: [
-            'Rally.ui.gridboard.GridBoard',
-            'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
-            'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
-            'Rally.ui.gridboard.plugin.GridBoardAddNew',
+            'Rally.ui.cardboard.plugin.CollapsibleColumns',
+            'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.combobox.PortfolioItemTypeComboBox'
         ],
 
+        config: {
+            toggleState: 'grid'
+        },
+
         launch: function () {
-            this._createPITypePicker().then({
-                success: function (currentType) {
-                    this.currentType = currentType;
-                    this.loadGridBoard();
+            if (Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
+                this.callParent(arguments);
+            } else {
+                this.add({
+                    xtype: 'container',
+                    html: '<div class="rpm-turned-off" style="padding: 50px; text-align: center;">You do not have RPM enabled for your subscription</div>'
+                });
+
+                this.publishComponentReady();
+            }
+        },
+
+        loadModelNames: function () {
+            return this._createPITypePicker().then({
+                success: function (selectedType) {
+                    this.currentType = selectedType;
+                    return [selectedType.get('TypePath')];
                 },
                 scope: this
             });
         },
 
-        loadGridBoard: function () {
-            // Override in child classes
-        },
-
-        addGridBoard: function (options) {
-            this.gridboard = Ext.create('Rally.ui.gridboard.GridBoard', this.getGridBoardConfig(options));
-
-            this.add(this.gridboard);
-            this.addHeader();
-        },
-
-        addHeader: function () {
-            var header = this.gridboard.getHeader();
-
-            if (header) {
-                header.getRight().add(this.getHeaderControls());
-            }
-        },
-
         getHeaderControls: function () {
-            return [this.piTypePicker];
+            return this.callParent(arguments).concat(this.piTypePicker);
         },
 
-        getGridBoardConfig: function (options) {
-            var currentTypePath = this.currentType.get('TypePath');
-
-            return {
-                itemId: 'gridboard',
-                stateId: 'portfolio-' + this.stateName + '-gridboard',
-                toggleState: this.toggleState,
-                modelNames: [currentTypePath],
-                context: this.getContext(),
-                addNewPluginConfig: {
-                    style: {
-                        'float': 'left'
-                    }
-                },
-                plugins: _.union([
-                    {
-                        ptype: 'rallygridboardaddnew',
-                        reduceLayouts: this.getContext().isFeatureEnabled('ADD_SPEED_HOLES_TO_TREE_GRID_APPS')
-                    },
-                    {
-                        ptype: 'rallygridboardcustomfiltercontrol',
-                        filterChildren: false,
-                        filterControlConfig: _.merge({
-                            blackListFields: ['PortfolioItemType', 'State'],
-                            whiteListFields: [this.milestonesAreEnabled() ? 'Milestones' : ''],
-                            modelNames: [currentTypePath],
-                            stateful: true,
-                            stateId: this.getContext().getScopedStateId('portfolio-' + this.stateName + '-custom-filter-button')
-                        }, this.getFilterControlConfig()),
-                        showOwnerFilter: true,
-                        ownerFilterControlConfig: {
-                            stateful: true,
-                            stateId: this.getContext().getScopedStateId('portfolio-' + this.stateName + '-owner-filter')
-                        }
-                    },
-                    _.merge({
-                        ptype: 'rallygridboardfieldpicker',
-                        headerPosition: 'left'
-                    }, this.getFieldPickerConfig())
-                ], this.getPlugins()),
-                cardBoardConfig: this.getCardBoardConfig(options),
-                gridConfig: this.getGridConfig(options),
-                height: this.getHeight()
-            };
-        },
-
-        getPlugins: function () {
-            return [];
+        getStateId: function () {
+            return 'portfolio-' + this.stateName;
         },
 
         getFilterControlConfig: function () {
-            return {};
+            return {
+                blackListFields: ['PortfolioItemType', 'State'],
+                whiteListFields: [this.milestonesAreEnabled() ? 'Milestones' : '']
+            };
         },
 
         getFieldPickerConfig: function () {
+            var config = this.callParent(arguments);
+            config.gridFieldBlackList = _.union(config.gridFieldBlackList, ['DisplayColor']);
+            return _.merge(config, {
+                boardFieldDefaults: (this.getSetting('fields') || '').split(','),
+                margin: '3 9 14 0',
+                gridAlwaysSelectedValues: ['FormattedID', 'Name'].concat(
+                    this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ? ['DragAndDropRank'] : []
+                )
+            });
+        },
+
+        getCardBoardColumns: function () {
+            return this._getStates().then({
+                success: function (states) {
+                    return this._buildColumns(states);
+                },
+                scope: this
+            });
+        },
+
+        _buildColumns: function (states) {
+            if (!states.length) {
+                return undefined;
+            }
+
+            var columns = [
+                {
+                    columnHeaderConfig: {
+                        headerTpl: 'No Entry'
+                    },
+                    value: null,
+                    plugins: ['rallycardboardcollapsiblecolumns'].concat(this.getCardBoardColumnPlugins(null))
+                }
+            ];
+
+            return columns.concat(_.map(states, function (state) {
+                return {
+                    value: state.get('_ref'),
+                    wipLimit: state.get('WIPLimit'),
+                    enableWipLimit: true,
+                    columnHeaderConfig: {
+                        record: state,
+                        fieldToDisplay: 'Name',
+                        editable: false
+                    },
+                    plugins: ['rallycardboardcollapsiblecolumns'].concat(this.getCardBoardColumnPlugins(state))
+                };
+            }, this));
+        },
+
+        _getStates: function () {
+            var deferred = new Deft.Deferred();
+            Ext.create('Rally.data.wsapi.Store', {
+                model: Ext.identityFn('State'),
+                context: this.getContext().getDataContext(),
+                autoLoad: true,
+                fetch: ['Name', 'WIPLimit', 'Description'],
+                filters: [
+                    {
+                        property: 'TypeDef',
+                        value: this.currentType.get('_ref')
+                    },
+                    {
+                        property: 'Enabled',
+                        value: true
+                    }
+                ],
+                sorters: [
+                    {
+                        property: 'OrderIndex',
+                        direction: 'ASC'
+                    }
+                ],
+                listeners: {
+                    load: function (store, records) {
+                        deferred.resolve(records);
+                    }
+                }
+            });
+            return deferred.promise;
+        },
+
+        getCardBoardColumnPlugins: function (state) {
+            return [];
+        },
+
+        getCardConfig: function () {
             return {};
         },
 
-        getCardBoardConfig: function () {
-            return {};
+        getCardBoardConfig: function (options) {
+            options = options || {};
+            var currentTypePath = this.currentType.get('TypePath');
+            var filters = [];
+
+            if (this.getSetting('query')) {
+                try {
+                    filters.push(Rally.data.QueryFilter.fromQueryString(this.getSetting('query')));
+                } catch (e) {
+                    Rally.ui.notify.Notifier.showError({ message: e.message });
+                }
+            }
+
+            return {
+                attribute: 'State',
+                cardConfig: _.merge({
+                    editable: true,
+                    showColorIcon: true
+                }, this.getCardConfig()),
+                columnConfig: {
+                    xtype: 'rallycardboardcolumn',
+                    enableWipLimit: true
+                },
+                columns: options.columns,
+                ddGroup: currentTypePath,
+                listeners: {
+                    load: this.publishComponentReady,
+                    cardupdated: this._publishContentUpdatedNoDashboardLayout,
+                    scope: this
+                },
+                plugins: [{ ptype: 'rallyfixedheadercardboard' }],
+                storeConfig: {
+                    filters: filters,
+                    context: this.getContext().getDataContext()
+                }
+            };
         },
 
-        getGridConfig: function () {
-            return {};
+        getGridStoreConfig: function () {
+            return { models: this.piTypePicker.getAllTypeNames() };
         },
 
         milestonesAreEnabled: function () {
             var context = this.getContext() ? this.getContext() : Rally.environment.getContext();
             return context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE');
-        },
-
-        setHeight: function(height) {
-            this.callParent(arguments);
-            if(this.gridboard) {
-                this.gridboard.setHeight(height);
-            }
         },
 
         _createPITypePicker: function () {
@@ -153,13 +220,23 @@
 
             if (this._pickerTypeChanged(picker)) {
                 this.currentType = newType;
-                this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
+                this.modelNames = [newType.get('TypePath')];
+
+                if (this.toggleState === 'grid') {
+                    this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
+                } else {
+                    this.loadGridBoard();
+                }
             }
         },
 
         _pickerTypeChanged: function(picker){
             var newType = picker.getSelectedType();
             return newType && this.currentType && newType.get('_ref') !== this.currentType.get('_ref');
+        },
+
+        _publishContentUpdatedNoDashboardLayout: function () {
+            this.fireEvent('contentupdated', { dashboardLayout: false });
         }
     });
 })();
