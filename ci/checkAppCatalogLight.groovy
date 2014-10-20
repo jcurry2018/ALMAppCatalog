@@ -2,7 +2,7 @@ import hudson.model.Result
 import jenkins.model.Jenkins
 
 def jobName = build.buildVariables["DOWNSTREAM_JOB_NAME"]
-def job = Jenkins.instance.getItem(jobName)
+def job = Jenkins.instance.getItemByFullName(jobName)
 if (!job) {
     println "\n*** CAN'T FIND JOB ${jobName}! ***\n\n"
     return 1
