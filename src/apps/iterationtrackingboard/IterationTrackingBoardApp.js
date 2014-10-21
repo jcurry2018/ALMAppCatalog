@@ -311,8 +311,7 @@
 
         _getGridBoardPlugins: function() {
             var plugins = [{
-                ptype: 'rallygridboardaddnew',
-                reduceLayouts: this.getContext().isFeatureEnabled('ADD_SPEED_HOLES_TO_TREE_GRID_APPS')
+                ptype: 'rallygridboardaddnew'
             }];
             var context = this.getContext();
 
@@ -606,9 +605,6 @@
                 enableInlineAdd: context.isFeatureEnabled('F6038_ENABLE_INLINE_ADD'),
                 enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
                 enableBulkEditMilestones: context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE'),
-                editingConfig: {
-                    reduceLayouts: context.isFeatureEnabled('ADD_SPEED_HOLES_TO_TREE_GRID_APPS')
-                },
                 pagingToolbarCfg: {
                     pageSizes: this.getGridPageSizes(),
                     comboboxConfig: {

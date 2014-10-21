@@ -153,9 +153,6 @@
                 columnCfgs: this.getSetting('columnNames') || this.columnNames,
                 summaryColumns: [],
                 enableBulkEdit: true,
-                editingConfig: {
-                    reduceLayouts: context.isFeatureEnabled('ADD_SPEED_HOLES_TO_TREE_GRID_APPS')
-                },
                 plugins: [],
                 stateId: stateId,
                 stateful: true,
