@@ -261,6 +261,11 @@
             return {};
         },
 
+        getHeight: function () {
+            var height = this.callParent(arguments);
+            return Ext.isIE8 ? Math.max(height, 600) : height;
+        },
+
         setHeight: function(height) {
             this.callParent(arguments);
             if(this.gridboard) {
