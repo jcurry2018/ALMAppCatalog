@@ -64,6 +64,7 @@
 
         getAddNewConfig: function () {
             return {
+                showRank: false,
                 showAddWithDetails: false,
                 openEditorAfterAddFailure: false,
                 minWidth: 800,
