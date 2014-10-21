@@ -187,7 +187,7 @@
             var context = this.getContext();
             return {
                 xtype: 'rallytreegrid',
-                columnCfgs: this.getSetting('columnNames') || this.columnNames || [],
+                columnCfgs: this.getColumnCfgs(),
                 summaryColumns: [],
                 enableBulkEdit: true,
                 enableBulkEditMilestones: context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE'),
@@ -201,6 +201,10 @@
                 },
                 store: options && options.gridStore
             };
+        },
+
+        getColumnCfgs: function() {
+            return this.getSetting('columnNames') || this.columnNames || [];
         },
 
         publishComponentReady: function () {
