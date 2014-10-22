@@ -8,5 +8,7 @@
       "Settings.js",
       "BoardApp.js"
    ],
-   "css": []
+   "css": [
+      "BoardApp.css"
+   ]
 }

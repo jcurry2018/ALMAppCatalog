@@ -4,6 +4,7 @@
     Ext.define('Rally.apps.taskboard.TaskBoardApp', {
         extend: 'Rally.app.TimeboxScopedApp',
         requires: [
+            'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
@@ -15,6 +16,8 @@
         appName: 'TaskBoard',
         scopeType: 'iteration',
         supportsUnscheduled: false,
+        autoScroll: false,
+        layout: 'fit',
 
         config: {
             defaultSettings: {
@@ -107,7 +110,8 @@
                         ptype: 'rallygridboardfieldpicker',
                         headerPosition: 'left',
                         modelNames: modelNames,
-                        boardFieldDefaults: ['Estimate', 'ToDo']
+                        boardFieldDefaults: ['Estimate', 'ToDo'],
+                        boardFieldBlackList: ['State']
                     }
                 ],
                 context: context,
@@ -129,7 +133,8 @@
                     },
                     minWidth: 600,
                     ignoredRequiredFields: ['Name', 'Project', 'WorkProduct', 'State', 'TaskIndex', 'ScheduleState']
-                }
+                },
+                height: this.getHeight()
             };
         },
 
@@ -190,7 +195,8 @@
                         xtype: 'rallytaskboardrowheader'
                     }
                 },
-                margin: '10px 0 0 0'
+                margin: '10px 0 0 0',
+                plugins: [{ptype:'rallyfixedheadercardboard'}]
             };
         },
 

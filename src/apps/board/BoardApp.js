@@ -5,13 +5,18 @@
         extend: 'Rally.app.App',
         alias: 'widget.boardapp',
         requires: [
-            'Rally.apps.board.Settings',
+            'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
-            'Rally.data.util.Sorter'
+            'Rally.data.util.Sorter',
+            'Rally.apps.board.Settings'
         ],
+
+        cls: 'customboard',
+        autoScroll: false,
+        layout: 'fit',
 
         config: {
             defaultSettings: {
@@ -35,7 +40,6 @@
                 stateful: false,
                 toggleState: 'board',
                 cardBoardConfig: this._getBoardConfig(),
-                shouldDestroyTreeStore: this.getContext().isFeatureEnabled('S73617_GRIDBOARD_SHOULD_DESTROY_TREESTORE'),
                 plugins: [
                     'rallygridboardaddnew',
                     {
@@ -84,7 +88,8 @@
                     editable: true,
                     showIconMenus: true
                 },
-                loadMask: true
+                loadMask: true,
+                plugins: [{ptype:'rallyfixedheadercardboard'}]
             };
             if (this.getSetting('showRows')) {
                 Ext.merge(boardConfig, {

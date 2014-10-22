@@ -30,11 +30,12 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
             , context
         settings: settings
         renderTo: options.renderTo || 'testDiv'
+        height: 400
+
       @waitForLoad()
 
-    getPlugin: (xtype) ->
-      gridBoard = @app.down 'rallygridboard'
-      _.find gridBoard.plugins, (plugin) ->
+    getPlugin: (xtype, cmp = @app.down('rallygridboard')) ->
+      _.find cmp.plugins, (plugin) ->
         plugin.ptype == xtype
 
     waitForLoad: ->
@@ -65,6 +66,7 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
           expect(plugin.headerPosition).toBe 'left'
           expect(plugin.modelNames).toEqual ['Task']
           expect(plugin.boardFieldDefaults).toEqual ['Estimate', 'ToDo']
+          expect(plugin.boardFieldBlackList).toContain 'State'
 
   describe '#hideAcceptedWork', ->
     it 'has the correct default settings', ->
@@ -221,3 +223,12 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
           records = workProductCombo.store.getRange()
           expect(records.length).toBe @workProducts.length + 1
           expect(_.last(records).get('_ref')).toBe newStory._ref
+
+  describe 'Fixed Header', ->
+    it 'should add the fixed header plugin', ->
+      @createApp().then =>
+        expect(@getPlugin('rallyfixedheadercardboard', @app.down('rallygridboard').getGridOrBoard())).toBeDefined()
+
+    it 'should set the initial gridboard height to the app height', ->
+      @createApp().then =>
+        expect(@app.down('rallygridboard').getHeight()).toBe @app.getHeight()
