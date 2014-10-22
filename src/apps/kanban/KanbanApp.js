@@ -16,7 +16,8 @@
             'Rally.ui.report.StandardReport',
             'Rally.clientmetrics.ClientMetricsRecordable',
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
-            'Rally.ui.gridboard.plugin.GridBoardFieldPicker'
+            'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
+            'Rally.ui.cardboard.plugin.FixedHeader'
         ],
         mixins: [
             'Rally.clientmetrics.ClientMetricsRecordable'
@@ -26,6 +27,8 @@
         appName: 'Kanban',
 
         settingsScope: 'project',
+        autoScroll: false,
+        layout: 'fit',
 
         config: {
             defaultSettings: {
@@ -168,7 +171,8 @@
                 },
                 storeConfig: {
                     filters: this._getFilters()
-                }
+                },
+                height: this.getHeight()
             };
         },
 
@@ -231,7 +235,8 @@
                     {
                         ptype: 'rallyscrollablecardboard',
                         containerEl: this.getEl()
-                    }
+                    },
+                    {ptype: 'rallyfixedheadercardboard'}
                 ],
                 types: this._getDefaultTypes(),
                 attribute: this.getSetting('groupByField'),

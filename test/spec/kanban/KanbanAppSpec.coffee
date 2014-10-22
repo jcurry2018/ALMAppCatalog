@@ -325,6 +325,15 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       @createApp(showRows: false, rowsField: 'Owner').then =>
         expect(@cardboard.rowConfig).toBeNull()
 
+  describe 'Fixed Header', ->
+    it 'should add the fixed header plugin', ->
+      @createApp().then =>
+        expect(@getPlugin('rallyfixedheadercardboard', @cardboard)).toBeDefined()
+
+    it 'should set the initial gridboard height to the app height', ->
+      @createApp().then =>
+        expect(@app.down('rallygridboard').getHeight()).toBe @app.getHeight()
+
   describe 'plugins', ->
 
     describe 'filtering', ->
@@ -366,6 +375,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         )
         settings: settings
         renderTo: options.renderTo || 'testDiv'
+        height: 400
 
       @waitForComponentReady(@app).then =>
         @cardboard = @app.down('rallycardboard')
@@ -383,7 +393,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       model.prototype.fields.remove field
       expect(model.getField(field.name)).toBeUndefined
 
-    getPlugin: (xtype) ->
-      gridBoard = @app.down 'rallygridboard'
-      _.find gridBoard.plugins, (plugin) ->
+    getPlugin: (xtype, cmp = @app.down('rallygridboard')) ->
+      _.find cmp.plugins, (plugin) ->
         plugin.ptype == xtype
