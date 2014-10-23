@@ -14,24 +14,12 @@
         }],
         scopeType: 'release',
         supportsUnscheduled: false,
-
-        launch: function() {
-            this.add({
-                xtype: 'component',
-                itemId: 'release-info',
-                tpl: [
-                    '<div class="release-info"><p><b>About this release: </b><br />',
-                    '<p class="release-notes">{notes}</p>',
-                    'Additional information is available <a href="{detailUrl}" target="_top">here.</a></p></div>'
-                ]
-            });
-
-            this.callParent(arguments);
-        },
+        releaseInfoData: {},
 
         onScopeChange: function(scope) {
             this._loadReleaseDetails(scope);
 
+            //this code recreates the grids on resize - should try not to do that
             if(!this.down('#story-grid')) {
                 Rally.data.ModelFactory.getModels({
                     types: ['UserStory', 'Defect']
@@ -63,7 +51,20 @@
         },
 
         _buildGrids: function(models) {
-            this.add(this._getGridConfig({
+            var releaseInfoHeight = 69;
+            var gridHeight = Math.max(150, Math.ceil(this._getAvailableGridHeight()/2)-Math.ceil(releaseInfoHeight/2));
+            //need to set height here
+            this.add({
+                    xtype: 'component',
+                    itemId: 'release-info',
+                    height: releaseInfoHeight,
+                    tpl: [
+                        '<div class="release-info"><p><b>About this release: </b><br />',
+                        '<p class="release-notes">{notes}</p>',
+                        'Additional information is available <a href="{detailUrl}" target="_top">here.</a></p></div>'
+                    ],
+                    data: this.releaseInfoData
+                }, this._getGridConfig({
                     itemId: 'story-grid',
                     title: 'Stories',
                     enableBulkEdit: false,
@@ -71,29 +72,35 @@
                         model: models.UserStory,
                         parentTypes: [models.UserStory.typePath]
                     })),
+                    height: gridHeight,
                     listeners: {
                         storeload: function (store) {
                             this.down('#story-grid').setTitle('Stories: ' + store.getTotalCount());
                         },
                         scope: this
                     }
+                }), this._getGridConfig({
+                    itemId: 'defect-grid',
+                    title: 'Defects',
+                    store: Ext.create('Rally.data.wsapi.TreeStore', this._getStoreConfig({
+                        model: models.Defect,
+                        parentTypes: [models.Defect.typePath]
+                    })),
+                    height: gridHeight,
+                    listeners: {
+                        storeload: function(store) {
+                            this.down('#defect-grid').setTitle('Defects: ' + store.getTotalCount());
+                        },
+                        scope: this
+                    }
                 })
             );
+        },
 
-            this.add(this._getGridConfig({
-                itemId: 'defect-grid',
-                title: 'Defects',
-                store: Ext.create('Rally.data.wsapi.TreeStore', this._getStoreConfig({
-                    model: models.Defect,
-                    parentTypes: [models.Defect.typePath]
-                })),
-                listeners: {
-                    storeload: function(store) {
-                        this.down('#defect-grid').setTitle('Defects: ' + store.getTotalCount());
-                    },
-                    scope: this
-                }
-            }));
+        _getAvailableGridHeight: function() {
+            var header = this.down('container[cls=header]');
+            //there is 11 px of padding or something and I don't know where it is coming from
+            return this.height - 11 - (header ? header.getHeight() : 0); //getHeight is expensive, so don't call unnecessarily
         },
 
         _loadReleaseDetails: function(scope) {
@@ -102,10 +109,14 @@
                 release.self.load(Rally.util.Ref.getOidFromRef(release), {
                     fetch: ['Notes'],
                     success: function(record) {
-                        this.down('#release-info').update({
+                        this.releaseInfoData = {
                             detailUrl: Rally.nav.Manager.getDetailUrl(release),
                             notes: record.get('Notes')
-                        });
+                        };
+                        var releaseInfo = this.down('#release-info');
+                        if (releaseInfo) {
+                            releaseInfo.update(this.releaseInfoData);
+                        } //applied when adding the tpl
                     },
                     scope: this
                 });
@@ -137,7 +148,8 @@
                     'FormattedID',
                     'Name',
                     'ScheduleState'
-                ]
+                ],
+                bufferedRenderer: this.getContext().isFeatureEnabled('S69537_BUFFERED_RENDERER_TREE_GRID')
             }, config);
         },
 
