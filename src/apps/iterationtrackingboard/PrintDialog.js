@@ -107,8 +107,14 @@
         _handlePrintClick: function() {
             var treeStoreBuilder = Ext.create('Rally.data.wsapi.TreeStoreBuilder');
             var storeConfig = this._buildStoreConfig();
-
-            treeStoreBuilder.build(storeConfig);
+            treeStoreBuilder.build(storeConfig).then({
+                success: function(store) {
+                    // parent types must be overridden after the store is built because the builder automatically overrides the config
+                    store.parentTypes = this.grid.getStore().parentTypes;
+                    store.load();
+                },
+                scope: this
+            });
         },
 
         _handleCancelClick: function(target, e) {
@@ -116,21 +122,23 @@
         },
 
         _buildStoreConfig: function() {
-            var timeboxFilter = this.timeboxScope.getQueryFilter();
             var includeChildren = Ext.getCmp('whattoprint').getChecked()[0].inputValue === 'includechildren';
             var gridStore = this.grid.getStore();
+            var fetch = gridStore.fetch;
+            var filters = gridStore.filters ? gridStore.filters.items : [];
+            var sorters = gridStore.getSorters();
 
             return {
                 models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
-                autoLoad: true,
+                autoLoad: false,
                 pageSize: 200,
                 remoteSort: true,
                 root: {expanded: includeChildren},
                 enableHierarchy: includeChildren,
                 childPageSizeEnabled: false,
-                fetch: gridStore.fetch,
-                filters: [timeboxFilter],
-                sorters: gridStore.getSorters(),
+                fetch: fetch,
+                filters: filters,
+                sorters: sorters,
                 listeners: {
                     load: this._onStoreLoad,
                     scope: this

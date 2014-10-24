@@ -15,6 +15,8 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
           getStore: ->
             getSorters: -> ['testSorter']
             fetch: ['testFetch']
+            filters: items: ['test', 'filters']
+            parentTypes: ['test', 'parent', 'types']
 
     clickCancel: ->
       @dialog.dockedItems.items[1].items.items[1].handler.call(@dialog)
@@ -141,8 +143,9 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
         expect(@buildSpy).toHaveBeenCalledOnce()
         expect(@buildSpy.args[0][0].fetch).toEqual ['testFetch']
 
-      it 'should use the filter from dialog', ->
-        @clickPrint()
+    it 'should use the filters from the grid', ->
+      @clickPrint()
 
-        expect(@buildSpy).toHaveBeenCalledOnce()
-        expect(@buildSpy.args[0][0].filters.toString()).toEqual [@dialog.timeboxScope.getQueryFilter()].toString()
+      expect(@buildSpy).toHaveBeenCalledOnce()
+      expect(@buildSpy.args[0][0].filters[0].initialConfig).toEqual 'test'
+      expect(@buildSpy.args[0][0].filters[1].initialConfig).toEqual 'filters'
