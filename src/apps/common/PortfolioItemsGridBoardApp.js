@@ -46,7 +46,7 @@
 
         getFilterControlConfig: function () {
             return {
-                blackListFields: ['PortfolioItemType', 'State'],
+                blackListFields: ['PortfolioItemType'],
                 whiteListFields: [this.milestonesAreEnabled() ? 'Milestones' : '']
             };
         },

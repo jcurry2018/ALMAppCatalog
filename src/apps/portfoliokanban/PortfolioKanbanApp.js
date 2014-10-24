@@ -98,6 +98,13 @@
             }]);
         },
 
+        getFilterControlConfig: function () {
+            var config = this.callParent(arguments);
+            return _.merge(config, {
+                blackListFields: _.union(config.blackListFields, ['State'])
+            });
+        },
+
         getCardConfig: function () {
             return {
                 xtype: 'rallyportfoliokanbancard'
