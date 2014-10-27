@@ -13,13 +13,16 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
         timeboxScope: Ext.create 'Rally.app.TimeboxScope', record: @mom.getRecord 'iteration'
         grid:
           getStore: ->
-            getSorters: -> []
+            getSorters: -> ['testSorter']
+            fetch: ['testFetch']
+            filters: items: ['test', 'filters']
+            parentTypes: ['test', 'parent', 'types']
 
     clickCancel: ->
-      @click css: ".#{Ext.baseCSSPrefix}docked-bottom .#{Ext.baseCSSPrefix}btn.secondary"
+      @dialog.dockedItems.items[1].items.items[1].handler.call(@dialog)
 
     clickPrint: ->
-      @click css: ".#{Ext.baseCSSPrefix}docked-bottom .#{Ext.baseCSSPrefix}btn.primary"
+      @dialog.dockedItems.items[1].items.items[0].handler.call(@dialog)
 
     createStoresAndStubAjax: ->
       record = @mom.getRecord 'userstory', values:
@@ -52,14 +55,15 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
       @ajaxStub.onSecondCall().returns [task.data]
 
   beforeEach ->
-    @openStub = @stub()
-    @openStub.returns {}
+    @openStub = @stub().returns focus: ->
 
     @stub Rally, 'getWindow', =>
       open: @openStub
 
     @treeGridPrinterStub = @stub()
     Ext.define 'Rally.ui.grid.TreeGridPrinter', print: @treeGridPrinterStub
+
+    @buildSpy = @spy Rally.data.wsapi.TreeStoreBuilder.prototype, 'build'
 
   afterEach ->
     @dialog.destroy()
@@ -91,14 +95,16 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
     it 'should close the dialog', ->
       expect(Ext.ComponentQuery.query('iterationprogessappprintdialog').length).toBe 1
 
-      @clickCancel().then =>
-        expect(Ext.ComponentQuery.query('iterationprogessappprintdialog').length).toBe 0
+      @clickCancel()
+
+      expect(Ext.ComponentQuery.query('iterationprogessappprintdialog').length).toBe 0
 
     it 'should not print anything', ->
-      @clickCancel().then =>
-        expect(@ajaxStub).not.toHaveBeenCalled()
-        expect(@treeGridPrinterStub).not.toHaveBeenCalled()
-        expect(@openStub).not.toHaveBeenCalled()
+      @clickCancel()
+
+      expect(@ajaxStub).not.toHaveBeenCalled()
+      expect(@treeGridPrinterStub).not.toHaveBeenCalled()
+      expect(@openStub).not.toHaveBeenCalled()
 
   describe 'printing', ->
     beforeEach ->
@@ -106,18 +112,40 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
       @createStoresAndStubAjax()
 
     it 'should print the tree grid', ->
-      @clickPrint().then =>
-        expect(@treeGridPrinterStub).toHaveBeenCalledOnce()
+      @clickPrint()
+      expect(@treeGridPrinterStub).toHaveBeenCalledOnce()
 
     it 'should print to a new window', ->
-      @clickPrint().then =>
-        expect(@openStub).toHaveBeenCalledOnce()
+      @clickPrint()
+      expect(@openStub).toHaveBeenCalledOnce()
 
     it 'should print summary list of work items', ->
-      @clickPrint().then =>
-        expect(@ajaxStub).toHaveBeenCalledOnce()
+      @clickPrint()
+      expect(@ajaxStub).toHaveBeenCalledOnce()
 
     it 'should print children', ->
-      @click(id: 'printDialogReportTypeIncludeChildren-inputEl').then =>
-        @clickPrint().then =>
-          expect(@ajaxStub).toHaveBeenCalledTwice()
+      radio = @dialog.items.items[1]
+      radio.setValue
+        reportType: 'includechildren'
+      @clickPrint()
+      expect(@ajaxStub).toHaveBeenCalledTwice()
+
+    describe 'store configuration', ->
+      it 'should use the sorters from the grid store', ->
+        @clickPrint()
+
+        expect(@buildSpy).toHaveBeenCalledOnce()
+        expect(@buildSpy.args[0][0].sorters[0].property).toEqual 'testSorter'
+
+      it 'should use the fetch from the grid store', ->
+        @clickPrint()
+
+        expect(@buildSpy).toHaveBeenCalledOnce()
+        expect(@buildSpy.args[0][0].fetch).toEqual ['testFetch']
+
+    it 'should use the filters from the grid', ->
+      @clickPrint()
+
+      expect(@buildSpy).toHaveBeenCalledOnce()
+      expect(@buildSpy.args[0][0].filters[0].initialConfig).toEqual 'test'
+      expect(@buildSpy.args[0][0].filters[1].initialConfig).toEqual 'filters'
