@@ -106,7 +106,6 @@
                 gridFieldBlackList: [
                     'ObjectID',
                     'Description',
-                    'DisplayColor',
                     'Notes',
                     'Subscription',
                     'Workspace',

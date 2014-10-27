@@ -52,9 +52,7 @@
         },
 
         getFieldPickerConfig: function () {
-            var config = this.callParent(arguments);
-            config.gridFieldBlackList = _.union(config.gridFieldBlackList, ['DisplayColor']);
-            return _.merge(config, {
+            return _.merge(this.callParent(arguments), {
                 boardFieldDefaults: (this.getSetting('fields') || '').split(','),
                 margin: '3 9 14 0',
                 gridAlwaysSelectedValues: ['FormattedID', 'Name'].concat(

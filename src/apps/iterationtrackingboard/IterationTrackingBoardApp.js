@@ -389,7 +389,6 @@
                     'Changesets',
                     'Children',
                     'Description',
-                    'DisplayColor',
                     'Estimate',
                     'Notes',
                     'ObjectID',
