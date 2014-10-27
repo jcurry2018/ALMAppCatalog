@@ -21,7 +21,6 @@
             'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
@@ -374,14 +373,6 @@
                 alwaysSelectedValues.push('DragAndDropRank');
             }
 
-            if (!context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
-                plugins.push({
-                    ptype: 'rallygridboardfilterinfo',
-                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')),
-                    stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
-                });
-            }
-
             plugins.push({
                 ptype: 'rallygridboardfieldpicker',
                 headerPosition: 'left',
@@ -593,7 +584,7 @@
                 columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
                 enableInlineAdd: context.isFeatureEnabled('F6038_ENABLE_INLINE_ADD'),
-                enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
+                enableBulkEdit: true,
                 enableBulkEditMilestones: context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE'),
                 pagingToolbarCfg: {
                     pageSizes: this.getGridPageSizes(),

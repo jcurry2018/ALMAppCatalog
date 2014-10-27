@@ -214,8 +214,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @toggleToBoard()
       expect(@app.down('#fieldpickerbtn').isVisible()).toBe true
 
-  it 'should enable bulk edit when toggled on', ->
-    @stubFeatureToggle ['BETA_TRACKING_EXPERIENCE']
+  it 'should enable bulk edit', ->
     @createApp().then =>
       @toggleToGrid()
       expect(@app.down('#gridBoard').getGridOrBoard().enableBulkEdit).toBe true
@@ -392,7 +391,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
   describe 'custom filter popover', ->
     beforeEach ->
       @featureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
-      @featureEnabledStub.withArgs('BETA_TRACKING_EXPERIENCE').returns true
 
     it 'should add common storeConfig to gridboard', ->
       @createApp().then =>

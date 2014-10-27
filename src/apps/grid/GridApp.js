@@ -24,8 +24,7 @@
         autoScroll: appAutoScroll,
 
         launch: function() {
-            var context = this.getContext(),
-                pageSize = this.getSetting('pageSize'),
+            var pageSize = this.getSetting('pageSize'),
                 fetch = this.getSetting('fetch'),
                 columns = this._getColumns(fetch);
 
@@ -34,7 +33,7 @@
                 columnCfgs: columns,
                 enableColumnHide: false,
                 enableRanking: true,
-                enableBulkEdit: context.isFeatureEnabled("BETA_TRACKING_EXPERIENCE"),
+                enableBulkEdit: true,
                 autoScroll: gridAutoScroll,
                 plugins: this._getPlugins(columns),
                 context: this.getContext(),
