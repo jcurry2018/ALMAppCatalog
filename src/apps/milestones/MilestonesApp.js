@@ -34,6 +34,14 @@
                             }
                         ];
                     }
+                },
+                storeConfig: {
+                    filters: [
+                        Rally.data.wsapi.Filter.or([
+                            {property: 'Projects', operator: 'contains', value: this.getContext().getProjectRef()},
+                            {property: 'TargetProject', operator: '=', value: null}
+                        ])
+                    ]
                 }
             });
         },

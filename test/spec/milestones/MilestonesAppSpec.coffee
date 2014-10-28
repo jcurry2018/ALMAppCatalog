@@ -106,3 +106,9 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
     it 'should not have any options when cannot edit target project', ->
       @createAppAndClickGear(false).then (menuItems) ->
         expect(menuItems.length).toBe 0
+
+  describe 'store config', ->
+    it 'should have project scoping filters', ->
+      @_createAppWithNoData().then =>
+        expect(@app.gridboard.gridConfig.storeConfig.filters[0].config.value.property).toBe 'TargetProject'
+        expect(@app.gridboard.gridConfig.storeConfig.filters[0].property.property).toBe 'Projects'
