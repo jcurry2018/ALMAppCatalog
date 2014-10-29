@@ -46,30 +46,6 @@
             });
         },
 
-        getColumnCfgs: function () {
-            var columnCfgs = this.callParent(arguments);
-
-            // When this toggle is removed, RendererFactory.js should be updated to render milestone formatted ids
-            // as links and this function can go away.
-            if (this.getContext().isFeatureEnabled('EDP_MILESTONE_BETA')) {
-                var formattedIDIndex = _.indexOf(columnCfgs, "FormattedID");
-                if (formattedIDIndex !== -1) {
-                    columnCfgs[formattedIDIndex] = {
-                        dataIndex: 'FormattedID',
-                        renderer: function (formattedID, obj, record) {
-                            return Ext.create('Rally.ui.renderer.template.FormattedIDTemplate').apply({
-                                _type: 'milestone',
-                                _ref: record.get('_ref'),
-                                FormattedID: formattedID,
-                                DisplayColor: record.get('DisplayColor')
-                            });
-                        }
-                    };
-                }
-            }
-            return columnCfgs;
-        },
-        
         getAdditionalFetchFields: function () {
             return ['DisplayColor'];
         },
