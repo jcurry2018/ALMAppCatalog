@@ -300,13 +300,18 @@
             return height;
         },
 
+        _shouldShowExpandAll: function() {
+            return !Ext.isIE ||
+                (this.getContext().isFeatureEnabled('S76915_EXPAND_ALL_FOR_IE') && Ext.isIE9p);
+        },
+
         _getGridBoardPlugins: function() {
             var plugins = [{
                 ptype: 'rallygridboardaddnew'
             }];
             var context = this.getContext();
 
-            if (!Ext.isIE) {
+            if (this._shouldShowExpandAll()) {
                 plugins.push('rallygridboardexpandall');
             }
 
