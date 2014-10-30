@@ -332,7 +332,7 @@
                 });
                 if (validationErrors.length > 0) {
                     validationDiv.innerHTML = validationErrors.join("<br/>");
-                    dojo.removeClass(validationDiv, "hide");
+                    dojo.removeClass(validationDiv, "rly-hide");
                 }
                 return validationErrors.length === 0;
             };
@@ -417,7 +417,7 @@
                 var cancelLink = "<a href='' id='cancelLink'>Cancel</a>";
                 dojo.place(cancelLink, buttonContainer);
                 dojo.connect(dojo.byId('cancelLink'), "onclick", function(event) {
-                    dojo.addClass(validationDiv, "hide");
+                    dojo.addClass(validationDiv, "rly-hide");
                     dialog.hide();
                     dojo.stopEvent(event);
                 });
@@ -445,7 +445,7 @@
                 dialog.addEventListener("onHide", function() {
                     that.fireEvent(that.getValidEvents().onHide, {});
                 });
-                dojo.addClass(validationDiv, "hide");
+                dojo.addClass(validationDiv, "rly-hide");
                 dialog.display();
                 that._alignSettingsDialog();
                 that.displaySaveCancelFeatures();
@@ -491,7 +491,7 @@
                         that.connectDeleteLinkHandlers();
                     } else {
                         validationDiv.innerHTML = "There is a limit of 12 columns.";
-                        dojo.removeClass(validationDiv, "hide");
+                        dojo.removeClass(validationDiv, "rly-hide");
                     }
                     dojo.stopEvent(event);
                 });
@@ -622,7 +622,7 @@
             width: 50px;
         }
 
-        .hide {
+        .rly-hide {
             display: none;
         }
 

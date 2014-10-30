@@ -5,21 +5,21 @@
         requires:['Rally.ui.Button'],
         extend:'Ext.Container',
         alias:'widget.iterationprogressdialogcharttoggle',
-        
+
         componentCls: 'iteration-progress-toggle-button-group',
         layout: 'hbox',
         border: 1,
         width: 106,
-        activeButtonCls: 'active',
+        activeButtonCls: 'rly-active',
 
         defaultType: 'rallybutton',
 
         config: {
             startingIndex: 0
         },
-        
+
         items: [{
-            cls: 'toggle left pie-chart',
+            cls: 'toggle rly-left pie-chart',
             iconCls: 'icon-pie',
             frame: false,
             toggleGroup: 'iterationprogressviewtoggle',
@@ -46,7 +46,7 @@
             userAction:'IterationProgressApp - User clicked burndown'
         },
         {
-            cls: 'toggle right cumulativeflow',
+            cls: 'toggle rly-right cumulativeflow',
             iconCls: 'icon-graph',
             frame: false,
             toggleGroup: 'iterationprogressviewtoggle',

@@ -10,26 +10,26 @@
 
     <script type="text/javascript">
     function WeeklyActuals() {
-        
+
             var rallyDataSource;
             var userHash;
             var taskHash;
             var dropdown;
             var waiter;
-        
+
             function Hash() {
                 this._hash = {};
             }
-        
+
             Hash.prototype.set = function(i, j, v) {
                 if (this._hash[i] === undefined) {
                     this._hash[i] = {};
                 }
                 this._hash[i][j] = v;
-        
-        
+
+
             };
-        
+
             Hash.prototype.get = function(i, j) {
                 if (this._hash[i] === undefined) {
                     this._hash[i] = {};
@@ -39,7 +39,7 @@
                 }
                 return this._hash[i][j];
             };
-        
+
             function parseRallyDate(dateStr) {
                 var day = dateStr.slice(8, 10);
                 var month = dateStr.slice(5, 7) - 1;
@@ -55,27 +55,27 @@
                 date.setMilliseconds(0);
                 return date;
             }
-        
+
             function processRevisions(task, revs, owner, project) {
-        
+
                 // MJR changed, removed the units and just put in a placeholder
                 var regExp1 = /ACTUALS added \[([0-9\.]*) [A-Za-z]*\]/;
                 var regExp2 = /ACTUALS changed from \[([0-9\.]*) [A-Za-z]*\] to \[([0-9\.]*) [A-Za-z]*\]/;
                 var regExp3 = /OWNER added \[([a-z\@\.]*)\]/;
                 var regExp4 = /OWNER changed from \[([a-z\@\.]*)\] to \[([a-z\@\.]*)\]/;
-        
+
                 for (var r in revs) {
                     if(revs.hasOwnProperty(r)) {
                         var rev = revs[r];
-        
+
                         var ownerName;
-        
+
                         if (!owner) {
                             ownerName = "No Owner";
                         } else {
                             ownerName = owner.DisplayName;
                         }
-        
+
                         r = regExp1.exec(rev.Description);
                         if (r) {
                             userHash.set(ownerName, project,
@@ -84,11 +84,11 @@
                                     userHash.get(ownerName, 'Total') + parseFloat(r[1]));
                             userHash.set('Total', project,
                                     userHash.get('Total', project) + parseFloat(r[1]));
-        
+
                             taskHash.set(task.FormattedID, 'Actuals',
                                     taskHash.get(task.FormattedID, 'Actuals') + parseFloat(r[1]));
                         }
-        
+
                         r = regExp2.exec(rev.Description);
                         if (r) {
                             userHash.set(ownerName, project,
@@ -97,7 +97,7 @@
                                     userHash.get(ownerName, 'Total') + parseFloat(r[2]) - parseFloat(r[1]));
                             userHash.set('Total', project,
                                     userHash.get('Total', project) + parseFloat(r[2]) - parseFloat(r[1]));
-        
+
                             taskHash.set(task.FormattedID, 'Actuals',
                                     taskHash.get(task.FormattedID, 'Actuals') + (parseFloat(r[2]) - parseFloat(r[1])));
                         }
@@ -112,7 +112,7 @@
                     }
                 }
             }
-        
+
             function getWorkProduct(array, task) {
                 var ref = task.WorkProduct._ref;
                 var id = /(\d+)\.js/.exec(ref)[1];
@@ -123,7 +123,7 @@
                 }
                 return undefined;
             }
-        
+
             function getRevisionHistory(array, task) {
                 var ref = task.RevisionHistory._ref;
                 var rhId = /(\d+)\.js/.exec(ref)[1];
@@ -134,7 +134,7 @@
                 }
                 return undefined;
             }
-        
+
             function getTask(array, formattedID) {
                 for (var i in array) {
                     if (array[i].FormattedID == formattedID) {
@@ -143,7 +143,7 @@
                 }
                 return undefined;
             }
-        
+
             function genUserTable(results) {
                 var cmpProject = function(a, b) {
                     if (a._ref < b._ref) {
@@ -156,7 +156,7 @@
                         return 1;
                     }
                 };
-        
+
                 var cmpUser = function(a, b) {
                     if (a.DisplayName < b.DisplayName) {
                         return -1;
@@ -168,12 +168,12 @@
                         return 1;
                     }
                 };
-        
+
                 // MJR - changed wording
                 var tbl = '<div class="title">Actuals By User</div>';
                 tbl += '<table class="data-table" border="0" cellpadding="0" cellspacing="0">';
                 tbl += '<tr><th class="center">User</th><th class="center">Total</th>';
-        
+
                 for (var p in results.projects.sort(cmpProject)) {
                     if (userHash.get('Total', results.projects[p]._ref) > 0) {
                         // MJR - Put more of the name here
@@ -184,21 +184,21 @@
                         tbl += results.projects[p]._refObjectName.substr(-20) + "</th>";
                     }
                 }
-        
-        
+
+
                 var userCounter = 0;
-        
+
                 tbl += '</tr>';
-        
+
                 for (var u in results.users.sort(cmpUser)) {
                     if(results.users.hasOwnProperty(u)) {
                         var days;
-        
+
                         if (userHash.get(results.users[u].DisplayName, 'Total') > 0) {
                             userCounter += 1;
                             tbl += '<tr>';
-                            tbl += '<td class="left">' + results.users[u].DisplayName + '</td>';
-        
+                            tbl += '<td class="rly-left">' + results.users[u].DisplayName + '</td>';
+
                             days = userHash.get(results.users[u].DisplayName, 'Total');
                             if (days > 0.0) {
                                 tbl += '<td class="center highlite-good">' + days + '</td>';
@@ -224,11 +224,11 @@
                 if (userCounter === 0) {
                     tbl += '<tr><td>No Actuals found on Tasks or no Tasks found</td></tr>';
                 }
-        
+
                 tbl += '</table>';
                 document.getElementById('user-table-div').innerHTML = tbl;
             }
-        
+
             function taskRow(task, days) {
                 var ownerName;
                 if (!task.Owner) {
@@ -236,10 +236,10 @@
                 } else {
                     ownerName = task.Owner.DisplayName;
                 }
-        
+
                 var tbl = '<tr>';
-                tbl += '<td class="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + task.FormattedID + '</td>';
-                tbl += '<td class="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + task.Name + '</td>';
+                tbl += '<td class="rly-left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + task.FormattedID + '</td>';
+                tbl += '<td class="rly-left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + task.Name + '</td>';
                 tbl += '<td class="center"><table class="state-table"><tr>';
                 tbl += '<td class="none"><div>-</div></td>';
                 // defined state
@@ -282,7 +282,7 @@
                 tbl += '</tr>';
                 return tbl;
             }
-        
+
             function storyRow(story) {
                 var ownerName;
                 if (!story.Owner) {
@@ -290,7 +290,7 @@
                 } else {
                     ownerName = story.Owner.DisplayName;
                 }
-        
+
                 var tbl = '<tr>';
                 tbl += '<td>' + story.FormattedID + '</td>';
                 tbl += '<td>' + story.Name + '</td>';
@@ -348,9 +348,9 @@
                 tbl += '</tr>';
                 return tbl;
             }
-        
+
             function genTaskTable(results) {
-        
+
                 var cmpTask = function(a, b) {
                     wpa = taskHash.get(a, 'wp');
                     wpb = taskHash.get(b, 'wp');
@@ -371,15 +371,15 @@
                         return 0;
                     }
                 };
-        
+
                 var tbl = '<div class="title">Tasks Actuals</div>';
                 tbl += '<table class="data-table" border="0" cellpadding="0" cellspacing="0">';
                 tbl += '<tr>' +
-                        '<th class="left">ID</th><th class="left">Name</th>' +
+                        '<th class="rly-left">ID</th><th class="rly-left">Name</th>' +
                         '<th class="center">State</th><th class="center">Actuals</th>' +
                         '<th class="center">Project</th><th class="center">Owner</th>' +
                         '</tr>';
-        
+
                 var tids = [];
                 for (var t in taskHash._hash) {
                     if(taskHash._hash.hasOwnProperty(t)) {
@@ -394,7 +394,7 @@
                     }
                 }
                 tids = tids.sort(cmpTask);
-        
+
                 var wpid = "";
                 var taskCounter = 0;
                 for (var t2 in tids) {
@@ -403,7 +403,7 @@
                         var task2 = taskHash.get(tids[t2], 'task');
                         var workProduct2 = taskHash.get(tids[t2], 'wp');
                         var c;
-        
+
                         if (workProduct2) {
                             if (workProduct2.FormattedID != wpid) {
                                 tbl += storyRow(workProduct2);
@@ -423,13 +423,13 @@
                 if (taskCounter === 0) {
                     tbl += '<tr><td>No Actuals found on Tasks or no Tasks found</td></tr>';
                 }
-        
+
                 tbl += '</table>';
                 document.getElementById('task-table-div').innerHTML = tbl;
             }
-        
+
             function processTasks(results) {
-        
+
                 userHash = new Hash();
                 taskHash = new Hash();
                 for (var t in results.tasks) {
@@ -437,26 +437,26 @@
                         var task = results.tasks[t];
                         var revs = getRevisionHistory(results.revs, task);
                         var owner = task.Owner;
-        
+
                         processRevisions(task, revs, owner, task.Project._ref);
                     }
                 }
-        
+
                 genUserTable(results);
                 genTaskTable(results);
                 waiter.hide();
             }
-        
+
             function fetchTasks() {
                 dojo.byId("user-table-div").innerHTML = '';
                 dojo.byId("task-table-div").innerHTML = '';
                 waiter.display("waiter");
-        
+
                 var today = new Date();
                 var timePeriod = Number(dropdown.getValue());
                 var cutoff = new Date(today.getTime() - timePeriod * 24 * 60 * 60 * 1000);
                 cutoff = dojo.date.locale.format(cutoff, {selector:"date",datePattern:"yyyy-MM-dd"});
-        
+
                 var queryObjectArr = [];
                 queryObjectArr[0] = {
                     key: 'tasks',
@@ -490,21 +490,21 @@
                     type: 'projects',
                     query: '(State = Open)'
                 };
-        
+
                 rallyDataSource.findAll(queryObjectArr, processTasks);
             }
-        
-        
+
+
             this.display = function(element) {
                 rally.sdk.ui.AppHeader.showPageTools(true);
-        
+
                 waiter = new rally.sdk.ui.basic.Wait({hideTarget:false});
-        
+
                 rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
                         '__PROJECT_OID__',
                         '__PROJECT_SCOPING_UP__',
                         '__PROJECT_SCOPING_DOWN__');
-        
+
                 var dropDownConfig = {  label: "Status for the last ",
                     showLabel: true,
                     defaultValue: 7};
@@ -522,10 +522,10 @@
             };
         }
     Utils = function() {
-        
+
             //
             // ARRAY/OBJECT FUNCTIONS
-        
+
             //
             // remove duplicates from array
             var removeDuplicates = function(a) {
@@ -544,7 +544,7 @@
                 }
                 return list;
             };
-        
+
             //
             // return an array of keys of an object
             var keys = function(obj) {
@@ -556,8 +556,8 @@
                 }
                 return a;
             };
-        
-        
+
+
             //
             // OUTPUT FUNCTIONS
             var dumpObj = function(obj, name, indent, depth) {
@@ -569,7 +569,7 @@
                     var output = indent + name + "<br>";
                     indent += "&nbsp;&nbsp;&nbsp;&nbsp;";
                     for (var item in obj) {
-        
+
                         if(obj.hasOwnProperty(item)) {
                             child = obj[item];
                             if (typeof child == "object") {
@@ -586,24 +586,24 @@
                     return obj;
                 }
             };
-        
+
             var out = function(str) {
                 document.body.innerHTML = document.body.innerHTML + str + "<br>";
             };
-        
+
             var dump = function(obj, name) {
                 document.body.innerHTML = document.body.innerHTML + dumpObj(obj, name, "", 0);
             };
-        
+
             var obj = {
                 removeDuplicates: removeDuplicates,
                 keys: keys,
                 out: out,
                 dump: dump
             };
-        
+
             return obj;
-        
+
         }();
 
     </script>
@@ -616,45 +616,45 @@
             text-align: left;
             background: white;
         }
-        
+
         .data-table th {
             padding-top: 2px;
             padding-bottom: 2px;
             border-bottom: 2px solid #dddddd;
             border-top: 2px solid #dddddd;
         }
-        
+
         .data-table td {
             padding-top: 2px;
             padding-bottom: 2px;
             border-bottom: 1px solid #dddddd;
             vertical-align: middle;
         }
-        
+
         .data-table .link {
             color: #366ab7;
         }
-        
+
         .data-table .highlite-good {
             background-color: #ddffdd;
         }
-        
+
         .data-table .center {
             text-align: center;
             padding-left: 20px;
             padding-right: 20px;
         }
-        
-        .data-table .left {
+
+        .data-table .rly-left {
             text-align: left;
             padding-right: 20px;
         }
-        
-        .data-table .right {
+
+        .data-table .rly-right {
             text-align: right;
             padding-left: 20px;
         }
-        
+
         .title {
             text-align: left;
             font-weight: bold;
@@ -662,29 +662,29 @@
             padding: 0;
             padding-bottom: 5px;
         }
-        
+
         #user-table-div {
             padding: 0.3em;
             padding-top: 4em;
         }
-        
+
         #task-table-div {
             padding: 0.3em;
             padding-top: 2em;
         }
-        
+
         .lbl {
             text-align: left;
             font-size: 0.9em;
         }
-        
+
         .state-table td {
             border-bottom: none;
             padding: 0px;
             padding-right: 0px;
             padding-left: 0px;
         }
-        
+
         .state-table td div {
             background: white;
             border: 1px solid rgb(221, 221, 221);
@@ -694,7 +694,7 @@
             line-height: 13px;
             text-align: center;
         }
-        
+
         .state-table td.selected div {
             background: rgb(0, 102, 0);
             color: white;
@@ -704,7 +704,7 @@
             line-height: 13px;
             text-align: center;
         }
-        
+
         .state-table td.blocked div {
             background: url(https://trial.rallydev.com/slm/images/icon_blocked.gif);
             color: white;
@@ -714,7 +714,7 @@
             line-height: 15px;
             text-align: center;
         }
-        
+
         .state-table td.none div {
             background: white;
             color: white;
@@ -724,12 +724,12 @@
             line-height: 15px;
             text-align: center;
         }
-        
+
         #timePeriodSelect {
             display: inline-block;
             float: left;
         }
-        
+
         #waiter {
             display: inline-block;
             float: left;

@@ -111,7 +111,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @cardboard.getEl().query('td.card-column')
 
     clickAddNewButton: ->
-      @click(css: '.scroll-button.right')
+      @click(css: '.scroll-button.rly-right')
 
     assertButtonIsInColumnHeader: (button, column) ->
       expect(column.getColumnHeader().getEl().getById(button.getEl().id)).not.toBeNull()

@@ -78,14 +78,14 @@ describe 'Rally.apps.iterationtrackingboard.PrintDialog', ->
   it 'should hide warning dialog by default', ->
     @createDialog()
 
-    expect(Ext.query('.print-warning.hidden').length).toEqual 1
+    expect(Ext.query('.print-warning.rly-hidden').length).toEqual 1
 
   it 'should show warning dialog', ->
     @createDialog
       showWarning: true
 
     expect(Ext.query('.print-warning').length).toEqual 1
-    expect(Ext.query('.print-warning.hidden').length).toEqual 0
+    expect(Ext.query('.print-warning.rly-hidden').length).toEqual 0
 
   describe 'canceling', ->
     beforeEach ->

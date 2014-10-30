@@ -59,7 +59,7 @@
                                     xtype: 'rallybutton',
                                     itemId: 'datesDone',
                                     text: 'Done',
-                                    cls: 'primary button small right',
+                                    cls: 'primary button small rly-right',
                                     listeners: {
                                         click: this._onDone,
                                         scope: this
@@ -69,7 +69,7 @@
                                     xtype: 'rallybutton',
                                     itemId: 'datesCancel',
                                     text: 'Cancel',
-                                    cls: 'secondary dark button small right',
+                                    cls: 'secondary dark button small rly-right',
                                     listeners: {
                                         click: this._onCancel,
                                         scope: this

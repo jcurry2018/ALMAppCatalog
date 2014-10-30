@@ -861,7 +861,7 @@ function initTaskboard() {
 
             items = this.view.findItems(comparator);
             for (i = 0, len = items.length; i < len; i++) {
-                if (!(Dom.hasClass(items[i], 'hidden') || Dom.hasClass(this.getParentRow(items[i]), 'accepted') || Dom.hasClass(this.getParentRow(items[i]), 'hidden'))) {
+                if (!(Dom.hasClass(items[i], 'rly-hidden') || Dom.hasClass(this.getParentRow(items[i]), 'accepted') || Dom.hasClass(this.getParentRow(items[i]), 'rly-hidden'))) {
                     num++;
                 }
             }
@@ -915,26 +915,26 @@ function initTaskboard() {
 
                 if (isTask(item)) {
                     if (typeof itemMap[item.id] == 'undefined') {
-                        Dom.addClass(item, 'hidden');
+                        Dom.addClass(item, 'rly-hidden');
                     } else {
                         if (this.hideAcceptedControl.checked && Dom.hasClass(item, 'rally-task-accepted')) {
                             shownAccepted++;
                         } else {
                             shown++;
                         }
-                        Dom.removeClass(item, 'hidden');
+                        Dom.removeClass(item, 'rly-hidden');
                     }
                 } else if (isWorkProd(item)) {
                     item = this.getParentRow(item);
                     if (isParentVisible(item)) {
-                        if (this.hideAcceptedControl.checked && Dom.hasClass(item, 'hidden')) {
+                        if (this.hideAcceptedControl.checked && Dom.hasClass(item, 'rly-hidden')) {
                             shownAccepted++;
                         } else {
                             shown++;
                         }
-                        Dom.removeClass(item, 'hidden');
+                        Dom.removeClass(item, 'rly-hidden');
                     } else {
-                        Dom.addClass(item, 'hidden');
+                        Dom.addClass(item, 'rly-hidden');
                     }
                 }
             }
@@ -1019,7 +1019,7 @@ YAHOO.util.Event.addListener(window, 'load', initTaskboard);
         height: 0;
     }
 
-    .hidden, .accepted {
+    .rly-hidden, .accepted {
         display: none;
         visibility: hidden;
         height: 0;

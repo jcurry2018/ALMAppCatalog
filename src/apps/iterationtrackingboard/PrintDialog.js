@@ -65,7 +65,7 @@
         },
 
         initComponent: function() {
-            var warningTextClasses = this.showWarning ? 'print-warning' : 'print-warning hidden';
+            var warningTextClasses = this.showWarning ? 'print-warning' : 'print-warning rly-hidden';
             this.items.push({
                 xtype: 'container',
                 html: '<div class="icon-warning alert"></div> Print is limited to 200 work items.',
