@@ -37,7 +37,8 @@
             'Rally.apps.iterationtrackingboard.StatsBannerField',
             'Rally.clientmetrics.ClientMetricsRecordable',
             'Rally.apps.iterationtrackingboard.PrintDialog',
-            'Rally.apps.common.RowSettingsField'
+            'Rally.apps.common.RowSettingsField',
+            'Rally.ui.grid.plugin.BufferedRenderer'
         ],
 
         mixins: [
@@ -605,6 +606,15 @@
             gridConfig.plugins.push({
                 ptype: 'rallytreegridexpandedrowpersistence'
             });
+
+            if (context.isFeatureEnabled('S69537_BUFFERED_RENDERER_TREE_GRID')) {
+                gridConfig.plugins.push({
+                    ptype: 'rallybufferedrenderer',
+                    trailingBufferZone: 10, // increasing these values to 15 significantly degrades grid refresh performance
+                    leadingBufferZone: 10,
+                    variableRowHeight: gridConfig.variableRowHeight
+                });
+            }
 
             return gridConfig;
         },
