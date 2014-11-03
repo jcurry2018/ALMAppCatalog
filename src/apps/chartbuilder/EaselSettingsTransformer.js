@@ -6,9 +6,12 @@
 		settingsFieldTransformers: {
 			'milestone-picker': function(easelSettingsField) {
 				return {
-					xtype: "rallymilestonecombobox",
+					xtype: 'rallymilestonecombobox',
 					name: easelSettingsField.name,
-					label: "Milestone"
+					label: 'Milestone',
+                    autoExpand: true,
+                    selectOnFocus: true,
+                    allowNoEntry: true
 				};
 			},
 			'project-picker': function(easelSettingsField) {
