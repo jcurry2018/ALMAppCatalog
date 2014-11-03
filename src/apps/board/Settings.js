@@ -1,15 +1,11 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    /**
-     *
-     */
     Ext.define('Rally.apps.board.Settings', {
         singleton: true,
         requires: [
             'Rally.ui.combobox.FieldComboBox',
             'Rally.ui.combobox.ComboBox',
-            'Rally.ui.picker.FieldPicker',
             'Rally.ui.TextField',
             'Rally.ui.NumberField',
             'Rally.apps.common.RowSettingsField',

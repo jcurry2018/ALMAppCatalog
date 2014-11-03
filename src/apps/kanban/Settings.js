@@ -1,16 +1,12 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    /**
-     *
-     */
     Ext.define('Rally.apps.kanban.Settings', {
         singleton: true,
         requires: [
             'Rally.apps.kanban.ColumnSettingsField',
             'Rally.apps.common.RowSettingsField',
             'Rally.ui.combobox.FieldComboBox',
-            'Rally.ui.picker.FieldPicker',
             'Rally.ui.CheckboxField',
             'Rally.ui.plugin.FieldValidationUi'
         ],
