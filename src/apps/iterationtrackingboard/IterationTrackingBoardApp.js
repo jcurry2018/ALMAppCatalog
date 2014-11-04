@@ -372,34 +372,17 @@
                 }
             });
 
-            var alwaysSelectedValues = ['FormattedID', 'Name'];
-            if (context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
-                alwaysSelectedValues.push('DragAndDropRank');
-            }
-
             plugins.push({
                 ptype: 'rallygridboardfieldpicker',
                 headerPosition: 'left',
                 gridFieldBlackList: [
-                    'Changesets',
-                    'Children',
-                    'Description',
                     'Estimate',
-                    'Notes',
-                    'ObjectID',
-                    'Predecessors',
-                    'RevisionHistory',
-                    'Subscription',
-                    'Successors',
-                    'ToDo',
-                    'Workspace'
+                    'ToDo'
                 ],
                 boardFieldBlackList: [
                     'Successors',
                     'Predecessors'
                 ],
-                gridAlwaysSelectedValues: alwaysSelectedValues,
-                boardAlwaysSelectedValues: alwaysSelectedValues.concat(['Owner']),
                 modelNames: this.modelNames,
                 boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
                     ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']

@@ -80,13 +80,7 @@
         },
 
         _getGridBoardPlugins: function(modelNamesArray) {
-            var plugins = [],
-                context = this.getContext();
-
-            var alwaysSelectedValues = ['FormattedID', 'Name'];
-            if (context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
-                alwaysSelectedValues.push('DragAndDropRank');
-            }
+            var plugins = [];
 
             if (this.filterControlConfig) {
                 plugins.push({
@@ -103,20 +97,7 @@
             plugins.push({
                 ptype: 'rallygridboardfieldpicker',
                 headerPosition: 'left',
-                gridFieldBlackList: [
-                    'ObjectID',
-                    'Description',
-                    'Notes',
-                    'Subscription',
-                    'Workspace',
-                    'Changesets',
-                    'RevisionHistory',
-                    'Children',
-                    'Successors',
-                    'Predecessors'
-                ],
                 margin: '3 9 14 0',
-                gridAlwaysSelectedValues: alwaysSelectedValues,
                 modelNames: modelNamesArray
             });
 

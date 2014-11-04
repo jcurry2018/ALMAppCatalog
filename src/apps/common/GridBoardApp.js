@@ -238,18 +238,6 @@
                     'LeafStoryCount',
                     'LeafStoryPlanEstimateTotal',
                     'UnEstimatedLeafStoryCount'
-                ],
-                gridFieldBlackList: [
-                    'ObjectID',
-                    'Description',
-                    'Notes',
-                    'Subscription',
-                    'Workspace',
-                    'Changesets',
-                    'RevisionHistory',
-                    'Children',
-                    'Successors',
-                    'Predecessors'
                 ]
             };
         },

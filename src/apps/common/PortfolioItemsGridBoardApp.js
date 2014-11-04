@@ -54,10 +54,7 @@
         getFieldPickerConfig: function () {
             return _.merge(this.callParent(arguments), {
                 boardFieldDefaults: (this.getSetting('fields') || '').split(','),
-                margin: '3 9 14 0',
-                gridAlwaysSelectedValues: ['FormattedID', 'Name'].concat(
-                    this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ? ['DragAndDropRank'] : []
-                )
+                margin: '3 9 14 0'
             });
         },
 

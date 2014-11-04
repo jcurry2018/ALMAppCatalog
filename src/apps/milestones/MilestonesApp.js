@@ -90,7 +90,7 @@
                 'VersionId'
             ]);
             return _.merge(config, {
-                gridAlwaysSelectedValues: ['FormattedID', 'Name', 'TargetDate', 'TotalArtifactCount', 'TargetProject']
+                gridAlwaysSelectedValues: ['TargetDate', 'TotalArtifactCount', 'TargetProject']
             });
         },
 
