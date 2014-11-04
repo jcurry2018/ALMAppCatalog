@@ -43,7 +43,7 @@
         ],
 
         constructor: function(config) {
-            if (this.milestonesAreEnabled()) {
+            if (Rally.environment.getContext().isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE')) {
                 this.config.defaultSettings.fields += ',Milestones';
             }
 

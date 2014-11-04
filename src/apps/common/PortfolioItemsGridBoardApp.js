@@ -47,13 +47,14 @@
         getFilterControlConfig: function () {
             return {
                 blackListFields: ['PortfolioItemType'],
-                whiteListFields: [this.milestonesAreEnabled() ? 'Milestones' : '']
+                whiteListFields: [this.getContext().isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE') ? 'Milestones' : '']
             };
         },
 
         getFieldPickerConfig: function () {
             return _.merge(this.callParent(arguments), {
                 boardFieldDefaults: (this.getSetting('fields') || '').split(','),
+                gridFieldBlackList: this.getContext().isFeatureEnabled('S74502_PI_DEPENDENCIES_ON_EDP') ? [] : ['PredecessorsAndSuccessors'],
                 margin: '3 9 14 0'
             });
         },
@@ -177,11 +178,6 @@
 
         getGridStoreConfig: function () {
             return { models: this.piTypePicker.getAllTypeNames() };
-        },
-
-        milestonesAreEnabled: function () {
-            var context = this.getContext() ? this.getContext() : Rally.environment.getContext();
-            return context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE');
         },
 
         _createPITypePicker: function () {
