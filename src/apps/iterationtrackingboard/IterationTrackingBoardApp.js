@@ -162,6 +162,10 @@
                     childPageSizeEnabled: true
                 };
 
+            if (this._inlineAddIsEnabled()) {
+                config.fetch = ['PlanEstimate', 'Release', 'Iteration'];
+            }
+
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
         },
 
@@ -570,7 +574,7 @@
                 store: gridStore,
                 columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
-                enableInlineAdd: context.isFeatureEnabled('F6038_ENABLE_INLINE_ADD'),
+                enableInlineAdd: this._inlineAddIsEnabled(),
                 enableBulkEdit: true,
                 enableBulkEditMilestones: context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE'),
                 pagingToolbarCfg: {
@@ -590,6 +594,10 @@
             });
 
             return gridConfig;
+        },
+
+        _inlineAddIsEnabled: function() {
+            return this.getContext().isFeatureEnabled('F6038_ENABLE_INLINE_ADD');
         },
 
         _getSummaryColumnConfig: function () {

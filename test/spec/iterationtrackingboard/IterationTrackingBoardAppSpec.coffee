@@ -286,6 +286,15 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @toggleToGrid()
         expect(@app.down('#gridBoard').getGridOrBoard().summaryColumns.length).toBe 3
 
+    it 'should fetch PlanEstimate, Release and Iteration if enableInlineAdd enabled', ->
+      @stubFeatureToggle(['F6038_ENABLE_INLINE_ADD'])
+      @createApp().then =>
+        @toggleToGrid()
+        store = @app.down('rallytreegrid').getStore()
+        expect(store.fetch).toContain 'PlanEstimate'
+        expect(store.fetch).toContain 'Release'
+        expect(store.fetch).toContain 'Iteration'
+
     it 'should include test sets', ->
       @createApp().then =>
         @toggleToGrid()
