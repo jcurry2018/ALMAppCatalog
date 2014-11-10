@@ -320,7 +320,7 @@
 
             plugins.push({
                 ptype: 'rallygridboardcustomfiltercontrol',
-                filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
+                filterChildren: true,
                 filterControlConfig: {
                     blackListFields: ['Iteration', 'PortfolioItem'],
                     margin: '3 9 3 30',
