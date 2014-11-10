@@ -45,6 +45,7 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 		expected = [
 			{
 				"xtype":"rallycombobox"
+				"hideLabel": false
 				"valueField":"value"
 				"displayField":"label"
 				"label":"Color Fool"
@@ -133,12 +134,13 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 		]
 
 		expected = [
-      xtype: 'rallymilestonecombobox'
-      name: 'xyzy'
-      label: 'Milestone'
-      autoExpand: true
-      selectOnFocus: true
-      allowNoEntry: true
+			xtype: 'rallymilestonecombobox'
+			hideLabel: false
+			name: 'xyzy'
+			label: 'Milestone'
+			autoExpand: true
+			selectOnFocus: true
+			allowNoEntry: true
 		]
 
 		converted = @xformer.transform(settingsFields)
