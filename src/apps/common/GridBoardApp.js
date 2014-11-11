@@ -199,8 +199,7 @@
                     afterrender: this.publishComponentReady,
                     scope: this
                 },
-                store: options && options.gridStore,
-                bufferedRenderer: this.getContext().isFeatureEnabled('S69537_BUFFERED_RENDERER_TREE_GRID')
+                store: options && options.gridStore
             };
         },
 

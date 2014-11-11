@@ -148,8 +148,7 @@
                     'FormattedID',
                     'Name',
                     'ScheduleState'
-                ],
-                bufferedRenderer: this.getContext().isFeatureEnabled('S69537_BUFFERED_RENDERER_TREE_GRID')
+                ]
             }, config);
         },
 

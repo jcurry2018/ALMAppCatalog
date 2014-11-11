@@ -137,8 +137,7 @@
                 stateId: stateId,
                 stateful: true,
                 alwaysShowDefaultColumns: false,
-                listeners: gridListeners,
-                bufferedRenderer: this.getContext().isFeatureEnabled('S69537_BUFFERED_RENDERER_TREE_GRID')
+                listeners: gridListeners
             };
 
             gridConfig.plugins.push({

@@ -586,7 +586,8 @@
                 plugins: ['rallytreegridchildpager'],
                 stateId: stateId,
                 stateful: true,
-                variableRowHeight: !context.isFeatureEnabled('S75353_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT')
+                variableRowHeight: !context.isFeatureEnabled('S75353_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT'),
+                bufferedRenderer: true
             };
 
             gridConfig.plugins.push({
