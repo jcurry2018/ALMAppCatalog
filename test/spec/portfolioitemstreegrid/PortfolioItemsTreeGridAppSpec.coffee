@@ -9,7 +9,7 @@ Ext.require [
 describe 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp', ->
 
   helpers
-    createApp: ->
+    createApp: (enableToggles) ->
       context = Ext.create 'Rally.app.Context',
         initialValues:
           project: Rally.environment.getContext().getProject()
@@ -17,14 +17,14 @@ describe 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp', ->
           user: Rally.environment.getContext().getUser()
           subscription: Rally.environment.getContext().getSubscription()
 
-      context.isFeatureEnabled = -> true
+      context.isFeatureEnabled = -> enableToggles
 
       Ext.create 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp',
         context: context
         renderTo: 'testDiv'
 
-    renderApp: ->
-      @app = @createApp()
+    renderApp: (enableToggles = true) ->
+      @app = @createApp(enableToggles)
       @waitForComponentReady @app
 
   beforeEach ->
@@ -48,3 +48,11 @@ describe 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp', ->
       storeTypes = _.pluck(@app.gridboard.gridConfig.store.models, 'elementName')
       piTypes = _.pluck(@piTypes, 'Name')
       expect(_.intersection(storeTypes, piTypes)).toEqual piTypes
+
+  describe '#getGridConfig', ->
+    it 'should return bufferedRenderer true when feature toggle enabled', ->
+      @renderApp(true).then =>
+        expect(@app.getGridConfig().bufferedRenderer).toBeTruthy()
+    it 'should return bufferedRenderer false when feature toggle disabled', ->
+      @renderApp(false).then =>
+        expect(@app.getGridConfig().bufferedRenderer).toBeFalsy()

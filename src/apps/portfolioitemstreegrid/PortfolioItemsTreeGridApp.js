@@ -11,8 +11,18 @@
         config: {
             toggleState: 'grid',
             defaultSettings: {
-                columnNames: ['Name', 'Owner', 'PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount', 'PreliminaryEstimate', 'PlannedStartDate', 'PlannedEndDate', 'ValueScore', 'RiskScore', 'InvestmentCategory']
+                columnNames: [
+                    'Name', 'Owner', 'PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount',
+                    'PreliminaryEstimate', 'PlannedStartDate', 'PlannedEndDate', 'ValueScore',
+                    'RiskScore', 'InvestmentCategory'
+                ]
             }
+        },
+
+        getGridConfig: function(options){
+            var config = this.callParent(arguments);
+            config.bufferedRenderer = this.getContext().isFeatureEnabled('S78545_ENABLE_BUFFERED_RENDERER_FOR_PI_PAGE');
+            return config;
         }
     });
 })();
