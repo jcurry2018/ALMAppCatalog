@@ -7,11 +7,12 @@
 			'milestone-picker': function(easelSettingsField) {
 				return {
 					xtype: 'rallymilestonecombobox',
+					hideLabel: false,
 					name: easelSettingsField.name,
 					label: 'Milestone',
-                    autoExpand: true,
-                    selectOnFocus: true,
-                    allowNoEntry: true
+					autoExpand: true,
+					selectOnFocus: true,
+					allowNoEntry: true
 				};
 			},
 			'project-picker': function(easelSettingsField) {
@@ -32,6 +33,7 @@
 					xtype: 'rallycombobox',
 					valueField: 'value',
 					displayField: 'label',
+					hideLabel: false,
 					label: easelSettingsField.label,
 					name: easelSettingsField.name,
 					store: {
