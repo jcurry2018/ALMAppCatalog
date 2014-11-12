@@ -66,9 +66,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     toggleToGrid: ->
       @app.gridboard.setToggleState('grid')
 
-    stubFeatureToggle: (toggles) ->
+    stubFeatureToggle: (toggles, value = true) ->
       stub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled');
-      stub.withArgs(toggle).returns(true) for toggle in toggles
+      stub.withArgs(toggle).returns(value) for toggle in toggles
       stub
 
   beforeEach ->
@@ -305,6 +305,34 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then (app) ->
         expect(buildSpy.getCall(0).args[0].context).toEqual app.getContext().getDataContext()
 
+    describe 'with S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER toggle off', ->
+      beforeEach ->
+        @stubFeatureToggle ['S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER'], false
+
+      it 'adds the gridboard expandall plugin', ->
+        @createApp().then =>
+          @toggleToGrid()
+          expect(@app.down('#gridBoard').initialConfig.plugins).toContain 'rallygridboardexpandall'
+
+      it 'sets the expandAllInColumnHeaderEnabled to false', ->
+        @createApp().then =>
+          @toggleToGrid()
+          expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.expandAllInColumnHeaderEnabled).toBe false
+
+    describe 'with S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER toggle on', ->
+      beforeEach ->
+        @stubFeatureToggle ['S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER'], true
+
+      it 'does not add the gridboard expandall plugin', ->
+        @createApp().then =>
+          @toggleToGrid()
+          expect(@app.down('#gridBoard').initialConfig.plugins).not.toContain 'rallygridboardexpandall'
+
+      it 'sets the expandAllInColumnHeaderEnabled to true', ->
+        @createApp().then =>
+          @toggleToGrid()
+          expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.expandAllInColumnHeaderEnabled).toBe true
+
   describe 'toggle grid/board cls to ensure overflow-y gets set for fixed header plugin', ->
     it 'should add board-toggled class to app on initial load in board view', ->
       @stub(Rally.ui.gridboard.GridBoard::, 'toggleState', 'board')
@@ -374,7 +402,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp({}, false).then =>
         statsBanner = @app.down('#statsBanner')
         gridBoard = @app.down('rallygridboard')
-        
+
         header = @app.add({
           xtype: 'container',
           cls: 'header',

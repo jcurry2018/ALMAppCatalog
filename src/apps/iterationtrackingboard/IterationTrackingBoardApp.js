@@ -304,8 +304,9 @@
         },
 
         _shouldShowExpandAll: function() {
-            return !Ext.isIE ||
-                (this.getContext().isFeatureEnabled('S76915_EXPAND_ALL_FOR_IE') && Ext.isIE9p);
+            var context = this.getContext();
+            return (!Ext.isIE && !context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER')) ||
+                (context.isFeatureEnabled('S76915_EXPAND_ALL_FOR_IE') && Ext.isIE9p && !context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER'));
         },
 
         _getGridBoardPlugins: function() {
@@ -571,6 +572,7 @@
 
             var gridConfig = {
                 xtype: 'rallyiterationtrackingtreegrid',
+                expandAllInColumnHeaderEnabled: context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER'),
                 store: gridStore,
                 columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
@@ -583,7 +585,7 @@
                         defaultSelectionPosition: 'last'
                     }
                 },
-                plugins: ['rallytreegridchildpager'],
+                plugins: [],
                 stateId: stateId,
                 stateful: true,
                 variableRowHeight: !context.isFeatureEnabled('S75353_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT'),

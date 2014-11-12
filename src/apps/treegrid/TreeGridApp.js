@@ -133,11 +133,12 @@
                 columnCfgs: this.getSetting('columnNames') || this.columnNames,
                 summaryColumns: [],
                 enableBulkEdit: true,
-                plugins: [],
+                plugins: ['rallytreegridexpandedrowpersistence'],
                 stateId: stateId,
                 stateful: true,
                 alwaysShowDefaultColumns: false,
-                listeners: gridListeners
+                listeners: gridListeners,
+                expandAllInColumnHeaderEnabled: context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER')
             };
 
             gridConfig.plugins.push({

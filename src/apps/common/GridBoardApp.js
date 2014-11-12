@@ -191,6 +191,7 @@
                 summaryColumns: [],
                 enableBulkEdit: true,
                 enableBulkEditMilestones: context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE'),
+                expandAllInColumnHeaderEnabled: context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER'),
                 plugins: this.getGridPlugins(),
                 stateId: context.getScopedStateId(this.getStateId() + '-grid'),
                 stateful: true,
