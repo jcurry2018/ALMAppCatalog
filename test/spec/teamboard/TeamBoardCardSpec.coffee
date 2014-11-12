@@ -86,7 +86,7 @@ describe 'Rally.apps.teamboard.TeamBoardCard', ->
         item = @getPopoverItem()
         expect(item.xtype).toBe xtype
         expect(item.model).toBe type
-        expect(item.storeConfig).toOnlyHaveFilters [[parentFieldName, '=', @record.get('_ref')]]
+        expect(item.storeConfig).toOnlyHaveFilter [parentFieldName, '=', @record.get('_ref')]
 
       getPopoverItem: ->
         Ext.ComponentQuery.query('#teamBoardAssociatedItemsPopover')[0].items.first()

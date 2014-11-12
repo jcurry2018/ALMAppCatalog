@@ -82,7 +82,7 @@ describe 'Rally.apps.board.BoardApp', ->
         Ext.create('Rally.app.TimeboxScope', record: newTimebox))
 
       @waitForCallback(boardDestroySpy).then =>
-        expect(@_getGridBoard().storeConfig).toOnlyHaveFilterStrings [@app.getContext().getTimeboxScope().getQueryFilter().toString()]
+        expect(@_getGridBoard().storeConfig).toOnlyHaveFilterString @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
   it 'returns settings fields with correct context', ->
     @createApp().then =>
