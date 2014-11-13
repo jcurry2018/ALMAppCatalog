@@ -314,7 +314,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     it 'enables the summary row on the treegrid when the toggle is on', ->
       @createApp().then =>
         @toggleToGrid()
-        expect(@app.down('#gridBoard').getGridOrBoard().summaryColumns.length).toBe 3
+        expect(@app.down('#gridBoard').getGridOrBoard().summaryColumns.length).toBe 4
 
     it 'should fetch PlanEstimate, Release and Iteration if enableInlineAdd enabled', ->
       @stubFeatureToggle(['F6038_ENABLE_INLINE_ADD'])
@@ -400,13 +400,15 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     it "should specify the summary columns", ->
       @createAppWithWorkspaceConfiguration(TaskUnitName: 'dogecoins').then =>
         summaryColumns = @getSummaryColumns()
-        expect(summaryColumns.length).toBe(3)
+        expect(summaryColumns.length).toBe(4)
         expect(summaryColumns[0].field).toBe('PlanEstimate')
         expect(summaryColumns[0].type).toBe('sum')
         expect(summaryColumns[1].field).toBe('TaskEstimateTotal')
         expect(summaryColumns[1].type).toBe('sum')
         expect(summaryColumns[2].field).toBe('TaskRemainingTotal')
         expect(summaryColumns[2].type).toBe('sum')
+        expect(summaryColumns[3].field).toBe('TaskActualTotal')
+        expect(summaryColumns[3].type).toBe('sum')
 
     it "should use the workspace's task unit name", ->
       @createAppWithWorkspaceConfiguration(TaskUnitName: 'dogecoins').then =>
