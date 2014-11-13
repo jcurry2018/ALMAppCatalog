@@ -22,6 +22,21 @@
         },
 
         _buildGridBoard: function (piTypePath) {
+            var boardFieldBlacklist =  [
+                    'AcceptedLeafStoryCount',
+                    'AcceptedLeafStoryPlanEstimateTotal',
+                    'DirectChildrenCount',
+                    'LeafStoryCount',
+                    'LeafStoryPlanEstimateTotal',
+                    'LastUpdateDate',
+                    'State',
+                    'UnEstimatedLeafStoryCount'
+                ];
+
+            if(!this.getContext()._isMilestoneEnabled()) {
+                boardFieldBlacklist.push('Milestones');
+            }
+
             this.gridboard = this.add({
                 xtype: 'rallytimeboxgridboard',
                 shouldDestroyTreeStore: this.getContext().isFeatureEnabled('S73617_GRIDBOARD_SHOULD_DESTROY_TREESTORE'),
@@ -72,16 +87,7 @@
                     },
                     {
                         ptype: 'rallygridboardfieldpicker',
-                        boardFieldBlackList: [
-                            'AcceptedLeafStoryCount',
-                            'AcceptedLeafStoryPlanEstimateTotal',
-                            'DirectChildrenCount',
-                            'LeafStoryCount',
-                            'LeafStoryPlanEstimateTotal',
-                            'LastUpdateDate',
-                            'State',
-                            'UnEstimatedLeafStoryCount'
-                        ],
+                        boardFieldBlackList: boardFieldBlacklist,
                         boardFieldDefaults: this._getDefaultFields(),
                         headerPosition: 'left'
                     }
@@ -127,7 +133,7 @@
         },
 
         _milestonesAreEnabled: function() {
-            return this.getContext().isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE');
+            return this.getContext()._isMilestoneEnabled();
         }
     });
 })();

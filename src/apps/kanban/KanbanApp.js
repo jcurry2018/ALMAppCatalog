@@ -116,7 +116,12 @@
 
         _getGridboardConfig: function(cardboardConfig) {
             var context = this.getContext(),
-                modelNames = this._getDefaultTypes();
+                modelNames = this._getDefaultTypes(),
+                blacklist = ['Successors', 'Predecessors', 'DisplayColor'];
+
+            if(!context._isMilestoneEnabled()) {
+                blacklist.push('Milestones');
+            }
             return {
                 xtype: 'rallygridboard',
                 stateful: false,
@@ -130,7 +135,7 @@
                         filterChildren: true,
                         filterControlConfig: {
                             blackListFields: [],
-                            whiteListFields: [],
+                            whiteListFields: context._isMilestoneEnabled() ? ['Milestones'] : [],
                             margin: '3 9 3 30',
                             modelNames: modelNames,
                             stateful: true,
@@ -145,7 +150,7 @@
                     {
                         ptype: 'rallygridboardfieldpicker',
                         headerPosition: 'left',
-                        boardFieldBlackList: ['Successors', 'Predecessors', 'DisplayColor'],
+                        boardFieldBlackList: blacklist,
                         modelNames: modelNames,
                         boardFieldDefaults: this.getSetting('cardFields').split(',')
                     },

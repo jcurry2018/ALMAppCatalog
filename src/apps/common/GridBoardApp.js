@@ -190,8 +190,8 @@
                 columnCfgs: this.getColumnCfgs(),
                 summaryColumns: [],
                 enableBulkEdit: true,
-                enableBulkEditMilestones: context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE'),
                 expandAllInColumnHeaderEnabled: context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER'),
+                enableBulkEditMilestones: context._isMilestoneEnabled(),
                 plugins: this.getGridPlugins(),
                 stateId: context.getScopedStateId(this.getStateId() + '-grid'),
                 stateful: true,
@@ -229,16 +229,22 @@
         },
 
         getFieldPickerConfig: function () {
+            var boardFieldBlackList = [
+                'AcceptedLeafStoryCount',
+                'AcceptedLeafStoryPlanEstimateTotal',
+                'DirectChildrenCount',
+                'LastUpdateDate',
+                'LeafStoryCount',
+                'LeafStoryPlanEstimateTotal',
+                'UnEstimatedLeafStoryCount'
+            ];
+
+            if(!this.getContext()._isMilestoneEnabled()) {
+                boardFieldBlackList.push('Milestones');
+            }
+
             return {
-                boardFieldBlackList: [
-                    'AcceptedLeafStoryCount',
-                    'AcceptedLeafStoryPlanEstimateTotal',
-                    'DirectChildrenCount',
-                    'LastUpdateDate',
-                    'LeafStoryCount',
-                    'LeafStoryPlanEstimateTotal',
-                    'UnEstimatedLeafStoryCount'
-                ]
+                boardFieldBlackList: boardFieldBlackList
             };
         },
 

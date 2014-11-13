@@ -377,17 +377,18 @@
                 }
             });
 
+            var milestoneBlackList = !context._isMilestoneEnabled() ? ['Milestones'] : [];
             plugins.push({
                 ptype: 'rallygridboardfieldpicker',
                 headerPosition: 'left',
                 gridFieldBlackList: [
                     'Estimate',
                     'ToDo'
-                ],
+                ].concat(milestoneBlackList),
                 boardFieldBlackList: [
                     'Successors',
                     'Predecessors'
-                ],
+                ].concat(milestoneBlackList),
                 modelNames: this.modelNames,
                 boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
                     ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']
@@ -578,7 +579,7 @@
                 summaryColumns: this._getSummaryColumnConfig(),
                 enableInlineAdd: this._inlineAddIsEnabled(),
                 enableBulkEdit: true,
-                enableBulkEditMilestones: context.isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE'),
+                enableBulkEditMilestones: context._isMilestoneEnabled(),
                 pagingToolbarCfg: {
                     pageSizes: this.getGridPageSizes(),
                     comboboxConfig: {

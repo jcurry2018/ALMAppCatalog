@@ -43,7 +43,7 @@
         ],
 
         constructor: function(config) {
-            if (Rally.environment.getContext().isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE')) {
+            if (this._isMilestoneEnabled()) {
                 this.config.defaultSettings.fields += ',Milestones';
             }
 
@@ -154,6 +154,11 @@
             });
 
             return this.filterInfo;
+        },
+
+        _isMilestoneEnabled: function() {
+            return Rally.environment.getContext().isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE')
+                && (!Rally.environment.getContext().isFeatureEnabled('DISABLE_MILESTONES_PAGE') || Rally.environment.getContext().isFeatureEnabled('SUPER_OVERRIDE_MILESTONE_TOGGLE'));
         }
     });
 })();
