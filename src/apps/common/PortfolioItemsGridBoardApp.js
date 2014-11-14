@@ -55,6 +55,7 @@
             return _.merge(this.callParent(arguments), {
                 boardFieldDefaults: (this.getSetting('fields') || '').split(','),
                 gridFieldBlackList: this.getContext().isFeatureEnabled('S74502_PI_DEPENDENCIES_ON_EDP') ? [] : ['PredecessorsAndSuccessors'],
+                boardFieldBlackList: ['Predecessors', 'Successors'].concat(this.getContext().isFeatureEnabled('S74502_PI_DEPENDENCIES_ON_EDP') ? [] : ['PredecessorsAndSuccessors']),
                 margin: '3 9 14 0'
             });
         },
