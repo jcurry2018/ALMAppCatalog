@@ -588,7 +588,7 @@
                 plugins: [],
                 stateId: stateId,
                 stateful: true,
-                variableRowHeight: !context.isFeatureEnabled('S75353_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT'),
+                variableRowHeight: (Ext.isIE && !context.isFeatureEnabled('S78815_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT')),
                 bufferedRenderer: true
             };
 
