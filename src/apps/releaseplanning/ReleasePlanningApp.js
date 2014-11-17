@@ -39,7 +39,6 @@
 
             this.gridboard = this.add({
                 xtype: 'rallytimeboxgridboard',
-                shouldDestroyTreeStore: this.getContext().isFeatureEnabled('S73617_GRIDBOARD_SHOULD_DESTROY_TREESTORE'),
                 cardBoardConfig: {
                     columnConfig: {
                         columnStatusConfig: {

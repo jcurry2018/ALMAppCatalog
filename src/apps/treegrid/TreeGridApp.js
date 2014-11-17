@@ -68,7 +68,6 @@
                 xtype: 'rallygridboard',
                 stateId: this.statePrefix + '-gridboard',
                 context: context,
-                shouldDestroyTreeStore: this.getContext().isFeatureEnabled('S73617_GRIDBOARD_SHOULD_DESTROY_TREESTORE'),
                 plugins: gridboardPlugins,
                 toggleState: 'grid',
                 modelNames: modelNamesArray,

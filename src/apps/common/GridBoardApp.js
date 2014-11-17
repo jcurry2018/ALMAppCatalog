@@ -131,7 +131,6 @@
                 toggleState: this.toggleState,
                 modelNames: _.clone(this.modelNames),
                 context: this.getContext(),
-                shouldDestroyTreeStore: this.getContext().isFeatureEnabled('S73617_GRIDBOARD_SHOULD_DESTROY_TREESTORE'),
                 addNewPluginConfig: _.merge({
                     style: {
                         'float': 'left'
