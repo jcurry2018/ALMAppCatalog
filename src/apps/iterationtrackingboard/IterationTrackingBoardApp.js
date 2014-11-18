@@ -423,10 +423,10 @@
             return plugins;
         },
 
-        setHeight: Ext.Function.createBuffered(function() {
-            this.superclass.setHeight.apply(this, arguments);
+        setSize: function() {
+            this.callParent(arguments);
             this._resizeGridBoardToFillSpace();
-        }, 100),
+        },
 
         _importHandler: function(options) {
             return _.bind(function() {
