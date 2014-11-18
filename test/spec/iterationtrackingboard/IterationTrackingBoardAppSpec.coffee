@@ -245,7 +245,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
     describe 'unscheduled', ->
       helpers
-        createLeafStoriesOnlyFilter: (storyTypeDefOid) ->
+        createLeafStoriesOnlyFilter: ->
           storyTypeDefOid = Rally.test.mock.data.WsapiModelFactory.getModel('UserStory').typeDefOid
           Ext.create('Rally.data.wsapi.Filter',
             property: 'TypeDefOid'
@@ -258,20 +258,50 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
             operator: '!='
             value: storyTypeDefOid
           ))
+        createUnassociatedDefectsOnlyFilter: ->
+          defectTypeDefOid = Rally.test.mock.data.WsapiModelFactory.getModel('Defect').typeDefOid
+          Ext.create('Rally.data.wsapi.Filter',
+            property: 'TypeDefOid'
+            value: defectTypeDefOid
+          ).and(Ext.create('Rally.data.wsapi.Filter',
+            property: 'Requirement.Iteration',
+            operator: '!=',
+            value: null
+          )).or(Ext.create('Rally.data.wsapi.Filter',
+            property: 'TypeDefOid'
+            operator: '!='
+            value: defectTypeDefOid
+          ))
 
-      it 'should exclude epic stories from the grid', ->
-        requestStub = @stubRequests()
-        @createApp(iterationRecord: null).then =>
-          @toggleToGrid()
-          expect(requestStub).toBeWsapiRequestWith
-            filters: [@createLeafStoriesOnlyFilter()]
+      describe 'stories', ->
+        it 'should exclude epic stories from the grid', ->
+          requestStub = @stubRequests()
+          @createApp(iterationRecord: null).then =>
+            @toggleToGrid()
+            expect(requestStub).toBeWsapiRequestWith
+              filters: [@createLeafStoriesOnlyFilter()]
 
-      it 'should not attach leaf-stories-only filter if iteration is not null', ->
-        requestStub = @stubRequests()
-        @createApp().then =>
-          @toggleToGrid()
-          expect(requestStub).not.toBeWsapiRequestWith
-            filters: [@createLeafStoriesOnlyFilter()]
+        it 'should not attach leaf-stories-only filter if iteration is not null', ->
+          requestStub = @stubRequests()
+          @createApp().then =>
+            @toggleToGrid()
+            expect(requestStub).not.toBeWsapiRequestWith
+              filters: [@createLeafStoriesOnlyFilter()]
+
+      describe 'defects', ->
+        it 'should exclude associated defects from the grid', ->
+          requestStub = @stubRequests()
+          @createApp(iterationRecord: null).then =>
+            @toggleToGrid()
+            expect(requestStub).toBeWsapiRequestWith
+              filters: [@createUnassociatedDefectsOnlyFilter()]
+
+        it 'should not attach unassociated-defects-only filter if iteration is not null', ->
+          requestStub = @stubRequests()
+          @createApp().then =>
+            @toggleToGrid()
+            expect(requestStub).not.toBeWsapiRequestWith
+              filters: [@createUnassociatedDefectsOnlyFilter()]
 
 
   describe 'tree grid config', ->

@@ -230,6 +230,7 @@
 
             if (!timeboxScope.getRecord() && this.getContext().getSubscription().StoryHierarchyEnabled) {
                 filters.push(this._createLeafStoriesOnlyFilter(model));
+                filters.push(this._createUnassociatedDefectsOnlyFilter(model));
             }
             return filters;
         },
@@ -254,6 +255,29 @@
             });
 
             return userStoryFilter.and(noChildrenFilter).or(notUserStoryFilter);
+        },
+
+        _createUnassociatedDefectsOnlyFilter: function(model) {
+            var typeDefOid = model.getArtifactComponentModel('Defect').typeDefOid;
+
+            var defectFilter = Ext.create('Rally.data.wsapi.Filter', {
+                property: 'TypeDefOid',
+                value: typeDefOid
+            });
+
+            var noUnscheduledRequirements = Ext.create('Rally.data.wsapi.Filter', {
+                property: 'Requirement.Iteration',
+                operator: '!=',
+                value: null
+            });
+
+            var notDefectFilter = Ext.create('Rally.data.wsapi.Filter', {
+                property: 'TypeDefOid',
+                value: typeDefOid,
+                operator: '!='
+            });
+
+            return defectFilter.and(noUnscheduledRequirements).or(notDefectFilter);
         },
 
         _getBoardConfig: function() {
