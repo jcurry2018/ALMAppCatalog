@@ -53,7 +53,7 @@
         getFieldPickerConfig: function () {
             var blackListedFields = [];
 
-            if(this.getContext().isFeatureEnabled('S74502_PI_DEPENDENCIES_ON_EDP')) {
+            if(!this.getContext().isFeatureEnabled('S74502_PI_DEPENDENCIES_ON_EDP')) {
                 blackListedFields.push('PredecessorsAndSuccessors');
             }
             if(!this.getContext()._isMilestoneEnabled()) {
