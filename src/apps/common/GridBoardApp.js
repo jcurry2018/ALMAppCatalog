@@ -160,14 +160,14 @@
                     ptype: 'rallygridboardcustomfiltercontrol',
                     filterChildren: false,
                     filterControlConfig: _.merge({
-                        margin: '3 5 3 10',
+//                        margin: '3 5 3 10',
                         modelNames: this.modelNames,
                         stateful: true,
                         stateId: this.getContext().getScopedStateId(this.getStateId() + '-custom-filter-button')
                     }, this.getFilterControlConfig()),
                     showOwnerFilter: this.enableOwnerFilter,
                     ownerFilterControlConfig: {
-                        margin: '3 10 3 10',
+//                        margin: '3 10 3 10',
                         stateful: true,
                         stateId: this.getContext().getScopedStateId(this.getStateId() + '-owner-filter')
                     }

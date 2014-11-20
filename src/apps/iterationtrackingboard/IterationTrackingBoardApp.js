@@ -348,7 +348,6 @@
                 filterControlConfig: {
                     blackListFields: ['Iteration', 'PortfolioItem'],
                     whiteListFields: context._isMilestoneEnabled() ? ['Milestones'] : [],
-                    margin: '3 9 3 30',
                     modelNames: this.modelNames,
                     stateful: true,
                     stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
@@ -366,13 +365,13 @@
             {
                 text: 'Import User Stories...',
                 handler: this._importHandler({
-                    type: 'userstory',
+                    type: 'HierarchicalRequirement',
                     title: 'Import User Stories'
                 })
             }, {
                 text: 'Import Tasks...',
                 handler: this._importHandler({
-                    type: 'task',
+                    type: 'Task',
                     title: 'Import Tasks'
                 })
             }, {
@@ -432,19 +431,13 @@
 
         _importHandler: function(options) {
             return _.bind(function() {
-                Rally.data.WsapiModelFactory.getModel({
+                Ext.widget({
+                    xtype: 'rallycsvimportdialog',
                     type: options.type,
-                    success: function(model) {
-                        Ext.widget({
-                            xtype: 'rallycsvimportdialog',
-                            model: model,
-                            title: options.title,
-                            params: {
-                                iterationOid: this._getIterationOid()
-                            }
-                        });
-                    },
-                    scope: this
+                    title: options.title,
+                    params: {
+                        iterationOid: this._getIterationOid()
+                    }
                 });
             }, this);
         },
