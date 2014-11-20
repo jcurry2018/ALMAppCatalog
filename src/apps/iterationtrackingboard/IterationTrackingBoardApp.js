@@ -347,6 +347,7 @@
                 filterChildren: true,
                 filterControlConfig: {
                     blackListFields: ['Iteration', 'PortfolioItem'],
+                    whiteListFields: context._isMilestoneEnabled() ? ['Milestones'] : [],
                     margin: '3 9 3 30',
                     modelNames: this.modelNames,
                     stateful: true,
