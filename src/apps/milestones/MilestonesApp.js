@@ -5,6 +5,7 @@
         extend: 'Rally.apps.common.GridBoardApp',
         requires: [
             'Rally.ui.DateField',
+            'Rally.ui.MilestonePermissionsHelper',
             'Rally.ui.combobox.MilestoneProjectComboBox',
             'Rally.ui.grid.MilestoneProjectEditor'
         ],
@@ -27,7 +28,7 @@
                 noDataItemName: 'milestone',
                 rowActionColumnConfig: {
                     rowActionsFn: function (record) {
-                        return Rally.ui.grid.MilestoneProjectEditor.shouldDisableEditing(record.get('TargetProject')) ? [] : [
+                        return Rally.ui.MilestonePermissionsHelper.shouldDisableEditing(record) ? [] : [
                             {
                                 xtype: 'rallyrecordmenuitemdelete',
                                 record: record
