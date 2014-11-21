@@ -25,7 +25,6 @@
       "statsbanner/CollapseExpand.js",
       "StatsBanner.js",
       "StatsBannerField.js",
-      "PrintDialog.js",
       "IterationTrackingBoardApp.js"
    ],
    "css": [

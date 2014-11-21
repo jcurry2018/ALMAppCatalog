@@ -36,7 +36,6 @@
             'Rally.apps.iterationtrackingboard.StatsBanner',
             'Rally.apps.iterationtrackingboard.StatsBannerField',
             'Rally.clientmetrics.ClientMetricsRecordable',
-            'Rally.apps.iterationtrackingboard.PrintDialog',
             'Rally.apps.common.RowSettingsField'
         ],
 
@@ -458,15 +457,15 @@
         },
 
         _printHandler: function() {
-            var gridBoard = this.queryById('gridBoard');
-            var gridOrBoard = gridBoard.getGridOrBoard();
-            var totalRows = gridOrBoard.store.totalCount;
             var timeboxScope = this.getContext().getTimeboxScope();
 
-            Ext.create('Rally.apps.iterationtrackingboard.PrintDialog', {
-                showWarning: totalRows > 200,
-                timeboxScope: timeboxScope,
-                grid: gridOrBoard
+            Ext.create('Rally.ui.grid.TreeGridPrintDialog', {
+                grid: this.queryById('gridBoard').getGridOrBoard(),
+                models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
+                treeGridPrinterConfig: {
+                    largeHeaderText: 'Iteration Summary',
+                    smallHeaderText: timeboxScope.getRecord() ? timeboxScope.getRecord().get('Name') : 'Unscheduled'
+                }
             });
         },
 
