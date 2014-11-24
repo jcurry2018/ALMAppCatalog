@@ -27,6 +27,7 @@
         getGridConfig: function(options){
             var config = this.callParent(arguments);
             config.bufferedRenderer = this.getContext().isFeatureEnabled('S78545_ENABLE_BUFFERED_RENDERER_FOR_PI_PAGE');
+            config.enableInlineAdd = this.getContext().isFeatureEnabled('F6038_ENABLE_INLINE_ADD');
             return config;
         },
 

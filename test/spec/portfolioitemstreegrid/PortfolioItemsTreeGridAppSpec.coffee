@@ -36,7 +36,7 @@ describe 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp', ->
 
   it 'should initialize', ->
     @renderApp().then =>
-      expect(Ext.isDefined(@app)).toBeTruthy()
+      expect(Ext.isDefined(@app)).toBe true
 
   it 'should use the row expansion plugin', ->
     @renderApp().then =>
@@ -52,7 +52,16 @@ describe 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp', ->
   describe '#getGridConfig', ->
     it 'should return bufferedRenderer true when feature toggle enabled', ->
       @renderApp(true).then =>
-        expect(@app.getGridConfig().bufferedRenderer).toBeTruthy()
+        expect(@app.getGridConfig().bufferedRenderer).toBe true
+
     it 'should return bufferedRenderer false when feature toggle disabled', ->
       @renderApp(false).then =>
-        expect(@app.getGridConfig().bufferedRenderer).toBeFalsy()
+        expect(@app.getGridConfig().bufferedRenderer).toBe false
+
+    it 'should enable inline add when feature toggle enabled', ->
+      @renderApp(true).then =>
+        expect(@app.getGridConfig().enableInlineAdd).toBe true
+
+    it 'should disable inline add when feature toggle disabled', ->
+      @renderApp(false).then =>
+        expect(@app.getGridConfig().enableInlineAdd).toBe false
