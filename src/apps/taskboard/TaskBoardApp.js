@@ -17,7 +17,6 @@
         scopeType: 'iteration',
         supportsUnscheduled: false,
         autoScroll: false,
-        layout: 'fit',
 
         config: {
             defaultSettings: {
@@ -64,8 +63,15 @@
             return fields;
         },
 
+        setSize: function() {
+            this.callParent(arguments);
+            if(this.rendered && this._getGridBoard()) {
+                this._getGridBoard().setHeight(this._getAvailableBoardHeight());
+            }
+        },
+
         _destroyGridBoard: function() {
-            var gridBoard = this.down('rallygridboard');
+            var gridBoard = this._getGridBoard();
             if (gridBoard) {
                 gridBoard.destroy();
             }
@@ -76,8 +82,13 @@
             this.add(this._getGridBoardConfig(store.getRange()));
         },
 
+        _getGridBoard: function() {
+            return this.down('rallygridboard');
+        },
+
         _getBoard: function () {
-            return this.down('rallygridboard').getGridOrBoard();
+            var gridBoard = this._getGridBoard();
+            return gridBoard && gridBoard.getGridOrBoard();
         },
 
         _getGridBoardConfig: function (rowRecords) {
@@ -133,8 +144,17 @@
                     minWidth: 600,
                     ignoredRequiredFields: ['Name', 'Project', 'WorkProduct', 'State', 'TaskIndex', 'ScheduleState']
                 },
-                height: this.getHeight()
+                height: this._getAvailableBoardHeight()
             };
+        },
+
+        _getAvailableBoardHeight: function() {
+            var header = this.getHeader(),
+                availableHeight = this.getHeight();
+            if(header) {
+                availableHeight -= header.getHeight();
+            }
+            return availableHeight;
         },
 
         _getRankField: function() {

@@ -8,26 +8,28 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
     @taskStub = @ajax.whenQuerying('task').respondWithCount 3
     @taskStateValues = ['Defined', 'In-Progress', 'Completed']
     @ajax.whenQueryingAllowedValues('task', 'State').respondWith @taskStateValues
+    @ajax.whenQuerying('iteration').respondWithCount 3
 
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'taskboardapp'
 
   helpers
     createApp: (settings = {}, options = {}, context = {}) ->
+      contextValues = Ext.merge
+        project:
+          _ref: Rally.environment.getContext().getProjectRef()
+        workspace:
+          WorkspaceConfiguration:
+            DragDropRankingEnabled: true
+        timebox: Ext.create Rally.test.mock.data.WsapiModelFactory.getIterationModel(),
+          _ref: '/iteration/1'
+          Name: 'Iteration 1'
+          StartDate: '2013-01-01'
+          EndDate: '2013-01-15'
+      , context
+
       @app = Ext.create 'Rally.apps.taskboard.TaskBoardApp',
-        context: Ext.create 'Rally.app.Context',
-          initialValues: Ext.merge
-            project:
-              _ref: Rally.environment.getContext().getProjectRef()
-            workspace:
-              WorkspaceConfiguration:
-                DragDropRankingEnabled: true
-            timebox: Ext.create Rally.test.mock.data.WsapiModelFactory.getIterationModel(),
-              _ref: '/iteration/1'
-              Name: 'Iteration 1'
-              StartDate: '2013-01-01'
-              EndDate: '2013-01-15'
-            , context
+        context: Ext.create 'Rally.app.Context', initialValues: contextValues
         settings: settings
         renderTo: options.renderTo || 'testDiv'
         height: 400
@@ -232,3 +234,19 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
     it 'should set the initial gridboard height to the app height', ->
       @createApp().then =>
         expect(@app.down('rallygridboard').getHeight()).toBe @app.getHeight()
+
+    it 'should update the size of the gridboard when the app height change', ->
+      @createApp().then =>
+        @app.setSize 1000, 500
+        expect(@app.down('rallygridboard').getHeight()).toBe 500
+
+    describe 'without iteration scope', ->
+      beforeEach ->
+        @createApp {}, {}, {timebox: null}
+
+      it 'should set the initial gridboard height to the app height', ->
+        expect(@app.down('rallygridboard').getHeight()).toBe @app.getHeight() - @app.getHeader().getHeight()
+
+      it 'should update the size of the gridboard when the app height change', ->
+        @app.setSize 1000, 500
+        expect(@app.down('rallygridboard').getHeight()).toBe 500 - @app.getHeader().getHeight()
