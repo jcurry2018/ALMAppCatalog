@@ -2,7 +2,7 @@
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define('Rally.apps.common.PortfolioItemsGridBoardApp', {
-        extend: 'Rally.apps.common.GridBoardApp',
+        extend: 'Rally.app.GridBoardApp',
         requires: [
             'Rally.ui.cardboard.plugin.CollapsibleColumns',
             'Rally.ui.cardboard.plugin.FixedHeader'

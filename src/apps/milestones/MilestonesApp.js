@@ -2,7 +2,7 @@
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define('Rally.apps.milestones.MilestonesApp', {
-        extend: 'Rally.apps.common.GridBoardApp',
+        extend: 'Rally.app.GridBoardApp',
         requires: [
             'Rally.ui.DateField',
             'Rally.ui.MilestoneTargetProjectPermissionsHelper',

@@ -1,9 +1,7 @@
 Ext = window.Ext4 || window.Ext
-Ext.require [
-  'Rally.data.util.PortfolioItemHelper'
-], ->
-describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
+Ext.require ['Rally.data.util.PortfolioItemHelper']
 
+describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
   helpers
     _createApp: (config, isFullPageApp = false) ->
       @app = Ext.create 'Rally.apps.portfoliokanban.PortfolioKanbanApp', Ext.merge
@@ -27,23 +25,26 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       @click(css: '.progress-bar-container.field-' + fieldName).then =>
         @waitForVisible(css: '.percentDonePopover')
 
+    getFeatureData: (config) ->
+      _.merge
+        ObjectID: 878
+        _ref: '/portfolioitem/feature/878'
+        FormattedID: 'F1'
+        Name: 'Name of first PI'
+        Owner:
+          _ref: '/user/1'
+          _refObjectName: 'Name of Owner'
+        State: '/feature/state/1'
+      , config
+
     waitForAppReady: ->
       readyStub = @stub()
       Rally.environment.getMessageBus().subscribe Rally.Message.piKanbanBoardReady, readyStub
       @waitForCallback readyStub
 
   beforeEach ->
-    Rally.environment.getContext().context.subscription.Modules = ['Rally Portfolio Manager']
-
-    @theme = Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemTheme')
-    @initiative = Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemInitiative')
-    @feature = Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemFeature')
-
-    @typeRequest = @ajax.whenQuerying('typedefinition').respondWith [
-      @theme
-      @initiative
-      @feature
-    ]
+    @piHelper = new Helpers.PortfolioItemGridBoardHelper @
+    @piHelper.stubPortfolioItemRequests()
 
     @featureStates = [ _type: 'State', Name: 'FeatureColumn1', _ref: '/feature/state/1', WIPLimit: 4 ]
     @initiativeStates = [
@@ -59,11 +60,8 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @ajax.whenQuerying('state').respondWith @featureStates
 
   afterEach ->
-    if @app?
-      if @app.down('rallyfilterinfo')?.tooltip?
-        @app.down('rallyfilterinfo').tooltip.destroy()
-
-      @app.destroy()
+    @app?.down('rallyfilterinfo')?.tooltip?.destroy()
+    @app?.destroy()
 
   it 'shows help component', ->
     @_createApp().then =>
@@ -76,10 +74,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
   it 'creates columns from states', ->
     @ajax.whenQuerying('state').respondWith @initiativeStates
 
-    @_createApp(
-      settings:
-        type: Rally.util.Ref.getRelativeUri(@initiative._ref)
-    ).then =>
+    @_createApp(settings: type: Rally.util.Ref.getRelativeUri(@piHelper.initiative._ref)).then =>
       expect(@app.gridboard.getGridOrBoard().getColumns().length).toEqual @initiativeStates.length + 1
 
   it 'shows message if no states are found', ->
@@ -97,62 +92,24 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       expect(@app.getEl().down('.filterInfo')).toBeFalsy()
 
   it 'shows project setting label if following a specific project scope', ->
-    @_createApp(
-      settings:
-        project: '/project/431439'
-    ).then =>
+    @_createApp(settings: project: '/project/431439').then =>
       @app.down('rallyfilterinfo').tooltip.show()
-
-      tooltipContent = Ext.get Ext.query('.filterInfoTooltip')[0]
-
-      expect(tooltipContent.dom.textContent).toContain 'Project'
-      expect(tooltipContent.dom.textContent).toContain 'Project 1'
+      expect(Ext.query('.filterInfoTooltip')[0].textContent).toContain 'Project 1'
 
   it 'shows "Following Global Project Setting" in project setting label if following global project scope', ->
-    @ajax.whenQuerying('project').respondWith([
-      {
-        Name: 'Test Project'
-        '_ref': '/project/2'
-      }
-    ])
+    @ajax.whenQuerying('project').respondWith [Name: 'Test Project', _ref: '/project/2']
 
     @_createApp().then =>
       @app.down('rallyfilterinfo').tooltip.show()
-
-      tooltipContent = Ext.get Ext.query('.filterInfoTooltip')[0]
-
-      expect(tooltipContent.dom.textContent).toContain 'Following Global Project Setting'
+      expect(Ext.query('.filterInfoTooltip')[0].textContent).toContain 'Following Global Project Setting'
 
   it 'shows Discussion on Card', ->
-    feature =
-      ObjectID: 878
-      _ref: '/portfolioitem/feature/878'
-      FormattedID: 'F1'
-      Name: 'Name of first PI'
-      Owner:
-        _ref: '/user/1'
-        _refObjectName: 'Name of Owner'
-      State: '/feature/state/1'
-      Summary:
-        Discussion:
-          Count: 1
-
-    @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
-
+    @ajax.whenQuerying('PortfolioItem/Feature').respondWith [ @getFeatureData Summary: Discussion: Count: 1 ]
     @_createApp().then =>
       expect(@app.gridboard.getGridOrBoard().getColumns()[1].getCards()[0].getEl().down('.status-field.Discussion')).not.toBeNull()
 
   it 'displays mandatory fields on the cards', ->
-    feature =
-      ObjectID: 878
-      _ref: '/portfolioitem/feature/878'
-      FormattedID: 'F1'
-      Name: 'Name of first PI'
-      Owner:
-        _ref: '/user/1'
-        _refObjectName: 'Name of Owner'
-      State: '/feature/state/1'
-
+    feature = @getFeatureData()
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
 
     @_createApp().then =>
@@ -187,28 +144,25 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 # Changes to the GridBoardCustomFilterControl caused this app to start refresh twice when the type changes, which causes the tests to fail.
 # Due to how the tests are wired up, they only failed once we added the type picker to other pages(S69900).
 # NOTE: these only seem to fail when the whole test suite is run.
-
+#
 #  describe 'when the type is changed', ->
 #    it 'should reload the gridboard', ->
 #      @_createApp().then =>
 #        loadGridBoardSpy = @spy @app, 'loadGridBoard'
-#        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@theme._ref))
+#        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@piHelper.theme._ref))
 #        @waitForCallback(loadGridBoardSpy).then =>
 #          expect(loadGridBoardSpy).toHaveBeenCalledOnce()
 #
 #    beforeEach ->
 #      @ajax.whenQuerying('state').respondWith(@initiativeStates)
 #
-#      @_createApp(
-#        settings:
-#          type: Rally.util.Ref.getRelativeUri(@initiative._ref)
-#      ).then =>
+#      @_createApp(settings: type: Rally.util.Ref.getRelativeUri(@piHelper.initiative._ref)).then =>
 #        @ajax.whenQuerying('state').respondWith(@themeStates)
-#        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@theme._ref))
+#        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@piHelper.theme._ref))
 #        @waitForAppReady()
 #
 #    it 'should update the gridboard types', ->
-#      expect(@app.gridboard.types).toEqual [ @theme.TypePath ]
+#      expect(@app.gridboard.types).toEqual [ @piHelper.theme.TypePath ]
 #
 #    it 'should refresh the gridboard with columns matching the states of the new type', ->
 #      expect(@app.gridboard.getColumns().length).toBe @themeStates.length + 1
@@ -223,7 +177,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 #        expect(policyCheckbox.isChecked()).toBe true
 #        afterColumnRenderStub = @stub()
 #        @app.gridboard.getGridOrBoard().on('aftercolumnrender', afterColumnRenderStub)
-#        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@feature._ref))
+#        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@piHelper.feature._ref))
 #        @waitForCallback(afterColumnRenderStub).then =>
 #          expect(_.every(_.invoke(Ext.ComponentQuery.query('#policyHeader'), 'isVisible', true))).toBe true
 
@@ -257,10 +211,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
           expect(@app.down('#fieldpickerbtn').isVisible()).toBe true
 
       it 'should have use the legacy field setting if available', ->
-        @_createApp(
-          settings:
-            fields: 'Field1,Field2'
-        ).then =>
+        @_createApp(settings: fields: 'Field1,Field2').then =>
           expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['Field1','Field2']
 
   describe 'sizing', ->
@@ -274,8 +225,3 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
         currentHeight = gridBoard.getHeight()
         @app.setHeight @app.getHeight() + 10
         expect(gridBoard.getHeight()).toBe currentHeight + 10
-
-#  describe 'type picker', ->
-#    it 'should only show data of the type selected in the picker on load'
-#    it 'should only show data of the type selected in the picker when the picker selection changes'
-
