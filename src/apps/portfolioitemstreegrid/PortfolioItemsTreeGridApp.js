@@ -6,6 +6,7 @@
         mixins: ['Rally.clientmetrics.ClientMetricsRecordable'],
         requires: [
             'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
+            'Rally.ui.grid.TreeGridPrintDialog',
             'Rally.ui.dialog.CsvImportDialog'
         ],
 
@@ -36,7 +37,7 @@
                 plugins.push({
                     ptype: 'rallygridboardactionsmenu',
                     itemId: 'printExportMenuButton',
-                    menuItems: {
+                    menuItems: [{
                         text: 'Import...',
                         handler: function() {
                             Ext.widget({
@@ -46,6 +47,18 @@
                             });
                         }
                     },
+                    {
+                        text: 'Print...',
+                        handler: function() {
+                            Ext.create('Rally.ui.grid.TreeGridPrintDialog', {
+                                grid: this.gridboard.getGridOrBoard(),
+                                treeGridPrinterConfig: {
+                                    largeHeaderText: 'Portfolio Items'
+                                }
+                            });
+                        },
+                        scope: this
+                    }],
                     buttonConfig: {
                         iconCls: 'icon-export',
                         toolTipConfig: {

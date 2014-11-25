@@ -460,8 +460,7 @@
             var timeboxScope = this.getContext().getTimeboxScope();
 
             Ext.create('Rally.ui.grid.TreeGridPrintDialog', {
-                grid: this.queryById('gridBoard').getGridOrBoard(),
-                models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
+                grid: this.gridboard.getGridOrBoard(),
                 treeGridPrinterConfig: {
                     largeHeaderText: 'Iteration Summary',
                     smallHeaderText: timeboxScope.getRecord() ? timeboxScope.getRecord().get('Name') : 'Unscheduled'
