@@ -126,6 +126,11 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
         expect(sorters[1].property).toBe Rally.data.Ranker.RANK_FIELDS.TASK
         expect(sorters[1].direction).toBe 'ASC'
 
+    it 'disables cross lane dnd', ->
+      @createApp().then =>
+        board = @app.down 'rallycardboard'
+        expect(board.rowConfig.enableCrossRowDragging).toBe false
+
   describe 'timebox scoping', ->
     it 'includes the timebox scope filter', ->
       @createApp().then =>

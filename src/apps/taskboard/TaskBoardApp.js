@@ -238,7 +238,8 @@
                     values: _.pluck(rowRecords, 'data'),
                     headerConfig: {
                         xtype: 'rallytaskboardrowheader'
-                    }
+                    },
+                    enableCrossRowDragging: false
                 },
                 margin: '10px 0 0 0',
                 plugins: [{ptype:'rallyfixedheadercardboard'}]
