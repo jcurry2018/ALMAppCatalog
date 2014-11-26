@@ -186,6 +186,9 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
       workProductCombo = @addNew.down '#workProduct'
       expect(workProductCombo).not.toBeNull()
       expect(_.invoke workProductCombo.store.getRange(), 'get', '_ref').toEqual _.pluck @workProducts, '_ref'
+      expect(workProductCombo.editable).toBe true
+      expect(workProductCombo.typeAhead).toBe true
+      expect(workProductCombo.queryMode).toBe 'local'
 
     it 'specifies correct record types', ->
       expect(@addNew.recordTypes).toEqual ['Task', 'Defect', 'Defect Suite', 'Test Set', 'User Story']

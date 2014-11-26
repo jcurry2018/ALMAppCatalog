@@ -9,7 +9,11 @@
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
-            'Rally.apps.taskboard.TaskBoardHeader'
+            'Rally.apps.taskboard.TaskBoardHeader',
+            'Rally.clientmetrics.ClientMetricsRecordable'
+        ],
+        mixins: [
+            'Rally.clientmetrics.ClientMetricsRecordable'
         ],
         cls: 'taskboard',
         alias: 'widget.taskboardapp',
@@ -41,7 +45,7 @@
                     load: this._onRowsLoaded,
                     scope: this
                 },
-                fetch: ['FormattedID']
+                fetch: ['FormattedID', 'Name']
             });
         },
 
@@ -144,8 +148,16 @@
                     minWidth: 600,
                     ignoredRequiredFields: ['Name', 'Project', 'WorkProduct', 'State', 'TaskIndex', 'ScheduleState']
                 },
-                height: this._getAvailableBoardHeight()
+                height: this._getAvailableBoardHeight(),
+                listeners: {
+                    load: this._onLoad,
+                    scope: this
+                }
             };
+        },
+
+        _onLoad: function() {
+            this.recordComponentReady();
         },
 
         _getAvailableBoardHeight: function() {
@@ -178,17 +190,31 @@
             this._workProductCombo = Ext.create('Rally.ui.combobox.ComboBox', {
                 displayField: 'FormattedID',
                 valueField: '_ref',
+                listConfig: {
+                    tpl: Ext.create('Ext.XTemplate',
+                        '<tpl for=".">',
+                        '<div class="' + Ext.baseCSSPrefix + 'boundlist-item">',
+                        '<tpl if="values._ref">{FormattedID}: </tpl>',
+                        '{Name:htmlEncode}',
+                        '</div>',
+                        '</tpl>'),
+                    maxWidth: 300
+                },
                 store: Ext.create('Ext.data.Store', {
                     data: _.invoke(rowRecords, 'getData'),
-                    fields: ['_ref', 'FormattedID']
+                    fields: ['_ref', 'FormattedID', 'Name']
                 }),
-                emptyText: 'Work Product',
+                emptyText: 'Parent',
                 defaultSelectionPosition: null,
                 allowBlank: false,
                 validateOnChange: false,
                 validateOnBlur: false,
                 name: 'WorkProduct',
-                itemId: 'workProduct'
+                itemId: 'workProduct',
+                editable: true,
+                typeAhead: true,
+                queryMode: 'local',
+                minChars: 0
             });
             return this._workProductCombo;
         },
