@@ -316,15 +316,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @toggleToGrid()
         expect(@app.down('#gridBoard').getGridOrBoard().summaryColumns.length).toBe 4
 
-    it 'should fetch PlanEstimate, Release and Iteration if enableInlineAdd enabled', ->
-      @stubFeatureToggle(['F6038_ENABLE_INLINE_ADD'])
-      @createApp().then =>
-        @toggleToGrid()
-        store = @app.down('rallytreegrid').getStore()
-        expect(store.fetch).toContain 'PlanEstimate'
-        expect(store.fetch).toContain 'Release'
-        expect(store.fetch).toContain 'Iteration'
-
     it 'should include test sets', ->
       @createApp().then =>
         @toggleToGrid()
@@ -334,6 +325,24 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       buildSpy = @spy(Rally.data.wsapi.TreeStoreBuilder::, 'build')
       @createApp().then (app) ->
         expect(buildSpy.getCall(0).args[0].context).toEqual app.getContext().getDataContext()
+
+    describe 'enableInlineAdd config', ->
+      beforeEach ->
+        @stubFeatureToggle(['F6038_ENABLE_INLINE_ADD'])
+
+      it 'should fetch PlanEstimate, Release and Iteration', ->
+        @createApp().then =>
+          @toggleToGrid()
+          store = @app.down('rallytreegrid').getStore()
+          expect(store.fetch).toContain 'PlanEstimate'
+          expect(store.fetch).toContain 'Release'
+          expect(store.fetch).toContain 'Iteration'
+
+      it 'should pass in enableAddPlusNewChildStories to inlineAddRowExpander plugin', ->
+        @createApp().then =>
+          @toggleToGrid()
+          inlineAddRowExpander = _.find(@app.down('rallytreegrid').plugins, {'ptype': 'rallyinlineaddrowexpander'})
+          expect(inlineAddRowExpander.enableAddPlusNewChildStories).toBe false
 
     describe 'with S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER toggle off', ->
       beforeEach ->

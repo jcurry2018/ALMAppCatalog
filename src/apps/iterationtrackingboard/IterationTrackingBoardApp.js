@@ -594,6 +594,9 @@
                 columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
                 enableInlineAdd: this._inlineAddIsEnabled(),
+                inlineAddConfig:{
+                    enableAddPlusNewChildStories: false
+                },
                 enableBulkEdit: true,
                 enableBulkEditMilestones: context._isMilestoneEnabled(),
                 pagingToolbarCfg: {
