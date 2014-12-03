@@ -69,6 +69,7 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
           expect(plugin.modelNames).toEqual ['Task']
           expect(plugin.boardFieldDefaults).toEqual ['Estimate', 'ToDo']
           expect(plugin.boardFieldBlackList).toContain 'State'
+          expect(plugin.boardFieldBlackList).toContain 'TaskIndex'
 
   describe '#hideAcceptedWork', ->
     it 'has the correct default settings', ->
@@ -130,6 +131,11 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
       @createApp().then =>
         board = @app.down 'rallycardboard'
         expect(board.rowConfig.enableCrossRowDragging).toBe false
+
+    it 'specifies a sortField so that the board can correctly re-order rows', ->
+      @createApp().then =>
+        board = @app.down 'rallycardboard'
+        expect(board.rowConfig.sortField).toBe Rally.data.Ranker.RANK_FIELDS.DND
 
   describe 'timebox scoping', ->
     it 'includes the timebox scope filter', ->

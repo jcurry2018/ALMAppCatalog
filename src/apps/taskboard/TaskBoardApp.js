@@ -45,7 +45,7 @@
                     load: this._onRowsLoaded,
                     scope: this
                 },
-                fetch: ['FormattedID', 'Name']
+                fetch: ['FormattedID', 'Name', this._getRankField()]
             });
         },
 
@@ -125,7 +125,7 @@
                         headerPosition: 'left',
                         modelNames: modelNames,
                         boardFieldDefaults: ['Estimate', 'ToDo'],
-                        boardFieldBlackList: ['State']
+                        boardFieldBlackList: ['State', 'TaskIndex']
                     }
                 ],
                 context: context,
@@ -239,6 +239,7 @@
                     headerConfig: {
                         xtype: 'rallytaskboardrowheader'
                     },
+                    sortField: this._getRankField(),
                     enableCrossRowDragging: false
                 },
                 margin: '10px 0 0 0',
