@@ -7,7 +7,8 @@
         requires: [
             'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
             'Rally.ui.grid.TreeGridPrintDialog',
-            'Rally.ui.dialog.CsvImportDialog'
+            'Rally.ui.dialog.CsvImportDialog',
+            'Rally.ui.grid.GridCsvExport'
         ],
 
         componentCls: 'pitreegrid',
@@ -63,7 +64,9 @@
                         },
                         {
                             text: 'Export...',
-                            handler: this._exportHandler,
+                            handler: function() {
+                                window.location = Rally.ui.grid.GridCsvExport.buildCsvExportUrl(this.gridboard.getGridOrBoard());
+                            },
                             scope: this
                         }
                     ],
@@ -81,21 +84,6 @@
                 });
             }
             return plugins;
-        },
-
-        _exportHandler: function(){
-            var grid = this.gridboard.getGridOrBoard();
-            var columns = _.map(grid.columnCfgs, function(config){
-                return config.dataIndex || config;
-            }).join();
-            var order = grid.store.sorters.items[0].property + ' ' + grid.store.sorters.items[0].direction;
-            var project = '/project/'+Rally.environment.getContext().getProject().OID;
-
-            var finalFilter =  _.reduce(grid.store.filters.items, function(result, filter) {
-                return result.and(filter);
-            });
-
-            window.location = window.location.origin+'/slm/webservice/v2.0/portfolioitem/'+this.piTypePicker.getSelectedType().get('Name')+'.csv?fetch='+columns+'&order='+order+'&project='+project+'&query='+(finalFilter ? finalFilter.toString() : '');
         }
     });
 })();
