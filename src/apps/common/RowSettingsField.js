@@ -147,7 +147,6 @@
                         ((attr.Constrained &&
                         attr.AttributeType.toLowerCase() !== 'collection') ||
                             (this.includeObjectFields && attr.AttributeType.toLowerCase() === 'object')) &&
-                        !attr.ReadOnly &&
                         (attr.Custom || this.includeConstrainedNonCustomFields) &&
                         artifactModel.getModelsForField(field).length === models.length;
                 }, this);
