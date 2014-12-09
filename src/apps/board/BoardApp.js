@@ -4,6 +4,7 @@
     Ext.define('Rally.apps.board.BoardApp', {
         extend: 'Rally.app.App',
         alias: 'widget.boardapp',
+
         requires: [
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.gridboard.GridBoard',
@@ -11,7 +12,11 @@
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.data.util.Sorter',
-            'Rally.apps.board.Settings'
+            'Rally.apps.board.Settings',
+            'Rally.clientmetrics.ClientMetricsRecordable'
+        ],
+        mixins: [
+            'Rally.clientmetrics.ClientMetricsRecordable'
         ],
 
         cls: 'customboard',
@@ -75,8 +80,22 @@
                 },
                 storeConfig: {
                     filters: this._getFilters()
+                },
+                listeners: {
+                    load: this._onLoad,
+                    scope: this
                 }
             };
+        },
+
+        _onLoad: function() {
+            this.recordComponentReady({
+                miscData: {
+                    type: this.getSetting('type'),
+                    columns: this.getSetting('groupByField'),
+                    rows: (this.getSetting('showRows') && this.getSetting('rowsField')) || ''
+                }
+            });
         },
 
         _getBoardConfig: function() {
