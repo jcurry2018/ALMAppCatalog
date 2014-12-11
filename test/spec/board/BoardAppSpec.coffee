@@ -55,6 +55,14 @@ describe 'Rally.apps.board.BoardApp', ->
       expect(@_getGridBoard().storeConfig.filters[0].toString())
         .toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
+  it 'does not filter by timebox if model does not have that timebox', ->
+    @ajax.whenQuerying('testcase').respondWithCount 5
+    @ajax.whenQueryingAllowedValues('testcase', 'Priority').respondWith ['None', 'Useful', 'Important', 'Critical']
+    @createApp({type: 'testcase', groupByField: 'Priority'}, context:
+      timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
+    ).then =>
+      expect(@_getGridBoard().storeConfig.filters.length).toBe 0
+
   it 'scopes the board to the current timebox scope and specified query filter', ->
     query = '(Name contains foo)'
     @createApp({query: query}, context:
@@ -139,7 +147,8 @@ describe 'Rally.apps.board.BoardApp', ->
         settings: settings
         renderTo: options.renderTo || 'testDiv'
 
-      @waitForComponentReady @_getBoard()
+      @once(condition: => @_getBoard()).then =>
+        @waitForComponentReady @_getBoard()
 
     _createContext: (context={}) ->
       Ext.create('Rally.app.Context',

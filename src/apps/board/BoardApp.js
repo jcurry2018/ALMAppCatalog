@@ -34,7 +34,15 @@
         },
 
         launch: function() {
-            this.add(this._getGridBoardConfig());
+            Rally.data.ModelFactory.getModel({
+                type: this.getSetting('type')
+            }).then({
+                success: function (model) {
+                    this.model = model;
+                    this.add(this._getGridBoardConfig());
+                },
+                scope: this
+            });
         },
 
         _getGridBoardConfig: function() {
@@ -145,12 +153,13 @@
         },
 
         _getFilters: function() {
-            var queries = [];
+            var queries = [],
+                timeboxScope = this.getContext().getTimeboxScope();
             if (this.getSetting('query')) {
                 queries.push(Rally.data.QueryFilter.fromQueryString(this.getSetting('query')));
             }
-            if (this.getContext().getTimeboxScope()) {
-                queries.push(this.getContext().getTimeboxScope().getQueryFilter());
+            if (timeboxScope && this.model.hasField(Ext.String.capitalize(timeboxScope.getType()))) {
+                queries.push(timeboxScope.getQueryFilter());
             }
 
             return queries;
