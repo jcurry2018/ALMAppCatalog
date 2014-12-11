@@ -21,28 +21,18 @@ describe 'Rally.apps.taskboard.TaskBoardHeader', ->
 
     onMouseEnter: () ->
       # calling a private so the creation of a popover actually can be tested :(
-      @header._showWorkProductPopover()
+      @header._showPopover()
 
   afterEach ->
     @header?.destroy()
 
-  it 'should register mouseenter handler for formatted id link after render', ->
+  it 'should register mouseover and mouseout handlers for formatted id link after render', ->
     onSpy = @spy(Ext.dom.Element::, 'on')
     @createHeader()
 
-    expect(onSpy.callCount).toBe 1
-    expect(onSpy.calledOn(@getFormattedIdLinkEl())).toBe true
-    expect(onSpy.calledWith('mouseenter')).toBe true
-
-  it 'should unregister mouseenter handler for formatted id link before destroy', ->
-    @createHeader()
-    unSpy = @spy(Ext.dom.Element::, 'un')
-    formattedIdLinkEl = @getFormattedIdLinkEl()
-    @header.destroy()
-
-    expect(unSpy.callCount).toBe 1
-    expect(unSpy.calledOn(formattedIdLinkEl)).toBe true
-    expect(unSpy.calledWith('mouseenter')).toBe true
+    expect(onSpy.callCount).toBe 2
+    expect(onSpy.calledWith('mouseover')).toBe true
+    expect(onSpy.calledWith('mouseout')).toBe true
 
   it 'should create a work product popover', ->
     @createHeader()
