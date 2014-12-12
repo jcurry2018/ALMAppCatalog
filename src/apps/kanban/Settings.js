@@ -64,14 +64,14 @@
                 margin: '10 0 0 0',
                 mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
                 readyEvent: 'ready',
-                includeCustomFields: true,
-                includeConstrainedNonCustomFields: false,
-                includeObjectFields: false,
+                isAllowedFieldFn: function(field) {
+                    var attr = field.attributeDefinition;
+                    return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string')
+                        || attr.Constrained || _.contains(['boolean'], attr.AttributeType.toLowerCase())) &&
+                        !_.contains(['web_link', 'text', 'date'], attr.AttributeType.toLowerCase());
+                },
                 explicitFields: [
-                    {name: 'Blocked', value: 'Blocked'},
-                    {name: 'Owner', value: 'Owner'},
-                    {name: 'Sizing', value: 'PlanEstimate'},
-                    {name: 'Expedite', value: 'Expedite'}
+                    {name: 'Sizing', value: 'PlanEstimate'}
                ]
             });
 

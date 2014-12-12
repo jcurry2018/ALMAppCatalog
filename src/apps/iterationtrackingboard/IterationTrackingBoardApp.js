@@ -122,9 +122,7 @@
                 margin: '10 0 0 0',
                 mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
                 readyEvent: 'ready',
-                includeCustomFields: false,
-                includeConstrainedNonCustomFields: false,
-                includeObjectFields: false,
+                isAllowedFieldFn: function() { return false; },
                 explicitFields: [
                     {name: 'Blocked', value: 'Blocked'},
                     {name: 'Owner', value: 'Owner'},

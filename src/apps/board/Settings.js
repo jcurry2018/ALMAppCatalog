@@ -75,7 +75,9 @@
                         ready: function (combo) {
                             combo.store.filterBy(function (record) {
                                 var attr = record.get('fieldDefinition').attributeDefinition;
-                                return attr && !attr.ReadOnly && attr.Constrained && attr.AttributeType !== 'COLLECTION';
+                                return attr && !attr.ReadOnly && !attr.Hidden && attr.Constrained && attr.AttributeType !== 'COLLECTION' &&
+                                    (!attr.AllowedValueType || attr.AllowedValueType._refObjectName !== 'User') &&
+                                    !_.contains(['Iteration', 'Release', 'Project'], attr.Name);
                             });
                             var fields = Ext.Array.map(combo.store.getRange(), function (record) {
                                 return record.get(combo.getValueField());
@@ -93,15 +95,14 @@
                     margin: '10 0 0 0',
                     mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
                     readyEvent: 'ready',
-                    explicitFields: [
-                        {name: 'Blocked', value: 'Blocked'},
-                        {name: 'Expedite', value: 'Expedite'},
-                        {name: 'Owner', value: 'Owner'},
-                        {name: 'Sizing', value: 'PlanEstimate'}
-                    ],
-                    includeCustomFields: true,
-                    includeConstrainedNonCustomFields: true,
-                    includeObjectFields: true,
+                    isAllowedFieldFn: function(field) {
+                        var attr = field.attributeDefinition;
+                        return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string') ||
+                            attr.Constrained || _.contains(['quantity', 'boolean'], attr.AttributeType.toLowerCase()) ||
+                            (!attr.Constrained && attr.AttributeType.toLowerCase() === 'object')) &&
+                            !_.contains(['web_link', 'text', 'date'], attr.AttributeType.toLowerCase()) &&
+                            !_.contains(['PortfolioItemType'], attr.ElementName);
+                    },
                     handlesEvents: {
                         typeselected: function(type, context) {
                             this.refreshWithNewModelType(type, context);

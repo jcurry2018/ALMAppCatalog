@@ -60,41 +60,41 @@ describe 'Rally.apps.common.RowSettingsField', ->
       expect(fieldNames).toEqual [].concat(fieldNames).sort()
 
   it 'should refresh the values in the combobox', ->
-    @createField(includeConstrainedNonCustomFields: true).then =>
+    @createField(isAllowedFieldFn: (field) -> field.Name != 'Severity').then =>
       @field.refreshWithNewModelType('defect')
       @waitForEvent(@field, 'ready').then =>
         combobox = @field.down 'rallycombobox'
         expect(combobox.findRecordByValue('Severity')).toBeTruthy()
 
-  describe '#includeCustomFields', ->
-    it 'should include a custom dropdown field', ->
-      @createField(includeCustomFields: true).then =>
+  describe 'returned fields', ->
+    it 'should filter fields without attributeDefinition', ->
+      @createField().then =>
         combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('c_KanbanState')).toBeTruthy()
+        expect(combobox.findRecordByValue('_refObjectName')).toBeFalsy()
 
-    it 'should not include a custom dropdown field if configured to not have them', ->
-      @createField(includeCustomFields: false).then =>
+    it 'should filter hidden fields', ->
+      @createField().then =>
         combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('c_KanbanState')).toBeFalsy()
+        expect(combobox.findRecordByValue('Package')).toBeFalsy()
 
-  describe '#includeObjectFields', ->
-    it 'should include an object field', ->
-      @createField(includeConstrainedNonCustomFields: true, includeObjectFields: true, modelNames: ['user story']).then =>
+    it 'should filter non-sortable fields', ->
+      @createField().then =>
         combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('Parent')).toBeTruthy()
+        expect(combobox.findRecordByValue('Milestones')).toBeFalsy()
 
-    it 'should not include an object field', ->
-      @createField(includeObjectFields: false, modelNames: ['user story']).then =>
+    it 'should filter fields that do not belong to all models', ->
+      @createField().then =>
         combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('Parent')).toBeFalsy()
+        expect(combobox.findRecordByValue('Milestones')).toBeFalsy()
 
-  describe '#includeConstrainedNonCustomFields', ->
-    it 'should include a constrained non custom field', ->
-      @createField(includeConstrainedNonCustomFields: true, modelNames: ['defect']).then =>
+    it 'should filter fields specified by isAllowedFieldFn', ->
+      @createField(isAllowedFieldFn: (field) -> field.Name != 'Blocked').then =>
         combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('Severity')).toBeTruthy()
+        expect(combobox.findRecordByValue('Blocked')).toBeFalsy()
 
-    it 'should not include a constrained non custom field', ->
-      @createField(includeConstrainedNonCustomFields: false, modelNames: ['defect']).then =>
+    it 'should filter all fields when specified by isAllowedFieldFn', ->
+      @createField(isAllowedFieldFn: (field) -> false).then =>
         combobox = @field.down 'rallycombobox'
-        expect(combobox.findRecordByValue('Severity')).toBeFalsy()
+        expect(combobox.store.getCount()).toBe 1
+
+

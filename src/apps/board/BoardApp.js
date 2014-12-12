@@ -35,7 +35,8 @@
 
         launch: function() {
             Rally.data.ModelFactory.getModel({
-                type: this.getSetting('type')
+                type: this.getSetting('type'),
+                context: this.getContext().getDataContext()
             }).then({
                 success: function (model) {
                     this.model = model;
@@ -92,7 +93,8 @@
                 listeners: {
                     load: this._onLoad,
                     scope: this
-                }
+                },
+                height: this.getHeight()
             };
         },
 

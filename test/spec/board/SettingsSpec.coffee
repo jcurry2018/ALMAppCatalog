@@ -93,6 +93,22 @@ describe 'Rally.apps.board.Settings', ->
         expect(attr && !attr.ReadOnly && attr.Constrained && attr.AttributeType != 'COLLECTION').toBe true
       )
 
+  it 'excludes these special fields', ->
+    @createSettings(type: 'HierarchicalRequirement').then =>
+      Ext.Array.each(@_getGroupByCombo().getStore().getRange(), (record) ->
+        attr = record.get('fieldDefinition').attributeDefinition
+        expect(attr.Name).not.toBe 'Iteration'
+        expect(attr.Name).not.toBe 'Release'
+        expect(attr.Name).not.toBe 'Project'
+      )
+
+  it 'excludes user object fields', ->
+    @createSettings(type: 'HierarchicalRequirement').then =>
+      Ext.Array.each(@_getGroupByCombo().getStore().getRange(), (record) ->
+        attr = record.get('fieldDefinition').attributeDefinition
+        expect(attr.Name != 'Owner').toBe true
+      )
+
   it 'refreshes the swimlanes setting when the type changes', ->
     @createSettings(type: 'Defect').then =>
       swimLanesRefreshSpy = @spy(@_getSwimLanes(), 'refreshWithNewModelType')
@@ -103,12 +119,101 @@ describe 'Rally.apps.board.Settings', ->
       expect(swimLanesRefreshSpy).toHaveBeenCalledOnce()
       expect(swimLanesRefreshSpy.getCall(0).args[0]).toBe newValue
 
-  it 'includes the correct swimlane fields', ->
-    @createSettings().then =>
-      swimLanes = @_getSwimLanes()
-      expect(swimLanes.includeCustomFields).toBe true
-      expect(swimLanes.includeConstrainedNonCustomFields).toBe true
-      expect(swimLanes.includeConstrainedNonCustomFields).toBe true
+  describe 'includes the correct swimlane', ->
+    helpers
+      assertFieldIsIncluded: (config) ->
+        field = Ext.merge
+          attributeDefinition:
+            AttributeType: 'BOOLEAN'
+            Constrained: false
+            Custom: false
+          , config
+        expect(@isAllowedFieldFn(field)).toBe true
+
+      assertFieldIsExcluded: (config) ->
+        field = Ext.merge
+          attributeDefinition:
+            AttributeType: 'BOOLEAN'
+            Constrained: false
+            Custom: false
+        , config
+        expect(@isAllowedFieldFn(field)).toBe false
+
+    beforeEach ->
+      @createSettings().then =>
+        @isAllowedFieldFn = @_getSwimLanes().isAllowedFieldFn
+
+    describe 'standard fields', ->
+
+      describe 'should have', ->
+        it 'booleans', ->
+          @assertFieldIsIncluded()
+
+        it 'quantity', ->
+          @assertFieldIsIncluded(attributeDefinition: AttributeType: 'QUANTITY')
+
+        it 'dropdowns', ->
+          @assertFieldIsIncluded(attributeDefinition: AttributeType: 'STRING', Constrained: true)
+
+        it 'constrained objects', ->
+          @assertFieldIsIncluded(attributeDefinition: AttributeType: 'OBJECT', Constrained: true)
+
+        it 'unconstrained objects', ->
+          @assertFieldIsIncluded(attributeDefinition: AttributeType: 'OBJECT', Constrained: false)
+
+      describe 'should NOT have', ->
+
+        it 'weblinks', ->
+          @assertFieldIsExcluded(attributeDefinition: AttributeType: 'WEB_LINK')
+
+        it 'string', ->
+          @assertFieldIsExcluded(attributeDefinition: AttributeType: 'STRING')
+
+        it 'text', ->
+          @assertFieldIsExcluded(attributeDefinition: AttributeType: 'TEXT')
+
+        it 'date', ->
+          @assertFieldIsExcluded(attributeDefinition: AttributeType: 'DATE')
+
+        it 'decimals', ->
+          @assertFieldIsExcluded(attributeDefinition: AttributeType: 'DECIMAL')
+
+        it 'integers', ->
+          @assertFieldIsExcluded(attributeDefinition: AttributeType: 'INTEGER')
+
+        it 'PortfolioItemType', ->
+          @assertFieldIsExcluded(attributeDefinition: ElementName: 'PortfolioItemType', AttributeType: 'OBJECT')
+
+    describe 'custom fields', ->
+      describe 'should have', ->
+
+        it 'booleans', ->
+          @assertFieldIsIncluded(attributeDefinition: Custom: true)
+
+        it 'decimals', ->
+          @assertFieldIsIncluded(attributeDefinition: AttributeType: 'DECIMAL', Custom: true)
+
+        it 'integers', ->
+          @assertFieldIsIncluded(attributeDefinition: AttributeType: 'INTEGER', Custom: true)
+
+        it 'dropdowns', ->
+          @assertFieldIsIncluded(attributeDefinition: AttributeType: 'STRING', Constrained: true, Custom: true)
+
+    describe 'should NOT have', ->
+
+      it 'weblinks', ->
+        @assertFieldIsExcluded(attributeDefinition: AttributeType: 'WEB_LINK', Custom: true)
+
+      it 'string', ->
+        @assertFieldIsExcluded(attributeDefinition: AttributeType: 'STRING', Custom: true)
+
+      it 'text', ->
+        @assertFieldIsExcluded(attributeDefinition: AttributeType: 'TEXT', Custom: true)
+
+      it 'date', ->
+        @assertFieldIsExcluded(attributeDefinition: AttributeType: 'DATE', Custom: true)
+
+
   helpers
     createSettings: (settings={}, contextValues)->
       settingsReady = @stub()
