@@ -48,54 +48,57 @@
 
         _getGridBoardConfig: function() {
             var context = this.getContext(),
-                modelNames = [this.getSetting('type')];
-            return {
-                xtype: 'rallygridboard',
-                stateful: false,
-                toggleState: 'board',
-                cardBoardConfig: this._getBoardConfig(),
-                plugins: [
-                    'rallygridboardaddnew',
-                    {
-                        ptype: 'rallygridboardcustomfiltercontrol',
-                        filterChildren: false,
-                        filterControlConfig: {
-                            margin: '3 9 3 30',
-                            modelNames: modelNames,
-                            stateful: true,
-                            stateId: context.getScopedStateId('board-custom-filter-button')
+                modelNames = [this.getSetting('type')],
+                config = {
+                    xtype: 'rallygridboard',
+                    stateful: false,
+                    toggleState: 'board',
+                    cardBoardConfig: this._getBoardConfig(),
+                    plugins: [
+                        'rallygridboardaddnew',
+                        {
+                            ptype: 'rallygridboardcustomfiltercontrol',
+                            filterChildren: false,
+                            filterControlConfig: {
+                                margin: '3 9 3 30',
+                                modelNames: modelNames,
+                                stateful: true,
+                                stateId: context.getScopedStateId('board-custom-filter-button')
+                            },
+                            showOwnerFilter: true,
+                            ownerFilterControlConfig: {
+                                stateful: true,
+                                stateId: context.getScopedStateId('board-owner-filter')
+                            }
                         },
-                        showOwnerFilter: true,
-                        ownerFilterControlConfig: {
-                            stateful: true,
-                            stateId: context.getScopedStateId('board-owner-filter')
+                        {
+                            ptype: 'rallygridboardfieldpicker',
+                            headerPosition: 'left',
+                            boardFieldBlackList: ['Successors', 'Predecessors', 'DisplayColor'],
+                            modelNames: modelNames,
+                            boardFieldDefaults: (this.getSetting('fields')
+                                && this.getSetting('fields').split(',')) || []
+                        }
+                    ],
+                    context: context,
+                    modelNames: modelNames,
+                    addNewPluginConfig: {
+                        style: {
+                            'float': 'left'
                         }
                     },
-                    {
-                        ptype: 'rallygridboardfieldpicker',
-                        headerPosition: 'left',
-                        boardFieldBlackList: ['Successors', 'Predecessors', 'DisplayColor'],
-                        modelNames: modelNames,
-                        boardFieldDefaults: (this.getSetting('fields')
-                            && this.getSetting('fields').split(',')) || []
+                    storeConfig: {
+                        filters: this._getFilters()
+                    },
+                    listeners: {
+                        load: this._onLoad,
+                        scope: this
                     }
-                ],
-                context: context,
-                modelNames: modelNames,
-                addNewPluginConfig: {
-                    style: {
-                        'float': 'left'
-                    }
-                },
-                storeConfig: {
-                    filters: this._getFilters()
-                },
-                listeners: {
-                    load: this._onLoad,
-                    scope: this
-                },
-                height: this.getHeight()
-            };
+                };
+            if(this.getEl()) {
+                config.height = this.getHeight();
+            }
+            return config;
         },
 
         _onLoad: function() {

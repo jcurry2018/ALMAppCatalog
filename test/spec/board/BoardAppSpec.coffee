@@ -115,6 +115,10 @@ describe 'Rally.apps.board.BoardApp', ->
       expect(sorters.length).toBe 1
       expect(sorters[0].property).toBe @app.getSetting('order')
 
+  it 'should set the initial gridboard height to the app height', ->
+    @createApp().then =>
+      expect(@app.down('rallygridboard').getHeight()).toBe @app.getHeight()
+
   describe 'plugins', ->
 
     describe 'filtering', ->
@@ -146,6 +150,7 @@ describe 'Rally.apps.board.BoardApp', ->
         context: @_createContext options.context
         settings: settings
         renderTo: options.renderTo || 'testDiv'
+        height: 400
 
       @once(condition: => @_getBoard()).then =>
         @waitForComponentReady @_getBoard()
