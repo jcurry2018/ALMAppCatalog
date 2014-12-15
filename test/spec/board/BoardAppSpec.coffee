@@ -106,11 +106,13 @@ describe 'Rally.apps.board.BoardApp', ->
     @createApp(showRows: true, rowsField: 'Owner').then =>
       expect(@_getBoard().rowConfig.field).toBe 'Owner'
       expect(@_getBoard().rowConfig.sortDirection).toBe 'ASC'
-      expect(@_getBoard().storeConfig.sorters).toBeUndefined()
 
   it 'should not include rows configuration when showRows setting is false', ->
     @createApp(showRows: false, rowsField: 'Owner').then =>
       expect(@_getBoard().rowConfig).toBeNull()
+
+  it 'should include sorters from order setting', ->
+    @createApp(order: 'Name').then =>
       sorters = @_getBoard().storeConfig.sorters
       expect(sorters.length).toBe 1
       expect(sorters[0].property).toBe @app.getSetting('order')

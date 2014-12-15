@@ -5,6 +5,48 @@ Ext.require [
 ]
 
 describe 'Rally.apps.board.Settings', ->
+  helpers
+    createSettings: (settings={}, contextValues)->
+      settingsReady = @stub()
+      context = @_getContext(contextValues)
+      @container = Ext.create('Rally.app.AppSettings', {
+        renderTo: 'testDiv',
+        context: context,
+        settings: settings,
+        fields: Rally.apps.board.Settings.getFields(context),
+        listeners: {
+          appsettingsready: settingsReady
+        }
+      })
+
+      @once(condition: -> settingsReady.called)
+
+    _getContext: (context) ->
+      Ext.create('Rally.app.Context',
+        initialValues: Ext.apply(
+          project:
+            _ref: '/project/1'
+            Name: 'Project 1'
+          workspace:
+            WorkspaceConfiguration:
+              DragDropRankingEnabled: true
+        , context)
+      )
+
+    _getFieldAt: (index) ->
+      @container.down('form').form.getFields().getAt(index)
+
+    _getTypeCombo: ->
+      @_getFieldAt(0)
+
+    _getGroupByCombo: ->
+      @_getFieldAt(1)
+
+    _getSwimLanes: ->
+      @_getFieldAt(2)
+
+    _getOrder: ->
+      @_getFieldAt(5)
 
   beforeEach ->
     @ajax.whenQuerying('TypeDefinition').respondWithCount(3, {
@@ -213,43 +255,24 @@ describe 'Rally.apps.board.Settings', ->
       it 'date', ->
         @assertFieldIsExcluded(attributeDefinition: AttributeType: 'DATE', Custom: true)
 
+  describe 'includes the correct order fields', ->
 
-  helpers
-    createSettings: (settings={}, contextValues)->
-      settingsReady = @stub()
-      context = @_getContext(contextValues)
-      @container = Ext.create('Rally.app.AppSettings', {
-        renderTo: 'testDiv',
-        context: context,
-        settings: settings,
-        fields: Rally.apps.board.Settings.getFields(context),
-        listeners: {
-          appsettingsready: settingsReady
-        }
-      })
+    it 'refreshes the group by combo when the type changes', ->
+      @createSettings(type: 'Defect').then =>
+        orderRefreshSpy = @spy @_getOrder(), 'refreshWithNewModelType'
+        typeCombo = @_getTypeCombo()
+        newValue = 'HierarchicalRequirement'
+        typeCombo.fireEvent('select', typeCombo, [typeCombo.findRecordByValue(newValue)])
 
-      @once(condition: -> settingsReady.called)
+        expect(orderRefreshSpy).toHaveBeenCalledOnce()
+        expect(orderRefreshSpy.getCall(0).args[0]).toBe newValue
+        expect(orderRefreshSpy.getCall(0).args[1]).toBe typeCombo.context
 
-    _getContext: (context) ->
-      Ext.create('Rally.app.Context',
-        initialValues: Ext.apply(
-          project:
-            _ref: '/project/1'
-            Name: 'Project 1'
-          workspace:
-            WorkspaceConfiguration:
-              DragDropRankingEnabled: true
-        , context)
-      )
+    it 'should have sortable fields', ->
+      @createSettings().then =>
+        _.each @_getOrder().getStore().getRange(), (field) ->
+          expect(field.get('fieldDefinition').attributeDefinition.Sortable).toBe true
 
-    _getFieldAt: (index) ->
-      @container.down('form').form.getFields().getAt(index)
-
-    _getTypeCombo: ->
-      @_getFieldAt(0)
-
-    _getGroupByCombo: ->
-      @_getFieldAt(1)
-
-    _getSwimLanes: ->
-      @_getFieldAt(2)
+    it 'defaults to the rank field', ->
+      @createSettings().then =>
+        expect(@_getOrder().getValue()).toBe 'DragAndDropRank'

@@ -121,19 +121,16 @@
                     showIconMenus: true
                 },
                 loadMask: true,
-                plugins: [{ptype:'rallyfixedheadercardboard'}]
+                plugins: [{ptype:'rallyfixedheadercardboard'}],
+                storeConfig: {
+                    sorters: Rally.data.util.Sorter.sorters(this.getSetting('order'))
+                }
             };
             if (this.getSetting('showRows')) {
                 Ext.merge(boardConfig, {
                     rowConfig: {
                         field: this.getSetting('rowsField'),
                         sortDirection: 'ASC'
-                    }
-                });
-            } else {
-                Ext.merge(boardConfig, {
-                    storeConfig: {
-                        sorters: Rally.data.util.Sorter.sorters(this.getSetting('order'))
                     }
                 });
             }

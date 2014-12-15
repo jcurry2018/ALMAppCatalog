@@ -78,6 +78,7 @@
                     xtype: 'rallycheckboxfield',
                     name: 'showRows',
                     boxLabel: '',
+                    margin: '0',
                     submitValue: false,
                     value: this.getValue().showRows,
                     listeners: {
@@ -91,7 +92,8 @@
                     xtype: 'rallycombobox',
                     plugins: ['rallyfieldvalidationui'],
                     name: 'rowsField',
-                    margin: '0 5px',
+                    margin: '0 6px',
+                    width: 130,
                     emptyText: 'Choose Field...',
                     displayField: 'name',
                     valueField: 'value',

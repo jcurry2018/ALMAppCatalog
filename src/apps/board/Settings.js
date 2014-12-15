@@ -92,7 +92,6 @@
                     name: 'groupHorizontallyByField',
                     xtype: 'rowsettingsfield',
                     fieldLabel: 'Swimlanes',
-                    margin: '10 0 0 0',
                     mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
                     readyEvent: 'ready',
                     isAllowedFieldFn: function(field) {
@@ -111,7 +110,23 @@
                 },
                 {
                     name: 'order',
-                    xtype: 'rallytextfield'
+                    fieldLabel: 'Order',
+                    xtype: 'rallyfieldcombobox',
+                    readyEvent: 'ready',
+                    handlesEvents: {
+                        typeselected: function(type, context) {
+                            this.refreshWithNewModelType(type, context);
+                        }
+                    },
+                    listeners: {
+                        ready: function (combo) {
+                            combo.store.filterBy(function (record) {
+                                var attr = record.get('fieldDefinition').attributeDefinition;
+                                return attr && attr.Sortable;
+                            });
+                        }
+                    },
+                    value: context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ? 'DragAndDropRank' : 'Rank'
                 },
                 {
                     type: 'query'
