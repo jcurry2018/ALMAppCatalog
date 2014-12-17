@@ -74,10 +74,12 @@
                     listeners: {
                         ready: function (combo) {
                             combo.store.filterBy(function (record) {
-                                var attr = record.get('fieldDefinition').attributeDefinition;
+                                var field = record.get('fieldDefinition'),
+                                    attr = field.attributeDefinition;
                                 return attr && !attr.ReadOnly && !attr.Hidden && attr.Constrained && attr.AttributeType !== 'COLLECTION' &&
                                     (!attr.AllowedValueType || attr.AllowedValueType._refObjectName !== 'User') &&
-                                    !_.contains(['Iteration', 'Release', 'Project'], attr.Name);
+                                    !_.contains(['Iteration', 'Release', 'Project'], attr.Name) &&
+                                    !field.isMappedFromArtifact;
                             });
                             var fields = Ext.Array.map(combo.store.getRange(), function (record) {
                                 return record.get(combo.getValueField());
@@ -121,8 +123,9 @@
                     listeners: {
                         ready: function (combo) {
                             combo.store.filterBy(function (record) {
-                                var attr = record.get('fieldDefinition').attributeDefinition;
-                                return attr && attr.Sortable;
+                                var field = record.get('fieldDefinition'),
+                                    attr = field.attributeDefinition;
+                                return attr && attr.Sortable && !field.isMappedFromArtifact;
                             });
                         }
                     },

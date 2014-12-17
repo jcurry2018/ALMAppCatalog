@@ -130,10 +130,10 @@ describe 'Rally.apps.board.Settings', ->
 
   it 'displays only writable fields with allowed values in group by combo', ->
     @createSettings().then =>
-      Ext.Array.each(@_getGroupByCombo().getStore().getRange(), (record) ->
-        attr = record.get('fieldDefinition').attributeDefinition
-        expect(attr && !attr.ReadOnly && attr.Constrained && attr.AttributeType != 'COLLECTION').toBe true
-      )
+      Ext.Array.each @_getGroupByCombo().getStore().getRange(), (record) ->
+        field = record.get('fieldDefinition')
+        attr = field.attributeDefinition
+        expect(attr && !attr.ReadOnly && attr.Constrained && attr.AttributeType != 'COLLECTION' && !field.isMappedFromArtifact).toBe true
 
   it 'excludes these special fields', ->
     @createSettings(type: 'HierarchicalRequirement').then =>
@@ -272,6 +272,11 @@ describe 'Rally.apps.board.Settings', ->
       @createSettings().then =>
         _.each @_getOrder().getStore().getRange(), (field) ->
           expect(field.get('fieldDefinition').attributeDefinition.Sortable).toBe true
+
+    it 'should exclude mapped fields', ->
+      @createSettings().then =>
+        _.each @_getOrder().getStore().getRange(), (field) ->
+          expect(field.get('fieldDefinition').isMappedFromArtifact).toBeUndefined()
 
     it 'defaults to the rank field', ->
       @createSettings().then =>
