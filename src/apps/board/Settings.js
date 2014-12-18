@@ -129,7 +129,7 @@
                             });
                         }
                     },
-                    value: context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ? 'DragAndDropRank' : 'Rank'
+                    initialValue: context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ? 'DragAndDropRank' : 'Rank'
                 },
                 {
                     type: 'query'
