@@ -280,4 +280,4 @@ describe 'Rally.apps.board.Settings', ->
 
     it 'defaults to the rank field', ->
       @createSettings().then =>
-        expect(@_getOrder().getValue()).toBe 'DragAndDropRank'
+        expect(@_getOrder().initialValue).toBe 'DragAndDropRank'
