@@ -255,26 +255,28 @@
         },
 
         _createUnassociatedDefectsOnlyFilter: function(model) {
-            var typeDefOid = model.getArtifactComponentModel('Defect').typeDefOid;
+            var typeDefOid = model.getArtifactComponentModel('Defect').typeDefOid,
+                isADefect = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'TypeDefOid',
+                    value: typeDefOid
+                }),
+                parentRequirementIsScheduled = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'Requirement.Iteration',
+                    operator: '!=',
+                    value: null
+                }),
+                hasNoParentRequirement = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'Requirement',
+                    operator: '=',
+                    value: null
+                }),
+                isNotADefect = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'TypeDefOid',
+                    value: typeDefOid,
+                    operator: '!='
+                });
 
-            var defectFilter = Ext.create('Rally.data.wsapi.Filter', {
-                property: 'TypeDefOid',
-                value: typeDefOid
-            });
-
-            var noUnscheduledRequirements = Ext.create('Rally.data.wsapi.Filter', {
-                property: 'Requirement.Iteration',
-                operator: '!=',
-                value: null
-            });
-
-            var notDefectFilter = Ext.create('Rally.data.wsapi.Filter', {
-                property: 'TypeDefOid',
-                value: typeDefOid,
-                operator: '!='
-            });
-
-            return defectFilter.and(noUnscheduledRequirements).or(notDefectFilter);
+            return isADefect.and(parentRequirementIsScheduled.or(hasNoParentRequirement)).or(isNotADefect);
         },
 
         _getBoardConfig: function() {
