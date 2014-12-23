@@ -19,10 +19,9 @@ describe 'Rally.apps.board.BoardApp', ->
 
   it 'has the correct default settings', ->
     @createApp().then =>
-      expect(@app.getSetting('groupByField')).toBe 'ScheduleState'
       expect(@app.getSetting('type')).toBe 'HierarchicalRequirement'
-      expect(@app.getSetting('order')).toBe 'Rank'
-      expect(@app.getSetting('query')).toBe ''
+      expect(@app.getSetting('groupByField')).toBe 'ScheduleState'
+      expect(@app.getSetting('showRows')).toBe false
 
   it 'shows the correct type on the board', ->
     @createApp(type: 'defect', groupByField: 'State').then =>

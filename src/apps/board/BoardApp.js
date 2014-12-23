@@ -27,8 +27,6 @@
             defaultSettings: {
                 type: 'HierarchicalRequirement',
                 groupByField: 'ScheduleState',
-                query: '',
-                order: 'Rank',
                 showRows: false
             }
         },
