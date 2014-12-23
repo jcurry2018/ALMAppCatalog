@@ -4,17 +4,19 @@ Ext.require [
 ], ->
 describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
   helpers
-    createApp: ->
+    createApp: (config = {}) ->
       Ext.create 'Rally.apps.common.PortfolioItemsGridBoardApp',
-        context: Ext.create 'Rally.app.Context',
-          initialValues:
-            project: Rally.environment.getContext().getProject()
-            workspace: Rally.environment.getContext().getWorkspace()
-            user: Rally.environment.getContext().getUser()
-        renderTo: 'testDiv'
+        Ext.apply
+          context: Ext.create 'Rally.app.Context',
+            initialValues:
+              project: Rally.environment.getContext().getProject()
+              workspace: Rally.environment.getContext().getWorkspace()
+              user: Rally.environment.getContext().getUser()
+          renderTo: 'testDiv'
+        , config
 
-    renderApp: ->
-      @app = @createApp()
+    renderApp: (config) ->
+      @app = @createApp(config)
       @waitForComponentReady @app
 
   beforeEach ->
@@ -32,3 +34,16 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
         @app.gridboard.on('modeltypeschange', modelChangeStub)
         @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@piHelper.theme._ref))
         expect(modelChangeStub).toHaveBeenCalledOnce()
+
+    it 'should apply custom filter when selection changes in grid mode', ->
+      @renderApp(toggleState: 'grid').then =>
+        applyCustomFilterSpy = @spy @app.gridboard, 'applyCustomFilter'
+        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@piHelper.theme._ref))
+        expect(applyCustomFilterSpy.callCount).toBe 1
+        expect(applyCustomFilterSpy.calledWith(types: @app.modelNames)).toBe true
+
+    it 'should load gridboard when selection changes in board mode', ->
+      @renderApp(toggleState: 'board').then =>
+        loadGridBoardSpy = @spy @app, 'loadGridBoard'
+        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@piHelper.theme._ref))
+        expect(loadGridBoardSpy.callCount).toBe 1

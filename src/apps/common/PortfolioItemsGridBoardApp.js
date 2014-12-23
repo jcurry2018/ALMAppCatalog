@@ -222,8 +222,9 @@
                 this.currentType = newType;
                 this.modelNames = [newType.get('TypePath')];
 
+                this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
                 if (this.toggleState === 'grid') {
-                    this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
+                    this.gridboard.applyCustomFilter({types: this.modelNames});
                 } else {
                     this.loadGridBoard();
                 }
