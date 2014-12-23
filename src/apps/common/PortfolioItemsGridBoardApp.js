@@ -181,9 +181,6 @@
                 storeConfig: {
                     filters: filters,
                     context: this.getContext().getDataContext()
-                },
-                rowConfig: {
-                    field: 'Owner'
                 }
             };
         },
@@ -225,9 +222,8 @@
                 this.currentType = newType;
                 this.modelNames = [newType.get('TypePath')];
 
-                this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
                 if (this.toggleState === 'grid') {
-                    this.gridboard.applyCustomFilter({types: this.modelNames});
+                    this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
                 } else {
                     this.loadGridBoard();
                 }
