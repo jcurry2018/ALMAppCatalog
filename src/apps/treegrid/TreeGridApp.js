@@ -137,7 +137,8 @@
                 stateful: true,
                 alwaysShowDefaultColumns: false,
                 listeners: gridListeners,
-                expandAllInColumnHeaderEnabled: context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER')
+                expandAllInColumnHeaderEnabled: true,
+                bufferedRenderer: true
             };
 
             gridConfig.plugins.push({

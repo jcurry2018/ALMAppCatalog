@@ -138,7 +138,6 @@
         },
 
         _getGridConfig: function(config) {
-            var context = this.getContext();
             return Ext.apply({
                 xtype: 'rallytreegrid',
                 style: {
@@ -149,8 +148,7 @@
                     'FormattedID',
                     'Name',
                     'ScheduleState'
-                ],
-                expandAllInColumnHeaderEnabled: context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER')
+                ]
             }, config);
         },
 

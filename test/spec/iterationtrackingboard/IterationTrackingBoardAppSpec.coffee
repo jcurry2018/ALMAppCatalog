@@ -330,51 +330,24 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then (app) ->
         expect(buildSpy.getCall(0).args[0].context).toEqual app.getContext().getDataContext()
 
-    describe 'enableInlineAdd config', ->
-      beforeEach ->
-        @stubFeatureToggle(['F6038_ENABLE_INLINE_ADD'])
+    it 'sets the expandAllInColumnHeaderEnabled to true', ->
+      @createApp().then =>
+        @toggleToGrid()
+        expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.expandAllInColumnHeaderEnabled).toBe true
 
-      it 'should fetch PlanEstimate, Release and Iteration', ->
-        @createApp().then =>
-          @toggleToGrid()
-          store = @app.down('rallytreegrid').getStore()
-          expect(store.fetch).toContain 'PlanEstimate'
-          expect(store.fetch).toContain 'Release'
-          expect(store.fetch).toContain 'Iteration'
+    it 'should fetch PlanEstimate, Release and Iteration', ->
+      @createApp().then =>
+        @toggleToGrid()
+        store = @app.down('rallytreegrid').getStore()
+        expect(store.fetch).toContain 'PlanEstimate'
+        expect(store.fetch).toContain 'Release'
+        expect(store.fetch).toContain 'Iteration'
 
-      it 'should pass in enableAddPlusNewChildStories to inlineAddRowExpander plugin', ->
-        @createApp().then =>
-          @toggleToGrid()
-          inlineAddRowExpander = _.find(@app.down('rallytreegrid').plugins, {'ptype': 'rallyinlineaddrowexpander'})
-          expect(inlineAddRowExpander.enableAddPlusNewChildStories).toBe false
-
-    describe 'with S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER toggle off', ->
-      beforeEach ->
-        @stubFeatureToggle ['S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER'], false
-
-      it 'adds the gridboard expandall plugin', ->
-        @createApp().then =>
-          @toggleToGrid()
-          expect(@app.down('#gridBoard').initialConfig.plugins).toContain 'rallygridboardexpandall'
-
-      it 'sets the expandAllInColumnHeaderEnabled to false', ->
-        @createApp().then =>
-          @toggleToGrid()
-          expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.expandAllInColumnHeaderEnabled).toBe false
-
-    describe 'with S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER toggle on', ->
-      beforeEach ->
-        @stubFeatureToggle ['S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER'], true
-
-      it 'does not add the gridboard expandall plugin', ->
-        @createApp().then =>
-          @toggleToGrid()
-          expect(@app.down('#gridBoard').initialConfig.plugins).not.toContain 'rallygridboardexpandall'
-
-      it 'sets the expandAllInColumnHeaderEnabled to true', ->
-        @createApp().then =>
-          @toggleToGrid()
-          expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.expandAllInColumnHeaderEnabled).toBe true
+    it 'should pass in enableAddPlusNewChildStories to inlineAddRowExpander plugin', ->
+      @createApp().then =>
+        @toggleToGrid()
+        inlineAddRowExpander = _.find(@app.down('rallytreegrid').plugins, {'ptype': 'rallyinlineaddrowexpander'})
+        expect(inlineAddRowExpander.enableAddPlusNewChildStories).toBe false
 
   describe 'toggle grid/board cls to ensure overflow-y gets set for fixed header plugin', ->
     it 'should add board-toggled class to app on initial load in board view', ->
@@ -504,24 +477,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then =>
         filterPlugin = _.find(@app.gridboard.plugins, ptype: 'rallygridboardcustomfiltercontrol')
         expect(_.contains(filterPlugin.filterControlConfig.whiteListFields, 'Milestones')).toBe false
-
-    describe 'Expand All', ->
-
-      it 'should configure plugin', ->
-        @createApp().then =>
-          expect(_.find(@app.gridboard.plugins, ptype: 'rallygridboardexpandall')).toBeTruthy()
-
-      describe 'in IE', ->
-        beforeEach ->
-          @_isIE = Ext.isIE
-          Ext.isIE = true
-
-        afterEach ->
-          Ext.isIE = @_isIE
-
-        it 'should not configure plugin for IE', ->
-          @createApp().then =>
-            expect(_.find(@app.gridboard.plugins, {ptype: 'rallygridboardexpandall'})).toBeFalsy()
 
   describe 'grid configurations', ->
     it 'should create a grid store with the correct page size', ->

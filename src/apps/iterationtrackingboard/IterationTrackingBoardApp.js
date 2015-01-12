@@ -26,7 +26,6 @@
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
             'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
             'Rally.ui.grid.plugin.TreeGridChildPager',
-            'Rally.ui.gridboard.plugin.GridBoardExpandAll',
             'Rally.ui.gridboard.plugin.GridBoardCustomView',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
@@ -156,12 +155,9 @@
                     root: {expanded: true},
                     enableHierarchy: true,
                     pageSize: this.getGridPageSizes()[1],
-                    childPageSizeEnabled: true
+                    childPageSizeEnabled: true,
+                    fetch: ['PlanEstimate', 'Release', 'Iteration']
                 };
-
-            if (this._inlineAddIsEnabled()) {
-                config.fetch = ['PlanEstimate', 'Release', 'Iteration'];
-            }
 
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
         },
@@ -325,21 +321,11 @@
             return height;
         },
 
-        _shouldShowExpandAll: function() {
-            var context = this.getContext();
-            return (!Ext.isIE && !context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER')) ||
-                (context.isFeatureEnabled('S76915_EXPAND_ALL_FOR_IE') && Ext.isIE9p && !context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER'));
-        },
-
         _getGridBoardPlugins: function() {
             var plugins = [{
                 ptype: 'rallygridboardaddnew'
             }];
             var context = this.getContext();
-
-            if (this._shouldShowExpandAll()) {
-                plugins.push('rallygridboardexpandall');
-            }
 
             plugins.push({
                 ptype: 'rallygridboardcustomfiltercontrol',
@@ -589,12 +575,12 @@
 
             var gridConfig = {
                 xtype: 'rallyiterationtrackingtreegrid',
-                expandAllInColumnHeaderEnabled: context.isFeatureEnabled('S77241_SHOW_EXPAND_ALL_IN_GRID_HEADER'),
                 store: gridStore,
                 columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
-                enableInlineAdd: this._inlineAddIsEnabled(),
-                inlineAddConfig:{
+                enableInlineAdd: true,
+                expandAllInColumnHeaderEnabled: true,
+                inlineAddConfig: {
                     enableAddPlusNewChildStories: false
                 },
                 enableBulkEdit: true,
@@ -617,10 +603,6 @@
             });
 
             return gridConfig;
-        },
-
-        _inlineAddIsEnabled: function() {
-            return this.getContext().isFeatureEnabled('F6038_ENABLE_INLINE_ADD');
         },
 
         _getSummaryColumnConfig: function () {

@@ -58,10 +58,6 @@ describe 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp', ->
       @renderApp(false).then =>
         expect(@app.getGridConfig().bufferedRenderer).toBe false
 
-    it 'should enable inline add when feature toggle enabled', ->
-      @renderApp(true).then =>
+    it 'should enable inline', ->
+      @renderApp().then =>
         expect(@app.getGridConfig().enableInlineAdd).toBe true
-
-    it 'should disable inline add when feature toggle disabled', ->
-      @renderApp(false).then =>
-        expect(@app.getGridConfig().enableInlineAdd).toBe false
