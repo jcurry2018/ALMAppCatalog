@@ -5,6 +5,7 @@ module.exports = (grunt) ->
 
   path = require 'path'
 
+  grunt.loadNpmTasks 'grunt-rick'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-less'
   grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -349,6 +350,14 @@ module.exports = (grunt) ->
     assemble:
       options:
         apps: 'src/apps/**/config.json'
+
+    rick:
+      'app-catalog':
+        url: 'almci/job/app-catalog-jobs'
+        job: 'app-catalog'
+      alm:
+        url: 'almci/job/alm-jobs'
+        job: 'alm'
 
   # Only recompile changed coffee files
   changedFiles = {}
