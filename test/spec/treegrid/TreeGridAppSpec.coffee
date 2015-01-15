@@ -55,7 +55,7 @@ describe 'Rally.apps.treegrid.TreeGridApp', ->
 
     parentTypes = treeGridApp.down('#gridBoard').gridConfig.store.parentTypes
     expect(parentTypes.length).toBe 2
-    expect(parentTypes).toContainAll ['hierarchicalrequirement','defect']
+    expect(parentTypes).toContainOnly ['hierarchicalrequirement','defect']
     treeGridApp.destroy()
 
 #  this test is too implementation-specific but the staterestore is well-baked into the grid which isn't able to render in the test.

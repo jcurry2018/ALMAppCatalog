@@ -35,12 +35,15 @@
             });
         },
 
-        getHeaderControls: function () {
-            return this.callParent(arguments).concat(this.piTypePicker);
+        addGridBoard: function () {
+            if (this.gridboard && this.piTypePicker && this.piTypePicker.rendered) {
+                this.piTypePicker.up().remove(this.piTypePicker, false);
+            }
+            this.callParent(arguments);
         },
 
-        getStateId: function () {
-            return 'portfolio-' + this.stateName;
+        getHeaderControls: function () {
+            return this.callParent(arguments).concat(this.piTypePicker);
         },
 
         getFilterControlConfig: function () {
@@ -221,13 +224,7 @@
             if (this._pickerTypeChanged(picker)) {
                 this.currentType = newType;
                 this.modelNames = [newType.get('TypePath')];
-
                 this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
-                if (this.toggleState === 'grid') {
-                    this.gridboard.applyCustomFilter({types: this.modelNames});
-                } else {
-                    this.loadGridBoard();
-                }
             }
         },
 

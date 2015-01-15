@@ -24,26 +24,37 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
     @piHelper.stubPortfolioItemRequests()
 
   describe 'PI type picker ', ->
-    it 'should have filter configuration using lowest-level PI type', ->
-      @renderApp().then =>
-        expect(@app.currentType.data._refObjectUUID).toBe @piHelper.feature._refObjectUUID
-
-    it 'should trigger modeltypeschange event when selection changes', ->
-      @renderApp().then =>
-        modelChangeStub = @stub()
-        @app.gridboard.on('modeltypeschange', modelChangeStub)
+    helpers
+      changeType: ->
+        addGridBoardSpy = @spy @app, 'addGridBoard'
         @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@piHelper.theme._ref))
-        expect(modelChangeStub).toHaveBeenCalledOnce()
+        @waitForCallback addGridBoardSpy
 
-    it 'should apply custom filter when selection changes in grid mode', ->
-      @renderApp(toggleState: 'grid').then =>
-        applyCustomFilterSpy = @spy @app.gridboard, 'applyCustomFilter'
-        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@piHelper.theme._ref))
-        expect(applyCustomFilterSpy.callCount).toBe 1
-        expect(applyCustomFilterSpy.calledWith(types: @app.modelNames)).toBe true
+    _.each ['board', 'grid'], (toggleState) =>
+      describe "in #{toggleState} mode", ->
+        beforeEach ->
+          @renderApp toggleState: toggleState
 
-    it 'should load gridboard when selection changes in board mode', ->
-      @renderApp(toggleState: 'board').then =>
-        loadGridBoardSpy = @spy @app, 'loadGridBoard'
-        @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@piHelper.theme._ref))
-        expect(loadGridBoardSpy.callCount).toBe 1
+        it 'should have filter configuration using lowest-level PI type', ->
+          expect(@app.currentType.data._refObjectUUID).toBe @piHelper.feature._refObjectUUID
+
+        describe 'on type change', ->
+          it 'should trigger modeltypeschange event when selection changes', ->
+            modelChangeStub = @stub()
+            @app.gridboard.on('modeltypeschange', modelChangeStub)
+            @changeType().then =>
+              expect(modelChangeStub).toHaveBeenCalledOnce()
+
+          it 'should load a new gridboard when selection changes', ->
+            @changeType().then =>
+              expect(@app.gridboard.modelNames).toEqual [@piHelper.theme.TypePath]
+
+          it 'should not destroy the type picker', ->
+            typePicker = @app.piTypePicker
+            destroyStub = @stub()
+            typePicker.on 'destroy', destroyStub
+
+            @changeType().then =>
+              expect(typePicker).toBeVisible()
+              expect(destroyStub).not.toHaveBeenCalled()
+              expect(@app.piTypePicker).toBe typePicker

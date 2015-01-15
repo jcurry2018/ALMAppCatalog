@@ -11,20 +11,12 @@
         ],
         cls: 'milestones-app',
         config: {
-            enableOwnerFilter: false,
             modelNames: ['Milestone'],
-            defaultSettings: {
-                columnNames: ['FormattedID','DisplayColor','Name','TargetDate','TotalArtifactCount','TargetProject']
-            }
-        },
-
-        getStateId: function () {
-            return 'milestone';
+            statePrefix: 'milestone'
         },
 
         getGridConfig: function () {
             return _.merge(this.callParent(arguments), {
-                enableRanking: false,
                 noDataItemName: 'milestone',
                 rowActionColumnConfig: {
                     rowActionsFn: function (record) {
@@ -49,13 +41,6 @@
 
         getAdditionalFetchFields: function () {
             return ['DisplayColor'];
-        },
-
-        getGridStoreConfig: function () {
-            return {
-                enableHierarchy: false,
-                childPageSizeEnabled: false
-            };
         },
 
         getFieldPickerConfig: function () {

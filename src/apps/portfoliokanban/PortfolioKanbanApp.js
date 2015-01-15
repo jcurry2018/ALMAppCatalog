@@ -22,10 +22,10 @@
         autoScroll: false,
         appName: 'Portfolio Kanban',
         cls: 'portfolio-kanban',
-        stateName: 'kanban',
 
         config: {
             toggleState: 'board',
+            statePrefix: 'portfolio-kanban',
             defaultSettings: {
                 fields: 'Discussion,PercentDoneByStoryCount,UserStories'
             }

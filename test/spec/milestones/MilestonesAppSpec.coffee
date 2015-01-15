@@ -53,24 +53,23 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
       @_createAppWithNoData().then =>
         expect(@app.getEl().down('.no-data-container').getHTML()).toContain 'Based on your selections, no milestones were found'
 
+    it 'should render a filter button', ->
+      @_createAppWithData().then =>
+        filterButton = @app.down 'rallycustomfilterbutton'
+        expect(filterButton).toBeVisible()
+        expect(filterButton.stateId).toBe @app.getContext().getScopedStateId('milestone-custom-filter-button')
+
   describe 'project column text', ->
     it 'should indicate project scoping', ->
-      @_createAppWithData(
-        TargetProject:
-          Name: 'Test Project 2'
-      ).then =>
+      @_createAppWithData(TargetProject: Name: 'Test Project 2').then =>
         expect(@app.getEl().down('.targetproject').getHTML()).toContain @milestoneData[0].TargetProject.Name
 
     it 'should indicate workspace scoping', ->
-      @_createAppWithData(
-        TargetProject: null
-      ).then =>
+      @_createAppWithData(TargetProject: null).then =>
         expect(@app.getEl().down('.targetproject').getHTML()).toContain 'All projects in default workspace'
 
     it 'should indicate insufficient permissions for target project', ->
-      @_createAppWithData(
-        TargetProject: ''
-      ).then =>
+      @_createAppWithData(TargetProject: '').then =>
         expect(@app.getEl().down('.targetproject').getHTML()).toContain 'Project Permissions Required'
 
   describe 'add new', ->
