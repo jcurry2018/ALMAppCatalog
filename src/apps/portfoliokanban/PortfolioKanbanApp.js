@@ -104,9 +104,17 @@
         },
 
         getCardBoardConfig: function () {
-            return _.merge(this.callParent(arguments), {
+            var config = _.merge(this.callParent(arguments), {
                 loadDescription: 'Portfolio Kanban'
             });
+            if(this.getContext().isFeatureEnabled('S79575_ADD_SWIMLANES_TO_PI_KANBAN')) {
+                Ext.apply(config, {
+                    rowConfig: {
+                        field: 'Owner'
+                    }
+                });
+            }
+            return config;
         },
 
         getCardBoardColumnPlugins: function (state) {
