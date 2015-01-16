@@ -33,57 +33,52 @@
         },
 
         getGridBoardPlugins: function() {
-            var plugins = this.callParent(arguments);
-
-            if(this.getContext().isFeatureEnabled('PORTFOLIO_ITEMS_GRID_PAGE_ACTIONS')) {
-                plugins.push({
-                    ptype: 'rallygridboardactionsmenu',
-                    itemId: 'printExportMenuButton',
-                    menuItems: [
-                        {
-                            text: 'Import...',
-                            handler: function() {
-                                Ext.widget({
-                                    xtype: 'rallycsvimportdialog',
-                                    type: 'PortfolioItem',
-                                    title: 'Import Portfolio Items'
-                                });
-                            }
-                        },
-                        {
-                            text: 'Print...',
-                            handler: function() {
-                                Ext.create('Rally.ui.grid.TreeGridPrintDialog', {
-                                    grid: this.gridboard.getGridOrBoard(),
-                                    treeGridPrinterConfig: {
-                                        largeHeaderText: 'Portfolio Items'
-                                    }
-                                });
-                            },
-                            scope: this
-                        },
-                        {
-                            text: 'Export...',
-                            handler: function() {
-                                window.location = Rally.ui.grid.GridCsvExport.buildCsvExportUrl(this.gridboard.getGridOrBoard());
-                            },
-                            scope: this
+            return this.callParent(arguments).concat([{
+                ptype: 'rallygridboardactionsmenu',
+                itemId: 'printExportMenuButton',
+                menuItems: [
+                    {
+                        text: 'Import...',
+                        handler: function() {
+                            Ext.widget({
+                                xtype: 'rallycsvimportdialog',
+                                type: 'PortfolioItem',
+                                title: 'Import Portfolio Items'
+                            });
                         }
-                    ],
-                    buttonConfig: {
-                        iconCls: 'icon-export',
-                        toolTipConfig: {
-                            html: 'Import/Export/Print',
-                            anchor: 'top',
-                            hideDelay: 0
+                    },
+                    {
+                        text: 'Print...',
+                        handler: function() {
+                            Ext.create('Rally.ui.grid.TreeGridPrintDialog', {
+                                grid: this.gridboard.getGridOrBoard(),
+                                treeGridPrinterConfig: {
+                                    largeHeaderText: 'Portfolio Items'
+                                }
+                            });
                         },
-                        style: {
-                            'margin' : '3px 0 0 10px'
-                        }
+                        scope: this
+                    },
+                    {
+                        text: 'Export...',
+                        handler: function() {
+                            window.location = Rally.ui.grid.GridCsvExport.buildCsvExportUrl(this.gridboard.getGridOrBoard());
+                        },
+                        scope: this
                     }
-                });
-            }
-            return plugins;
+                ],
+                buttonConfig: {
+                    iconCls: 'icon-export',
+                    toolTipConfig: {
+                        html: 'Import/Export/Print',
+                        anchor: 'top',
+                        hideDelay: 0
+                    },
+                    style: {
+                        'margin' : '3px 0 0 10px'
+                    }
+                }
+            }]);
         }
     });
 })();
