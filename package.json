@@ -29,6 +29,7 @@
     "grunt-downloadfile": "0.3.2",
     "grunt-express": "~1.0.1",
     "grunt-nexus-artifact": "0.3.7",
+    "grunt-parallel-spec-runner": "~0.3.0",
     "grunt-regex-check": "0.1.5",
     "grunt-rick": "0.0.3",
     "grunt-text-replace": "~0.3.6",
