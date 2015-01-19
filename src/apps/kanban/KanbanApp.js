@@ -119,9 +119,6 @@
                 modelNames = this._getDefaultTypes(),
                 blacklist = ['Successors', 'Predecessors', 'DisplayColor'];
 
-            if(!context._isMilestoneEnabled()) {
-                blacklist.push('Milestones');
-            }
             return {
                 xtype: 'rallygridboard',
                 stateful: false,
@@ -134,7 +131,7 @@
                         filterChildren: true,
                         filterControlConfig: {
                             blackListFields: [],
-                            whiteListFields: context._isMilestoneEnabled() ? ['Milestones'] : [],
+                            whiteListFields: ['Milestones'],
                             margin: '3 9 3 30',
                             modelNames: modelNames,
                             stateful: true,

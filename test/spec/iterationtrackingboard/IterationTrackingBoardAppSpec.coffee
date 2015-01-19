@@ -466,17 +466,10 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         expect(plugin.ownerFilterControlConfig.stateful).toBe true
         expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-owner-filter')
 
-    it 'should include the Milestones field in the available Fields when the toggle is enabled', ->
-      @stub(Rally.app.Context.prototype, '_isMilestoneEnabled').returns true
+    it 'should include the Milestones field in the available Fields', ->
       @createApp().then =>
         filterPlugin = _.find(@app.gridboard.plugins, ptype: 'rallygridboardcustomfiltercontrol')
         expect(_.contains(filterPlugin.filterControlConfig.whiteListFields, 'Milestones')).toBe true
-
-    it 'should not include the Milestones field in the available Fields when the toggle is not enabled', ->
-      @stub(Rally.app.Context.prototype, '_isMilestoneEnabled').returns false
-      @createApp().then =>
-        filterPlugin = _.find(@app.gridboard.plugins, ptype: 'rallygridboardcustomfiltercontrol')
-        expect(_.contains(filterPlugin.filterControlConfig.whiteListFields, 'Milestones')).toBe false
 
   describe 'grid configurations', ->
     it 'should create a grid store with the correct page size', ->

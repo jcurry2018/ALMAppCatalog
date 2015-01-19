@@ -49,7 +49,7 @@
         getFilterControlConfig: function () {
             return {
                 blackListFields: ['PortfolioItemType'],
-                whiteListFields: [this.getContext()._isMilestoneEnabled() ? 'Milestones' : '']
+                whiteListFields: ['Milestones']
             };
         },
 
@@ -59,10 +59,6 @@
             if(!this.getContext().isFeatureEnabled('S74502_PI_DEPENDENCIES_ON_EDP')) {
                 blackListedFields.push('PredecessorsAndSuccessors');
             }
-            if(!this.getContext()._isMilestoneEnabled()) {
-                blackListedFields.push('Milestones');
-            }
-
             return _.merge(this.callParent(arguments), {
                 boardFieldDefaults: (this.getSetting('fields') || '').split(','),
                 boardFieldBlackList: ['Predecessors', 'Successors'].concat(blackListedFields),

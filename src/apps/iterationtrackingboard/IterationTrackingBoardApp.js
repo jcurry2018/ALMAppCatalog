@@ -332,7 +332,7 @@
                 filterChildren: true,
                 filterControlConfig: {
                     blackListFields: ['Iteration', 'PortfolioItem'],
-                    whiteListFields: context._isMilestoneEnabled() ? ['Milestones'] : [],
+                    whiteListFields: ['Milestones'],
                     modelNames: this.modelNames,
                     stateful: true,
                     stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
@@ -385,18 +385,17 @@
                 }
             });
 
-            var milestoneBlackList = !context._isMilestoneEnabled() ? ['Milestones'] : [];
             plugins.push({
                 ptype: 'rallygridboardfieldpicker',
                 headerPosition: 'left',
                 gridFieldBlackList: [
                     'Estimate',
                     'ToDo'
-                ].concat(milestoneBlackList),
+                ],
                 boardFieldBlackList: [
                     'Successors',
                     'Predecessors'
-                ].concat(milestoneBlackList),
+                ],
                 modelNames: this.modelNames,
                 boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
                     ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']
@@ -584,7 +583,6 @@
                     enableAddPlusNewChildStories: false
                 },
                 enableBulkEdit: true,
-                enableBulkEditMilestones: context._isMilestoneEnabled(),
                 pagingToolbarCfg: {
                     pageSizes: this.getGridPageSizes(),
                     comboboxConfig: {

@@ -27,7 +27,7 @@
             toggleState: 'board',
             statePrefix: 'portfolio-kanban',
             defaultSettings: {
-                fields: 'Discussion,PercentDoneByStoryCount,UserStories'
+                fields: 'Discussion,PercentDoneByStoryCount,UserStories,Milestones'
             }
         },
 
@@ -41,14 +41,6 @@
                 description: 'portfolio-kanban-show-help'
             }
         ],
-
-        constructor: function(config) {
-            if (this._isMilestoneEnabled()) {
-                this.config.defaultSettings.fields += ',Milestones';
-            }
-
-            this.callParent([config]);
-        },
 
         getSettingsFields: function () {
             return [
@@ -154,11 +146,6 @@
             });
 
             return this.filterInfo;
-        },
-
-        _isMilestoneEnabled: function() {
-            return Rally.environment.getContext().isFeatureEnabled('S70874_SHOW_MILESTONES_PAGE')
-                && (!Rally.environment.getContext().isFeatureEnabled('DISABLE_MILESTONES_PAGE') || Rally.environment.getContext().isFeatureEnabled('SUPER_OVERRIDE_MILESTONE_TOGGLE'));
         }
     });
 })();

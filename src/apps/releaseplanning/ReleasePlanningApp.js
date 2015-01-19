@@ -33,10 +33,6 @@
                     'UnEstimatedLeafStoryCount'
                 ];
 
-            if(!this.getContext()._isMilestoneEnabled()) {
-                boardFieldBlacklist.push('Milestones');
-            }
-
             this.gridboard = this.add({
                 xtype: 'rallytimeboxgridboard',
                 cardBoardConfig: {
@@ -73,7 +69,7 @@
                         filterControlConfig: {
                             margin: '3 9 3 30',
                             blackListFields: ['PortfolioItemType', 'Release'],
-                            whiteListFields: [this._milestonesAreEnabled() ? 'Milestones' : ''],
+                            whiteListFields: ['Milestones'],
                             modelNames: [piTypePath],
                             stateful: true,
                             stateId: this.getContext().getScopedStateId('release-planning-custom-filter-button')
@@ -124,15 +120,7 @@
         },
 
         _getDefaultFields: function() {
-            var fields = ['Discussion', 'PreliminaryEstimate', 'UserStories'];
-            if (this._milestonesAreEnabled()) {
-                fields.push('Milestones');
-            }
-            return fields;
-        },
-
-        _milestonesAreEnabled: function() {
-            return this.getContext()._isMilestoneEnabled();
+            return ['Discussion', 'PreliminaryEstimate', 'UserStories', 'Milestones'];
         }
     });
 })();
