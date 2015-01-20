@@ -1,5 +1,10 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.apps.taskboard.TaskBoardHeader'
+  'Rally.ui.popover.PopoverFactory'
+]
+
 describe 'Rally.apps.taskboard.TaskBoardHeader', ->
 
   helpers

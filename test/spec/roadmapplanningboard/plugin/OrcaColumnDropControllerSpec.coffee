@@ -133,6 +133,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     @row =
       getContentCellFor: -> rowContentCell
       getRowValue: ->
+      on: ->
       fieldDef:
         name: 'long fingernails' 
 

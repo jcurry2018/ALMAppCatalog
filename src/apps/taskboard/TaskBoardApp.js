@@ -6,11 +6,14 @@
         requires: [
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.gridboard.GridBoard',
+            'Rally.ui.cardboard.CardBoard',
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.apps.taskboard.TaskBoardHeader',
-            'Rally.clientmetrics.ClientMetricsRecordable'
+            'Rally.clientmetrics.ClientMetricsRecordable',
+            'Rally.data.Ranker',
+            'Ext.XTemplate'
         ],
         mixins: [
             'Rally.clientmetrics.ClientMetricsRecordable'
@@ -102,7 +105,7 @@
                 xtype: 'rallygridboard',
                 stateful: false,
                 toggleState: 'board',
-                cardBoardConfig: this._getBoardConfig(rowRecords),
+                cardBoardConfig: this._getBoardConfig(),
                 plugins: [
                     'rallygridboardaddnew',
                     {
@@ -219,7 +222,7 @@
             return this._workProductCombo;
         },
 
-        _getBoardConfig: function (rowRecords) {
+        _getBoardConfig: function () {
             return {
                 xtype: 'rallycardboard',
                 attribute: 'State',
@@ -235,7 +238,6 @@
                             direction: 'ASC'
                         }
                     ],
-                    values: _.pluck(rowRecords, 'data'),
                     headerConfig: {
                         xtype: 'rallytaskboardrowheader'
                     },

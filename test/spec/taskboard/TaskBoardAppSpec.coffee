@@ -1,5 +1,12 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.apps.taskboard.TaskBoardApp'
+  'Rally.app.Context'
+  'Rally.app.TimeboxScope'
+  'Rally.data.Ranker'
+]
+
 describe 'Rally.apps.taskboard.TaskBoardApp', ->
 
   beforeEach ->
@@ -104,13 +111,6 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
         board = @app.down 'rallycardboard'
         expect(board.attribute).toBe 'State'
         expect(_.pluck board.getColumns(), 'value').toEqual @taskStateValues
-
-    it 'adds rows for each work scheduled workproduct', ->
-      @createApp().then =>
-        board = @app.down 'rallycardboard'
-        expect(_.pluck board.rowConfig.values, '_ref').toEqual _.pluck @workProducts, '_ref'
-        expect(@artifactStub).toBeWsapiRequestWith
-          sorters: [{property: Rally.data.Ranker.RANK_FIELDS.DND, direction: 'ASC'}]
 
     it 'uses task board header for each row', ->
       @createApp().then =>
@@ -225,7 +225,7 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
       @addNewHelper.sendKeysForNameField().then =>
         @addNewHelper.clickAdd().then =>
           rows = @gridboard.getGridOrBoard().getRows()
-          expect(rows.length).toBe @workProducts.length + 1
+          expect(rows.length).toBe 2
           expect(_.last(rows).getRowValue()).toBe newStory._ref
 
     it 'adds an entry to the work product field when a non task is created', ->

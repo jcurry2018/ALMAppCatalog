@@ -11,6 +11,7 @@
         alias: 'widget.rallytaskboardrowheader',
 
         requires: [
+            'Ext.util.DelayedTask',
             'Rally.ui.popover.PopoverFactory'
         ],
 
@@ -49,7 +50,7 @@
             }
         },
 
-        destroy: function() {
+        onDestroy: function() {
             if(this._delayedTask) {
                 this._delayedTask.cancel();
             }
