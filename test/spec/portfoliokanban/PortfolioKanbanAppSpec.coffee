@@ -42,6 +42,11 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       Rally.environment.getMessageBus().subscribe Rally.Message.piKanbanBoardReady, readyStub
       @waitForCallback readyStub
 
+    stubFeatureToggle: (toggles, value = true) ->
+      stub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled');
+      stub.withArgs(toggle).returns(value) for toggle in toggles
+      stub
+
   beforeEach ->
     @piHelper = new Helpers.PortfolioItemGridBoardHelper @
     @piHelper.stubPortfolioItemRequests()
@@ -193,13 +198,49 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       ).then =>
         expect(@getAppStore()).toHaveFilter 'Name', '=', 'abc'
 
-    it 'should have a project setting', ->
-      @_createApp().then =>
-        expect(@app).toHaveSetting 'project'
+    it 'should set settingsScope to project if isFullPageApp true', ->
+      @_createApp(
+        isFullPageApp: true
+      ).then =>
+        expect(@app.settingsScope).toBe 'project'
+
+    it 'should set settingsScope to app if isFullPageApp false', ->
+      @_createApp(
+        isFullPageApp: false
+      ).then =>
+        expect(@app.settingsScope).toBe 'app'
 
     it 'should pass app scoping information to gridboard', ->
       @_createApp().then =>
         expect(@app.gridboard.getGridOrBoard().getContext()).toBe @app.getContext()
+
+    it 'should NOT have the rowSettings field', ->
+      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], false)
+      @_createApp().then =>
+        expect(_.find(@app.getSettingsFields(), {xtype: 'rowsettingsfield'})).not.toBeDefined()
+
+    it 'should have the rowSettings field', ->
+      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], true)
+      @_createApp().then =>
+        expect(_.find(@app.getSettingsFields(), {xtype: 'rowsettingsfield'})).toBeDefined()
+
+    it 'adds the rowConfig property to the boardConfig', ->
+      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], true)
+      @_createApp(
+        settings:
+          showRows: true
+          rowsField: 'Owner'
+      ).then =>
+        expect(@app.gridboard.getGridOrBoard().config.rowConfig.field).toBe 'Owner'
+
+    it 'does NOT add the rowConfig property to the boardConfig', ->
+      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], false)
+      @_createApp(
+        settings:
+          showRows: true
+          rowsField: 'Owner'
+      ).then =>
+        expect(@app.gridboard.getGridOrBoard().config.rowConfig).toBeNull()
 
     helpers
       getAppStore: ->

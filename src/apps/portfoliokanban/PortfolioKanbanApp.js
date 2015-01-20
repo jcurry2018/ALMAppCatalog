@@ -8,6 +8,7 @@
     Ext.define('Rally.apps.portfoliokanban.PortfolioKanbanApp', {
         extend: 'Rally.apps.common.PortfolioItemsGridBoardApp',
         requires: [
+            'Rally.apps.common.RowSettingsField',
             'Rally.apps.portfoliokanban.PortfolioKanbanCard',
             'Rally.apps.portfoliokanban.PortfolioKanbanPolicy',
             'Rally.ui.gridboard.plugin.BoardPolicyDisplayable',
@@ -24,6 +25,7 @@
         cls: 'portfolio-kanban',
         statePrefix: 'portfolio-kanban',
         toggleState: 'board',
+        settingsScope: 'project',
 
         config: {
             defaultSettings: {
@@ -42,24 +44,48 @@
             }
         ],
 
+        constructor: function(config) {
+            config.settingsScope = config.isFullPageApp ? 'project' : 'app';
+            this.callParent([config]);
+        },
+
         getSettingsFields: function () {
-            return [
-                {
-                    type: 'project'
-                },
-                {
-                    type: 'query',
-                    config: {
-                        plugins: [
-                            {
-                                ptype: 'rallyhelpfield',
-                                helpId: 271
-                            },
-                            'rallyfieldvalidationui'
-                        ]
+            var fields = [];
+
+            if (this.getContext().isFeatureEnabled('S79575_ADD_SWIMLANES_TO_PI_KANBAN')) {
+                fields.push({
+                    name: 'groupHorizontallyByField',
+                    xtype: 'rowsettingsfield',
+                    fieldLabel: 'Swimlanes',
+                    margin: '10 0 10 0',
+                    mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
+                    readyEvent: 'ready',
+                    modelNames: ['PortfolioItem'],
+                    isAllowedFieldFn: function (field) {
+                        var attr = field.attributeDefinition;
+                        return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string')
+                            || attr.Constrained || _.contains(['boolean'], attr.AttributeType.toLowerCase())) &&
+                            !_.contains(['web_link', 'text', 'date'], attr.AttributeType.toLowerCase()) &&
+                            !_.contains(['Archived', 'Portfolio Item Type', 'State'], attr.Name);
                     }
+                });
+            }
+
+            fields.push({
+                type: 'query',
+                config: {
+                    plugins: [
+                        {
+                            ptype: 'rallyhelpfield',
+                            helpId: 271
+                        },
+                        'rallyfieldvalidationui'
+                    ]
                 }
-            ];
+            });
+
+
+            return fields;
         },
 
         _createFilterItem: function(typeName, config) {
@@ -107,13 +133,17 @@
             var config = _.merge(this.callParent(arguments), {
                 loadDescription: 'Portfolio Kanban'
             });
-            if(this.getContext().isFeatureEnabled('S79575_ADD_SWIMLANES_TO_PI_KANBAN')) {
+
+            if (this.getSetting('showRows') && this.getSetting('rowsField') &&
+                this.getContext().isFeatureEnabled('S79575_ADD_SWIMLANES_TO_PI_KANBAN')) {
                 Ext.apply(config, {
                     rowConfig: {
-                        field: 'Owner'
+                        field: this.getSetting('rowsField'),
+                        sortDirection: 'ASC'
                     }
                 });
             }
+
             return config;
         },
 
