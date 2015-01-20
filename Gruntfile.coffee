@@ -38,7 +38,9 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'test:__buildjasmineconf__', 'Internal task to build and alter the jasmine conf', ['jasmine:apps:build', 'replace:jasmine']
   grunt.registerTask 'test:fast', 'Just configs and runs the tests. Does not do any compiling. grunt && grunt watch should be running.', ['test:__buildjasmineconf__', 'express:inline', 'downloadfile', 'webdriver_jasmine_runner:chrome']
-  grunt.registerTask 'test:faster', 'Run jasmine test in parallel', ['express:inline', 'parallel_spec_runner:appsp']
+  grunt.registerTask 'test:faster', 'Run jasmine test in parallel', ['express:inline', 'parallel_spec_runner:appsp:chrome']
+  grunt.registerTask 'test:faster:firefox', 'Run jasmine test in parallel', ['express:inline', 'parallel_spec_runner:appsp:firefox']
+
   grunt.registerTask 'test:fast:firefox', 'Just configs and runs the tests in firefox. Does not do any compiling. grunt && grunt watch should be running.', ['test:__buildjasmineconf__', 'express:inline', 'downloadfile', 'webdriver_jasmine_runner:firefox']
   grunt.registerTask 'test:conf', 'Fetches the deps, compiles coffee and css files, runs jshint and builds the jasmine test config', ['nexus:deps', 'clean:test', 'coffee', 'css', 'test:__buildjasmineconf__']
   grunt.registerTask 'test:fastconf', 'Just builds the jasmine test config', ['test:__buildjasmineconf__']
@@ -173,13 +175,23 @@ module.exports = (grunt) ->
       ]
 
     parallel_spec_runner:
-      appsp:{
-        options:{
-          specs: specFileArray,
-          excludedSpecs: [],
-          isolatedSpecs:[]
-        }
-      }
+      options:
+        browser: "chrome"
+        specs: specFileArray,
+        # The following specs are excluded because they do not run in isolation in either firefox or chrome,
+        # or they are very flaky in one of these browser
+        # these need to be fixed then they can be removed from the exclude list
+        # test grunt test:fast --spec='YourSpec' --keepalive and
+        # refresh the browser many times to ensure the spec passes before removing these
+        excludedSpecs: [],
+        isolatedSpecs: []
+      appsp:
+        chrome:
+          options:
+            browser: "chrome"
+        firefox:
+          options:
+            browser: "firefox"
 
     jasmine:
       options:

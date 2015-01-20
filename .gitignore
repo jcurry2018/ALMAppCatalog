@@ -11,7 +11,7 @@ build/
 target/
 .grunt/
 .idea
-_SpecRunner.html
+_SpecRunner*.html
 appcatalog.version
 *.sublime-workspace
 temp/
