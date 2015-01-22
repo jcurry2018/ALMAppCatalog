@@ -200,11 +200,6 @@
                     useShallowFetch: false,
                     filters: this._getGridboardFilters(gridStore.model)
                 },
-                addNewPluginConfig: {
-                    style: {
-                        'float': 'left'
-                    }
-                },
                 listeners: {
                     load: this._onLoad,
                     toggle: this._onToggle,

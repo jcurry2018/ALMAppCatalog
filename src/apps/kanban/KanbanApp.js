@@ -165,9 +165,6 @@
                         beforecreate: this._onBeforeCreate,
                         beforeeditorshow: this._onBeforeEditorShow,
                         scope: this
-                    },
-                    style: {
-                        'float': 'left'
                     }
                 },
                 storeConfig: {

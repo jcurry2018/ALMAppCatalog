@@ -61,9 +61,6 @@
                     beforeeditorshow: this._onBeforeCreate,
                     scope: this
                 },
-                style: {
-                    'float': 'left'
-                },
                 fieldLabel: 'New ' + this.typeNames.child.name
             };
 

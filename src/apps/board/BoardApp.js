@@ -80,11 +80,6 @@
                     ],
                     context: context,
                     modelNames: modelNames,
-                    addNewPluginConfig: {
-                        style: {
-                            'float': 'left'
-                        }
-                    },
                     storeConfig: {
                         filters: this._getFilters()
                     },

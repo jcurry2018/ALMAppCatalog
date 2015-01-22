@@ -138,9 +138,6 @@
                     enableRankFieldParameterAutoMapping: false
                 },
                 addNewPluginConfig: {
-                    style: {
-                        'float': 'left'
-                    },
                     recordTypes: ['Task', 'Defect', 'Defect Suite', 'Test Set', 'User Story'],
                     additionalFields: [this._createWorkProductComboBox(rowRecords)],
                     listeners: {
