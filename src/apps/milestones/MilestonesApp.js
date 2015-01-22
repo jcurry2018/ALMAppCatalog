@@ -10,10 +10,8 @@
             'Rally.ui.grid.MilestoneProjectEditor'
         ],
         cls: 'milestones-app',
-        config: {
-            modelNames: ['Milestone'],
-            statePrefix: 'milestone'
-        },
+        modelNames: ['Milestone'],
+        statePrefix: 'milestone',
 
         getGridConfig: function () {
             return _.merge(this.callParent(arguments), {
@@ -27,16 +25,17 @@
                             }
                         ];
                     }
-                },
-                storeConfig: {
-                    filters: [
-                        Rally.data.wsapi.Filter.or([
-                            {property: 'Projects', operator: 'contains', value: this.getContext().getProjectRef()},
-                            {property: 'TargetProject', operator: '=', value: null}
-                        ])
-                    ]
                 }
             });
+        },
+
+        getPermanentFilters: function () {
+            return [
+                Rally.data.wsapi.Filter.or([
+                    { property: 'Projects', operator: 'contains', value: this.getContext().getProjectRef() },
+                    { property: 'TargetProject', operator: '=', value: null }
+                ])
+            ];
         },
 
         getAdditionalFetchFields: function () {

@@ -12,18 +12,9 @@
         ],
 
         componentCls: 'pitreegrid',
-
-        config: {
-            statePrefix: 'portfolio-tree',
-            toggleState: 'grid',
-            defaultSettings: {
-                columnNames: [
-                    'Name', 'Owner', 'PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount',
-                    'PreliminaryEstimate', 'PlannedStartDate', 'PlannedEndDate', 'ValueScore',
-                    'RiskScore', 'InvestmentCategory'
-                ]
-            }
-        },
+        printHeaderLabel: 'Portfolio Items',
+        statePrefix: 'portfolio-tree',
+        toggleState: 'grid',
 
         getGridConfig: function(options){
             var config = this.callParent(arguments);
@@ -32,55 +23,6 @@
             config.expandAllInColumnHeaderEnabled = !Ext.isIE || isBufferedRendererEnabled;
             config.enableInlineAdd = true;
             return config;
-        },
-
-        getGridBoardPlugins: function() {
-            return this.callParent(arguments).concat([{
-                ptype: 'rallygridboardactionsmenu',
-                itemId: 'printExportMenuButton',
-                menuItems: [
-                    {
-                        text: 'Import...',
-                        handler: function() {
-                            Ext.widget({
-                                xtype: 'rallycsvimportdialog',
-                                type: 'PortfolioItem',
-                                title: 'Import Portfolio Items'
-                            });
-                        }
-                    },
-                    {
-                        text: 'Print...',
-                        handler: function() {
-                            Ext.create('Rally.ui.grid.TreeGridPrintDialog', {
-                                grid: this.gridboard.getGridOrBoard(),
-                                treeGridPrinterConfig: {
-                                    largeHeaderText: 'Portfolio Items'
-                                }
-                            });
-                        },
-                        scope: this
-                    },
-                    {
-                        text: 'Export...',
-                        handler: function() {
-                            window.location = Rally.ui.grid.GridCsvExport.buildCsvExportUrl(this.gridboard.getGridOrBoard());
-                        },
-                        scope: this
-                    }
-                ],
-                buttonConfig: {
-                    iconCls: 'icon-export',
-                    toolTipConfig: {
-                        html: 'Import/Export/Print',
-                        anchor: 'top',
-                        hideDelay: 0
-                    },
-                    style: {
-                        'margin' : '3px 0 0 10px'
-                    }
-                }
-            }]);
         }
     });
 })();

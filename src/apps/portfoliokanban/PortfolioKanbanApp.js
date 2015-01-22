@@ -19,13 +19,13 @@
             'Deft.Deferred'
         ],
 
-        autoScroll: false,
         appName: 'Portfolio Kanban',
+        autoScroll: false,
         cls: 'portfolio-kanban',
+        statePrefix: 'portfolio-kanban',
+        toggleState: 'board',
 
         config: {
-            toggleState: 'board',
-            statePrefix: 'portfolio-kanban',
             defaultSettings: {
                 fields: 'Discussion,PercentDoneByStoryCount,UserStories,Milestones'
             }

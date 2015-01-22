@@ -1,0 +1,9 @@
+{
+   "name": "Backlog",
+   "className": "Rally.apps.backlog.BacklogApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "BacklogApp.js"
+   ]
+}

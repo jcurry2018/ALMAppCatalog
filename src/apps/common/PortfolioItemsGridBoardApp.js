@@ -8,10 +8,6 @@
             'Rally.ui.cardboard.plugin.FixedHeader'
         ],
 
-        config: {
-            toggleState: 'grid'
-        },
-
         launch: function () {
             if (Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
                 this.callParent(arguments);
