@@ -4,14 +4,9 @@
     Ext.define('Rally.apps.backlog.BacklogApp', {
         extend: 'Rally.app.GridBoardApp',
         columnNames: ['FormattedID', 'Name', 'PlanEstimate', 'Priority', 'Owner'],
+        requires: ['Rally.data.wsapi.Filter'],
         modelNames: ['hierarchicalrequirement', 'defect', 'defectsuite'],
         statePrefix: 'backlog',
-
-        getGridConfig: function () {
-            return _.merge(this.callParent(arguments), {
-                noDataItemName: 'backlog'
-            });
-        },
 
         getPermanentFilters: function () {
             return [
