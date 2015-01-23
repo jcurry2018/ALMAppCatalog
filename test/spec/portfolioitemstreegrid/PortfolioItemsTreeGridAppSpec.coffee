@@ -1,10 +1,6 @@
 Ext = window.Ext4 || window.Ext
 
-Ext.require [
-  'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp',
-  'Ext.state.Manager',
-  'Rally.data.util.PortfolioItemTypeDefList'
-]
+Ext.require ['Rally.app.GridBoardApp']
 
 describe 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp', ->
 
@@ -18,6 +14,7 @@ describe 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp', ->
           subscription: Rally.environment.getContext().getSubscription()
 
       context.isFeatureEnabled = -> enableToggles
+      Rally.app.GridBoardApp.bufferedRendererEnabled = enableToggles
 
       Ext.create 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp',
         context: context
@@ -32,6 +29,7 @@ describe 'Rally.apps.portfolioitemstreegrid.PortfolioItemsTreeGridApp', ->
     @piHelper.stubPortfolioItemRequests()
 
   afterEach ->
+    delete Rally.app.GridBoardApp.bufferedRendererEnabled
     _.invoke Ext.ComponentQuery.query('portfoliotemstreegridapp'), 'destroy'
 
   it 'should initialize', ->

@@ -3,14 +3,7 @@
 
     Ext.define('Rally.apps.backlog.BacklogApp', {
         extend: 'Rally.app.GridBoardApp',
-        requires: [
-            'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
-            'Rally.ui.grid.TreeGridPrintDialog',
-            'Rally.ui.dialog.CsvImportDialog',
-            'Rally.ui.grid.GridCsvExport'
-        ],
-
-        columnNames: ['FormattedID','DisplayColor','Name','ScheduleState','Owner','PlanEstimate'],
+        columnNames: ['FormattedID', 'Name', 'PlanEstimate', 'Priority', 'Owner'],
         modelNames: ['hierarchicalrequirement', 'defect', 'defectsuite'],
         statePrefix: 'backlog',
 
