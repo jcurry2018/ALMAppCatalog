@@ -2,7 +2,7 @@ Ext = window.Ext4 || window.Ext
 
 Ext.require [
   'Rally.apps.iterationtrackingboard.IterationTrackingTreeGrid'
-  'Rally.domain.WsapiModelBuilder'
+  'Rally.data.wsapi.ModelBuilder'
   'Rally.test.mock.data.WsapiModelFactory'
 ]
 
@@ -16,7 +16,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingTreeView', ->
   helpers
     createTreeView: (config = {}) ->
       storeConfig =
-        models: Rally.domain.WsapiModelBuilder.buildCompositeArtifact([
+        models: Rally.data.wsapi.ModelBuilder.buildCompositeArtifact([
           Rally.test.mock.data.WsapiModelFactory.getModel('userstory'),
           Rally.test.mock.data.WsapiModelFactory.getModel('task')
         ], Rally.environment.getContext())

@@ -11,7 +11,7 @@
         extend: 'Rally.app.TimeboxScopedApp',
         requires: [
             'Rally.data.Ranker',
-            'Rally.data.WsapiModelFactory',
+            'Rally.data.wsapi.ModelFactory',
             'Rally.data.wsapi.TreeStoreBuilder',
             'Rally.ui.dialog.CsvImportDialog',
             'Rally.ui.gridboard.GridBoard',

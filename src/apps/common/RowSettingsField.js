@@ -26,7 +26,7 @@
             'Rally.ui.combobox.ComboBox',
             'Rally.ui.plugin.FieldValidationUi',
             'Rally.data.ModelFactory',
-            'Rally.domain.WsapiModelBuilder'
+            'Rally.data.wsapi.ModelBuilder'
         ],
 
         mixins: {
@@ -49,7 +49,7 @@
              * @cfg {Function}
              * A function which should return true if the specified field should
              * be included in the list of available swimlane fields
-             * @param {Rally.domain.WsapiField} field
+             * @param {Rally.data.wsapi.Field} field
              */
             isAllowedFieldFn: Ext.emptyFn,
 
@@ -130,7 +130,7 @@
         },
 
         _getRowableFields: function (models) {
-            var artifactModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(models, this.context),
+            var artifactModel = Rally.data.wsapi.ModelBuilder.buildCompositeArtifact(models, this.context),
                 allFields = artifactModel.getFields(),
                 rowableFields = _.filter(allFields, function (field) {
                     var attr = field.attributeDefinition;
