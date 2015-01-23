@@ -21,7 +21,7 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
 
     _createApp: (@milestoneData, canEdit = true) ->
       @ajax.whenQuerying('project').respondWith [_ref: '/project/123']
-      @ajax.whenQuerying('typedefinition').respondWith [Rally.test.mock.data.WsapiModelFactory.getModelDefinition('Milestone')]
+      @ajax.whenQuerying('typedefinition').respondWith [@modelFactory.getModelDefinition('Milestone')]
       @ajax.whenQuerying('Milestone').respondWith @milestoneData, delay: true
 
       @app = Ext.create 'Rally.apps.milestones.MilestonesApp',

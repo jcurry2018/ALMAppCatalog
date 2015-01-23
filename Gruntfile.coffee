@@ -222,6 +222,7 @@ module.exports = (grunt) ->
             "#{appsdk_path}/test/support/sinon/sinon-1.10.2.js"
             "#{appsdk_path}/test/support/sinon/jasmine-sinon.js"
             "#{appsdk_path}/test/support/sinon/rally-sinon-config.js"
+            "node_modules/immutable/dist/immutable.js"
 
             # Setup
             'lib/webdriver/webdriver.js'

@@ -38,5 +38,8 @@
   },
   "publishConfig": {
     "registry": "http://npm-publish.f4tech.com"
+  },
+  "dependencies": {
+    "immutable": "^3.6.2"
   }
 }
