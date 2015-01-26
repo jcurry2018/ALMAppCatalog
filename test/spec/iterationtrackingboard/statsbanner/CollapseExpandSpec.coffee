@@ -1,6 +1,8 @@
 Ext = window.Ext4 || window.Ext
 
-Ext.require []
+Ext.require [
+  'Rally.apps.iterationtrackingboard.StatsBanner'
+]
 
 describe 'Rally.apps.iterationtrackingboard.statsbanner.CollapseExpand', ->
 
@@ -8,33 +10,41 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.CollapseExpand', ->
     createPane: (config = {}) ->
       @store = Ext.create 'Ext.data.Store',
         model: Rally.test.mock.data.WsapiModelFactory.getModel 'userstory'
+
+      @parent = {
+        getEl: ->
+          return Ext.get document.getElementById('testDiv')
+      }
+
       @pane = Ext.create 'Rally.apps.iterationtrackingboard.statsbanner.CollapseExpand', _.defaults config,
         renderTo: 'testDiv'
         store: @store
+        expanded: false
+        parentComponent: @parent
 
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'statsbannercollapseexpand'
 
-  it 'should show collapse icon initially', ->
+  it 'should show expand icon initially', ->
     @createPane()
 
-    expect(@pane.expanded).toBeTruthy()
-    expect(@pane.getEl().down('.icon-chevron-up').isVisible()).toBe true
-    expect(@pane.getEl().down('.icon-chevron-down').isVisible()).toBe false
+    expect(@pane.expanded).toBeFalsy()
+    expect(@pane.getEl().down('.icon-collapse-row').isVisible()).toBe false
+    expect(@pane.getEl().down('.icon-expand-row').isVisible()).toBe true
 
   it 'should show collapse icon when toggled while collapsed', ->
     @createPane expanded: false
     @pane.expand()
 
-    expect(@pane.getEl().down('.icon-chevron-up').isVisible()).toBe true
-    expect(@pane.getEl().down('.icon-chevron-down').isVisible()).toBe false
+    expect(@pane.getEl().down('.icon-collapse-row').isVisible()).toBe true
+    expect(@pane.getEl().down('.icon-expand-row').isVisible()).toBe false
 
   it 'should show expand icon when toggled while expanded', ->
     @createPane expanded: true
     @pane.collapse()
 
-    expect(@pane.getEl().down('.icon-chevron-up').isVisible()).toBe false
-    expect(@pane.getEl().down('.icon-chevron-down').isVisible()).toBe true
+    expect(@pane.getEl().down('.icon-collapse-row').isVisible()).toBe false
+    expect(@pane.getEl().down('.icon-expand-row').isVisible()).toBe true
 
   it 'should fire collapse event when collapse-expand is clicked and initially expanded', ->
     @createPane expanded: true

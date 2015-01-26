@@ -28,32 +28,23 @@
                     context: this.getContext(),
                     scope: this,
                     requester: this,
-                    success: function(models){
-                        models.UserStory.getField('ScheduleState').getAllowedValueStore().load({
-                            callback: this._createStateMap,
-                            requester: this,
-                            scope: this
-                        });
-                    }
+                    success: this._createStateMap
                 });
             } else {
                 this._loadArtifacts();
             }
         },
 
-        _createStateMap: function(allowedValues) {
+        _createStateMap: function(models) {
             var stateMap = ['Defined', 'In-Progress', 'Completed'],
                 stateMapIndex = 0,
                 storyStates = {};
 
-            _.each(allowedValues, function(value) {
-                var state = value.data.StringValue;
-                if (state) {
-                    if (state === stateMap[stateMapIndex + 1]) {
-                        stateMapIndex++;
-                    }
-                    storyStates[state] = stateMap[stateMapIndex];
+            _.each(models.UserStory.getField('ScheduleState').getAllowedStringValues(), function(state) {
+                if (state === stateMap[stateMapIndex + 1]) {
+                    stateMapIndex++;
                 }
+                storyStates[state] = stateMap[stateMapIndex];
             });
 
             this._storyStates = storyStates;
@@ -63,11 +54,14 @@
         _loadArtifacts: function() {
             this._chartData = [];
             this._childChartData = [];
-            
+
             this.store = Ext.create('Rally.data.wsapi.artifact.Store', {
                 models: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
                 fetch: ['Defects', 'PlanEstimate', 'Requirement', 'FormattedID', 'Name', 'Blocked', 'BlockedReason', 'ScheduleState', 'State', 'Tasks', 'TestCases'],
                 filters: [this.context.getTimeboxScope().getQueryFilter()],
+                sorters: [
+                    {property: 'ScheduleState'}
+                ],
                 context: this.context.getDataContext(),
                 limit: Infinity,
                 requester: this,
@@ -195,6 +189,8 @@
         _createChartConfig: function(overrides) {
             var clickChartHandler = _.isFunction(this.clickHandler) ? this.clickHandler : Ext.emptyFn;
             var height = this.height;
+            var pieHeight = this.height * 0.9;
+
             return Ext.Object.merge({
                 xtype: 'rallychart',
                 loadMask: false,
@@ -203,21 +199,21 @@
                 chartData: {
                     series: [
                         {
-                            type:'pie',
+                            type: 'pie',
                             name: 'Parents',
                             data: this._chartData,
-                            size: height,
+                            size: pieHeight,
                             allowPointSelect: false,
                             dataLabels: {
                                 enabled: false
                             }
                         },
                         {
-                            type:'pie',
+                            type: 'pie',
                             name: 'Children',
                             data: this._childChartData,
-                            size: height,
-                            innerSize: 0.8 * height,
+                            size: pieHeight,
+                            innerSize: 0.8 * pieHeight,
                             allowPointSelect: false,
                             dataLabels: { enabled: false }
                         }
@@ -230,33 +226,35 @@
                         height: height,
                         width: this.width,
                         spacingTop: 0,
-                        spacingRight: 0,
+                        spacingRight: 3,
                         spacingBottom: 0,
-                        spacingLeft: 0,
+                        spacingLeft: 3,
                         events: {
                             click: clickChartHandler
                         }
                     },
                     subtitle: {
-                        useHTML:true, //class refactor
+                        useHTML: true,
                         text: '<table align="center" class="pie-chart-legend"><tr><td><span class="legend-swatch defined-sample-swatch"></span><span>Defined</td>' +
-                              '<td><span class="legend-swatch in-progress-sample-swatch"></span>In-Progress</td>'+
-                              '<td><span class="legend-swatch completed-sample-swatch"></span>Completed</td>'+
+                              '<td><span class="legend-swatch in-progress-sample-swatch"></span>In-Progress</td>' +
+                              '<td><span class="legend-swatch completed-sample-swatch"></span>Completed</td>' +
                               '<td><span class="legend-swatch blocked-sample-swatch"></span>Blocked</td></tr></table>',
                         verticalAlign: 'bottom',
                         floating: true,
-                        x: -50,
-                        y: -25
+                        x: -10,
+                        y: -20
                     },
                     tooltip: {
-                        formatter: this._formatTooltip
+                        formatter: this._formatTooltip,
+                        useHTML: true
                     },
                     spacingTop: 0,
                     title: { text: null },
                     plotOptions: {
                         pie: {
+                            cursor: 'pointer',
                             shadow: false,
-                            center: ['50%', '50%'],
+                            center: ['50%', '45%'],
                             point: {
                                 events: {
                                     click: function(event) {
@@ -328,26 +326,22 @@
         },
 
         _formatTooltip: function() {
-            var relatedCount = '';
+            var relatedMessage = '';
             var blockedMessage = '';
             var artifactName = this.point.rallyName ? '<b>' + this.point.name + '</b>: ' + this.point.rallyName + '<br/>' : this.point.name;
 
             if (this.point.blocked) {
-                blockedMessage = '<b>Blocked</b>';
+                blockedMessage = '<br/><b>Blocked</b>';
                 if (this.point.blockedReason) {
                     blockedMessage += ': ' + this.point.blockedReason;
                 }
             }
 
             if (this.point.series && this.point.series.name === 'Parents') {
-                if(!this.point.userStory) {
-                    var numRelated = this.point.relatedCount || 0;
-                    relatedCount = 'Related Items: ' + numRelated;
-                }
-                return artifactName + this.point.status + '<br/>' + relatedCount + '<br/>' + blockedMessage;
-            } else {
-                return artifactName + this.point.status + '<br/>' + blockedMessage;
+                relatedMessage = (this.point.relatedCount) ? '<br/>Related Items: ' + this.point.relatedCount : '';
             }
+
+            return '<div style="min-width:200px;white-space:normal">' + artifactName + this.point.status + relatedMessage + blockedMessage + '</div>';
         }
     });
 })();

@@ -41,7 +41,24 @@
             this.originalOnColumnDateRangeChange = cmp._onColumnDateRangeChange;
             cmp._onColumnDateRangeChange = Ext.bind(this._onColumnDateRangeChange, this);
 
+            this.originalFilter = cmp.filter;
+            cmp.filter = Ext.bind(this.filter, this);
+
+
             this.callParent(arguments);
+        },
+
+        filter: function (filter, clearFilterKeys, ignoreDefaultFilters) {
+            // Add temp filters so that when we scroll the filters will be applied to the newly created columns
+            // We have to do this because the roadmap board is different than every other cardboard and doesn't maintain a list of column instances.
+            // Instead, it stores column configs and creates new columns when scrolling. We cannot add the filter to the column store configs because
+            // the filter will be added permanently to the store and will not be cleared when the filter is changed by a user.
+            // Puppies weep.
+            this.cmp.filterCollection = this.cmp.filterCollection || Ext.create('Rally.data.filter.FilterCollection');
+            this.cmp.filterCollection.clearTempFilters();
+            this.cmp.filterCollection.addTempFilter(filter);
+
+            this.originalFilter.call(this.cmp, filter, clearFilterKeys, ignoreDefaultFilters);
         },
 
         drawAddNewColumnButton: function () {
@@ -50,10 +67,6 @@
             }
         },
 
-        /**
-         *
-         * @param store
-         */
         buildColumns: function (options) {
             options = options || {};
 
@@ -115,21 +128,12 @@
         },
 
         _getIndexOfFirstColumnToShow: function (firstTimeframe) {
-            var firstColumnToShow;
-
-            if (firstTimeframe) {
-                firstColumnToShow = this._getColumnForTimeframe(firstTimeframe);
-            }
-
-            if (!firstColumnToShow) {
-                firstColumnToShow = this._getFirstPresentColumn() || this._getMostRecentPastColumn();
-            }
-
+            var firstColumnToShow = this._getColumnForTimeframe(firstTimeframe) || this._getFirstPresentColumn() || this._getMostRecentPastColumn();
             return firstColumnToShow.index || 0;
         },
 
         _getColumnForTimeframe: function (timeframe) {
-            return _.find(this.scrollableColumns, function (column) {
+            return timeframe && _.find(this.scrollableColumns, function (column) {
                 return column.timeframeRecord && column.timeframeRecord.getId() === timeframe.getId();
             });
         },
@@ -158,11 +162,13 @@
         },
 
         _syncColumns: function () {
-            this._reindexColumns();
-            this._adjustCurrentColumnIndex();
-            this._updatePlaceholderColumns();
-            this._renderScrollableColumns();
-            this._renderButtons();
+            if(!this.cmp.destroying) {
+                this._reindexColumns();
+                this._adjustCurrentColumnIndex();
+                this._updatePlaceholderColumns();
+                this._renderScrollableColumns();
+                this._renderButtons();
+            }
         },
 
         _scroll: function (forwards) {
@@ -205,10 +211,8 @@
         },
 
         _renderScrollableColumns: function () {
-            _.each(this._getColumnsToHide(), function (column) {
-                this._hideColumn(column);
-            }, this);
-
+            var columnsToHide = _.reject(this.getScrollableColumns(), this._shouldShowColumn, this);
+            _.each(columnsToHide, this._hideColumn, this);
             _.each(this._getColumnsToShow(), function (columnConfig) {
                 var columnNotVisible = !this._getVisibleColumn(columnConfig);
 
@@ -221,7 +225,6 @@
         _drawColumn: function (columnConfig) {
             var displayIndex = this._getDisplayIndexForScrollableColumn(columnConfig);
             var column = this.cmp.addColumn(columnConfig, displayIndex);
-            column.on('ready', this._onNewlyAddedColumnReady, this, {single: true});
             this.cmp.renderColumn(column, this._createColumnEls(displayIndex));
         },
 
@@ -232,12 +235,6 @@
         _getColumnsToShow: function () {
             return _.filter(this.scrollableColumns, function (column) {
                 return this._shouldShowColumn(column);
-            }, this);
-        },
-
-        _getColumnsToHide: function () {
-            return _.filter(this.getScrollableColumns(), function (column) {
-                return !this._shouldShowColumn(column);
             }, this);
         },
 
@@ -274,9 +271,7 @@
         },
 
         _removePlaceholderColumns: function() {
-            this.scrollableColumns = _.reject(this.scrollableColumns, function (column) {
-                return this._isPlaceholderColumn(column);
-            }, this);
+            this.scrollableColumns = _.reject(this.scrollableColumns, this._isPlaceholderColumn);
         },
 
         _reindexColumns: function () {
@@ -314,20 +309,11 @@
         },
 
         _getFirstPlaceholderColumn: function () {
-            return _.find(this.getScrollableColumns(), function (column) {
-                return this._isPlaceholderColumn(column);
-            }, this);
+            return _.find(this.getScrollableColumns(), this._isPlaceholderColumn);
         },
 
-        _onNewlyAddedColumnReady: function () {
-            this.cmp.applyLocalFilters();
-        },
-
-        _sizeButtonToColumnHeader: function(button, column){
-            var columnHeaderHeight = column.getHeaderTitle().getHeight() - 17;
-            button.getEl()
-                .setHeight(columnHeaderHeight)
-                .setStyle('margin-top', '16px');
+        _sizeButtonToColumnHeader: function (button, column) {
+            button.getEl().setHeight(column.getHeaderTitle().getHeight() - 17).setStyle('margin-top', '16px');
         },
 
         getFirstVisibleScrollableColumn: function () {

@@ -125,7 +125,6 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.Gauge', ->
   describe 'should generate acceptance data object', ->
 
     it 'with uncustomized schedule states', ->
-      @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(['Defined', 'In-Progress', 'Completed', 'Accepted'])
       @createGauge()
 
       @store.add [
@@ -139,12 +138,11 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.Gauge', ->
             ScheduleState: 'Defined'
       ]
 
-      @gauge.getAcceptanceData().then (result) =>
-        expect(result.accepted).toBe 5
-        expect(result.total).toBe 10
+      expect(@gauge.getAcceptanceData().accepted).toBe 5
+      expect(@gauge.getAcceptanceData().total).toBe 10
 
     it 'with customized schedule states', ->
-      @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(['Defined', 'In-Progress', 'Completed', 'Accepted', 'Released'])
+      @stub Rally.test.mock.data.WsapiModelFactory.getUserStoryModel().getField('ScheduleState'), 'getAllowedStringValues', -> ['Defined', 'In-Progress', 'Completed', 'Accepted', 'Released']
       @createGauge()
 
       @store.add [
@@ -164,12 +162,10 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.Gauge', ->
             ScheduleState: 'Defined'
       ]
 
-      @gauge.getAcceptanceData().then (result) =>
-        expect(result.accepted).toBe 10
-        expect(result.total).toBe 15
+      expect(@gauge.getAcceptanceData().accepted).toBe 10
+      expect(@gauge.getAcceptanceData().total).toBe 15
 
     it 'with no plan estimates', ->
-      @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(['Defined', 'In-Progress', 'Completed', 'Accepted'])
       @createGauge()
 
       @store.add [
@@ -184,6 +180,5 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.Gauge', ->
             ScheduleState: 'Defined'
       ]
 
-      @gauge.getAcceptanceData().then (result) =>
-        expect(result.accepted).toBe 0
-        expect(result.total).toBe 0
+      expect(@gauge.getAcceptanceData().accepted).toBe 0
+      expect(@gauge.getAcceptanceData().total).toBe 0

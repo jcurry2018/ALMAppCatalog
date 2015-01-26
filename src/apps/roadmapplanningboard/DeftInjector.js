@@ -38,12 +38,6 @@
                             model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
                         }]
                     },
-                    preliminaryEstimateStore: {
-                      className: 'Rally.data.wsapi.Store',
-                      parameters: [{
-                            model: 'PreliminaryEstimate'
-                      }]
-                    },
                     nextDateRangeGenerator: {
                         className: 'Rally.apps.roadmapplanningboard.util.NextDateRangeGenerator'
                     }

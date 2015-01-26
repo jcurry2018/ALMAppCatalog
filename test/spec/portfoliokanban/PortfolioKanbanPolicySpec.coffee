@@ -4,7 +4,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanPolicy', ->
 
   beforeEach ->
     Model = Ext.define Rally.test.generateName(),
-      extend: 'Rally.domain.WsapiModel'
+      extend: 'Rally.data.wsapi.Model'
       fields: ['Description']
 
     @stateRecord = Ext.create Model,

@@ -42,8 +42,6 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.TimeboxEnd', ->
             format:
               tzOffset: 300
 
-    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(['Defined', 'In-Progress', 'Completed', 'Accepted'])
-
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'statsbannertimeboxend'
 

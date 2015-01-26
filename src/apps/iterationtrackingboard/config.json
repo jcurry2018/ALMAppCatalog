@@ -4,7 +4,8 @@
    "server": "https://rally1.rallydev.com",
    "sdk": "2.0rc3",
    "javascript": [
-      "Column.js",
+      "../common/RowSettingsField.js",
+      "IterationTrackingTreeGrid.js",
       "statsbanner/BannerWidget.js",
       "statsbanner/Gauge.js",
       "statsbanner/PlannedVelocity.js",
@@ -23,6 +24,7 @@
       "statsbanner/IterationProgress.js",
       "statsbanner/CollapseExpand.js",
       "StatsBanner.js",
+      "StatsBannerField.js",
       "IterationTrackingBoardApp.js"
    ],
    "css": [

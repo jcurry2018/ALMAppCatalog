@@ -19,6 +19,7 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
         typeNames:
           child:
             name: 'Feature'
+        context: Ext.create 'Rally.app.Context'
 
       @waitForComponentReady @cardboard
 

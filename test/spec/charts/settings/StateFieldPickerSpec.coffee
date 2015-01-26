@@ -10,7 +10,7 @@ describe 'Rally.apps.charts.settings.StateFieldPicker', ->
 
   afterEach ->
     # unstub the method to cleanup
-    Rally.domain.WsapiModel.getFields.restore()
+    Rally.data.wsapi.Model.getFields.restore()
     Rally.test.destroyComponentsOfQuery('rallychartssettingsstatefieldpicker')
     Rally.test.destroyComponentsOfQuery('rallyfieldvaluecombobox')
     Rally.test.destroyComponentsOfQuery('rallyfieldcombobox')
@@ -41,7 +41,7 @@ describe 'Rally.apps.charts.settings.StateFieldPicker', ->
 
       # I'm not convinced this is the appropriate way to do this, but it definitely works although it also
       # requires some magic (above)
-      @stub Rally.domain.WsapiModel, "getFields", ->
+      @stub Rally.data.wsapi.Model, "getFields", ->
         [
           { name: "c_KanbanState", displayName: "Kanban State", attributeDefinition: { AttributeType: "STRING", hidden: false, ReadOnly: false, Constrained: true }, getAllowedValueStore}
           { name: "ScheduleState", displayName: "Schedule State", attributeDefinition: { AttributeType: "STRING", hidden: false, ReadOnly: false, Constrained: true }, getAllowedValueStore}

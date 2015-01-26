@@ -22,7 +22,7 @@
             store: null
         },
 
-        currentChartDisplayed: 0,
+        currentChartDisplayed: 1,
 
         stateId: 'stats-banner-iteration-progress',
         stateful: true,
@@ -45,15 +45,12 @@
             '</div>'
         ],
 
-        constructor: function(config) {
-            this.stateId = Rally.environment.getContext().getScopedStateId(this.stateId);
-            this.callParent(arguments);
-        },
-
-        initComponent: function(){
+        initComponent: function () {
             this.mon(this.store, 'datachanged', this.onDataChanged, this);
             this.callParent(arguments);
             var boundClickHandler = Ext.bind(this._onChartClick, this);
+
+            this.stateId = this.context.getScopedStateId(this.stateId);
 
             this.carouselItems = [
                 {
@@ -93,6 +90,12 @@
             }, this);
 
             this._pendingChartReadies = this.carouselItems.length;
+
+            if (!this.expanded) {
+                this.fireEvent('ready', this);
+            } else {
+                this.onDataChanged();
+            }
         },
 
         expand: function() {
@@ -142,7 +145,7 @@
         applyState: function (state) {
             if (state){
                 if (state.currentChartDisplayed > this.carouselItems.length -1 || state.currentChartDisplayed < 0) {
-                    this.currentChartDisplayed = 0;
+                    this.currentChartDisplayed = 1;
                 } else {
                     this.currentChartDisplayed = state.currentChartDisplayed;
                 }
@@ -158,13 +161,20 @@
         onDataChanged: function() {
             this._cleanupCarousel();
 
-            if(this.rendered) {
+            var addCarousel = _.bind(function() {
                 if (this.getContext().getTimeboxScope().getRecord()) {
                     this.update();
 
                     this.createCarousel();
                 } else {
                     this._addPlaceholder();
+                }
+            }, this);
+            if (this.expanded) {
+                if (this.rendered) {
+                    addCarousel();
+                } else {
+                    this.on('afterrender', addCarousel);
                 }
             }
         },

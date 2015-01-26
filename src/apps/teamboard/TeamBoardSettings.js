@@ -3,13 +3,14 @@
 
     Ext.define('Rally.apps.teamboard.TeamBoardSettings', {
         requires: [
+            'Rally.ui.combobox.ComboBox',
             'Rally.ui.picker.FieldPicker',
             'Rally.ui.picker.MultiObjectPicker'
         ],
         singleton: true,
 
-        getFields: function(){
-            return [this._getTeamsPickerConfig(), this._getFieldPickerConfig()];
+        getFields: function(userModel){
+            return [this._getTeamsPickerConfig(), this._getFieldPickerConfig(), this._getGroupByPickerConfig(userModel)];
         },
 
         _getTeamsPickerConfig: function(){
@@ -43,17 +44,30 @@
         },
 
         _getFieldPickerConfig: function(){
-            var config = {
+            return {
                 xtype: 'rallyfieldpicker',
                 fieldLabel: 'Card Fields',
                 name: 'cardFields',
                 modelTypes: ['User']
             };
-            if(!Rally.environment.getContext().getPermissions().isWorkspaceOrSubscriptionAdmin()){
-                config.fieldWhiteList = Rally.apps.teamboard.TeamBoardApp.ATTRIBUTES_VISIBLE_TO_WS_NON_ADMIN_USERS;
-            }
+        },
 
-            return config;
+        _getGroupByPickerConfig: function(userModel) {
+            var groupByFields = _.filter(userModel.getFields(), function(field){
+                return field.getType() === 'rating' || field.hasAllowedValues();
+            });
+
+            return {
+                xtype: 'rallycombobox',
+                allowNoEntry: true,
+                editable: false,
+                fieldLabel: 'Group By',
+                name: 'groupBy',
+                queryMode: 'local',
+                store: _.map(_.sortBy(groupByFields, 'displayName'), function(field){
+                    return [field.name, field.displayName];
+                })
+            };
         }
     });
 

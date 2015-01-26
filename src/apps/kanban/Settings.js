@@ -1,28 +1,24 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    /**
-     *
-     */
     Ext.define('Rally.apps.kanban.Settings', {
         singleton: true,
         requires: [
             'Rally.apps.kanban.ColumnSettingsField',
+            'Rally.apps.common.RowSettingsField',
             'Rally.ui.combobox.FieldComboBox',
-            'Rally.ui.picker.FieldPicker',
             'Rally.ui.CheckboxField',
             'Rally.ui.plugin.FieldValidationUi'
         ],
 
         getFields: function(config) {
-            var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner', 'BlockedReason'];
             var items = [
                 {
                     name: 'groupByField',
                     xtype: 'rallyfieldcombobox',
                     model: Ext.identityFn('UserStory'),
                     margin: '10px 0 0 0',
-                    fieldLabel: 'Group By',
+                    fieldLabel: 'Columns',
                     listeners: {
                         select: function(combo) {
                             this.fireEvent('fieldselected', combo.getRecord().get('fieldDefinition'));
@@ -61,35 +57,24 @@
                 }
             ];
 
-            if (!config.shouldShowColumnLevelFieldPicker) {
-                var fieldBlackList = ['DefectStatus', 'TaskStatus', 'DisplayColor', 'DragAndDropRank', 'Rank'];
+            items.push({
+                name: 'groupHorizontallyByField',
+                xtype: 'rowsettingsfield',
+                fieldLabel: 'Swimlanes',
+                margin: '10 0 0 0',
+                mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
+                readyEvent: 'ready',
+                isAllowedFieldFn: function(field) {
+                    var attr = field.attributeDefinition;
+                    return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string')
+                        || attr.Constrained || _.contains(['boolean'], attr.AttributeType.toLowerCase())) &&
+                        !_.contains(['web_link', 'text', 'date'], attr.AttributeType.toLowerCase());
+                },
+                explicitFields: [
+                    {name: 'Sizing', value: 'PlanEstimate'}
+               ]
+            });
 
-                if (config.isDndWorkspace === false) {
-                    _.pull(fieldBlackList, 'Rank');
-                }
-
-                items.push({
-                    name: 'cardFields',
-                    fieldLabel: 'Card Fields',
-                    xtype: 'rallyfieldpicker',
-                    modelTypes: ['userstory', 'defect'],
-                    fieldBlackList: fieldBlackList,
-                    alwaysSelectedValues: alwaysSelectedValues,
-                    listeners: {
-                        selectionchange: function(picker) {
-                            picker.validate();
-                        }
-                    },
-                    handlesEvents: {
-                        columnsettingsready: function() {
-                            if (this.picker) {
-                                this.alignPicker();
-                            }
-                        }
-                    }
-                });
-            }
-            
             items.push(
                 {
                     name: 'hideReleasedCards',
@@ -104,26 +89,7 @@
                         fieldLabel: '',
                         margin: '5 0 10 80'
                     }
-                }
-            );
-
-            if (config.shouldShowPageSize) {
-                // can be removed with toggle ENABLE_INFINITE_SCROLL_ALL_BOARDS
-                items.push({
-                    name: 'pageSize',
-                    xtype: 'rallynumberfield',
-                    plugins: ['rallyfieldvalidationui'],
-                    fieldLabel: 'Page Size',
-                    allowDecimals: false,
-                    minValue: 1,
-                    maxValue: 100,
-                    allowBlank: false,
-                    validateOnChange: false,
-                    validateOnBlur: false
-                });
-            }
-
-            items.push(
+                },
                 {
                     type: 'query'
                 });

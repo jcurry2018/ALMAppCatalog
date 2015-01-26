@@ -85,9 +85,11 @@
                             }
                         },
                         column: {
-                            events: {
-                                click: clickChartHandler
-                            }
+                            point: {
+                               events: {
+                                   click: clickChartHandler
+                               }
+                           }
                         }
                     },
                     legend: { enabled: true },
@@ -150,6 +152,9 @@
 
             config = Ext.Object.merge(config, {
                 chartConfig: {
+                    chart: {
+                        zoomType: ''
+                    },
                     tooltip: {
                         formatter: function() {
                             return false;
@@ -160,6 +165,7 @@
                         labels: { enabled: false },
                         tickPositions: []
                     },
+
                     yAxis: [
                         {
                             title: { text: null },

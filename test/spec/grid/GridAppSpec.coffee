@@ -57,14 +57,14 @@ describe 'Rally.apps.grid.GridApp', ->
       settings:
         order: 'Name ASC'
     ).then =>
-      expect(@grid.storeConfig).toHaveSorters [['Name', 'ASC']]
+      expect(@grid.storeConfig).toOnlyHaveSorter ['Name', 'ASC']
 
   it 'passes the query to the grid', ->
     @createApp(
       settings:
         query: '(Name contains foo)'
     ).then =>
-      expect(@grid.storeConfig).toOnlyHaveFilterStrings [Rally.data.wsapi.Filter.fromQueryString(@app.settings.query).toString()]
+      expect(@grid.storeConfig).toOnlyHaveFilterString Rally.data.wsapi.Filter.fromQueryString(@app.settings.query).toString()
 
   it 'passes the user query to the grid on a timebox filtered dashboard', ->
     @createTimeboxScopedApp(
@@ -78,14 +78,14 @@ describe 'Rally.apps.grid.GridApp', ->
 
   it 'passes the query to the grid on a timebox filtered dashboard with no user query', ->
     @createTimeboxScopedApp().then =>
-      expect(@grid.storeConfig).toOnlyHaveFilterStrings [@app.getContext().getTimeboxScope().getQueryFilter().toString()]
+      expect(@grid.storeConfig).toOnlyHaveFilterString @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
   it 'passes the timebox query when all types are schedulable', ->
     @createTimeboxScopedApp(
       settings:
         types: 'hierarchicalrequirement,task,defect,defectsuite,testset'
     ).then =>
-      expect(@grid.storeConfig).toOnlyHaveFilterStrings [@app.getContext().getTimeboxScope().getQueryFilter().toString()]
+      expect(@grid.storeConfig).toOnlyHaveFilterString @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
   it 'does not pass the timebox query when all types are not schedulable', ->
     @createTimeboxScopedApp(
@@ -99,9 +99,7 @@ describe 'Rally.apps.grid.GridApp', ->
       settings:
         query: '(Owner = {user})'
     ).then =>
-      expect(@grid.storeConfig).toOnlyHaveFilterStrings [
-        Rally.data.wsapi.Filter.fromQueryString("(Owner = #{Rally.util.Ref.getRelativeUri(@app.getContext().getUser())})").toString()
-      ]
+      expect(@grid.storeConfig).toOnlyHaveFilterString Rally.data.wsapi.Filter.fromQueryString("(Owner = #{Rally.util.Ref.getRelativeUri(@app.getContext().getUser())})").toString()
 
   it 'refreshes the grid when the timebox scope changes', ->
     @createTimeboxScopedApp().then =>

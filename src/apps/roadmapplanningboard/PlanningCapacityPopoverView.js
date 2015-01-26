@@ -18,6 +18,7 @@
         config: {
             model: null
         },
+        header: false,
 
         initComponent: function () {
             this.items = this._getItems();
@@ -64,7 +65,7 @@
                             xtype: 'rallybutton',
                             itemId: 'capacityCancel',
                             text: 'Cancel',
-                            cls: 'secondary dark button small right',
+                            cls: 'secondary dark button small rly-right',
                             listeners: {
                                 click: this._onCancel,
                                 scope: this
@@ -74,7 +75,7 @@
                             xtype: 'rallybutton',
                             itemId: 'capacityDone',
                             text: 'Done',
-                            cls: 'primary button small right',
+                            cls: 'primary button small rly-right',
                             listeners: {
                                 click: this._onDone,
                                 scope: this

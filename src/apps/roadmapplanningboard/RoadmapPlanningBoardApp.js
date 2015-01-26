@@ -56,7 +56,7 @@
 
             this.browserCheck();
 
-            Ext.Ajax.on('requestexception', this._onRequestException, this);
+            this.mon(Ext.Ajax, 'requestexception', this._onRequestException, this);
 
             this._retrievePITypes(function(records) {
                 this.types = [records[0].get('TypePath')];

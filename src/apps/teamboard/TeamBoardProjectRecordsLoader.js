@@ -10,6 +10,10 @@
 
         load: function(teamOids, callback, scope){
             var config = {
+                autoLoad: {
+                    callback: callback,
+                    scope: scope
+                },
                 model: Ext.identityFn('Project'),
                 sorters: ['Name']
             };
@@ -23,15 +27,10 @@
                     };
                 }));
             }else{
-                config.pageSize = 25;
+                config.pageSize = 10;
             }
 
-            var store = Ext.create('Rally.data.wsapi.Store', config);
-            store.load({
-                callback: callback,
-                scope: scope
-            });
-            return store;
+            return Ext.create('Rally.data.wsapi.Store', config);
         }
     });
 

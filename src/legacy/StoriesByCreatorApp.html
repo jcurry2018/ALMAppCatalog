@@ -16,7 +16,7 @@
             var releaseDropdown;
             var table;
             var wait = null;
-        
+
             // private method the builds the table of stories and associated info
             function showResults(results) {
                 if (wait) {
@@ -35,7 +35,7 @@
                         '150px',        '120px',      '120px', '120px']
                 };
                 table = new rally.sdk.ui.Table(config);
-        
+
                 var i, j, story;
                 var linkConfig = null;
                 var storyLink = null;
@@ -46,7 +46,7 @@
                 var acceptor = null;
                 var creators = {};
                 var revision = null;
-        
+
                 for (i = 0; i < results.stories.length; i++) {
                     story = results.stories[i];
                     // somewhat counter-intuitively, the revisions are returned in last to first order
@@ -54,7 +54,7 @@
                     initialRevisionIx = story.RevisionHistory.Revisions.length - 1;
                     initialRevision = story.RevisionHistory.Revisions[initialRevisionIx];
                     creator = initialRevision.User._refObjectName;
-        
+
                     // fill an object that holds creator names so that we can later show table grouped in
                     // creator order
                     if (!(creator in creators)) {
@@ -76,7 +76,7 @@
                         for (j = 0; j < story.RevisionHistory.Revisions.length; j++) {
                             revision = story.RevisionHistory.Revisions[j];
                             srchIx = revision.Description.search(/SCHEDULE STATE changed from \[.+\] to \[Accepted\]/);
-                            if (srchIx > 0) {
+                            if (srchIx >= 0) {
                                 acceptor = '';
                                 if (revision.User && revision.User._refObjectName) {
                                     acceptor = revision.User._refObjectName;
@@ -85,11 +85,11 @@
                             }
                         }
                     }
-        
+
                     story.AcceptedBy = acceptor;
                     creators[creator].push(story);
                 }
-        
+
                 var creatorNames = [];
                 for (var cn in creators) {
                     if (creators.hasOwnProperty(cn)) {
@@ -97,7 +97,7 @@
                     }
                 }
                 creatorNames.sort();
-        
+
                 for (i = 0; i < creatorNames.length; i++) {
                     creator = creatorNames[i];
                     var stories = creators[creator];
@@ -111,19 +111,19 @@
                         table.addRow(story);
                     }
                 }
-        
+
                 table.display(tableHolder);
             }
-        
+
             //private method to query for stories when release selection changes
             function runMainQuery(sender, eventArgs) {
                 if (table) {
                     table.destroy();
                     table = null;
                 }
-        
+
                 tableHolder.innerHTML = "";
-        
+
                 var release = releaseDropdown.getSelectedName();
                 if ((release === null) || (release.length === 0)) {
                     tableHolder.innerHTML = "No release was defined. Please select another workspace/project.";
@@ -138,13 +138,13 @@
                     order : "FormattedID",
                     query : queryCriteria
                 };
-        
+
                 wait = new rally.sdk.ui.basic.Wait({});
                 wait.display('wait');
-        
+
                 rallyDataSource.findAll(queryConfig, showResults);
             }
-        
+
             //private method to start building controls on page
             //page consists of a dropdown to select the release and the table to hold the query results
             function initPage() {
@@ -157,17 +157,17 @@
                 releaseDropdown = new rally.sdk.ui.ReleaseDropdown(rdConfig, rallyDataSource);
                 releaseDropdown.display(releaseHolder, runMainQuery);
             }
-        
+
             // only public method
             this.display = function() {
                 rally.sdk.ui.AppHeader.setHelpTopic("250");
                 rally.sdk.ui.AppHeader.showPageTools(true);
-        
+
                 initPage();
             };
-        
+
         }
-    
+
 
     </script>
     <script type="text/javascript">

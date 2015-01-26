@@ -7,6 +7,10 @@
         requires: [
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardFilterControl',
+            'Rally.ui.filter.view.CustomQueryFilter',
+            'Rally.ui.filter.view.ParentFilter',
+            'Rally.ui.filter.view.OwnerPillFilter',
+            'Rally.ui.filter.view.TagPillFilter',
             'Rally.ui.gridboard.plugin.GridBoardFeedback',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.apps.roadmapplanningboard.PlanningBoard',
@@ -54,20 +58,30 @@
             this.addNewPluginConfig = {
                 listeners: {
                     beforecreate: this._onBeforeCreate,
-                    beforeeditorshow: this._onBeforeCreate
-                },
-                style: {
-                    'float': 'left'
+                    beforeeditorshow: this._onBeforeCreate,
+                    scope: this
                 },
                 fieldLabel: 'New ' + this.typeNames.child.name
             };
+
             this.plugins = [
                 'rallygridboardaddnew',
+                {
+                    ptype: 'rallygridboardfiltercontrol',
+                    filterControlConfig: {
+                        cls: 'small gridboard-filter-control',
+                        margin: '3 10 3 7',
+                        stateful: true,
+                        stateId: this.context.getScopedStateId('roadmapplanningboard-filter-button'),
+                        items: this._getFilterItems()
+                    }
+                },
                 {
                     ptype: 'rallygridboardfieldpicker',
                     headerPosition: 'left',
                     boardFieldDefaults: ['PreliminaryEstimate', 'Discussions', 'UserStories', 'Name'],
                     gridFieldBlackList: ['DragAndDropRank', 'DisplayColor'],
+                    boardFieldBlackList: ['State', 'CreationDate', 'Description', 'Notes'],
                     stateful: true,
                     stateId: this.getContext().getScopedStateId('fields')
                 },
@@ -85,7 +99,7 @@
                 }
             ];
 
-            this.cardBoardConfig = {
+            this.cardBoardConfig = Ext.merge({
                 xtype: 'roadmapplanningboard',
                 context: this.context,
                 roadmap: this.roadmap,
@@ -99,38 +113,52 @@
                     { ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 3 },
                     { ptype: 'rallyroadmapcollapsableheader' }
                 ]
-            };
+            }, this.cardBoardConfig);
 
             this.callParent(arguments);
         },
 
-        _initialFilter: function (component, filters) {
-            component.on('filter', this._onFilter, this);
-            this._applyFilter(filters);
-            this.config.storeConfig.autoLoad = true;
-            this.loadStore();
+        _createPillFilterItem: function(typeName, config) {
+            return Ext.apply({
+                xtype: typeName,
+                margin: '-15 0 5 0',
+                showPills: true,
+                showClear: true
+            }, config);
         },
 
-        _onFilter: function (component, filters) {
-            this._applyFilter(filters);
-            this.refresh(this.config);
-        },
+        _getFilterItems: function () {
+            var filterItems = [];
 
-        _applyFilter: function (filters) {
-            this.queryFilter = filters[0];
-
-            if (this.queryFilter) {
-                this.filterButton.removeCls('secondary');
-                this.filterButton.addCls('primary');
-            } else {
-                this.filterButton.removeCls('primary');
-                this.filterButton.addCls('secondary');
+            if (this.typeNames.parent) {
+                filterItems.push({
+                    xtype: 'rallyparentfilter',
+                    modelType: this.typeNames.parent.typePath,
+                    modelName: this.typeNames.parent.name,
+                    prependFilterFieldWithFormattedId: true,
+                    storeConfig: {
+                        context: {
+                            project: null
+                        }
+                    }
+                });
             }
+
+            filterItems.push(
+                this._createPillFilterItem('rallyownerpillfilter', {
+                    filterChildren: false,
+                    project: this.context.getProject(),
+                    showPills: false
+                }),
+                this._createPillFilterItem('rallytagpillfilter', {remoteFilter: true}),
+                { xtype: 'rallycustomqueryfilter', filterHelpId: 194 }
+            );
+
+            return filterItems;
         },
 
         /**
          * This method is fired by AddNew and will run before the artifact is created.
-         * Scoping will be the GridBoardAddNew plugin (because of issues with deep merging of the listener config and the scope)
          * @private
          */
         _onBeforeCreate: function (addNew, record, params) {
@@ -138,7 +166,7 @@
             if (!record.isModel) {
                 params = record;
             }
-            var rankRecord = this.gridboard.getGridOrBoard().getFirstRecord();
+            var rankRecord = this.getGridOrBoard().getFirstRecord();
             if (rankRecord) {
                 params.rankAbove = rankRecord.getUri();
             }

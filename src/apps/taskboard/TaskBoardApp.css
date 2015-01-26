@@ -1,0 +1,8 @@
+.taskboard .header {
+    line-height: normal;
+    padding: 5px 5px 2px 5px;
+}
+
+.taskboard {
+    overflow-y: hidden;
+}

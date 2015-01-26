@@ -9,6 +9,7 @@ Ext.require [
 
     beforeEach ->
       @stub(Rally.app.Context.prototype, 'getSubscription').returns StoryHierarchyEnabled: true
+      @cardboardHelper = Rally.test.helpers.CardBoard
 
       @Model = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
 
@@ -26,16 +27,23 @@ Ext.require [
       expect(storeFilterSpy.returnValues[0][1].property).toBe 'DirectChildrenCount'
       expect(storeFilterSpy.returnValues[0][1].value).toBe 0
 
+    it 'should have correct filter settings if hideReleasedCards is true', ->
+      storeFilterSpy = @spy(Rally.apps.kanban.Column.prototype, 'getStoreFilter')
+      @createColumn(hideReleasedCards:true)
+
+      expect(storeFilterSpy.returnValues[0][2].property).toBe 'Release'
+      expect(storeFilterSpy.returnValues[0][2].value).toBe null
+
     helpers
       createColumn: (config = {}) ->
-        Ext.create('Rally.apps.kanban.Column', Ext.apply(
+        @cardboardHelper.createColumn(Ext.apply(
+          columnClass: 'Rally.apps.kanban.Column'
           context: Rally.environment.getContext()
           value: 'Defined'
           attribute: 'ScheduleState'
           wipLimit: 0
           renderTo: 'testDiv'
           headerCell: Ext.get 'testDiv'
-          contentCell: Ext.get 'testDiv'
           models: [@Model]
           , config)
         )

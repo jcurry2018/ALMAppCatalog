@@ -6,6 +6,7 @@ Ext.require [
   'Rally.apps.roadmapplanningboard.PlanningBoard'
   'Rally.apps.roadmapplanningboard.AppModelFactory'
   'Rally.data.PreferenceManager'
+  'Rally.app.Context'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
@@ -48,6 +49,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       roadmapStore = Deft.Injector.resolve('roadmapStore')
       timelineStore = Deft.Injector.resolve('timelineStore')
       config = _.extend
+        loadMask: false,
         roadmap: roadmapStore.first()
         timeline: timelineStore.first()
         timeframeColumnCount: 4
@@ -83,6 +85,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
           ]
 
           slideDuration: 10
+
+          context: Ext.create 'Rally.app.Context'
+
         , config
 
       @plugin = @cardboard.plugins[0]
@@ -106,7 +111,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @cardboard.getEl().query('td.card-column')
 
     clickAddNewButton: ->
-      @click(css: '.scroll-button.right')
+      @click(css: '.scroll-button.rly-right')
 
     assertButtonIsInColumnHeader: (button, column) ->
       expect(column.getColumnHeader().getEl().getById(button.getEl().id)).not.toBeNull()
@@ -456,7 +461,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
         @scrollBackwards().then =>
           expect(@plugin.getFirstVisibleScrollableColumn().getColumnHeaderCell().dom).toBe @getColumnHeaderCells()[1]
-          expect(@plugin.getFirstVisibleScrollableColumn().getContentCell().dom).toBe @getColumnContentCells()[1]
+          expect(@plugin.getFirstVisibleScrollableColumn().getContentCellContainers()[0].dom).toBe @getColumnContentCells()[1]
 
     it 'should re-render scroll buttons', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
@@ -469,11 +474,16 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         @scrollBackwards().then =>
           expect(@cardboard.getEl().query('.scroll-button').length).toBe 2
 
-    it 'should filter newly added column', ->
+    it 'should add temp filters to newly added column when board is filtered', ->
+      nameFilter = new Rally.data.QueryFilter
+        property: 'Name',
+        operator: '=',
+        value: 'Android Support'
+
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
-        filterSpy = @spy @cardboard, 'applyLocalFilters'
+        @cardboard.filter nameFilter
         @scrollBackwards().then =>
-          expect(filterSpy.callCount).toBe 1
+          expect(@plugin.getLastVisibleScrollableColumn().filterCollection.tempFilters.undefined.toString()).toBe nameFilter.toString()
 
     it 'should handle only 1 column', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 1, timeframeColumnCount: 1).then =>
@@ -512,7 +522,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
         @scrollForwards().then =>
           expect(@plugin.getLastVisibleScrollableColumn().getColumnHeaderCell().dom).toBe (_.last @getColumnHeaderCells())
-          expect(@plugin.getLastVisibleScrollableColumn().getContentCell().dom).toBe (_.last @getColumnContentCells())
+          expect(@plugin.getLastVisibleScrollableColumn().getContentCellContainers()[0].dom).toBe (_.last @getColumnContentCells())
 
     it 'should re-render scroll buttons', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
@@ -525,11 +535,16 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         @scrollForwards().then =>
           expect(@cardboard.getEl().query('.scroll-button').length).toBe 2
 
-    it 'should filter newly added column', ->
+    it 'should add temp filters to newly added column when board is filtered', ->
+      nameFilter = new Rally.data.QueryFilter
+        property: 'Name',
+        operator: '=',
+        value: 'Android Support'
+
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
-        filterSpy = @spy @cardboard, 'applyLocalFilters'
+        @cardboard.filter nameFilter
         @scrollForwards().then =>
-          expect(filterSpy.callCount).toBe 1
+          expect(@plugin.getLastVisibleScrollableColumn().filterCollection.tempFilters.undefined.toString()).toBe nameFilter.toString()
 
     it 'should handle only 1 column', ->
       @createCardboard(pastColumnCount: 0, presentColumnCount: 2, timeframeColumnCount: 1).then =>
@@ -630,3 +645,16 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
 
       it 'should not call syncColumns', ->
         expect(@syncColumnsSpy).not.toHaveBeenCalled()
+
+
+  describe '#filter', ->
+    it 'should save the filter to the temp filter collection', ->
+      nameFilter = new Rally.data.QueryFilter
+        property: 'Name',
+        operator: '=',
+        value: 'Android Support'
+
+      @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
+        @cardboard.filter nameFilter
+        expect(@cardboard.filterCollection.tempFilters.undefined.toString()).toBe nameFilter.toString()
+

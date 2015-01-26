@@ -77,8 +77,10 @@
 
         getMinWidth: function () {
             return Rally.ui.cardboard.Column.prototype.getMinWidth();
-        }
+        },
 
+        filter: Ext.emptyFn,
+
+        onRowAdded: Ext.emptyFn
     });
-
 })();

@@ -14,6 +14,7 @@ describe 'Rally.apps.iterationtrackingboard.StatsBanner', ->
         renderTo: 'testDiv'
         context:
           getTimeboxScope: -> timeboxScope
+          getScopedStateId: -> 'stateId'
           getDataContext: -> Rally.environment.getContext().getDataContext()
         items: [{xtype: 'bannerwidget'}]
         , config)
@@ -25,6 +26,21 @@ describe 'Rally.apps.iterationtrackingboard.StatsBanner', ->
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'statsbanner'
 
+  describe 'constructor', ->
+    it 'should set _isRootLayout to true when optimizeLayouts is passed', ->
+      @createBanner(
+        optimizeLayouts: true
+      )
+      expect(@banner.isLayoutRoot()).toBe true
+
+    it 'should default to isRootLayout to false when it has a parent container', ->
+      @createBanner()
+      try
+        container = Ext.create('Ext.container.Container', items: [@banner])
+        expect(@banner.isLayoutRoot()).toBe false
+      finally
+        container.destroy()
+
   describe 'initComponent', ->
 
     describe 'item defaults', ->
@@ -35,10 +51,10 @@ describe 'Rally.apps.iterationtrackingboard.StatsBanner', ->
         expect(_.has(@banner.self.prototype.items[0], 'store')).toBe false
 
     describe 'Rally.Message handlers', ->
-      it 'should update in response to Rally.Message.object* messages', ->
+      it 'should update in response to Rally.Message.object* and Rally.Message.bulk* messages', ->
         @createBanner()
         loadSpy = @spy @banner.store, 'load'
-        for message in ['objectCreate', 'objectUpdate', 'bulkUpdate', 'objectDestroy']
+        for message in ['objectCreate', 'objectUpdate', 'bulkUpdate', 'bulkImport', 'objectDestroy']
           Rally.environment.getMessageBus().publish Rally.Message[message], @mom.getData 'userstory'
           expect(loadSpy.callCount).toEqual 1
           loadSpy.reset()
@@ -84,15 +100,27 @@ describe 'Rally.apps.iterationtrackingboard.StatsBanner', ->
         expect(loadSpy).not.toHaveBeenCalled()
 
   describe 'persisting state', ->
-    it 'should initialize to expanded when no state is stored', ->
+    it 'should initialize to collapsed when no state is stored', ->
       @createBanner()
       @banner.applyState({})
+      expect(@banner.expanded).toBeFalsy()
+
+    it 'should set item\'s expanded states to the banner\'s default expanded state', ->
+      @createBanner()
+      @banner.applyState({})
+      _.each @banner.items.getRange(), (item) ->
+          expect(item.expanded).toBeFalsy()
+
+    it 'should apply state when stored as expanded', ->
+      @createBanner()
+      @banner.applyState(expanded: true)
       expect(@banner.expanded).toBeTruthy()
 
-    it 'should apply state when stored as collapsed', ->
+    it 'should apply expanded state to items', ->
       @createBanner()
-      @banner.applyState(expanded: false)
-      expect(@banner.expanded).toBeFalsy()
+      @banner.applyState(expanded: true)
+      _.each @banner.items.getRange(), (item) ->
+          expect(item.expanded).toBeTruthy()
 
     it 'should apply state when stored as expanded', ->
       @createBanner()

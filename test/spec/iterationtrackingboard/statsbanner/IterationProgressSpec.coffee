@@ -11,12 +11,13 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.IterationProgress', ->
   helpers
     createIterationProgress: () ->
       Ext.create 'Rally.apps.iterationtrackingboard.statsbanner.IterationProgress',
-        context: {}
+        context: @createContext()
         store: Ext.create('Rally.data.wsapi.artifact.Store')
     createContext: (withRecord = true) ->
       @iterationRecord = @mom.getRecord('iteration', values: { _ref: '/iteration/1' }) if withRecord
       @context =
         getProject: -> Rally.environment.getContext().getProject()
+        getScopedStateId: -> 'stateId'
         getTimeboxScope: =>
           Ext.create 'Rally.app.TimeboxScope', record: @iterationRecord, type: 'iteration'
 
@@ -84,10 +85,10 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.IterationProgress', ->
 
   describe 'chart settings', ->
 
-    it 'should default to zero', ->
+    it 'should default to one', ->
       iterationProgress = @createIterationProgress()
-      expect(iterationProgress.currentChartDisplayed).toBe(0)
-      expect(iterationProgress.getState().currentChartDisplayed).toBe(0)
+      expect(iterationProgress.currentChartDisplayed).toBe(1)
+      expect(iterationProgress.getState().currentChartDisplayed).toBe(1)
 
     it 'should apply the state', ->
       iterationProgress = @createIterationProgress()
@@ -102,7 +103,7 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.IterationProgress', ->
       totalItems = iterationProgress.carouselItems.length
 
       iterationProgress.applyState(currentChartDisplayed: totalItems+1)
-      expect(iterationProgress.currentChartDisplayed).toBe(0)
+      expect(iterationProgress.currentChartDisplayed).toBe(1)
 
   describe 'carousel', ->
 

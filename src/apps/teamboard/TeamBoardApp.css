@@ -32,7 +32,22 @@
     font-weight: normal;
 }
 
+.team-board-app .rui-card .rui-card-content .status-content {
+    border-top: 1px dotted #CCC;
+}
+
+.team-board-app .rui-card .rui-card-content .associated-artifacts-icon {
+    color: #888;
+    font-size: 15px;
+    position: relative;
+    top: 4px;
+}
+
 .team-board-app .rui-card .rui-card-right-side {
     padding-top: 5px;
     width: 70px;
+}
+
+.team-board-app .rui-card.non-team-member-card {
+    background-color: #e0e0e0;
 }

@@ -1,21 +1,18 @@
-(function() {
+(function () {
     var Ext = window.Ext4 || window.Ext;
 
-    /**
-     *
-     */
     Ext.define('Rally.apps.board.Settings', {
         singleton: true,
         requires: [
             'Rally.ui.combobox.FieldComboBox',
             'Rally.ui.combobox.ComboBox',
-            'Rally.ui.picker.FieldPicker',
             'Rally.ui.TextField',
-            'Rally.ui.NumberField'
+            'Rally.ui.NumberField',
+            'Rally.apps.common.RowSettingsField',
+            'Rally.data.wsapi.Filter'
         ],
 
-        getFields: function(context) {
-            var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner', 'BlockedReason'];
+        getFields: function (context) {
             return [
                 {
                     name: 'type',
@@ -29,7 +26,7 @@
                                 property: 'Name'
                             }
                         ],
-                        fetch: ['DisplayName', 'ElementName', 'TypePath'],
+                        fetch: ['DisplayName', 'ElementName', 'TypePath', 'Parent'],
                         filters: [
                             {
                                 property: 'Creatable',
@@ -43,51 +40,48 @@
                     displayField: 'DisplayName',
                     valueField: 'TypePath',
                     listeners: {
-                        select: function(combo, records) {
+                        select: function (combo, records) {
                             combo.fireEvent('typeselected', records[0].get('TypePath'), combo.context);
                         },
-                        ready: function(combo) {
+                        ready: function (combo) {
                             combo.store.sort('DisplayName');
-
-                            Rally.data.ModelFactory.getModels({
-                                context: combo.context.getDataContext(),
-                                types: Ext.Array.map(combo.store.getRange(), function(record) {
-                                    return record.get('TypePath');
-                                }),
-                                success: function(models) {
-                                    combo.store.filterBy(function(record) {
-                                        return models[record.get('TypePath')].hasField('FormattedID');
-                                    });
-                                    combo.fireEvent('typeselected', combo.getRecord().get('TypePath'), combo.context);
-                                }
+                            combo.store.filterBy(function(record) {
+                                var parent = record.get('Parent'),
+                                    parentName = parent.ElementName;
+                                return _.contains(['Artifact', 'SchedulableArtifact', 'Requirement', 'PortfolioItem'], parentName);
                             });
+                            combo.fireEvent('typeselected', combo.getRecord().get('TypePath'), combo.context);
                         }
                     },
                     bubbleEvents: ['typeselected'],
                     readyEvent: 'ready',
                     handlesEvents: {
-                        projectscopechanged: function(context) {
+                        projectscopechanged: function (context) {
                             this.refreshWithNewContext(context);
                         }
                     }
                 },
                 {
                     name: 'groupByField',
-                    fieldLabel: 'Group By',
+                    fieldLabel: 'Columns',
                     xtype: 'rallyfieldcombobox',
                     readyEvent: 'ready',
                     handlesEvents: {
-                        typeselected: function(type, context) {
+                        typeselected: function (type, context) {
                             this.refreshWithNewModelType(type, context);
                         }
                     },
                     listeners: {
-                        ready: function(combo) {
-                            combo.store.filterBy(function(record) {
-                                var attr = record.get('fieldDefinition').attributeDefinition;
-                                return attr && !attr.ReadOnly && attr.Constrained && attr.AttributeType !== 'COLLECTION';
+                        ready: function (combo) {
+                            combo.store.filterBy(function (record) {
+                                var field = record.get('fieldDefinition'),
+                                    attr = field.attributeDefinition;
+                                return attr && !attr.ReadOnly && !attr.Hidden && attr.Constrained && attr.AttributeType !== 'COLLECTION' &&
+                                    (!attr.AllowedValueType || attr.AllowedValueType._refObjectName !== 'User') &&
+                                    !_.contains(['Iteration', 'Release', 'Project'], attr.Name) &&
+                                    !field.isMappedFromArtifact;
                             });
-                            var fields = Ext.Array.map(combo.store.getRange(), function(record) {
+                            var fields = Ext.Array.map(combo.store.getRange(), function (record) {
                                 return record.get(combo.getValueField());
                             });
                             if (!Ext.Array.contains(fields, combo.getValue())) {
@@ -97,24 +91,45 @@
                     }
                 },
                 {
-                    name: 'fields',
-                    fieldLabel: 'Card Fields',
-                    xtype: 'rallyfieldpicker',
-                    alwaysSelectedValues: alwaysSelectedValues,
+                    name: 'groupHorizontallyByField',
+                    xtype: 'rowsettingsfield',
+                    fieldLabel: 'Swimlanes',
+                    mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
+                    readyEvent: 'ready',
+                    isAllowedFieldFn: function(field) {
+                        var attr = field.attributeDefinition;
+                        return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string') ||
+                            attr.Constrained || _.contains(['quantity', 'boolean'], attr.AttributeType.toLowerCase()) ||
+                            (!attr.Constrained && attr.AttributeType.toLowerCase() === 'object')) &&
+                            !_.contains(['web_link', 'text', 'date'], attr.AttributeType.toLowerCase()) &&
+                            !_.contains(['PortfolioItemType'], attr.ElementName);
+                    },
                     handlesEvents: {
                         typeselected: function(type, context) {
-                            this.refreshWithNewModelTypes([type], context);
+                            this.refreshWithNewModelType(type, context);
                         }
                     }
                 },
                 {
                     name: 'order',
-                    xtype: 'rallytextfield'
-                },
-                {
-                    name: 'pageSize',
-                    xtype: 'rallynumberfield',
-                    fieldLabel: 'Page Size'
+                    fieldLabel: 'Order',
+                    xtype: 'rallyfieldcombobox',
+                    readyEvent: 'ready',
+                    handlesEvents: {
+                        typeselected: function(type, context) {
+                            this.refreshWithNewModelType(type, context);
+                        }
+                    },
+                    listeners: {
+                        ready: function (combo) {
+                            combo.store.filterBy(function (record) {
+                                var field = record.get('fieldDefinition'),
+                                    attr = field.attributeDefinition;
+                                return attr && attr.Sortable && !field.isMappedFromArtifact;
+                            });
+                        }
+                    },
+                    initialValue: context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ? 'DragAndDropRank' : 'Rank'
                 },
                 {
                     type: 'query'

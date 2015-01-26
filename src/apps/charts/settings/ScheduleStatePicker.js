@@ -26,7 +26,7 @@
             Rally.data.ModelFactory.getModel({
                 type: "UserStory",
                 context: this._getContext(),
-                success: this._getScheduleStateValues,
+                success: this._addPicker,
                 scope: this
             });
         },
@@ -38,34 +38,18 @@
             };
         },
 
-        _getScheduleStateValues: function (model) {
-            if(model) {
-                model.getField("ScheduleState").getAllowedValueStore().load({
-                    callback: function(records, operation, success) {
-                        var scheduleStates = _.collect(records, function(obj) {
-                            return obj.raw;
-                        });
-
-                        var store = this._wrapRecords(scheduleStates);
-                        this._addPicker(store);
-                    },
-                    scope: this
-                });
-            }
-        },
-
-        _wrapRecords: function(records) {
-            return Ext.create("Ext.data.JsonStore", {
-                fields: ["_ref", "StringValue"],
-                data: records
-            });
-        },
-
-        _addPicker: function(store) {
+        _addPicker: function(userStoryModel) {
             this.add({
                 xtype: "combobox",
                 name:  this.settingName,
-                store: store,
+                store: Ext.create('Ext.data.JsonStore', {
+                    fields: ['StringValue'],
+                    data: _.map(userStoryModel.getField('ScheduleState').getAllowedStringValues(), function(scheduleState) {
+                        return {
+                            StringValue: scheduleState
+                        };
+                    })
+                }),
                 valueField: "StringValue",
                 displayField: "StringValue",
                 queryMode: "local",

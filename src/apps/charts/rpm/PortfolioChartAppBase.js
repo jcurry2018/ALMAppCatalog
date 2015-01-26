@@ -212,53 +212,16 @@
             }
         },
 
-        _onUserStoryModelRetrieved: function (model, portfolioItemRecord) {
-            this._updateChartComponentConfig(model, portfolioItemRecord).then({
-                success: function (chartComponentConfig) {
-                    this.add(chartComponentConfig);
-                    Rally.environment.getMessageBus().publish(Rally.Message.piChartAppReady);
-                },
-                scope: this
-            });
-        },
+        _onUserStoryModelRetrieved: function (model, portfolioItem) {
+            var scheduleStateValues = model.getField('ScheduleState').getAllowedStringValues();
+            this.chartComponentConfig.calculatorConfig.scheduleStates = scheduleStateValues;
 
-        _updateChartComponentConfig: function (model, portfolioItem) {
-            var deferred = Ext.create('Deft.Deferred');
+            this._setDynamicConfigValues(portfolioItem);
+            this._calculateDateRange(portfolioItem);
+            this._updateQueryConfig(portfolioItem);
 
-            this._getScheduleStateValues(model).then({
-                success: function (scheduleStateValues) {
-                    this.chartComponentConfig.calculatorConfig.scheduleStates = scheduleStateValues;
-
-                    this._setDynamicConfigValues(portfolioItem);
-                    this._calculateDateRange(portfolioItem);
-                    this._updateQueryConfig(portfolioItem);
-
-                    deferred.resolve(this.chartComponentConfig);
-                },
-                scope: this
-            });
-
-            return deferred.promise;
-        },
-
-        _getScheduleStateValues: function (model) {
-            var deferred = Ext.create('Deft.Deferred');
-
-            if (model) {
-                model.getField('ScheduleState').getAllowedValueStore().load({
-                    callback: function (records, operation, success) {
-                        var scheduleStateValues = Ext.Array.map(records, function (record) {
-                            return record.get('StringValue');
-                        });
-                        deferred.resolve(scheduleStateValues);
-                    },
-                    scope: this
-                });
-            } else {
-                deferred.resolve(this.scheduleStates);
-            }
-
-            return deferred.promise;
+            this.add(this.chartComponentConfig);
+            Rally.environment.getMessageBus().publish(Rally.Message.piChartAppReady);
         },
 
         _setDynamicConfigValues: function (portfolioItem) {

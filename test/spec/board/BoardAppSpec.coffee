@@ -7,12 +7,9 @@ Ext.require [
 describe 'Rally.apps.board.BoardApp', ->
 
   beforeEach ->
-    @ajax.whenQuerying('userstory').respondWithCount(1, {
-      values: [{
-        ScheduleState: 'In-Progress'
-      }]
+    @ajax.whenQuerying('userstory').respondWithCount 1,
+      values: [ ScheduleState: 'In-Progress' ]
       createImmediateSubObjects: true
-    })
 
     @ajax.whenQueryingAllowedValues('hierarchicalrequirement', 'ScheduleState').respondWith ['Defined', 'In-Progress', 'Completed', 'Accepted']
     @ajax.whenQueryingAllowedValues('defect', 'State').respondWith ['Submitted', 'Open', 'Fixed', 'Closed']
@@ -22,29 +19,17 @@ describe 'Rally.apps.board.BoardApp', ->
 
   it 'has the correct default settings', ->
     @createApp().then =>
-      expect(@app.getSetting('groupByField')).toBe 'ScheduleState'
       expect(@app.getSetting('type')).toBe 'HierarchicalRequirement'
-      expect(@app.getSetting('pageSize')).toBe 25
-      expect(@app.getSetting('order')).toBe 'Rank'
-      expect(@app.getSetting('query')).toBe ''
-      expect(@app.getSetting('fields')).toBe 'FormattedID,Name,Owner'
-
-  it 'should show correct fields on cards', ->
-    @createApp(fields: 'Name,Defects,Project').then =>
-
-      expect(@_getBoard().cardConfig.fields).toContain 'Name'
-      expect(@_getBoard().cardConfig.fields).toContain 'Defects'
-      expect(@_getBoard().cardConfig.fields).toContain 'Project'
+      expect(@app.getSetting('groupByField')).toBe 'ScheduleState'
+      expect(@app.getSetting('showRows')).toBe false
 
   it 'shows the correct type on the board', ->
-    @createApp(type: 'Defect', groupByField: 'State').then =>
-
+    @createApp(type: 'defect', groupByField: 'State').then =>
       expect(@_getBoard().getTypes().length).toBe 1
-      expect(@_getBoard().getTypes()[0]).toBe 'Defect'
+      expect(@_getBoard().getTypes()[0]).toBe 'defect'
 
   it 'groups by the correct attribute on the board', ->
-    @createApp(type: 'Defect', groupByField: 'State').then =>
-
+    @createApp(type: 'defect', groupByField: 'State').then =>
       expect(@_getBoard().getAttribute()).toBe 'State'
 
   it 'passes the current context to the board', ->
@@ -52,49 +37,40 @@ describe 'Rally.apps.board.BoardApp', ->
       project:
         _ref: '/project/2'
     ).then =>
-
       expect(@_getBoard().getContext().getProject()._ref).toBe '/project/2'
-
-  it 'passes the page size to the board', ->
-    @createApp(pageSize: 1).then =>
-      expect(@_getBoard().getStoreConfig().pageSize).toBe 1
-      _.each @_getBoard().getColumns(), (column) ->
-        expect(column.store.pageSize).toBe 1
-
-  it 'defaults to a pageSize of 25', ->
-    @createApp().then =>
-      expect(@_getBoard().getStoreConfig().pageSize).toBe 25
-      _.each @_getBoard().getColumns(), (column) ->
-        expect(column.store.pageSize).toBe 25
 
   it 'passes the filters to the board', ->
     query = '(Name contains foo)'
     @createApp(query: query).then =>
-
-      expect(@_getBoard().getStoreConfig().filters.length).toBe 1
-      expect(@_getBoard().getStoreConfig().filters[0].toString())
+      expect(@_getGridBoard().storeConfig.filters.length).toBe 1
+      expect(@_getGridBoard().storeConfig.filters[0].toString())
         .toBe Rally.data.QueryFilter.fromQueryString(query).toString()
 
   it 'scopes the board to the current timebox scope', ->
     @createApp({}, context:
       timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
     ).then =>
-
-      expect(@_getBoard().getStoreConfig().filters.length).toBe 1
-      expect(@_getBoard().getStoreConfig().filters[0].toString())
+      expect(@_getGridBoard().storeConfig.filters.length).toBe 1
+      expect(@_getGridBoard().storeConfig.filters[0].toString())
         .toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
+
+  it 'does not filter by timebox if model does not have that timebox', ->
+    @ajax.whenQuerying('testcase').respondWithCount 5
+    @ajax.whenQueryingAllowedValues('testcase', 'Priority').respondWith ['None', 'Useful', 'Important', 'Critical']
+    @createApp({type: 'testcase', groupByField: 'Priority'}, context:
+      timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
+    ).then =>
+      expect(@_getGridBoard().storeConfig.filters.length).toBe 0
 
   it 'scopes the board to the current timebox scope and specified query filter', ->
     query = '(Name contains foo)'
     @createApp({query: query}, context:
         timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
     ).then =>
-
-      expect(@_getBoard().getStoreConfig().filters.length).toBe 2
-      expect(@_getBoard().getStoreConfig().filters[0].toString())
+      expect(@_getGridBoard().storeConfig.filters.length).toBe 2
+      expect(@_getGridBoard().storeConfig.filters[0].toString())
         .toBe Rally.data.QueryFilter.fromQueryString(query).toString()
-
-      expect(@_getBoard().getStoreConfig().filters[1].toString())
+      expect(@_getGridBoard().storeConfig.filters[1].toString())
         .toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
   it 'refreshes the board when the timebox scope changes', ->
@@ -108,13 +84,12 @@ describe 'Rally.apps.board.BoardApp', ->
     @createApp({}, context:
       timebox: Ext.create 'Rally.app.TimeboxScope', record: @_createIterationRecord()
     ).then =>
-
-      refreshSpy = @spy(@_getBoard(), 'refresh')
+      boardDestroySpy = @spy @_getGridBoard(), 'destroy'
       Rally.environment.getMessageBus().publish(Rally.app.Message.timeboxScopeChange,
         Ext.create('Rally.app.TimeboxScope', record: newTimebox))
 
-      @once(condition: -> refreshSpy.calledOnce).then =>
-        expect(refreshSpy.getCall(0).args[0].storeConfig).toOnlyHaveFilterStrings [@app.getContext().getTimeboxScope().getQueryFilter().toString()]
+      @waitForCallback(boardDestroySpy).then =>
+        expect(@_getGridBoard().storeConfig).toOnlyHaveFilterString @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
   it 'returns settings fields with correct context', ->
     @createApp().then =>
@@ -126,14 +101,60 @@ describe 'Rally.apps.board.BoardApp', ->
       expect(getFieldsSpy.getCall(0).returnValue).toBe settingsFields
       expect(getFieldsSpy.getCall(0).args[0]).toBe @app.getContext()
 
+  it 'should include rows configuration with rowsField when showRows setting is true', ->
+    @createApp(showRows: true, rowsField: 'Owner').then =>
+      expect(@_getBoard().rowConfig.field).toBe 'Owner'
+      expect(@_getBoard().rowConfig.sortDirection).toBe 'ASC'
+
+  it 'should not include rows configuration when showRows setting is false', ->
+    @createApp(showRows: false, rowsField: 'Owner').then =>
+      expect(@_getBoard().rowConfig).toBeNull()
+
+  it 'should include sorters from order setting', ->
+    @createApp(order: 'Name').then =>
+      sorters = @_getBoard().storeConfig.sorters
+      expect(sorters.length).toBe 1
+      expect(sorters[0].property).toBe @app.getSetting('order')
+
+  it 'should set the initial gridboard height to the app height', ->
+    @createApp().then =>
+      expect(@app.down('rallygridboard').getHeight()).toBe @app.getHeight()
+
+  describe 'plugins', ->
+
+    describe 'filtering', ->
+      it 'should use rallygridboard custom filter control', ->
+        @createApp().then =>
+          plugin = @_getPlugin('rallygridboardcustomfiltercontrol')
+          expect(plugin).toBeDefined()
+          expect(plugin.filterChildren).toBe false
+          expect(plugin.filterControlConfig.stateful).toBe true
+          expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('board-custom-filter-button')
+          expect(plugin.filterControlConfig.modelNames).toEqual [@app.getSetting('type')]
+
+          expect(plugin.showOwnerFilter).toBe true
+          expect(plugin.ownerFilterControlConfig.stateful).toBe true
+          expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('board-owner-filter')
+
+    describe 'field picker', ->
+      it 'should use rallygridboard field picker', ->
+        @createApp(fields: 'Foo,Bar').then =>
+          plugin = @_getPlugin('rallygridboardfieldpicker')
+          expect(plugin).toBeDefined()
+          expect(plugin.headerPosition).toBe 'left'
+          expect(plugin.modelNames).toEqual [@app.getSetting('type')]
+          expect(plugin.boardFieldDefaults).toEqual @app.getSetting('fields').split(',')
+
   helpers
     createApp: (settings = {}, options = {}) ->
       @app = Ext.create 'Rally.apps.board.BoardApp',
         context: @_createContext options.context
         settings: settings
         renderTo: options.renderTo || 'testDiv'
+        height: 400
 
-      @waitForComponentReady @_getBoard()
+      @once(condition: => @_getBoard()).then =>
+        @waitForComponentReady @_getBoard()
 
     _createContext: (context={}) ->
       Ext.create('Rally.app.Context',
@@ -156,5 +177,12 @@ describe 'Rally.apps.board.BoardApp', ->
         EndDate: '2013-01-15'
       , data))
 
+    _getGridBoard: ->
+      @app.down('rallygridboard')
+
     _getBoard: ->
       @app.down('rallycardboard')
+
+    _getPlugin: (xtype) ->
+      _.find @_getGridBoard().plugins, (plugin) ->
+        plugin.ptype == xtype

@@ -38,34 +38,23 @@
         },
 
         onDataChanged: function() {
-            Deft.Promise.all([
-                    this.getAcceptanceData(),
-                    this.getTimeboxData()
-                ]).then({
-                    success: this._onDataAssembled,
-                    scope: this
-                });
+            this.getTimeboxData().then({
+                success: this._onDataAssembled,
+                scope: this
+            });
         },
 
         getChartEl: function() {
             return this.getEl().down('.metric-chart');
         },
 
-        _getRenderData: function() {
-            var data = _.merge(
+
+        _onDataAssembled: function (timeboxData) {
+            var renderData = _.merge(
                 {type: Ext.String.capitalize(this.getContext().getTimeboxScope().getType())},
-                this.acceptanceData,
-                this.timeboxData
+                this.getAcceptanceData(),
+                timeboxData
             );
-
-            return data;
-        },
-
-        _onDataAssembled: function (results) {
-            this.acceptanceData = results[0];
-            this.timeboxData = results[1];
-
-            var renderData = this._getRenderData();
             this.update(renderData);
 
             this.refreshChart(this._getChartConfig(renderData));

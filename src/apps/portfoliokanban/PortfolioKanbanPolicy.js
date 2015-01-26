@@ -12,7 +12,7 @@
 
         config: {
             /**
-             * @cfg {Rally.domain.WsapiModel} (required)
+             * @cfg {Rally.data.wsapi.Model} (required)
              * The Kanban State record that holds the policy information.
              */
             stateRecord: undefined

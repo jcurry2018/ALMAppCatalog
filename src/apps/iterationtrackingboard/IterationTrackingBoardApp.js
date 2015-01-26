@@ -1,6 +1,8 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
+    var defaultGridColumns = ['Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'Tasks', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'Defects', 'Discussion'];
+
     /**
      * Iteration Tracking Board App
      * The Iteration Tracking Board can be used to visualize and manage your User Stories and Defects within an Iteration.
@@ -9,60 +11,83 @@
         extend: 'Rally.app.TimeboxScopedApp',
         requires: [
             'Rally.data.Ranker',
-            'Rally.ui.gridboard.GridBoard',
-            'Rally.ui.grid.TreeGrid',
+            'Rally.data.wsapi.ModelFactory',
             'Rally.data.wsapi.TreeStoreBuilder',
+            'Rally.ui.dialog.CsvImportDialog',
+            'Rally.ui.gridboard.GridBoard',
+            'Rally.apps.iterationtrackingboard.IterationTrackingTreeGrid',
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.cardboard.plugin.Print',
+            'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
-            'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
-            'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
+            'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
-            'Rally.ui.gridboard.plugin.GridBoardFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
             'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
-            'Rally.ui.gridboard.plugin.GridBoardExpandAll',
+            'Rally.ui.grid.plugin.TreeGridChildPager',
             'Rally.ui.gridboard.plugin.GridBoardCustomView',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
             'Rally.ui.filter.view.OwnerPillFilter',
             'Rally.ui.filter.view.TagPillFilter',
             'Rally.app.Message',
-            'Rally.apps.iterationtrackingboard.Column',
+            'Rally.apps.iterationtrackingboard.StatsBanner',
+            'Rally.apps.iterationtrackingboard.StatsBannerField',
             'Rally.clientmetrics.ClientMetricsRecordable',
-            'Rally.apps.iterationtrackingboard.StatsBanner'
+            'Rally.apps.common.RowSettingsField'
         ],
 
         mixins: [
-            'Rally.app.CardFieldSelectable',
             'Rally.clientmetrics.ClientMetricsRecordable'
         ],
         componentCls: 'iterationtrackingboard',
         alias: 'widget.rallyiterationtrackingboard',
 
         settingsScope: 'project',
+        userScopedSettings: true,
         scopeType: 'iteration',
         autoScroll: false,
 
         config: {
             defaultSettings: {
                 showCardAge: true,
+                showStatsBanner: true,
                 cardAgeThreshold: 3
-            }
+            },
+            includeStatsBanner: true
         },
 
         modelNames: ['User Story', 'Defect', 'Defect Suite', 'Test Set'],
+
+        constructor: function(config) {
+            _.defaults(config, { layout: 'anchor'});
+
+            this.callParent(arguments);
+        },
 
         onScopeChange: function() {
             if(!this.rendered) {
                 this.on('afterrender', this.onScopeChange, this, {single: true});
                 return;
             }
-            this._addStatsBanner();
-            this._getGridStore().then({
+
+            var me = this;
+
+            this.suspendLayouts();
+
+            var grid = this.down('rallytreegrid');
+            if (grid) {
+                // reset page count to 1.
+                // must be called here to reset persisted page count value.
+                grid.fireEvent('storecurrentpagereset');
+            }
+
+            if (this._shouldShowStatsBanner()){
+                this._addStatsBanner();
+            }
+
+            this._buildGridStore().then({
                 success: function(gridStore) {
                     var model = gridStore.model;
                     if(_.isFunction(model.getArtifactComponentModels)) {
@@ -73,6 +98,8 @@
                     this._addGridBoard(gridStore);
                 },
                 scope: this
+            }).always(function() {
+                me.resumeLayouts(true);
             });
         },
 
@@ -87,21 +114,56 @@
                 }
             });
 
+            fields.push({
+                name: 'groupHorizontallyByField',
+                xtype: 'rowsettingsfield',
+                fieldLabel: 'Swimlanes',
+                margin: '10 0 0 0',
+                mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
+                readyEvent: 'ready',
+                isAllowedFieldFn: function() { return false; },
+                explicitFields: [
+                    {name: 'Blocked', value: 'Blocked'},
+                    {name: 'Owner', value: 'Owner'},
+                    {name: 'Sizing', value: 'PlanEstimate'},
+                    {name: 'Expedite', value: 'Expedite'}
+                ]
+            });
+
             return fields;
         },
 
-        _getGridStore: function() {
+        getUserSettingsFields: function () {
+            var fields = this.callParent(arguments);
+
+            fields.push({
+                xtype: 'rallystatsbannersettingsfield',
+                fieldLabel: '',
+                mapsToMultiplePreferenceKeys: ['showStatsBanner']
+            });
+
+            return fields;
+        },
+
+        _buildGridStore: function() {
             var context = this.getContext(),
                 config = {
+                    context: context.getDataContext(),
                     models: this.modelNames,
-                    autoLoad: !context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
+                    autoLoad: false,
                     remoteSort: true,
                     root: {expanded: true},
-                    filters: [context.getTimeboxScope().getQueryFilter()],
-                    enableHierarchy: true
+                    enableHierarchy: true,
+                    pageSize: this.getGridPageSizes()[1],
+                    childPageSizeEnabled: true,
+                    fetch: ['PlanEstimate', 'Release', 'Iteration']
                 };
 
             return Ext.create('Rally.data.wsapi.TreeStoreBuilder').build(config);
+        },
+
+        _shouldShowStatsBanner: function() {
+            return this.includeStatsBanner && this.getSetting('showStatsBanner');
         },
 
         _addStatsBanner: function() {
@@ -111,11 +173,12 @@
                 itemId: 'statsBanner',
                 context: this.getContext(),
                 margin: '0 0 5px 0',
+                shouldOptimizeLayouts: this.config.optimizeFrontEndPerformanceIterationStatus,
                 listeners: {
                     resize: this._resizeGridBoardToFillSpace,
                     scope: this
                 }
-            });
+           });
         },
 
         _addGridBoard: function (gridStore) {
@@ -130,37 +193,12 @@
                 context: context,
                 plugins: this._getGridBoardPlugins(),
                 modelNames: this.modelNames,
-                cardBoardConfig: {
-                    serverSideFiltering: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
-                    plugins: [
-                        {ptype: 'rallycardboardprinting', pluginId: 'print'},
-                        {ptype: 'rallyfixedheadercardboard'}
-                    ],
-                    storeConfig: {
-                        useShallowFetch: true
-                    },
-                    columnConfig: {
-                        xtype: 'iterationtrackingboardcolumn',
-                        additionalFetchFields: ['PortfolioItem'],
-                        enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS'),
-                        plugins: [{
-                            ptype: 'rallycolumnpolicy',
-                            app: this
-                        }]
-                    },
-                    cardConfig: {
-                        showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
-                    },
-                    listeners: {
-                        filter: this._onBoardFilter,
-                        filtercomplete: this._onBoardFilterComplete
-                    }
-                },
+                cardBoardConfig: this._getBoardConfig(),
                 gridConfig: this._getGridConfig(gridStore),
-                addNewPluginConfig: {
-                    style: {
-                        'float': 'left'
-                    }
+                layout: 'anchor',
+                storeConfig: {
+                    useShallowFetch: false,
+                    filters: this._getGridboardFilters(gridStore.model)
                 },
                 listeners: {
                     load: this._onLoad,
@@ -169,105 +207,190 @@
                     recordcreate: this._publishContentUpdatedNoDashboardLayout,
                     scope: this
                 },
-                height: Math.max(this.getAvailableGridBoardHeight(), 150)
+                height: Math.max(this._getAvailableGridBoardHeight(), 150)
             });
         },
 
-        /**
-         * @private
-         */
-        getAvailableGridBoardHeight: function() {
+        _getGridboardFilters: function(model) {
+            var timeboxScope = this.getContext().getTimeboxScope(),
+                timeboxFilter = timeboxScope.getQueryFilter(),
+                filters = [timeboxFilter];
+
+            if (!timeboxScope.getRecord() && this.getContext().getSubscription().StoryHierarchyEnabled) {
+                filters.push(this._createLeafStoriesOnlyFilter(model));
+                filters.push(this._createUnassociatedDefectsOnlyFilter(model));
+            }
+            return filters;
+        },
+
+        _createLeafStoriesOnlyFilter: function(model) {
+            var typeDefOid = model.getArtifactComponentModel('HierarchicalRequirement').typeDefOid;
+
+            var userStoryFilter = Ext.create('Rally.data.wsapi.Filter', {
+                property: 'TypeDefOid',
+                value: typeDefOid
+            });
+
+            var noChildrenFilter = Ext.create('Rally.data.wsapi.Filter', {
+                property: 'DirectChildrenCount',
+                value: 0
+            });
+
+            var notUserStoryFilter = Ext.create('Rally.data.wsapi.Filter', {
+                property: 'TypeDefOid',
+                value: typeDefOid,
+                operator: '!='
+            });
+
+            return userStoryFilter.and(noChildrenFilter).or(notUserStoryFilter);
+        },
+
+        _createUnassociatedDefectsOnlyFilter: function(model) {
+            var typeDefOid = model.getArtifactComponentModel('Defect').typeDefOid,
+                isADefect = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'TypeDefOid',
+                    value: typeDefOid
+                }),
+                parentRequirementIsScheduled = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'Requirement.Iteration',
+                    operator: '!=',
+                    value: null
+                }),
+                hasNoParentRequirement = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'Requirement',
+                    operator: '=',
+                    value: null
+                }),
+                isNotADefect = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'TypeDefOid',
+                    value: typeDefOid,
+                    operator: '!='
+                });
+
+            return isADefect.and(parentRequirementIsScheduled.or(hasNoParentRequirement)).or(isNotADefect);
+        },
+
+        _getBoardConfig: function() {
+            var config = {
+                plugins: [
+                    {ptype: 'rallycardboardprinting', pluginId: 'print'},
+                    {ptype: 'rallyfixedheadercardboard'}
+                ],
+                columnConfig: {
+                    additionalFetchFields: ['PortfolioItem'],
+                    plugins: [{
+                        ptype: 'rallycolumnpolicy',
+                        app: this
+                    }],
+                    requiresModelSpecificFilters: false
+                },
+                cardConfig: {
+                    showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
+                },
+                listeners: {
+                    filter: this._onBoardFilter,
+                    filtercomplete: this._onBoardFilterComplete
+                }
+            };
+
+            if (this.getSetting('showRows') && this.getSetting('rowsField')) {
+                Ext.merge(config, {
+                    rowConfig: {
+                        field: this.getSetting('rowsField'),
+                        sortDirection: 'ASC'
+                    }
+                });
+            }
+
+            return config;
+        },
+
+        _getAvailableGridBoardHeight: function() {
             var height = this.getHeight();
-            if(this.down('#statsBanner').rendered) {
+            if (this._shouldShowStatsBanner() && this.down('#statsBanner').rendered) {
                 height -= this.down('#statsBanner').getHeight();
+            }
+            if (this.getHeader()) {
+                height -= this.getHeader().getHeight();
             }
             return height;
         },
 
         _getGridBoardPlugins: function() {
-            var plugins = ['rallygridboardaddnew'],
-                context = this.getContext();
+            var plugins = [{
+                ptype: 'rallygridboardaddnew'
+            }];
+            var context = this.getContext();
 
-            if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
-                plugins.push('rallygridboardexpandall');
-            }
-
-            if (context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
-                var filterControlConfig = {
-                    cls: 'small gridboard-filter-control',
-                    context: context,
-                    margin: '3 10 3 7',
+            plugins.push({
+                ptype: 'rallygridboardcustomfiltercontrol',
+                filterChildren: true,
+                filterControlConfig: {
+                    blackListFields: ['Iteration', 'PortfolioItem'],
+                    whiteListFields: ['Milestones'],
+                    modelNames: this.modelNames,
                     stateful: true,
-                    stateId: context.getScopedStateId('iteration-tracking-filter-button')
-                };
-
-                if (context.isFeatureEnabled('USE_CUSTOM_FILTER_POPOVER_ON_ITERATION_TRACKING_APP')) {
-                    _.merge(filterControlConfig, {
-                        customFilterPopoverEnabled: true,
-                        modelNames: this.modelNames
-                    });
-                } else {
-                    _.merge(filterControlConfig, {
-                        items: [
-                            this._createOwnerFilterItem(context),
-                            this._createTagFilterItem(context),
-                            this._createModelFilterItem(context)
-                        ]
-                    });
+                    stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
+                },
+                showOwnerFilter: true,
+                ownerFilterControlConfig: {
+                    stateful: true,
+                    stateId: context.getScopedStateId('iteration-tracking-owner-filter')
                 }
-
-                plugins.push({
-                    ptype: 'rallygridboardfiltercontrol',
-                    filterControlConfig: filterControlConfig
-                });
-            } else {
-                plugins.push('rallygridboardownerfilter');
-            }
+            });
 
             plugins.push('rallygridboardtoggleable');
-            var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner'];
-            if (context.getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
-                alwaysSelectedValues.push('DragAndDropRank');
-            }
 
-            if (!context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE')) {
-                plugins.push({
-                    ptype: 'rallygridboardfilterinfo',
-                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')),
-                    stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
-                });
-            }
+            var actionsMenuItems = [
+            {
+                text: 'Import User Stories...',
+                handler: this._importHandler({
+                    type: 'HierarchicalRequirement',
+                    title: 'Import User Stories'
+                })
+            }, {
+                text: 'Import Tasks...',
+                handler: this._importHandler({
+                    type: 'Task',
+                    title: 'Import Tasks'
+                })
+            }, {
+                text: 'Export...',
+                handler: this._exportHandler,
+                scope: this
+            }];
+
+            actionsMenuItems.push({
+                text: 'Print...',
+                handler: this._printHandler,
+                scope: this
+            });
+
+            plugins.push({
+                ptype: 'rallygridboardactionsmenu',
+                itemId: 'printExportMenuButton',
+                menuItems: actionsMenuItems,
+                buttonConfig: {
+                    iconCls: 'icon-export',
+                    toolTipConfig: {
+                        html: 'Import/Export/Print',
+                        anchor: 'top',
+                        hideDelay: 0
+                    }
+                }
+            });
 
             plugins.push({
                 ptype: 'rallygridboardfieldpicker',
                 headerPosition: 'left',
                 gridFieldBlackList: [
-                    'ObjectID',
-                    'Description',
-                    'DisplayColor',
-                    'Notes',
-                    'Subscription',
-                    'Workspace',
-                    'Changesets',
-                    'RevisionHistory',
-                    'Children'
+                    'Estimate',
+                    'ToDo'
                 ],
                 boardFieldBlackList: [
-                    'ObjectID',
-                    'Description',
-                    'DisplayColor',
-                    'Notes',
-                    'Rank',
-                    'DragAndDropRank',
-                    'Subscription',
-                    'Workspace',
-                    'Changesets',
-                    'RevisionHistory',
-                    'PortfolioItemType',
-                    'StateChangedDate',
-                    'Children'
+                    'Successors',
+                    'Predecessors'
                 ],
-                alwaysSelectedValues: alwaysSelectedValues,
                 modelNames: this.modelNames,
                 boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
                     ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']
@@ -280,14 +403,64 @@
             return plugins;
         },
 
-        setHeight: Ext.Function.createBuffered(function() {
-            this.superclass.setHeight.apply(this, arguments);
+        setSize: function() {
+            this.callParent(arguments);
             this._resizeGridBoardToFillSpace();
-        }, 100),
+        },
+
+        _importHandler: function(options) {
+            return _.bind(function() {
+                Ext.widget({
+                    xtype: 'rallycsvimportdialog',
+                    type: options.type,
+                    title: options.title,
+                    params: {
+                        iterationOid: this._getIterationOid()
+                    }
+                });
+            }, this);
+        },
+
+        _exportHandler: function() {
+            var context = this.getContext();
+            var params = {
+                cpoid: context.getProject().ObjectID,
+                projectScopeUp: context.getProjectScopeUp(),
+                projectScopeDown: context.getProjectScopeDown(),
+                iterationKey: this._getIterationOid()
+            };
+
+            window.location = Ext.String.format('{0}/sc/exportCsv.sp?{1}',
+                Rally.environment.getServer().getContextUrl(),
+                Ext.Object.toQueryString(params)
+            );
+        },
+
+        _printHandler: function() {
+            var timeboxScope = this.getContext().getTimeboxScope();
+
+            Ext.create('Rally.ui.grid.TreeGridPrintDialog', {
+                grid: this.gridboard.getGridOrBoard(),
+                treeGridPrinterConfig: {
+                    largeHeaderText: 'Iteration Summary',
+                    smallHeaderText: timeboxScope.getRecord() ? timeboxScope.getRecord().get('Name') : 'Unscheduled'
+                }
+            });
+        },
+
+        _getIterationOid: function() {
+            var iterationId = '-1';
+            var timebox = this.getContext().getTimeboxScope();
+
+            if (timebox && timebox.getRecord()) {
+                iterationId = timebox.getRecord().getId();
+            }
+            return iterationId;
+        },
 
         _resizeGridBoardToFillSpace: function() {
-            if(this.gridboard) {
-                this.gridboard.setHeight(this.getAvailableGridBoardHeight());
+            if (this.gridboard) {
+                this.gridboard.setHeight(this._getAvailableGridBoardHeight());
             }
         },
 
@@ -297,7 +470,7 @@
                 stateId: 'iteration-tracking-board-app',
 
                 defaultGridViews: [{
-                    model: ['UserStory', 'Defect', 'DefectSuite'],
+                    model: ['UserStory', 'Defect', 'DefectSuite', 'TestSet'],
                     name: 'Defect Status',
                     state: {
                         cmpState: {
@@ -388,76 +561,39 @@
             return customViewConfig;
         },
 
-        _createOwnerFilterItem: function (context) {
-            var isPillPickerEnabled = context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
-                projectRef = context.getProjectRef();
-
-            if (isPillPickerEnabled) {
-                return {
-                    xtype: 'rallyownerpillfilter',
-                    margin: '-15 0 5 0',
-                    filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
-                    project: projectRef,
-                    showPills: false,
-                    showClear: true
-                };
-            } else {
-                return {
-                    xtype: 'rallyownerfilter',
-                    margin: '5 0 5 0',
-                    filterChildren: this.getContext().isFeatureEnabled('S58650_ALLOW_WSAPI_TRAVERSAL_FILTER_FOR_MULTIPLE_TYPES'),
-                    project: projectRef
-                };
-            }
-
-        },
-
-        _createTagFilterItem: function (context) {
-            var filterUiImprovementsToggleEnabled = context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE');
-            return {
-                xtype: 'rallytagpillfilter',
-                margin: filterUiImprovementsToggleEnabled ? '-15 0 5 0' : '5 0 5 0',
-                showPills: filterUiImprovementsToggleEnabled,
-                showClear: filterUiImprovementsToggleEnabled,
-                remoteFilter: filterUiImprovementsToggleEnabled
-            };
-        },
-
-        _createModelFilterItem: function (context) {
-            return {
-                xtype: 'rallymodelfilter',
-                models: this.modelNames,
-                context: context
-            };
-        },
-
         _getGridConfig: function (gridStore) {
             var context = this.getContext(),
                 stateString = 'iteration-tracking-treegrid',
-                stateId = context.getScopedStateId(stateString);
+                stateId = context.getScopedStateId(stateString),
+                useFixedHeightRows = Ext.isIE && context.isFeatureEnabled('S78815_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT');
 
             var gridConfig = {
-                xtype: 'rallytreegrid',
+                xtype: 'rallyiterationtrackingtreegrid',
                 store: gridStore,
-                enableRanking: this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled,
-                columnCfgs: null, //must set this to null to offset default behaviors in the gridboard
-                defaultColumnCfgs: this._getGridColumns(),
-                showSummary: true,
+                columnCfgs: this._getGridColumns(),
                 summaryColumns: this._getSummaryColumnConfig(),
-                treeColumnRenderer: function (value, metaData, record, rowIdx, colIdx, store, view) {
-                    store = store.treeStore || store;
-                    return Rally.ui.renderer.RendererFactory.getRenderTemplate(store.model.getField('FormattedID')).apply(record.data);
+                enableInlineAdd: true,
+                expandAllInColumnHeaderEnabled: true,
+                inlineAddConfig: {
+                    enableAddPlusNewChildStories: false
                 },
-                enableBulkEdit: context.isFeatureEnabled('BETA_TRACKING_EXPERIENCE'),
+                enableBulkEdit: true,
+                pagingToolbarCfg: {
+                    pageSizes: this.getGridPageSizes(),
+                    comboboxConfig: {
+                        defaultSelectionPosition: 'last'
+                    }
+                },
                 plugins: [],
                 stateId: stateId,
                 stateful: true,
-                pageResetMessages: [Rally.app.Message.timeboxScopeChange]
+                variableRowHeight: !useFixedHeightRows,
+                bufferedRenderer: true
             };
 
-            if (context.isFeatureEnabled('EXPAND_ALL_TREE_GRID_CHILDREN')) {
-                gridConfig.plugins.push('rallytreegridexpandedrowpersistence');
-            }
+            gridConfig.plugins.push({
+                ptype: 'rallytreegridexpandedrowpersistence'
+            });
 
             return gridConfig;
         },
@@ -481,24 +617,38 @@
                     field: 'TaskRemainingTotal',
                     type: 'sum',
                     units: taskUnitName
+                },
+                {
+                    field: 'TaskActualTotal',
+                    type: 'sum',
+                    units: taskUnitName
                 }
             ];
         },
 
         _getGridColumns: function (columns) {
-            var result = ['FormattedID', 'Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'TaskStatus', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'DefectStatus', 'Discussion'];
-
-            if (columns) {
-                result = columns;
-            }
-            _.pull(result, 'FormattedID');
-
-            return result;
+            return columns ? _.without(columns, 'FormattedID') : defaultGridColumns;
         },
 
         _onLoad: function () {
             this._publishContentUpdated();
-            this.recordComponentReady();
+
+            var additionalMetricData = {};
+
+            if  (this.gridboard.getToggleState() === 'board') {
+                additionalMetricData = {
+                    miscData: {
+                        swimLanes: this.getSetting('showRows'),
+                        swimLaneField: this.getSetting('rowsField')
+                    }
+                };
+            }
+
+            this.recordComponentReady(additionalMetricData);
+
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
         },
 
         _onBoardFilter: function () {
@@ -509,13 +659,31 @@
             this.setLoading(false);
         },
 
-        _onToggle: function (toggleState) {
+        _hidePrintButton: function(hide, gridboard) {
+            var button, menuItem;
+
+            if (gridboard) {
+                button = _.find(gridboard.plugins, {itemId: 'printExportMenuButton'});
+
+                if (button) {
+                    menuItem = _.find(button.menuItems, {text: 'Print...'});
+
+                    if (menuItem) {
+                        menuItem.hidden = hide;
+                    }
+                }
+            }
+        },
+
+        _onToggle: function (toggleState, gridOrBoard, gridboard) {
             var appEl = this.getEl();
 
             if (toggleState === 'board') {
                 appEl.replaceCls('grid-toggled', 'board-toggled');
+                this._hidePrintButton(true, gridboard);
             } else {
                 appEl.replaceCls('board-toggled', 'grid-toggled');
+                this._hidePrintButton(false, gridboard);
             }
             this._publishContentUpdated();
         },
@@ -526,6 +694,10 @@
 
         _publishContentUpdatedNoDashboardLayout: function () {
             this.fireEvent('contentupdated', {dashboardLayout: false});
+        },
+
+        getGridPageSizes: function() {
+            return [10, 25, 50];
         }
     });
 })();

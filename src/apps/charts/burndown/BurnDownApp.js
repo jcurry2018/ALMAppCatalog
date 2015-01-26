@@ -36,7 +36,7 @@
 
         scopeObject: undefined,
 
-        customScheduleStates: ['Accepted'],	// a reasonable default
+        customScheduleStates: null, // defaults hide problems
 
         config: {
             defaultSettings: {
@@ -71,7 +71,7 @@
                     return;
                 }
             }
-
+            this.customScheduleStates = null;
             this.chartComponentConfig = Ext.create('Rally.apps.charts.burndown.BurnDownChart', this).defaultChartComponentConfig();
 
             Ext.create('Rally.apps.charts.IntegrationHeaders',this).applyTo(this.chartComponentConfig.storeConfig);
@@ -195,7 +195,6 @@
 
             this._addDateBounds();
             this._addAggregationTypeToCalculator();
-            this._updateCompletedScheduleStates();
             this._loadTimeboxes();
         },
 
@@ -203,7 +202,11 @@
             if (this._getScopeType() === 'release') {
                 this._fetchIterations();
             } else {
-                this._addChart();
+                if ( this.customScheduleStates === null) { // wait until we get the schedule states
+                    this.deferredAddChart = this._addChart;
+                } else {
+                    this._addChart();
+                }
             }
         },
 
@@ -229,11 +232,19 @@
 
         },
 
+        _addChartWithIterationLines: function () {
+            this._addChart();
+            this.down('rallychart').on('snapshotsAggregated', this._addIterationLines, this);
+        },
+
         _onIterationsLoaded: function (store) {
             this.iterations = store.getItems();
 
-            this._addChart();
-            this.down('rallychart').on('snapshotsAggregated', this._addIterationLines, this);
+            if ( this.customScheduleStates === null) {
+                this.deferredAddChart = this._addChartWithIterationLines;
+            } else {
+                this._addChartWithIterationLines();
+            }
         },
 
         _addDateBounds: function () {
@@ -433,6 +444,7 @@
         },
 
         _addChart: function () {
+            this._updateCompletedScheduleStates();
             this._updateChartConfigDateFormat();
             this._updateChartConfigWorkdays();
             var chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
@@ -701,41 +713,13 @@
         },
 
         _getScheduleStateValues: function (model) {
-            if(model) {
-                model.getField("ScheduleState").getAllowedValueStore().load({
-                    callback: function(records, operation, success) {
-                        var scheduleStates = _.collect(records, function(obj) {
-                            return obj.raw;
-                        });
+            var scheduleStates = model.getField('ScheduleState').getAllowedStringValues();
 
-                        var store = this._wrapRecords(scheduleStates);
-                        var	values = [];
-                        var acceptedSeen = false;
-                        for(var i = 0; i < store.data.items.length; i++) {
-                            if(store.data.items[i].data.StringValue === 'Accepted') {
-                                acceptedSeen = true;
-                            }
-                            if(acceptedSeen) {
-                                values.push(store.data.items[i].data.StringValue);
-                            }
-                        }
+            this.customScheduleStates = scheduleStates.slice(scheduleStates.indexOf('Accepted'), scheduleStates.length);
 
-                        if(values.length > 0) {
-                            this.customScheduleStates = values;
-                        }
-                    },
-                    scope: this
-                });
+            if (this.deferredAddChart) {
+                this.deferredAddChart.call(this);
             }
-        },
-
-        _wrapRecords: function(records) {
-            return Ext.create("Ext.data.JsonStore", {
-                fields: ["_ref", "StringValue"],
-                data: records
-            });
         }
-
-
     });
 }());

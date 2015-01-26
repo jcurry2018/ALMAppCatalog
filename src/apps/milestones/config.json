@@ -1,0 +1,9 @@
+{
+   "name": "Milestones",
+   "className": "Rally.apps.milestones.MilestonesApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "MilestonesApp.js"
+   ]
+}

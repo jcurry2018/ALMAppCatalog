@@ -5,8 +5,6 @@
         extend: 'Rally.ui.cardboard.CardBoard',
         alias: 'widget.roadmapplanningboard',
 
-        inject: ['preliminaryEstimateStore'],
-
         requires: [
             'Rally.data.util.PortfolioItemHelper',
             'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
@@ -146,7 +144,7 @@
         },
 
         _loadColumnData: function () {
-            return Deft.Promise.all([this.timeframePlanStoreWrapper.load(), this._loadPreliminaryStore()]).then({
+            return this.timeframePlanStoreWrapper.load().then({
                 failure: function (operation) {
                     var service = operation.storeServiceName || 'External';
                     Rally.ui.notify.Notifier.showError({message: 'Failed to load: ' + service + ' service data load issue'});
@@ -165,7 +163,7 @@
                     border: 1,
                     text: '<i class="icon-add"></i>',
                     elTooltip: 'Add Timeframe',
-                    cls: 'scroll-button right',
+                    cls: 'scroll-button rly-right',
                     height: 28,
                     frame: false,
                     handler: this._addNewColumn,
@@ -178,10 +176,6 @@
 
         getRightmostColumn: function () {
             return _.last(this.getColumns());
-        },
-
-        _loadPreliminaryStore: function() {
-            return this.preliminaryEstimateStore.load();
         },
 
         /**
@@ -223,10 +217,7 @@
                 typeNames: this.typeNames,
                 planStore: this.timeframePlanStoreWrapper.planStore,
                 enableCrossColumnRanking: false,
-                cls: 'column backlog',
-                cardConfig: {
-                    preliminaryEstimateStore: this.preliminaryEstimateStore
-                }
+                cls: 'column backlog'
             };
         },
 
@@ -313,10 +304,6 @@
             return column;
         },
 
-        destroy: function () {
-            this.callParent(arguments);
-        },
-
         _addColumnFromTimeframeAndPlan: function (timeframe, plan) {
             return {
                 xtype: 'timeframeplanningcolumn',
@@ -329,9 +316,6 @@
                     record: timeframe,
                     fieldToDisplay: 'name',
                     editable: this.isAdmin
-                },
-                cardConfig: {
-                    preliminaryEstimateStore: this.preliminaryEstimateStore
                 },
                 editPermissions: {
                     capacityRanges: this.isAdmin,

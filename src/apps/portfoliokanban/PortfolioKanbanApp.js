@@ -6,43 +6,30 @@
      * Displays a cardboard and a type selector. Board shows States for the selected Type.
      */
     Ext.define('Rally.apps.portfoliokanban.PortfolioKanbanApp', {
-        extend: 'Rally.app.App',
+        extend: 'Rally.apps.common.PortfolioItemsGridBoardApp',
         requires: [
-            'Rally.data.util.PortfolioItemHelper',
+            'Rally.apps.common.RowSettingsField',
             'Rally.apps.portfoliokanban.PortfolioKanbanCard',
             'Rally.apps.portfoliokanban.PortfolioKanbanPolicy',
-            'Rally.ui.gridboard.plugin.GridBoardAddNew',
-            'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
-            'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.BoardPolicyDisplayable',
-            'Rally.ui.filter.view.OwnerPillFilter',
-            'Rally.ui.filter.view.TagPillFilter',
-            'Rally.ui.gridboard.plugin.GridBoardTagFilter',
-            'Rally.ui.gridboard.plugin.GridBoardFilterControl',
-            'Rally.ui.gridboard.GridBoard',
-            'Rally.ui.cardboard.plugin.CollapsibleColumns',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
-            'Rally.ui.cardboard.plugin.FixedHeader',
-            'Rally.ui.cardboard.plugin.Scrollable',
             'Rally.ui.cardboard.Column',
-            'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.Card',
-            'Rally.data.QueryFilter',
-            'Rally.ui.notify.Notifier',
-            'Rally.ui.AddNew',
-            'Rally.ui.LeftRight',
             'Rally.util.Help',
             'Rally.util.Test',
             'Deft.Deferred'
         ],
-        autoScroll: false,
-        appName: 'Portfolio Kanban',
 
+        appName: 'Portfolio Kanban',
+        autoScroll: false,
         cls: 'portfolio-kanban',
+        statePrefix: 'portfolio-kanban',
+        toggleState: 'board',
+        settingsScope: 'project',
 
         config: {
             defaultSettings: {
-                fields: 'PercentDoneByStoryCount,UserStories'
+                fields: 'Discussion,PercentDoneByStoryCount,UserStories,Milestones'
             }
         },
 
@@ -57,165 +44,48 @@
             }
         ],
 
-        launch: function () {
-            if (!Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
-                this.add({
-                    xtype: 'container',
-                    html: '<div class="rpm-turned-off" style="padding: 50px; text-align: center;">You do not have RPM enabled for your subscription</div>'
-                });
-
-                this._publishContentUpdated();
-
-                return;
-            }
-
-            this._createPITypePicker().then({
-                success: function (currentType) {
-                    this.currentType = currentType;
-                    this._loadCardboard();
-                },
-                scope: this
-            });
-        },
-
-        _createPITypePicker: function () {
-            if (this.piTypePicker) {
-                this.piTypePicker.destroy();
-            }
-
-            var deferred = new Deft.Deferred();
-
-            this.piTypePicker = Ext.create('Rally.ui.combobox.PortfolioItemTypeComboBox', {
-                value: this.getSetting('type'),
-                context: this.getContext(),
-                listeners: {
-                    change: this._onTypeChange,
-                    ready: {
-                        fn: function (picker) {
-                            deferred.resolve(picker.getSelectedType());
-                        },
-                        single: true
-                    },
-                    scope: this
-                }
-            });
-
-            return deferred.promise;
+        constructor: function(config) {
+            config.settingsScope = config.isFullPageApp ? 'project' : 'app';
+            this.callParent([config]);
         },
 
         getSettingsFields: function () {
-            return [
-                {
-                    type: 'project'
-                },
-                {
-                    type: 'query',
-                    config: {
-                        plugins: [
-                            {
-                                ptype: 'rallyhelpfield',
-                                helpId: 271
-                            },
-                            'rallyfieldvalidationui'
-                        ]
-                    }
-                }
-            ];
-        },
+            var fields = [];
 
-        onDestroy: function () {
-            if (this._percentDonePopover) {
-                this._percentDonePopover.destroy();
-                delete this._percentDonePopover;
+            if (this.getContext().isFeatureEnabled('S79575_ADD_SWIMLANES_TO_PI_KANBAN')) {
+                fields.push({
+                    name: 'groupHorizontallyByField',
+                    xtype: 'rowsettingsfield',
+                    fieldLabel: 'Swimlanes',
+                    margin: '10 0 10 0',
+                    mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
+                    readyEvent: 'ready',
+                    modelNames: ['PortfolioItem'],
+                    isAllowedFieldFn: function (field) {
+                        var attr = field.attributeDefinition;
+                        return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string')
+                            || attr.Constrained || _.contains(['boolean'], attr.AttributeType.toLowerCase())) &&
+                            !_.contains(['web_link', 'text', 'date'], attr.AttributeType.toLowerCase()) &&
+                            !_.contains(['Archived', 'Portfolio Item Type', 'State'], attr.Name);
+                    }
+                });
             }
 
-            this.callParent(arguments);
-        },
-
-        _drawHeader: function () {
-            var header = this.gridboard.getHeader();
-
-            if (header) {
-                header.getRight().add([
-                    this._buildHelpComponent(),
-                    this.piTypePicker,
-                    this._buildFilterInfo()
-                ]);
-            }
-        },
-
-        _loadCardboard: function (policyPluginCmpCfg) {
-            this._loadStates({
-                success: function (states) {
-                    var columns = this._createColumns(states, policyPluginCmpCfg);
-                    if (this.rendered) {
-                        this._drawCardboard(columns);
-                    } else {
-                        this.on('afterrender', Ext.bind(this._drawCardboard, this, [columns]), this, {single: true});
-                    }
-                },
-                scope: this
-            });
-
-        },
-
-        /**
-         * @private
-         * We need the States of the selected Portfolio Item Type to know what columns to show.
-         * Whenever the type changes, reload the states to redraw the cardboard.
-         * @param options
-         * @param options.success called when states are loaded
-         * @param options.scope the scope to call success with
-         */
-        _loadStates: function (options) {
-            Ext.create('Rally.data.wsapi.Store', {
-                model: Ext.identityFn('State'),
-                context: this.getContext().getDataContext(),
-                autoLoad: true,
-                fetch: ['Name', 'WIPLimit', 'Description'],
-                filters: [
-                    {
-                        property: 'TypeDef',
-                        value: this.currentType.get('_ref')
-                    },
-                    {
-                        property: 'Enabled',
-                        value: true
-                    }
-                ],
-                sorters: [
-                    {
-                        property: 'OrderIndex',
-                        direction: 'ASC'
-                    }
-                ],
-                listeners: {
-                    load: function (store, records) {
-                        if (options.success) {
-                            options.success.call(options.scope || this, records);
-                        }
-                    }
+            fields.push({
+                type: 'query',
+                config: {
+                    plugins: [
+                        {
+                            ptype: 'rallyhelpfield',
+                            helpId: 271
+                        },
+                        'rallyfieldvalidationui'
+                    ]
                 }
             });
 
-        },
 
-        /**
-         * Given a set of columns, build a cardboard component. Otherwise show an empty message.
-         * @param columns
-         */
-        _drawCardboard: function (columns) {
-            if (!this.rendered) {
-                this.on('afterrender', Ext.bind(this._drawCardboard, this, [columns]), this, {single: true});
-                return;
-            }
-
-            this._showColumns(columns);
-
-            if (!columns || columns.length === 0) {
-                this._showNoColumns();
-                this._onBoardLoad();
-            }
+            return fields;
         },
 
         _createFilterItem: function(typeName, config) {
@@ -227,254 +97,77 @@
             }, config);
         },
 
+        getHeaderControls: function () {
+            var ctls = this.callParent(arguments);
+            ctls.unshift(this._buildHelpComponent());
+            ctls.push(this._buildFilterInfo());
+            return ctls;
+        },
 
-        _showColumns: function (columns) {
-            var filters = [{
-                property: 'PortfolioItemType',
-                value: this.currentType.get('_ref')
-            }];
-
-            if (this.getSetting('query')) {
-                try {
-                    filters.push(Rally.data.QueryFilter.fromQueryString(this.getSetting('query')));
-                } catch (e) {
-                    Rally.ui.notify.Notifier.showError({
-                        message: e.message
-                    });
+        getGridBoardPlugins: function () {
+            return this.callParent(arguments).concat([{
+                ptype: 'rallyboardpolicydisplayable',
+                pluginId: 'boardPolicyDisplayable',
+                prefKey: 'piKanbanPolicyChecked',
+                checkboxConfig: {
+                    boxLabel: 'Show Policies',
+                    margin: '2 5 5 5'
                 }
-            }
+            }]);
+        },
 
-            var currentTypePath = this.currentType.get('TypePath');
+        getFilterControlConfig: function () {
+            var config = this.callParent(arguments);
+            return _.merge(config, {
+                blackListFields: _.union(config.blackListFields, ['State'])
+            });
+        },
 
-            if (this.gridboard) {
-                this.gridboard.modelNames = [currentTypePath];
+        getCardConfig: function () {
+            return {
+                xtype: 'rallyportfoliokanbancard'
+            };
+        },
 
-                if (this.cardboard.filterCollection) {
-                    this.cardboard.filterCollection.clearAllFilters();
-                }
+        getCardBoardConfig: function () {
+            var config = _.merge(this.callParent(arguments), {
+                loadDescription: 'Portfolio Kanban'
+            });
 
-                this.cardboard.refresh({
-                    columns: columns,
-                    ddGroup: currentTypePath,
-                    types: [currentTypePath],
-                    storeConfig: {
-                        filters: filters,
-                        context: this.getContext().getDataContext()
+            if (this.getSetting('showRows') && this.getSetting('rowsField') &&
+                this.getContext().isFeatureEnabled('S79575_ADD_SWIMLANES_TO_PI_KANBAN')) {
+                Ext.apply(config, {
+                    rowConfig: {
+                        field: this.getSetting('rowsField'),
+                        sortDirection: 'ASC'
                     }
                 });
-            } else {
-                this.gridboard = Ext.create('Rally.ui.gridboard.GridBoard', {
-                    itemId: 'gridboard',
-                    toggleState: 'board',
-                    modelNames: [currentTypePath],
-                    context: this.getContext(),
-                    addNewPluginConfig: {
-                        style: {
-                            'float': 'left'
-                        }
-                    },
-                    plugins: [
-                        'rallygridboardaddnew',
-                        {
-                            ptype: 'rallygridboardfiltercontrol',
-                            filterControlConfig: {
-                                cls: 'small gridboard-filter-control',
-                                margin: '3 10 3 7',
-                                stateful: true,
-                                stateId: this.getContext().getScopedStateId('portfolio-kanban-filter-button'),
-                                items: [
-                                    this._createFilterItem('rallyownerpillfilter', {
-                                        filterChildren: false,
-                                        project: this.getContext().getProject(),
-                                        showPills: false
-                                    }),
-                                    this._createFilterItem('rallytagpillfilter', {remoteFilter: true})
-                                ]
-                            }
-                        },
-                        {
-                            ptype: 'rallygridboardfieldpicker',
-                            boardFieldBlackList: [
-                                'ObjectID',
-                                'Description',
-                                'DisplayColor',
-                                'FormattedID',
-                                'Name',
-                                'Notes',
-                                'Ready',
-                                'AcceptedLeafStoryCount',
-                                'AcceptedLeafStoryPlanEstimateTotal',
-                                'DirectChildrenCount',
-                                'LeafStoryCount',
-                                'LeafStoryPlanEstimateTotal',
-                                'Rank',
-                                'DragAndDropRank',
-                                'UnEstimatedLeafStoryCount',
-                                'CreationDate',
-                                'Subscription',
-                                'Workspace',
-                                'Changesets',
-                                'Discussion',
-                                'LastUpdateDate',
-                                'Owner'
-                            ],
-                            boardFieldDefaults: this.getSetting('fields').split(','),
-                            headerPosition: 'left'
-                        },
-                        {
-                            ptype: 'rallyboardpolicydisplayable',
-                            pluginId: 'boardPolicyDisplayable',
-                            prefKey: 'piKanbanPolicyChecked',
-                            checkboxConfig: {
-                                boxLabel: 'Show Policies',
-                                margin: '2 5 5 5'
-                            }
-                        }
-                    ],
-                    listeners: {
-                        toggle: this._gridBoardToggle,
-                        scope: this
-                    },
-                    cardBoardConfig: {
-                        attribute: 'State',
-                        cardConfig: {
-                            xtype: 'rallyportfoliokanbancard',
-                            editable: true,
-                            fields: Rally.apps.portfoliokanban.PortfolioKanbanCard.defaultFields.concat('Discussion'),
-                            showColorIcon: true
-                        },
-                        columnConfig: {
-                            xtype: 'rallycardboardcolumn',
-                            additionalFetchFields: ['Discussion'],
-                            enableWipLimit: true,
-                            enableInfiniteScroll: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS')
-                        },
-                        columns: columns,
-                        ddGroup: currentTypePath,
-                        listeners: {
-                            load: this._onBoardLoad,
-                            cardupdated: this._publishContentUpdatedNoDashboardLayout,
-                            scope: this
-                        },
-                        loadDescription: 'Portfolio Kanban',
-                        loadMask: false,
-                        plugins: (this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS') ? [] : [{
-                                ptype: 'rallyscrollablecardboard',
-                                containerEl: this.getEl()
-                            }]).concat([{ ptype: 'rallyfixedheadercardboard' }]),
-                        storeConfig: {
-                            // pageSize config can be removed when we remove ENABLE_INFINITE_SCROLL_ALL_BOARDS toggle, because we can use the default value
-                            pageSize: this.getContext().isFeatureEnabled('S64257_ENABLE_INFINITE_SCROLL_ALL_BOARDS') ? 15 : 50,
-                            filters: filters,
-                            context: this.context.getDataContext()
-                        }
-                    },
-                    height: this.getHeight()
-                });
-
-                this.add(this.gridboard);
-                this._drawHeader();
-            }
-        },
-
-       setHeight: function(height) {
-            this.callParent(arguments);
-            if(this.gridboard) {
-                this.gridboard.setHeight(height);
-            }
-        },
-
-        _onTypeChange: function (picker) {
-            var policyCfg,
-                policyPlugin,
-                newType = picker.getSelectedType();
-
-            if (newType && this.currentType && newType.get('_ref') !== this.currentType.get('_ref')) {
-                this.currentType = newType;
-                this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
-                policyPlugin = this.gridboard.getPlugin('boardPolicyDisplayable');
-                if (policyPlugin) {
-                    policyCfg = {
-                        hidden: !policyPlugin.isChecked()
-                    };
-                }
-                this._loadCardboard(policyCfg);
-            }
-        },
-
-        _gridBoardToggle: function (toggleState, gridOrBoard) {
-            this.cardboard = toggleState === 'board' ? gridOrBoard : null;
-        },
-
-        getMaskId: function () {
-            return 'btid-portfolio-kanban-board-load-mask-' + this.id;
-        },
-
-        _onBoardLoad: function (cardboard) {
-            this._publishContentUpdated();
-            Rally.environment.getMessageBus().publish(Rally.Message.piKanbanBoardReady);
-            this.recordComponentReady();
-        },
-
-        _showNoColumns: function () {
-            this.add({
-                xtype: 'container',
-                cls: 'no-type-text',
-                html: '<p>This Type has no states defined.</p>'
-            });
-            this._publishContentUpdated();
-        },
-
-        /**
-         * @private
-         * @return columns for the cardboard, as a map with keys being the column name.
-         */
-        _createColumns: function (states, policyPluginCmpCfg) {
-            if (!states.length) {
-                return undefined;
             }
 
-            var defaultColumnPolicyPlugin = {
+            return config;
+        },
+
+        getCardBoardColumnPlugins: function (state) {
+            var policyPlugin = this.gridboard && this.gridboard.getPlugin('boardPolicyDisplayable');
+            return {
                 ptype: 'rallycolumnpolicy',
-                policyCmpConfig: Ext.merge({
+                policyCmpConfig: {
                     xtype: 'rallyportfoliokanbanpolicy',
-                    hidden: true,
-                    title: 'Exit Policy'
-                }, policyPluginCmpCfg || {})
-            };
-
-            var columns = [
-                {
-                    columnHeaderConfig: {
-                        headerTpl: 'No Entry'
-                    },
-                    value: null,
-                    plugins: [defaultColumnPolicyPlugin].concat(this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS') ? ['rallycardboardcollapsiblecolumns'] : [])
+                    hidden: !policyPlugin || !policyPlugin.isChecked(),
+                    title: 'Exit Policy',
+                    stateRecord: state
                 }
-            ];
+            };
+        },
 
-            Ext.Array.each(states, function (state) {
-                var stateColumnPolicyPlugin = Ext.merge({}, defaultColumnPolicyPlugin);
-                stateColumnPolicyPlugin.policyCmpConfig.stateRecord = state;
-
-                columns.push({
-                    value: state.get('_ref'),
-                    wipLimit: state.get('WIPLimit'),
-                    enableWipLimit: true,
-                    columnHeaderConfig: {
-                        record: state,
-                        fieldToDisplay: 'Name',
-                        editable: false
-                    },
-                    plugins: [stateColumnPolicyPlugin].concat(this.getContext().isFeatureEnabled('ENABLE_COLLAPSIBLE_COLUMNS') ? ['rallycardboardcollapsiblecolumns'] : [])
-                });
-            }, this);
-
-            return columns;
+        publishComponentReady: function () {
+            this.fireEvent('contentupdated');
+            this.callParent(arguments);
+            Rally.environment.getMessageBus().publish(Rally.Message.piKanbanBoardReady);
         },
 
         _buildHelpComponent: function (config) {
-            return this.appContainer.dashboard.isFullPageApp ? null : Ext.create('Ext.Component', Ext.apply({
+            return this.isFullPageApp ? null : Ext.create('Ext.Component', Ext.apply({
                 cls: 'help-field ' + Rally.util.Test.toBrowserTestCssClass('portfolio-kanban-help-container'),
                 renderTpl: Rally.util.Help.getIcon({
                     id: 265
@@ -483,7 +176,7 @@
         },
 
         _buildFilterInfo: function () {
-            this.filterInfo = this.appContainer.dashboard.isFullPageApp ? null : Ext.create('Rally.ui.tooltip.FilterInfo', {
+            this.filterInfo = this.isFullPageApp ? null : Ext.create('Rally.ui.tooltip.FilterInfo', {
                 projectName: this.getSetting('project') && this.getContext().get('project').Name || 'Following Global Project Setting',
                 scopeUp: this.getSetting('projectScopeUp'),
                 scopeDown: this.getSetting('projectScopeDown'),
@@ -491,18 +184,6 @@
             });
 
             return this.filterInfo;
-        },
-
-        _publishContentUpdated: function () {
-            this.fireEvent('contentupdated');
-            if (Rally.BrowserTest) {
-                Rally.BrowserTest.publishComponentReady(this);
-            }
-        },
-
-        _publishContentUpdatedNoDashboardLayout: function () {
-            this.fireEvent('contentupdated', {dashboardLayout: false});
         }
-
     });
 })();

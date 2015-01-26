@@ -4,7 +4,7 @@
     Ext.define('Rally.apps.teamboard.plugin.TeamBoardUserIterationCapacity', {
         alias: 'plugin.rallyteamboarduseriterationcapacity',
         extend: 'Rally.apps.teamboard.plugin.TeamBoardIterationAwarePlugin',
-        requires: ['Rally.data.wsapi.Filter', 'Rally.ui.cardboard.plugin.CardContentRight', 'Rally.ui.grid.Grid'],
+        requires: ['Rally.ui.cardboard.plugin.CardContentRight', 'Rally.ui.grid.Grid'],
 
         inheritableStatics: {
             _getProgressBarTpl: function() {
@@ -33,7 +33,7 @@
             if(iterationRecord) {
                 iterationRecord.getCollection('UserIterationCapacities', {
                     autoLoad: true,
-                    fetch: 'Capacity,Iteration,Load,TaskEstimates,User',
+                    fetch: _.union(['Capacity', 'Iteration', 'Load', 'TaskEstimates', 'User'], this.cmp.getAllFetchFields()),
                     limit: Infinity,
                     listeners: {
                         load: function (store, records) {
@@ -45,32 +45,6 @@
             }else{
                 this._updateCapacities([], false);
             }
-        },
-
-        _updateCapacities: function(userIterationCapacityRecords, showSwipe) {
-            _.each(this.cmp.getCards(), function(card){
-                var topEl = card.getEl().down('.' + Rally.ui.cardboard.plugin.CardContentRight.TOP_SIDE_CLS);
-                var bottomEl = card.getEl().down('.' + Rally.ui.cardboard.plugin.CardContentRight.BOTTOM_SIDE_CLS);
-
-                var uicRecord = this._findUserIterationCapacityFor(card.getRecord(), userIterationCapacityRecords);
-                if(uicRecord){
-                    topEl.update(this.self._getProgressBarTpl().apply(uicRecord.data));
-                    topEl.on('click', function(e, targetEl){
-                        this._showTasksGrid(Ext.get(targetEl), uicRecord);
-                    }, this, {delegate: '.progress-bar-container'});
-
-                    bottomEl.update(this._getHasCapacityHtml(uicRecord));
-                }else{
-                    topEl.update('');
-                    bottomEl.update(showSwipe ? this._getAddCapacityHtml() : '');
-                }
-
-                if(showSwipe){
-                    card.getEl().addCls('rui-card-swipe');
-                }else{
-                    card.getEl().removeCls('rui-card-swipe');
-                }
-            }, this);
         },
 
         _findUserIterationCapacityFor: function(userRecord, userIterationCapacityRecords) {
@@ -87,6 +61,28 @@
             return Ext.create('Rally.ui.renderer.template.CardPlanEstimateTemplate', '--', 'Capacity', 'no-estimate').apply();
         },
 
+        _showCapacityOnCard: function(card, uicRecord, showSwipe) {
+            var topEl = card.getEl().down('.' + Rally.ui.cardboard.plugin.CardContentRight.TOP_SIDE_CLS);
+            var bottomEl = card.getEl().down('.' + Rally.ui.cardboard.plugin.CardContentRight.BOTTOM_SIDE_CLS);
+            if(uicRecord){
+                topEl.update(this.self._getProgressBarTpl().apply(uicRecord.data));
+                topEl.on('click', function(e, targetEl){
+                    this._showTasksGrid(Ext.get(targetEl), uicRecord);
+                }, this, {delegate: '.progress-bar-container'});
+
+                bottomEl.update(this._getHasCapacityHtml(uicRecord));
+            }else{
+                topEl.update('');
+                bottomEl.update(showSwipe ? this._getAddCapacityHtml() : '');
+            }
+
+            if(showSwipe){
+                card.getEl().addCls('rui-card-swipe');
+            }else{
+                card.getEl().removeCls('rui-card-swipe');
+            }
+        },
+
         _showTasksGrid: function(target, uicRecord) {
             Ext.create('Rally.ui.popover.Popover', {
                 items: [{
@@ -99,15 +95,40 @@
                             projectScopeDown: false,
                             projectScopeUp: false
                         },
-                        filters: Rally.data.wsapi.Filter.and([
+                        filters: [
                             {property: 'Iteration', value: uicRecord.get('Iteration')._ref},
                             {property: 'Owner', value: uicRecord.get('User')._ref}
-                        ])
+                        ]
                     }
                 }],
                 target: target,
+                title: 'Tasks',
                 width: 700
             });
+        },
+
+        _updateCapacities: function(userIterationCapacityRecords, showSwipe) {
+            _.each(this.cmp.getCards(), function(card){
+                var uicRecord = this._findUserIterationCapacityFor(card.getRecord(), userIterationCapacityRecords);
+                Ext.Array.remove(userIterationCapacityRecords, uicRecord);
+                if(card._isNonTeamMember && !uicRecord) {
+                    this.cmp.removeCard(card, true);
+                }else{
+                    this._showCapacityOnCard(card, uicRecord, showSwipe);
+                }
+            }, this);
+
+            _.each(userIterationCapacityRecords, function(uicRecord){
+                var record = new this.cmp.model[0](uicRecord.get('User'));
+                record.set('updatable', false);
+
+                var card = this.cmp.createAndAddCard(record, null, false, {
+                    cls: 'rui-card non-team-member-card',
+                    _isNonTeamMember: true
+                });
+
+                this._showCapacityOnCard(card, uicRecord, showSwipe);
+            }, this);
         }
     });
 })();
