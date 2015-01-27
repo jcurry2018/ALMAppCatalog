@@ -31,8 +31,8 @@ These apps are built using [App SDK 2.0](https://help.rallydev.com/apps/2.0/doc/
 * [Recent Activity](https://help.rallydev.com/recent-activity) - [[src](src/apps/recentactivity)]
 * Release Burndown - [[src](src/apps/charts/burndown)]
 * Release Summary - [[src](src/apps/releasesummary)]
-* [Roadmap Planning Board](https://help.rallydev.com/plan-roadmaps) - [[src](src/apps/roadmapplanningboard)]
 * [Story Hierarchy](https://help.rallydev.com/story-hierarchy) - [[src](src/apps/storyhierarchy)]
+* Task Board - [[src](src/apps/taskboard)]
 * Team Board - [[src](src/apps/teamboard)]
 * [Tip of the Day](https://help.rallydev.com/tip-day) - [[src](src/apps/tipoftheday)]
 
@@ -82,7 +82,6 @@ These apps are built using [App SDK 1](https://help.rallydev.com/app-sdk) and ea
 * [Super Customizable Program Chart](https://help.rallydev.com/super-customizable-program-chart) - [[src](src/legacy/SuperCustomizableProgramChart.html)]
 * [Super Customizable Release Chart](https://help.rallydev.com/super-customizable-release-chart) - [[src](src/legacy/SuperCustomizableReleaseChart.html)]
 * [System Requirements Validation Document](https://help.rallydev.com/system-requirement-validation-document-0) - [[src](src/legacy/SystemRequirementValidationDocumentApp.html)]
-* [Task Board](https://help.rallydev.com/task-board) - [[src](src/legacy/TaskBoard.html)]
 * [Test Case Estimation](https://help.rallydev.com/test-case-estimation) - [[src](src/legacy/TestCaseEstimation.html)]
 * [Test Case Pass/Fail History](https://help.rallydev.com/test-case-passfail-history) - [[src](src/legacy/TestCasePassFailHistoryApp.html)]
 * [Traceability Matrix](https://help.rallydev.com/traceability-matrix-0) - [[src](src/legacy/TraceabilityMatrixApp.html)]

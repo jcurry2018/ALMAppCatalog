@@ -2,7 +2,7 @@
    "name": "Blocked Work",
    "className": "Rally.apps.blockedwork.BlockedWorkApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0rc3",
+   "sdk": "2.0",
    "javascript": [
       "BlockedWorkView.js",
       "BlockedWorkApp.js"

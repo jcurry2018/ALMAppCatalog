@@ -2,7 +2,7 @@
    "name": "PrintStoryCards",
    "className": "Rally.apps.printcards.printstorycards.PrintStoryCardsApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0rc3",
+   "sdk": "2.0",
    "javascript": [
       "../PrintCard.js",
       "PrintStoryCardsApp.js"
