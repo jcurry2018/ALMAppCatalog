@@ -30,6 +30,7 @@ These apps are built using [App SDK 2.0](https://help.rallydev.com/apps/2.0/doc/
 * Project CFD - [[src](src/apps/charts/cfd/project)]
 * [Recent Activity](https://help.rallydev.com/recent-activity) - [[src](src/apps/recentactivity)]
 * Release Burndown - [[src](src/apps/charts/burndown)]
+* [Release Planning Board](https://help.rallydev.com/release-planning-board) - [[src](src/apps/releaseplanningboard)]
 * Release Summary - [[src](src/apps/releasesummary)]
 * [Story Hierarchy](https://help.rallydev.com/story-hierarchy) - [[src](src/apps/storyhierarchy)]
 * Task Board - [[src](src/apps/taskboard)]
