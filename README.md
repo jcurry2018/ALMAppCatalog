@@ -14,7 +14,7 @@ Copyright (c) Rally Software Development Corp. 2015 Distributed under the MIT Li
 These apps are built using [App SDK 2.0](https://help.rallydev.com/apps/2.0/doc/).
 
 * [Blocked Work](https://help.rallydev.com/blocked-work) - [[src](src/apps/blockedwork)]
-* Custom Board - [[src](src/apps/board)]
+* [Custom Board](https://help.rallydev.com/custom-board) - [[src](src/apps/board)]
 * [Custom Grid](https://help.rallydev.com/custom-grid) - [[src](src/apps/grid)]
 * [Defect Summary Matrix](https://help.rallydev.com/defect-summary-matrix) - [[src](src/apps/defectsummarymatrix)]
 * [Iteration Planning Board](https://help.rallydev.com/iteration-planning-board) - [[src](src/apps/iterationplanningboard)]
@@ -33,7 +33,7 @@ These apps are built using [App SDK 2.0](https://help.rallydev.com/apps/2.0/doc/
 * [Release Planning Board](https://help.rallydev.com/release-planning-board) - [[src](src/apps/releaseplanningboard)]
 * Release Summary - [[src](src/apps/releasesummary)]
 * [Story Hierarchy](https://help.rallydev.com/story-hierarchy) - [[src](src/apps/storyhierarchy)]
-* Task Board - [[src](src/apps/taskboard)]
+* [Task Board](https://help.rallydev.com/task-board) - [[src](src/apps/taskboard)]
 * Team Board - [[src](src/apps/teamboard)]
 * [Tip of the Day](https://help.rallydev.com/tip-day) - [[src](src/apps/tipoftheday)]
 
