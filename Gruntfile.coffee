@@ -20,7 +20,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-webdriver-jasmine-runner'
   grunt.loadNpmTasks 'grunt-parallel-spec-runner'
   grunt.loadNpmTasks 'grunt-text-replace'
-  grunt.loadNpmTasks 'grunt-downloadfile'
+  grunt.loadNpmTasks 'grunt-curl'
 
   grunt.loadTasks 'grunt/tasks'
 
@@ -37,18 +37,18 @@ module.exports = (grunt) ->
   grunt.registerTask 'ci', 'Does a full build, runs tests and deploys to nexus', ['build', 'test:ci', 'nexus:__createartifact__']
 
   grunt.registerTask 'test:__buildjasmineconf__', 'Internal task to build and alter the jasmine conf', ['jasmine:apps:build', 'replace:jasmine']
-  grunt.registerTask 'test:fast', 'Just configs and runs the tests. Does not do any compiling. grunt && grunt watch should be running.', ['test:__buildjasmineconf__', 'express:inline', 'downloadfile', 'webdriver_jasmine_runner:chrome']
+  grunt.registerTask 'test:fast', 'Just configs and runs the tests. Does not do any compiling. grunt && grunt watch should be running.', ['test:__buildjasmineconf__', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:chrome']
   grunt.registerTask 'test:faster', 'Run jasmine test in parallel', ['express:inline', 'parallel_spec_runner:appsp:chrome']
   grunt.registerTask 'test:faster:firefox', 'Run jasmine test in parallel', ['express:inline', 'parallel_spec_runner:appsp:firefox']
 
-  grunt.registerTask 'test:fast:firefox', 'Just configs and runs the tests in firefox. Does not do any compiling. grunt && grunt watch should be running.', ['test:__buildjasmineconf__', 'express:inline', 'downloadfile', 'webdriver_jasmine_runner:firefox']
+  grunt.registerTask 'test:fast:firefox', 'Just configs and runs the tests in firefox. Does not do any compiling. grunt && grunt watch should be running.', ['test:__buildjasmineconf__', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:firefox']
   grunt.registerTask 'test:conf', 'Fetches the deps, compiles coffee and css files, runs jshint and builds the jasmine test config', ['nexus:deps', 'clean:test', 'coffee', 'css', 'test:__buildjasmineconf__']
   grunt.registerTask 'test:fastconf', 'Just builds the jasmine test config', ['test:__buildjasmineconf__']
-  grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['sanity', 'test:conf', 'express:inline', 'downloadfile', 'webdriver_jasmine_runner:apps']
-  grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['sanity', 'test:conf', 'express:inline', 'downloadfile', 'webdriver_jasmine_runner:chrome']
-  grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['sanity', 'test:conf', 'express:inline', 'downloadfile', 'webdriver_jasmine_runner:firefox']
+  grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:apps']
+  grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:chrome']
+  grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:firefox']
   grunt.registerTask 'test:server', "Starts a Jasmine server at localhost:#{serverPort}, specify a different port with --port=<port>", ['express:server', 'express-keepalive']
-  grunt.registerTask 'test:ci', 'Runs the tests in both firefox and chrome', ['sanity', 'test:conf', 'express:inline', 'downloadfile', 'webdriver_jasmine_runner:chrome', 'webdriver_jasmine_runner:firefox']
+  grunt.registerTask 'test:ci', 'Runs the tests in both firefox and chrome', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:chrome', 'webdriver_jasmine_runner:firefox']
 
   _ = grunt.util._
   spec = (grunt.option('spec') || grunt.option('jsspec') || '*').replace(/(Spec|Test)$/, '')
@@ -166,13 +166,12 @@ module.exports = (grunt) ->
         options:
           browser: 'firefox'
 
-    downloadfile:
-      files: [
-        {
-          url: "http://selenium-release.storage.googleapis.com/#{seleniumMajorVersion}/selenium-server-standalone-#{seleniumMajorVersion}.#{seleniumMinorVersion}.jar"
-          dest: 'lib'
-        }
-      ]
+    'curl-dir':
+      downloadfiles:
+        src: [
+          "http://selenium-release.storage.googleapis.com/#{seleniumMajorVersion}/selenium-server-standalone-#{seleniumMajorVersion}.#{seleniumMinorVersion}.jar"
+        ],
+        dest: 'lib'
 
     parallel_spec_runner:
       options:

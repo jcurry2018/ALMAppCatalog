@@ -26,7 +26,7 @@
     "grunt-contrib-jshint": "~0.6.2",
     "grunt-contrib-less": "~0.11.0",
     "grunt-contrib-watch": "~0.5.1",
-    "grunt-downloadfile": "0.3.2",
+    "grunt-curl": "~2.1.0",
     "grunt-express": "~1.0.1",
     "grunt-nexus-artifact": "0.3.7",
     "grunt-parallel-spec-runner": "~0.3.0",
