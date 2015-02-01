@@ -47,6 +47,8 @@ module.exports = (grunt) ->
   grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:apps']
   grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:chrome']
   grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:firefox']
+  grunt.registerTask 'test:chrome:faster', 'Sets up and runs the tests in Chrome', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'parallel_spec_runner:appsp:chrome']
+  grunt.registerTask 'test:firefox:faster', 'Sets up and runs the tests in Firefox', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'parallel_spec_runner:appsp:firefox']
   grunt.registerTask 'test:server', "Starts a Jasmine server at localhost:#{serverPort}, specify a different port with --port=<port>", ['express:server', 'express-keepalive']
   grunt.registerTask 'test:ci', 'Runs the tests in both firefox and chrome', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:chrome', 'webdriver_jasmine_runner:firefox']
 
