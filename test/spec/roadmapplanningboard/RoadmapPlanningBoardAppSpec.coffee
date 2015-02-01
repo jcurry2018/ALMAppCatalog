@@ -6,6 +6,13 @@ Ext.require [
   'Rally.apps.roadmapplanningboard.SplashContainer'
   'Rally.test.mock.ModelObjectMother'
   'Rally.util.BrowserValidation'
+  'Rally.app.Context'
+  'Rally.ui.notify.Notifier'
+  'Deft.Injector'
+  'Deft.Deferred'
+  'Deft.promise.Deferred'
+  'Deft.Promise'
+  'Ext.Ajax'
 ]
 
 describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
