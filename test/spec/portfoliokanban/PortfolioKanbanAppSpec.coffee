@@ -1,5 +1,14 @@
 Ext = window.Ext4 || window.Ext
-Ext.require ['Rally.data.util.PortfolioItemHelper']
+Ext.require [
+  'Ext.Array'
+  'Rally.app.Context'
+  'Rally.Message'
+  'Ext.Element'
+  'Rally.util.Ref'
+  'Rally.data.util'
+  'Rally.apps.portfoliokanban.PortfolioKanbanApp'
+  'Rally.data.util.PortfolioItemHelper'
+]
 
 describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
   helpers
