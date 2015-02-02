@@ -697,7 +697,7 @@
         },
 
         getGridPageSizes: function() {
-            return [10, 25, 50];
+            return Ext.isIE ? [10, 25, 50] : [10, 25, 50, 100];
         }
     });
 })();

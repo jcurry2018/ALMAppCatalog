@@ -471,6 +471,23 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         filterPlugin = _.find(@app.gridboard.plugins, ptype: 'rallygridboardcustomfiltercontrol')
         expect(_.contains(filterPlugin.filterControlConfig.whiteListFields, 'Milestones')).toBe true
 
+  describe 'page sizes', ->
+    beforeEach ->
+      @_isIE = Ext.isIE
+
+    afterEach ->
+      Ext.isIE = @_isIE
+
+    it 'should give the correct page sizes for non-ie', ->
+      @createApp().then =>
+        Ext.isIE = false
+        expect(@app.getGridPageSizes()).toEqual [10, 25, 50, 100]
+
+    it 'should give the correct page sizes for ie', ->
+      @createApp().then =>
+        Ext.isIE = true
+        expect(@app.getGridPageSizes()).toEqual [10, 25, 50]
+
   describe 'grid configurations', ->
     it 'should create a grid store with the correct page size', ->
       @createApp().then =>
