@@ -97,4 +97,10 @@ describe 'Rally.apps.common.RowSettingsField', ->
         combobox = @field.down 'rallycombobox'
         expect(combobox.store.getCount()).toBe 1
 
+    it 'should include all fields in whitelist', ->
+      fieldOnlyFoundOnDefect = 'Severity'
+      @createField(whiteListFields: [fieldOnlyFoundOnDefect]).then =>
+        combobox = @field.down 'rallycombobox'
+        expect(combobox.findRecordByValue(fieldOnlyFoundOnDefect)).toBeTruthy()
+
 

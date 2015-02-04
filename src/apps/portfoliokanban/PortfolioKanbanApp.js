@@ -60,7 +60,8 @@
                     margin: '10 0 10 0',
                     mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
                     readyEvent: 'ready',
-                    modelNames: ['PortfolioItem'],
+                    whiteListFields: ['Parent'],
+                    modelNames: this.piTypePicker.getAllTypeNames(),
                     isAllowedFieldFn: function (field) {
                         var attr = field.attributeDefinition;
                         return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string')
