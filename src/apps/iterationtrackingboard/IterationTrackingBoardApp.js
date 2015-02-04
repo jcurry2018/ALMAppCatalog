@@ -15,7 +15,6 @@
             'Rally.data.wsapi.TreeStoreBuilder',
             'Rally.ui.dialog.CsvImportDialog',
             'Rally.ui.gridboard.GridBoard',
-            'Rally.apps.iterationtrackingboard.IterationTrackingTreeGrid',
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.cardboard.plugin.Print',
             'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
@@ -568,16 +567,19 @@
                 useFixedHeightRows = Ext.isIE && context.isFeatureEnabled('S78815_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT');
 
             var gridConfig = {
-                xtype: 'rallyiterationtrackingtreegrid',
-                store: gridStore,
+                bufferedRenderer: true,
                 columnCfgs: this._getGridColumns(),
-                summaryColumns: this._getSummaryColumnConfig(),
+                enableBulkEdit: true,
                 enableInlineAdd: true,
+                enableSummaryRow: true,
                 expandAllInColumnHeaderEnabled: true,
                 inlineAddConfig: {
                     enableAddPlusNewChildStories: false
                 },
-                enableBulkEdit: true,
+                noDataHelpLink: {
+                    url: "https://help.rallydev.com/tracking-iterations#filter",
+                    title: "Filter Help Page"
+                },
                 pagingToolbarCfg: {
                     pageSizes: this.getGridPageSizes(),
                     comboboxConfig: {
@@ -585,10 +587,10 @@
                     }
                 },
                 plugins: [],
-                stateId: stateId,
                 stateful: true,
-                variableRowHeight: !useFixedHeightRows,
-                bufferedRenderer: true
+                stateId: stateId,
+                store: gridStore,
+                variableRowHeight: !useFixedHeightRows
             };
 
             gridConfig.plugins.push({
@@ -596,34 +598,6 @@
             });
 
             return gridConfig;
-        },
-
-        _getSummaryColumnConfig: function () {
-            var taskUnitName = this.getContext().getWorkspace().WorkspaceConfiguration.TaskUnitName,
-                planEstimateUnitName = this.getContext().getWorkspace().WorkspaceConfiguration.IterationEstimateUnitName;
-
-            return [
-                {
-                    field: 'PlanEstimate',
-                    type: 'sum',
-                    units: planEstimateUnitName
-                },
-                {
-                    field: 'TaskEstimateTotal',
-                    type: 'sum',
-                    units: taskUnitName
-                },
-                {
-                    field: 'TaskRemainingTotal',
-                    type: 'sum',
-                    units: taskUnitName
-                },
-                {
-                    field: 'TaskActualTotal',
-                    type: 'sum',
-                    units: taskUnitName
-                }
-            ];
         },
 
         _getGridColumns: function (columns) {

@@ -130,7 +130,6 @@
                 xtype: 'rallytreegrid',
                 store: gridStore,
                 columnCfgs: this.getSetting('columnNames') || this.columnNames,
-                summaryColumns: [],
                 enableBulkEdit: true,
                 plugins: ['rallytreegridexpandedrowpersistence'],
                 stateId: stateId,
