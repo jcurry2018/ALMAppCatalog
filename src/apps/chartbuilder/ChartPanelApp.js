@@ -6,7 +6,14 @@
 		extend: 'Rally.app.App',
 		componentCls: 'cbchart-app',
 		config: {
+			height:'100%',
+			width:'100%'
 		},
+		items: [{
+			xtype: 'container',
+			itemId: 'header',
+			cls: 'header'
+		}],
 		/** any xtypes being used by settings (in the chart) need to be put here */
 		requires: [
 			'Rally.apps.chartbuilder.EaselAlmBridge',
@@ -15,27 +22,18 @@
 			'Rally.util.Help'
 		],
 		autoScroll: false,
-
-		layout: {
-			type: 'border',
-			align : 'stretch',
-			pack  : 'start'
+		initComponent: function() {
+			this.callParent(arguments);
+			this.add([
+				{
+					xtype: 'container',
+					itemId: 'mrcontainer',
+					cls: 'mrcontainer',
+					width:'100%',
+					height: this._hasHelp() ? '90%' : '99%'
+				}
+			]);
 		},
-		items: [
-			{
-				xtype: 'container',
-				itemId: 'header',
-				cls: 'header',
-				region: 'north'
-			},
-			{
-				xtype: 'container',
-				itemId: 'mrcontainer',
-				cls: 'mrcontainer',
-				region: 'center',
-				layout: 'fit'
-			}
-		],
 
 		showSettings: function() {
 			// this feels like a hack
@@ -83,7 +81,7 @@
 			var filename = this.isDebugMode() ? 'almchart.html' : 'almchart.min.html';
 			var version = this.getChartVersionFromRequest();
 			var url = '/analytics/chart/' + version + '/' + filename + '?_gen=' + this._getCacheGeneration();
-			var ifr = '<iframe frameborder="0" style="overflow:hidden;" width="100%" height="100%" src="' + url + '"></iframe>';
+			var ifr = '<iframe frameborder="0" style="overflow:hidden;" scrolling="no" width="100%" height="100%" src="' + url + '"></iframe>';
 			this.down("#mrcontainer").el.dom.innerHTML = ifr;
 		},
 
@@ -158,6 +156,7 @@
 
 		render: function () {
 			this.callParent(arguments);
+
 			this.constructIFrame();
 			// create the bridge that will be passed in (the execution context if you will) to the
 			// chart that's loaded
