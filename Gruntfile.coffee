@@ -51,6 +51,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'test:firefox:faster', 'Sets up and runs the tests in Firefox', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'parallel_spec_runner:appsp:firefox']
   grunt.registerTask 'test:server', "Starts a Jasmine server at localhost:#{serverPort}, specify a different port with --port=<port>", ['express:server', 'express-keepalive']
   grunt.registerTask 'test:ci', 'Runs the tests in both firefox and chrome', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:chrome', 'webdriver_jasmine_runner:firefox']
+  grunt.registerTask 'test:ci:faster', 'Runs the tests in both firefox and chrome', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'parallel_spec_runner:appsp:chrome', 'parallel_spec_runner:appsp:firefox']
 
   _ = grunt.util._
   spec = (grunt.option('spec') || grunt.option('jsspec') || '*').replace(/(Spec|Test)$/, '')
