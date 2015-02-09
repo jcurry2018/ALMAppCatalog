@@ -15,7 +15,6 @@
 
         getGridConfig: function () {
             return _.merge(this.callParent(arguments), {
-                noDataItemName: 'milestone',
                 rowActionColumnConfig: {
                     rowActionsFn: function (record) {
                         return Rally.ui.MilestoneTargetProjectPermissionsHelper.shouldDisableEditing(record) ? [] : [

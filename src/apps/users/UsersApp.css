@@ -1,0 +1,10 @@
+.users-app .license-count {
+    float: right;
+    padding-top: 5px;
+}
+
+.users-app .user-workspace-picker {
+    float: left;
+    margin-right: 7px;
+    margin-top: 3px;
+}
