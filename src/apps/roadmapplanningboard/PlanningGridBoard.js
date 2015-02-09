@@ -55,17 +55,18 @@
                 throw 'typeNames must have a child property with a name';
             }
 
-            this.addNewPluginConfig = {
-                listeners: {
-                    beforecreate: this._onBeforeCreate,
-                    beforeeditorshow: this._onBeforeCreate,
-                    scope: this
-                },
-                fieldLabel: 'New ' + this.typeNames.child.name
-            };
-
             this.plugins = [
-                'rallygridboardaddnew',
+                {
+                    ptype: 'rallygridboardaddnew',
+                    addNewControlConfig: {
+                        listeners: {
+                            beforecreate: this._onBeforeCreate,
+                            beforeeditorshow: this._onBeforeCreate,
+                            scope: this
+                        },
+                        fieldLabel: 'New ' + this.typeNames.child.name
+                    }
+                },
                 {
                     ptype: 'rallygridboardfiltercontrol',
                     filterControlConfig: {

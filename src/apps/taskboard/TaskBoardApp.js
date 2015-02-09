@@ -107,7 +107,22 @@
                 toggleState: 'board',
                 cardBoardConfig: this._getBoardConfig(),
                 plugins: [
-                    'rallygridboardaddnew',
+                    {
+                        ptype:'rallygridboardaddnew',
+                        addNewControlConfig: {
+                            recordTypes: ['Task', 'Defect', 'Defect Suite', 'Test Set', 'User Story'],
+                            additionalFields: [this._createWorkProductComboBox(rowRecords)],
+                            listeners: {
+                                recordtypechange: this._onAddNewRecordTypeChange,
+                                create: this._onAddNewCreate,
+                                scope: this
+                            },
+                            minWidth: 600,
+                            ignoredRequiredFields: ['Name', 'Project', 'WorkProduct', 'State', 'TaskIndex', 'ScheduleState'],
+                            stateful: true,
+                            stateId: context.getScopedStateId('taskboard-add-new')
+                        }
+                    },
                     {
                         ptype: 'rallygridboardcustomfiltercontrol',
                         filterChildren: false,
@@ -136,17 +151,6 @@
                 storeConfig: {
                     filters: this._getQueryFilters(false),
                     enableRankFieldParameterAutoMapping: false
-                },
-                addNewPluginConfig: {
-                    recordTypes: ['Task', 'Defect', 'Defect Suite', 'Test Set', 'User Story'],
-                    additionalFields: [this._createWorkProductComboBox(rowRecords)],
-                    listeners: {
-                        recordtypechange: this._onAddNewRecordTypeChange,
-                        create: this._onAddNewCreate,
-                        scope: this
-                    },
-                    minWidth: 600,
-                    ignoredRequiredFields: ['Name', 'Project', 'WorkProduct', 'State', 'TaskIndex', 'ScheduleState']
                 },
                 height: this._getAvailableBoardHeight(),
                 listeners: {

@@ -125,7 +125,18 @@
                 toggleState: 'board',
                 cardBoardConfig: cardboardConfig,
                 plugins: [
-                    'rallygridboardaddnew',
+                    {
+                        ptype: 'rallygridboardaddnew',
+                        addNewControlConfig: {
+                            listeners: {
+                                beforecreate: this._onBeforeCreate,
+                                beforeeditorshow: this._onBeforeEditorShow,
+                                scope: this
+                            },
+                            stateful: true,
+                            stateId: context.getScopedStateId('kanban-add-new')
+                        }
+                    },
                     {
                         ptype: 'rallygridboardcustomfiltercontrol',
                         filterChildren: true,
@@ -160,13 +171,6 @@
                 ],
                 context: context,
                 modelNames: modelNames,
-                addNewPluginConfig: {
-                    listeners: {
-                        beforecreate: this._onBeforeCreate,
-                        beforeeditorshow: this._onBeforeEditorShow,
-                        scope: this
-                    }
-                },
                 storeConfig: {
                     filters: this._getFilters()
                 },

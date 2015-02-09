@@ -19,10 +19,15 @@
         },
 
         launch: function() {
-            var plugins = [
+            var context = this.getContext(),
+                plugins = [
                 {
                     ptype: 'rallygridboardaddnew',
-                    rankScope: 'BACKLOG'
+                    rankScope: 'BACKLOG',
+                    addNewControlConfig: {
+                        stateful: true,
+                        stateId: context.getScopedStateId('iteration-planning-add-new')
+                    }
                 },
                 {
                     ptype: 'rallygridboardcustomfiltercontrol',
@@ -31,23 +36,23 @@
                         blackListFields: ['Iteration', 'PortfolioItem'],
                         modelNames: this.modelNames,
                         stateful: true,
-                        stateId: this.getContext().getScopedStateId('iteration-planning-custom-filter-button')
+                        stateId: context.getScopedStateId('iteration-planning-custom-filter-button')
                     },
                     showOwnerFilter: true,
                     ownerFilterControlConfig: {
                         stateful: true,
-                        stateId: this.getContext().getScopedStateId('iteration-planning-owner-filter')
+                        stateId: context.getScopedStateId('iteration-planning-owner-filter')
                     }
                 }
             ];
 
-            if (this.getContext().getSubscription().isHsEdition() || this.getContext().getSubscription().isExpressEdition()) {
+            if (context.getSubscription().isHsEdition() || context.getSubscription().isExpressEdition()) {
                 plugins.push('rallygridboardmanageiterations');
             }
 
             this.gridboard = this.add({
                 xtype: 'rallytimeboxgridboard',
-                context: this.getContext(),
+                context: context,
                 modelNames: this.modelNames,
                 timeboxType: 'Iteration',
                 plugins: plugins,

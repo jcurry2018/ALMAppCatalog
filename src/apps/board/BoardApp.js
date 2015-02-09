@@ -53,7 +53,13 @@
                     toggleState: 'board',
                     cardBoardConfig: this._getBoardConfig(),
                     plugins: [
-                        'rallygridboardaddnew',
+                        {
+                            ptype:'rallygridboardaddnew',
+                            addNewControlConfig: {
+                                stateful: true,
+                                stateId: context.getScopedStateId('board-add-new')
+                            }
+                        },
                         {
                             ptype: 'rallygridboardcustomfiltercontrol',
                             filterChildren: false,

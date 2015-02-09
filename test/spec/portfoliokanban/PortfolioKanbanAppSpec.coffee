@@ -5,7 +5,6 @@ Ext.require [
   'Rally.Message'
   'Ext.Element'
   'Rally.util.Ref'
-  'Rally.data.util'
   'Rally.apps.portfoliokanban.PortfolioKanbanApp'
   'Rally.data.util.PortfolioItemHelper'
 ]

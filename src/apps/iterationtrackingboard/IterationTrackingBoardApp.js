@@ -316,10 +316,14 @@
         },
 
         _getGridBoardPlugins: function() {
-            var plugins = [{
-                ptype: 'rallygridboardaddnew'
-            }];
             var context = this.getContext();
+            var plugins = [{
+                ptype: 'rallygridboardaddnew',
+                addNewControlConfig: {
+                    stateful: true,
+                    stateId: context.getScopedStateId('iteration-tracking-add-new')
+                }
+            }];
 
             plugins.push({
                 ptype: 'rallygridboardcustomfiltercontrol',

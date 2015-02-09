@@ -31,7 +31,8 @@
                     'LastUpdateDate',
                     'State',
                     'UnEstimatedLeafStoryCount'
-                ];
+                ],
+                context = this.getContext();
 
             this.gridboard = this.add({
                 xtype: 'rallytimeboxgridboard',
@@ -47,7 +48,7 @@
                         scope: this
                     }
                 },
-                context: this.getContext(),
+                context: context,
                 endDateField: 'ReleaseDate',
                 listeners: {
                     load: this._onLoad,
@@ -61,7 +62,11 @@
                 plugins: [
                     {
                         ptype: 'rallygridboardaddnew',
-                        rankScope: 'BACKLOG'
+                        rankScope: 'BACKLOG',
+                        addNewControlConfig: {
+                            stateful: true,
+                            stateId: context.getScopedStateId('release-planning-add-new')
+                        }
                     },
                     {
                         ptype: 'rallygridboardcustomfiltercontrol',
@@ -72,12 +77,12 @@
                             whiteListFields: ['Milestones'],
                             modelNames: [piTypePath],
                             stateful: true,
-                            stateId: this.getContext().getScopedStateId('release-planning-custom-filter-button')
+                            stateId: context.getScopedStateId('release-planning-custom-filter-button')
                         },
                         showOwnerFilter: true,
                         ownerFilterControlConfig: {
                             stateful: true,
-                            stateId: this.getContext().getScopedStateId('release-planning-owner-filter')
+                            stateId: context.getScopedStateId('release-planning-owner-filter')
                         }
                     },
                     {
