@@ -22,14 +22,7 @@
 
         getFilterControlConfig: function () {
             return {
-                margin: '3 9 3 0',
                 blackListFields: ['ObjectID']
-            };
-        },
-
-        getFieldPickerConfig: function() {
-            return {
-                margin: '3 9 3 -20'
             };
         }
     });
