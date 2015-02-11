@@ -39,3 +39,10 @@ describe 'Rally.apps.users.UsersApp', ->
     it 'should be to the right of the filter control', ->
       headerItemIds = _.pluck @app.gridboard.getHeader().getLeft().items.getRange(), 'itemId'
       expect(headerItemIds.indexOf('gridBoardFilterControlCt')).toBe headerItemIds.indexOf('userWorkspacePicker') - 1
+
+  describe '#getScopedStateId', ->
+    it 'should include user scoping', ->
+      expect(@app.getScopedStateId()).toContain 'user'
+
+    it 'should not include workspace scoping', ->
+      expect(@app.getScopedStateId()).not.toContain 'workspace'

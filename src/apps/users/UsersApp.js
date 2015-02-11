@@ -8,6 +8,7 @@
         cls: 'users-app',
         isWorkspaceScoped: true,
         modelNames: ['User'],
+        scopeOfUserPrefs: 'subscription',
         statePrefix: 'users',
 
         addGridBoard: function () {
@@ -48,6 +49,13 @@
             return this._getSelectedWorkspace() ? [{ property: 'WorkspacePermission', operator: '!=', value: 'No Access' }] : [];
         },
 
+        getScopedStateId: function (suffix) {
+            return Ext.create('Rally.state.ScopedStateUtil').getScopedStateId(this.getStateId(suffix), {
+                appID: this.getContext().getAppId(),
+                filterByUser: true
+            });
+        },
+
         loadModelNames: function () {
             return this._createWorkspacePicker().then({
                 success: function() {
@@ -80,7 +88,7 @@
                     },
                     scope: this
                 },
-                preferenceName: this.getStateId('workspace-combobox'),
+                preferenceName: this.getScopedStateId('workspace-combobox'),
                 storeConfig: {
                     filters: [{property: 'State', value: 'Open'}],
                     limit: Infinity,
