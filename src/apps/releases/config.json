@@ -1,0 +1,9 @@
+{
+   "name": "Releases",
+   "className": "Rally.apps.backlog.ReleasesApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "ReleasesApp.js"
+   ]
+}

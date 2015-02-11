@@ -380,7 +380,7 @@ module.exports = (grunt) ->
             'compile'
             "-classpath=#{appsdk_path}/builds/sdk-dependencies-debug.js,#{appsdk_path}/src,src/apps"
             'exclude -all and'
-            "union -r -file #{grunt.option('app')} and"
+            "union -r -file #{grunt.option('app')}/ and"
             "exclude -file #{appsdk_path}/builds/sdk-dependencies-debug.js and"
             "exclude -file #{appsdk_path}/src and"
             'exclude -namespace Ext and'
