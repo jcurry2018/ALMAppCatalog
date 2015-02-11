@@ -51,7 +51,7 @@
         loadModelNames: function () {
             return this._createWorkspacePicker().then({
                 success: function() {
-                    this.workspacePicker.on('change', this._onWorkspaceChanged, this);
+                    this.workspacePicker.on('select', this._onWorkspaceSelect, this);
                     this._setWorkspaceOnContext();
                     return this.modelNames;
                 },
@@ -68,6 +68,7 @@
                 clearText: '-- Clear Filter --',
                 cls:'user-workspace-picker',
                 context: this.getContext(),
+                editable: false,
                 emptyText: 'Filter by Workspace',
                 itemId: 'userWorkspacePicker',
                 listeners: {
@@ -81,7 +82,6 @@
                 },
                 preferenceName: this.getStateId('workspace-combobox'),
                 storeConfig: {
-                    fetch: 'Name,ObjectID',
                     filters: [{property: 'State', value: 'Open'}],
                     limit: Infinity,
                     model: Ext.identityFn('Workspace'),
@@ -99,7 +99,7 @@
             return this.workspacePicker.getStore().findRecord('_ref', this.workspacePicker.getValue());
         },
 
-        _onWorkspaceChanged: function() {
+        _onWorkspaceSelect: function() {
             this._setWorkspaceOnContext();
             this.loadGridBoard();
         },
