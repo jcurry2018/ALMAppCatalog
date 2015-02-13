@@ -24,8 +24,7 @@ describe 'Rally.apps.users.UsersApp', ->
     expect(@app).not.toBeNull()
 
   it 'should have a count of subscription seats as the last item in the left header', ->
-    expect(@app.gridboard.getHeader().getLeft().items.last().id).toBe 'seatInformationMessage'
-    expect(@app.gridboard.getHeader().getLeft().items.last().getEl().dom.textContent).toBe 'Unable to retrieve licensing information.'
+    expect(@app.gridboard.getHeader().getLeft().items.last().xtype).toBe 'rallysubscriptionseats'
 
   describe 'workspace filter', ->
     it 'should not filter by workspace by default', ->

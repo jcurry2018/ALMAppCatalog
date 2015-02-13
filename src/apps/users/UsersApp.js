@@ -3,7 +3,7 @@
 
     Ext.define('Rally.apps.users.UsersApp', {
         extend: 'Rally.app.GridBoardApp',
-        requires: ['Rally.data.wsapi.ModelFactory'],
+        requires: ['Rally.apps.users.SubscriptionSeats', 'Rally.data.wsapi.ModelFactory'],
 
         cls: 'users-app',
         isWorkspaceScoped: true,
@@ -20,18 +20,7 @@
 
             var leftHeader = this.gridboard.getHeader().getLeft();
             leftHeader.insert(leftHeader.items.indexOf(leftHeader.down('#gridBoardFilterControlCt')) + 1, this.workspacePicker);
-
-            var seatInfoCtId = 'seatInformationMessage';
-            leftHeader.add({
-                xtype: 'component',
-                cls: 'license-count',
-                id: seatInfoCtId,
-                width: 200
-            });
-            Ext.create('Rally.apps.users.SubscriptionSeats', {
-                targetId: seatInfoCtId,
-                workspaceOid: this.getContext().getWorkspace().ObjectID
-            });
+            leftHeader.add({xtype: 'rallysubscriptionseats'});
         },
 
         getGridConfig: function () {
