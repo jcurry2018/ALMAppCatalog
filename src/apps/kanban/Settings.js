@@ -66,8 +66,8 @@
                 readyEvent: 'ready',
                 isAllowedFieldFn: function(field) {
                     var attr = field.attributeDefinition;
-                    return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string')
-                        || attr.Constrained || _.contains(['boolean'], attr.AttributeType.toLowerCase())) &&
+                    return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string') ||
+                        attr.Constrained || _.contains(['boolean'], attr.AttributeType.toLowerCase())) &&
                         !_.contains(['web_link', 'text', 'date'], attr.AttributeType.toLowerCase());
                 },
                 explicitFields: [

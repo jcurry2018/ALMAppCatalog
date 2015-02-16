@@ -80,8 +80,8 @@
                             headerPosition: 'left',
                             boardFieldBlackList: ['Successors', 'Predecessors', 'DisplayColor'],
                             modelNames: modelNames,
-                            boardFieldDefaults: (this.getSetting('fields')
-                                && this.getSetting('fields').split(',')) || []
+                            boardFieldDefaults: (this.getSetting('fields') &&
+                                this.getSetting('fields').split(',')) || []
                         }
                     ],
                     context: context,
