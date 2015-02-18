@@ -52,6 +52,12 @@
             });
         },
 
+        getGridStoreConfig: function() {
+            return _.merge(this.callParent(arguments), {
+                sorters: [ {property: this.startDateFieldName, direction: 'DESC'} ]
+            });
+        },
+
         _onBeforeCreate: function(addNew, record) {
             record.set('State', 'Planning');
         }
