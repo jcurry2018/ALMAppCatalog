@@ -141,6 +141,16 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(storeCurrentPageResetStub).toHaveBeenCalledOnce()
 
   describe 'stats banner', ->
+    it 'should not show stats banner when S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS is enabled', ->
+      @stubFeatureToggle(['S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS'], true)
+      @createApp().then =>
+        expect(@app.down('#statsBanner')).toBeNull()
+
+    it 'should show stats banner when S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS is disabled', ->
+      @stubFeatureToggle(['S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS'], false)
+      @createApp().then =>
+        expect(@app.down('#statsBanner')).not.toBeNull()
+
     it 'should add the stats banner by default', ->
       @createApp().then =>
         statsBanner = @app.down '#statsBanner'
@@ -167,6 +177,26 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         setHeightSpy = @spy @app.down('rallygridboard'), 'setHeight'
         statsBanner.setHeight 40
         @waitForCallback(setHeightSpy)
+
+    it 'should show showStatsBanner settings field when app IS a full page app', ->
+      @stubFeatureToggle(['S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS'], false)
+      @createApp(isFullPageApp: true).then =>
+        expect(_.find(@app.getUserSettingsFields(), {xtype: 'rallystatsbannersettingsfield'})).toBeDefined()
+
+    it 'should show showStatsBanner settings field when S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS disabled and app IS NOT a full page app', ->
+      @stubFeatureToggle(['S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS'], false)
+      @createApp(isFullPageApp: false).then =>
+        expect(_.find(@app.getUserSettingsFields(), {xtype: 'rallystatsbannersettingsfield'})).toBeDefined()
+
+    it 'should show showStatsBanner settings field when S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS enabled and app IS a full page app', ->
+      @stubFeatureToggle(['S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS'], true)
+      @createApp(isFullPageApp: true).then =>
+        expect(_.find(@app.getUserSettingsFields(), {xtype: 'rallystatsbannersettingsfield'})).toBeDefined()
+
+    it 'should NOT show showStatsBanner settings field when S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS enabled and app is NOT a full page app', ->
+      @stubFeatureToggle(['S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS'], true)
+      @createApp(isFullPageApp: false).then =>
+        expect(_.find(@app.getUserSettingsFields(), {xtype: 'rallystatsbannersettingsfield'})).not.toBeDefined()
 
   it 'fires contentupdated event after board load', ->
     contentUpdatedHandlerStub = @stub()

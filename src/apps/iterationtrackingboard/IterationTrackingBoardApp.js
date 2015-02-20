@@ -134,13 +134,13 @@
 
         getUserSettingsFields: function () {
             var fields = this.callParent(arguments);
-
-            fields.push({
-                xtype: 'rallystatsbannersettingsfield',
-                fieldLabel: '',
-                mapsToMultiplePreferenceKeys: ['showStatsBanner']
-            });
-
+            if (!this.getContext().isFeatureEnabled('S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS') || this.isFullPageApp !== false) {
+                fields.push({
+                    xtype: 'rallystatsbannersettingsfield',
+                    fieldLabel: '',
+                    mapsToMultiplePreferenceKeys: ['showStatsBanner']
+                });
+            }
             return fields;
         },
 
@@ -162,7 +162,8 @@
         },
 
         _shouldShowStatsBanner: function() {
-            return this.includeStatsBanner && this.getSetting('showStatsBanner');
+            return !this.getContext().isFeatureEnabled('S85045_HIDE_STATS_BANNER_ON_ITERATION_TRACKING_DASHBOARD_APPS') &&
+                this.includeStatsBanner && this.getSetting('showStatsBanner');
         },
 
         _addStatsBanner: function() {
