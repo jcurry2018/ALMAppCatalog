@@ -50,15 +50,9 @@
         },
 
         getFieldPickerConfig: function () {
-            var blackListedFields = [];
-
-            if(!this.getContext().isFeatureEnabled('S74502_PI_DEPENDENCIES_ON_EDP')) {
-                blackListedFields.push('PredecessorsAndSuccessors');
-            }
             return _.merge(this.callParent(arguments), {
                 boardFieldDefaults: (this.getSetting('fields') || '').split(','),
-                boardFieldBlackList: ['Predecessors', 'Successors'].concat(blackListedFields),
-                gridFieldBlackList: blackListedFields,
+                boardFieldBlackList: ['Predecessors', 'Successors'],
                 margin: '3 9 14 0'
             });
         },
