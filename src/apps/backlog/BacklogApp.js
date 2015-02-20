@@ -9,20 +9,20 @@
         statePrefix: 'backlog',
 
         getPermanentFilters: function () {
+            var defectSuiteModel = this._getModelFor('defectsuite');
             return [
                 { property: 'Release', operator: '=', value: null },
                 { property: 'Iteration', operator: '=', value: null },
                 Rally.data.wsapi.Filter.or([
                     Rally.data.wsapi.Filter.and([
                         { property: 'State', operator: '!=', value: 'Closed' },
-                        { property: 'TypeDefOid', operator: '=', value: this._getTypeDefOidFor('defect') }
+                        { property: 'TypeDefOid', operator: '=', value: this._getModelFor('defect').typeDefOid }
                     ]),
                     Rally.data.wsapi.Filter.and([
                         { property: 'DirectChildrenCount', operator: '=', value: '0' },
-                        { property: 'TypeDefOid', operator: '=', value: this._getTypeDefOidFor('hierarchicalrequirement') }
-                    ]),
-                    { property: 'TypeDefOid', operator: '=', value: this._getTypeDefOidFor('defectsuite') }
-                ])
+                        { property: 'TypeDefOid', operator: '=', value: this._getModelFor('hierarchicalrequirement').typeDefOid }
+                    ])
+                ].concat(defectSuiteModel ? [{ property: 'TypeDefOid', operator: '=', value: defectSuiteModel.typeDefOid }] : []))
             ];
         },
 
@@ -32,8 +32,8 @@
             };
         },
 
-        _getTypeDefOidFor: function(type) {
-            return _.find(this.models, { typePath: type }).typeDefOid;
+        _getModelFor: function(type) {
+            return _.find(this.models, { typePath: type });
         }
     });
 })();
