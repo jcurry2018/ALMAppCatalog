@@ -5,6 +5,17 @@ Ext.require [
 describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
   helpers
     createApp: (config = {}) ->
+      Ext.create 'Ext.Container',
+        id: 'content'
+        items: [
+          xtype: 'container'
+          cls: 'titlebar'
+          items: [
+            cls: 'dashboard-timebox-container'
+          ]
+        ]
+        renderTo: 'testDiv'
+
       Ext.create 'Rally.apps.common.PortfolioItemsGridBoardApp',
         Ext.apply
           context: Ext.create 'Rally.app.Context',
@@ -55,6 +66,6 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
             typePicker.on 'destroy', destroyStub
 
             @changeType().then =>
-              expect(typePicker).toBeVisible()
+              expect(typePicker.isVisible()).toBe true
               expect(destroyStub).not.toHaveBeenCalled()
               expect(@app.piTypePicker).toBe typePicker

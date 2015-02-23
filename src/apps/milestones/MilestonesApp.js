@@ -13,21 +13,6 @@
         modelNames: ['Milestone'],
         statePrefix: 'milestone',
 
-        getGridConfig: function () {
-            return _.merge(this.callParent(arguments), {
-                rowActionColumnConfig: {
-                    rowActionsFn: function (record) {
-                        return Rally.ui.MilestoneTargetProjectPermissionsHelper.shouldDisableEditing(record) ? [] : [
-                            {
-                                xtype: 'rallyrecordmenuitemdelete',
-                                record: record
-                            }
-                        ];
-                    }
-                }
-            });
-        },
-
         getPermanentFilters: function () {
             return [
                 Rally.data.wsapi.Filter.or([
@@ -35,10 +20,6 @@
                     { property: 'TargetProject', operator: '=', value: null }
                 ])
             ];
-        },
-
-        getAdditionalFetchFields: function () {
-            return ['DisplayColor'];
         },
 
         getFieldPickerConfig: function () {

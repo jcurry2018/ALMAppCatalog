@@ -98,11 +98,12 @@
             }, config);
         },
 
-        getHeaderControls: function () {
-            var ctls = this.callParent(arguments);
-            ctls.unshift(this._buildHelpComponent());
-            ctls.push(this._buildFilterInfo());
-            return ctls;
+        addGridBoard: function () {
+            this.callParent(arguments);
+            this.gridboard.getHeader().getRight().add([
+                this._buildHelpComponent(),
+                this._buildFilterInfo()
+            ]);
         },
 
         getGridBoardPlugins: function () {

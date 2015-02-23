@@ -33,7 +33,7 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
 
     createAppWithNoData: (canEdit = true) ->
       @createApp [], canEdit
-      
+
     getFirstDataRow: ->
       @app.getEl().down '.btid-row-' + @milestoneData[0].ObjectID
 
@@ -89,22 +89,6 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
         expect(targetDateField.xtype).toBe 'rallymilestoneprojectcombobox'
         expect(targetDateField.name).toBe 'TargetProject'
         expect(targetDateField.value).toBe @app.getContext().getProjectRef()
-
-  describe 'row actions', ->
-    helpers
-      createAppAndClickGear: (isAdmin) ->
-        @createAppWithData(TargetProject: null, _p: 2 + 5 * isAdmin).then =>
-          @click(css: ".btid-row-#{@milestoneData[0].ObjectID} .row-action-icon").then ->
-            Ext.query('.rally-menu .' + Ext.baseCSSPrefix + 'menu-item-link')
-
-    it 'should have only a delete option when can edit target project', ->
-      @createAppAndClickGear(true).then (menuItems) ->
-        expect(menuItems.length).toBe 1
-        expect(menuItems[0].textContent).toBe 'Delete'
-
-    it 'should not have any options when cannot edit target project', ->
-      @createAppAndClickGear(false).then (menuItems) ->
-        expect(menuItems.length).toBe 0
 
   describe 'store config', ->
     it 'should have project scoping filters', ->
