@@ -26,6 +26,10 @@ describe 'Rally.apps.users.UsersApp', ->
   it 'should have a count of subscription seats as the last item in the left header', ->
     expect(@app.gridboard.getHeader().getLeft().items.last().xtype).toBe 'rallysubscriptionseats'
 
+  it 'should apply custom filter config', ->
+    customFilterPluginConfig = _.find(@app.getGridBoardPlugins(), { ptype:'rallygridboardcustomfiltercontrol'})
+    expect(customFilterPluginConfig.showUserFilter).toBe true
+
   describe 'workspace filter', ->
     it 'should not filter by workspace by default', ->
       expect(@app.gridboard.getGridOrBoard().store).toHaveNoFilters()

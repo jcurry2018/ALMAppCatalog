@@ -3,7 +3,11 @@
 
     Ext.define('Rally.apps.users.UsersApp', {
         extend: 'Rally.app.GridBoardApp',
-        requires: ['Rally.apps.users.SubscriptionSeats', 'Rally.data.wsapi.ModelFactory'],
+        requires: [
+            'Rally.util.Ref',
+            'Rally.data.wsapi.ModelFactory',
+            'Rally.apps.users.SubscriptionSeats'
+        ],
 
         cls: 'users-app',
         isWorkspaceScoped: true,
@@ -104,6 +108,21 @@
         _setWorkspaceOnContext: function() {
             this.context = this.getContext().clone();
             this.context.setWorkspace(this._getSelectedWorkspace() ? this._getSelectedWorkspace().data : Rally.environment.getContext().getWorkspace());
+        },
+
+        getGridBoardCustomFilterControlConfig: function() {
+            return {
+                showUserFilter: true,
+                userFilterConfig: {
+                    stateful: true,
+                    stateId: this.getScopedStateId('user-user-filter'),
+                    storeConfig:{
+                        pageSize: 25,
+                        fetch: ['UserName'],
+                        autoLoad: true
+                    }
+                }
+            };
         }
     });
 })();
