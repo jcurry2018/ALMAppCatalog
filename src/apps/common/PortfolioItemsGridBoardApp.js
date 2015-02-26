@@ -209,6 +209,14 @@
 
         _publishContentUpdatedNoDashboardLayout: function () {
             this.fireEvent('contentupdated', { dashboardLayout: false });
+        },
+
+        onDestroy: function() {
+            this.callParent(arguments);
+            if(this.piTypePicker) {
+                this.piTypePicker.destroy();
+                delete this.piTypePicker;
+            }
         }
     });
 })();

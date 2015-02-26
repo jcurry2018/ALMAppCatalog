@@ -34,6 +34,9 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
     @piHelper = new Helpers.PortfolioItemGridBoardHelper @
     @piHelper.stubPortfolioItemRequests()
 
+  afterEach ->
+    @app?.destroy()
+
   describe 'PI type picker ', ->
     helpers
       changeType: ->
@@ -69,3 +72,11 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
               expect(typePicker.isVisible()).toBe true
               expect(destroyStub).not.toHaveBeenCalled()
               expect(@app.piTypePicker).toBe typePicker
+
+    it 'should destroy the piTypePicker when the app is destroyed', ->
+      @renderApp().then =>
+        typePicker = @app.piTypePicker
+        @spy typePicker, 'destroy'
+        @app.destroy()
+        expect(typePicker.destroy).toHaveBeenCalledOnce()
+        expect(@app.piTypePicker).toBeUndefined()
