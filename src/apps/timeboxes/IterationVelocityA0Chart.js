@@ -4,6 +4,7 @@
     Ext.define('Rally.apps.timeboxes.IterationVelocityA0Chart', {
         extend: 'Ext.Component',
         alias: 'widget.rallyiterationvelocitya0chart',
+        cls: 'iteration-velocity-a0-chart',
 
         afterRender: function () {
             Ext.Ajax.request({
@@ -11,8 +12,6 @@
                 success: function (response) {
                     if (!this.isDestroyed) {
                         this.update(response.responseText);
-                        this.getEl().down('div').setStyle('border', 'none');
-                        this.getEl().down('input').hide();
                     }
                 },
                 scope: this

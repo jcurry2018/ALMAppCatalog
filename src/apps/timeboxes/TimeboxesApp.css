@@ -1,0 +1,8 @@
+.iteration-velocity-a0-chart > div {
+    width: 100% !important;
+    border: none !important;
+}
+
+.iteration-velocity-a0-chart input {
+    display: none;
+}
