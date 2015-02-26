@@ -50,6 +50,9 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
     it 'should have a disabled chart button', ->
       expect(@getChartButton().disabled).toBe true
 
+    it 'should not have an xml export button', ->
+      expect(@app.xmlExportEnabled()).toBe false
+
   describe 'iterations', ->
     beforeEach ->
       @createApp 'iteration'
@@ -63,6 +66,9 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
     it 'should have a disabled chart button', ->
       expect(@getChartButton().disabled).toBe false
 
+    it 'should have an xml export button', ->
+      expect(@app.xmlExportEnabled()).toBe true
+
   describe 'releases', ->
     beforeEach ->
       @createApp 'release'
@@ -75,6 +81,9 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
 
     it 'should have a disabled chart button', ->
       expect(@getChartButton().disabled).toBe true
+
+    it 'should have an xml export button', ->
+      expect(@app.xmlExportEnabled()).toBe true
 
   describe 'on type change', ->
     beforeEach ->

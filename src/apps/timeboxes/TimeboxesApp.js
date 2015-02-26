@@ -16,7 +16,10 @@
         ],
 
         enableGridBoardToggle: true,
-        enableXmlExport: true,
+
+        xmlExportEnabled: function(){
+            return this.selectedType !== 'milestone';
+        },
 
         loadSettingsAndLaunch: function () {
             if (this.modelPicker) {
