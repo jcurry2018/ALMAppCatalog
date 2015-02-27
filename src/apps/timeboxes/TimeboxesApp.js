@@ -12,7 +12,6 @@
         requires: [
             'Deft.Deferred',
             'Rally.apps.timeboxes.IterationVelocityA0Chart',
-            'Rally.data.PreferenceManager',
             'Rally.ui.gridboard.GridBoardToggle'
         ],
 
@@ -20,14 +19,6 @@
 
         xmlExportEnabled: function(){
             return this.selectedType !== 'milestone';
-        },
-
-        newPageNoticePreferenceName: 'newMilestonesPageNotice',
-
-        constructor: function() {
-            this.callParent(arguments);
-
-            this._showNewPageNoticeIfNeeded();
         },
 
         loadSettingsAndLaunch: function () {
@@ -225,35 +216,6 @@
             if (this.modelPicker) {
                 this.changeModelType(this.modelPicker.getValue());
             }
-        },
-
-        _showNewPageNoticeIfNeeded: function() {
-            Rally.data.PreferenceManager.load({
-                filterByUser: true,
-                additionalFilters: {
-                    property: 'Name',
-                    value: this.newPageNoticePreferenceName
-                },
-                success: function(pref) {
-                    if (pref[this.newPageNoticePreferenceName] !== 'true') {
-                        this._showNewPageNotice();
-                    }
-                },
-                scope: this
-            });
-        },
-
-        _showNewPageNotice: function() {
-            this.newPageNoticePopover = Ext.create('Rally.apps.timeboxes.NewPageNoticePopover', {
-                dismissedPrefName: this.newPageNoticePreferenceName,
-                listeners: {
-                    destroy: function() {
-                        delete this.newPageNoticePopover;
-                    },
-                    scope: this
-                },
-                target: Ext.getBody().down('.titlebar .title')
-            });
         }
     });
 })();

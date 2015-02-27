@@ -1,10 +1,10 @@
 Ext = window.Ext4 || window.Ext
 
-Ext.require 'Rally.data.PreferenceManager'
+Ext.require('Rally.data.PreferenceManager')
 
 describe 'Rally.apps.timeboxes.TimeboxesApp', ->
   helpers
-    createApp: (selectedType = 'iteration', config = {}, prefs = []) ->
+    createApp: (selectedType = 'iteration', config = {}) ->
       config = _.merge(
         context: Ext.create 'Rally.app.Context',
           initialValues:
@@ -17,18 +17,16 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
       , config)
 
       @ajax.whenQueryingEndpoint('/charts/iterationVelocityChart.sp').respondWithString Ext.JSON.encode('<div><input/></div>')
+      @ajax.whenQuerying('preference').respondWith()
 
       @requestStubs = _.reduce ['milestone', 'iteration', 'release'], (result, type) =>
         result[type] = @ajax.whenQuerying(type).respondWith @mom.getData type
         result
       , {}
 
-      if _.isEmpty prefs
-        @preferenceLoadStub = @stub Rally.data.PreferenceManager, 'load', (options) ->
-          if options.filterByName is 'timebox-combobox'
-            options.success.call options.scope, 'timebox-combobox': selectedType
-      else
-        @ajax.whenQuerying('preference').respondWith @mom.getData('preference', values: prefs)
+      @preferenceLoadStub = @stub Rally.data.PreferenceManager, 'load', (options) ->
+        if options.filterByName is 'timebox-combobox'
+          options.success.call options.scope, 'timebox-combobox': selectedType
 
       @app = Ext.create 'Rally.apps.timeboxes.TimeboxesApp', config
       @waitForComponentReady @app
@@ -114,20 +112,3 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
     it 'should not disable applicable header controls', ->
       expect(@getHeader().down('#grid').disabled).toBe false
       expect(@getHeader().down('#chart').disabled).toBe false
-
-  describe 'new page notice', ->
-    it 'should not be shown if the preference is set', ->
-      @createApp('milestone', {}, [
-        Name: 'newMilestonesPageNotice'
-        Value: 'true'
-      ]).then =>
-        expect(@app.newPageNoticePopover).toBeUndefined()
-
-    it 'should be shown if the preference is not set', ->
-      @createApp('milestone', {}, [
-        Name: 'somePref'
-        Value: 'some value'
-      ]).then =>
-        expect(@app.newPageNoticePopover).not.toBeNull()
-        expect(@app.newPageNoticePopover.$className).toBe 'Rally.apps.timeboxes.NewPageNoticePopover'
-        @app.newPageNoticePopover.destroy()
