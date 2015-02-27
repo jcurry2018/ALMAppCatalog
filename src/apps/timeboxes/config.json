@@ -5,6 +5,7 @@
    "sdk": "x",
    "javascript": [
       "IterationVelocityA0Chart.js",
+      "NewPageNoticePopover.js",
       "TimeboxesApp.js"
    ]
 }
