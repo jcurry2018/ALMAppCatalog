@@ -20,6 +20,7 @@
             'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
+            'Rally.ui.gridboard.plugin.GridBoardFiltering',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
@@ -300,22 +301,26 @@
                 }
             }];
 
-            plugins.push({
-                ptype: 'rallygridboardcustomfiltercontrol',
-                filterChildren: true,
-                filterControlConfig: {
-                    blackListFields: ['Iteration', 'PortfolioItem'],
-                    whiteListFields: ['Milestones'],
-                    modelNames: this.modelNames,
-                    stateful: true,
-                    stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
-                },
-                showOwnerFilter: true,
-                ownerFilterControlConfig: {
-                    stateful: true,
-                    stateId: context.getScopedStateId('iteration-tracking-owner-filter')
-                }
-            });
+            if (context.isFeatureEnabled('F7336_ADVANCED_FILTERING')) {
+                plugins.push('rallygridboardfiltering');
+            } else {
+                plugins.push({
+                    ptype: 'rallygridboardcustomfiltercontrol',
+                    filterChildren: true,
+                    filterControlConfig: {
+                        blackListFields: ['Iteration', 'PortfolioItem'],
+                        whiteListFields: ['Milestones'],
+                        modelNames: this.modelNames,
+                        stateful: true,
+                        stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
+                    },
+                    showOwnerFilter: true,
+                    ownerFilterControlConfig: {
+                        stateful: true,
+                        stateId: context.getScopedStateId('iteration-tracking-owner-filter')
+                    }
+                });
+            }
 
             plugins.push('rallygridboardtoggleable');
 

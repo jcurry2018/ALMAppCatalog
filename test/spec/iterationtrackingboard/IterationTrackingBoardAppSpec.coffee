@@ -351,9 +351,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
           expect(gridBoard.getHeight()).toBe currentHeight + 10
 
   describe 'custom filter popover', ->
-    beforeEach ->
-      @featureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
-
     it 'should add common storeConfig to gridboard', ->
       @createApp().then =>
         gridBoard = @app.down 'rallygridboard'
@@ -377,6 +374,17 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then =>
         filterPlugin = _.find(@app.gridboard.plugins, ptype: 'rallygridboardcustomfiltercontrol')
         expect(_.contains(filterPlugin.filterControlConfig.whiteListFields, 'Milestones')).toBe true
+
+  describe 'filtering panel plugin', ->
+    beforeEach ->
+      @stubFeatureToggle ['F7336_ADVANCED_FILTERING'], true
+
+    it 'should use rallygridboard filtering plugin', ->
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardfiltering'
+        expect(plugin).toBeDefined()
 
   describe 'page sizes', ->
     beforeEach ->
