@@ -5,12 +5,12 @@
         extend: 'Rally.app.GridBoardApp',
 
         columnNames: ['ID','Name', 'Type','DeletedBy','DeletionDate'],
-        modelNames: ['RecycleBinEntry'],
-        statePrefix: 'recyclebin',
         enableOwnerFilter: false,
         enableAddNew: false,
         enablePrint: false,
         enableCsvExport: false,
+        modelNames: ['RecycleBinEntry'],
+        statePrefix: 'recyclebin',
 
         getGridConfig: function () {
             return _.merge(this.callParent(arguments), {
