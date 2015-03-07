@@ -302,7 +302,45 @@
             }];
 
             if (context.isFeatureEnabled('F7336_ADVANCED_FILTERING')) {
-                plugins.push('rallygridboardfiltering');
+                plugins.push({
+                    ptype:'rallygridboardfiltering',
+                    filterButtonConfig: {
+                        filterPanelConfig: {
+                            quickFilterPanelConfig: {
+                                filterConfigs:
+                                [
+                                    {
+                                        xtype: 'textfield',
+                                        itemId: 'search',
+                                        fieldLabel: 'SEARCH',
+                                        //defaults
+                                        labelAlign: 'top',
+                                        labelSeparator: '',
+                                        margin: 5
+                                    },
+                                    {
+                                        xtype: 'textfield',
+                                        itemId: 'owner',
+                                        fieldLabel: 'OWNER',
+                                        //defaults
+                                        labelAlign: 'top',
+                                        labelSeparator: '',
+                                        margin: 5
+                                    },
+                                    {
+                                        xtype: 'textfield',
+                                        itemId: 'type',
+                                        fieldLabel: 'TYPE',
+                                        //defaults
+                                        labelAlign: 'top',
+                                        labelSeparator: '',
+                                        margin: 5
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                });
             } else {
                 plugins.push({
                     ptype: 'rallygridboardcustomfiltercontrol',
