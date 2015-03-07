@@ -307,6 +307,7 @@
                     filterButtonConfig: {
                         filterPanelConfig: {
                             quickFilterPanelConfig: {
+                                //TODO: configure real filter components
                                 filterConfigs:
                                 [
                                     {
