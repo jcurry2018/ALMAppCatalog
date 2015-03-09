@@ -113,12 +113,6 @@
             }, this._getTypeSpecificAddNewConfig());
         },
 
-        getFilterControlConfig: function () {
-            return _.merge(this.callParent(arguments), {
-                blackListFields: ['GrossEstimateConversionRatio', 'Theme']
-            });
-        },
-
         getGridStoreConfig: function() {
             return _.merge(this.callParent(arguments), {
                 sorters: [ {property: this._getStartDateFieldName(), direction: 'DESC'} ]
