@@ -125,3 +125,11 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.iterationprogresscharts.
         formatter = chartConfig.chartConfig.tooltip.formatter
         result = formatter.call(point: {})
         expect(result).toBeAString()
+
+  describe 'destroy', ->
+    it 'should reset chart pointer', ->
+      @createChart().then (chart) =>
+        resetSpy = @spy chart.down('rallychart').getChart().pointer, 'reset'
+        chart.destroy()
+        expect(resetSpy.callCount).toBe 1
+
