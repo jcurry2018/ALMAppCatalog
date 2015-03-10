@@ -110,60 +110,13 @@
                 openEditorAfterAddFailure: false,
                 showAddWithDetails: true,
                 showRank: false
-            }, this._getTypeSpecificAddNewConfig());
+            });
         },
 
         getGridStoreConfig: function() {
             return _.merge(this.callParent(arguments), {
                 sorters: [ {property: this._getStartDateFieldName(), direction: 'DESC'} ]
             });
-        },
-
-        _getTypeSpecificAddNewConfig: function () {
-            if (this.selectedType === 'milestone') {
-                return {
-                    additionalFields: [
-                        {
-                            xtype: 'rallydatefield',
-                            emptyText: 'Select Date',
-                            name: 'TargetDate'
-                        },
-                        {
-                            xtype: 'rallymilestoneprojectcombobox',
-                            minWidth: 250,
-                            name: 'TargetProject',
-                            value: Rally.util.Ref.getRelativeUri(this.getContext().getProject())
-                        }
-                    ]
-                };
-            }
-
-            var startDateFieldName = this._getStartDateFieldName();
-            var endDateFieldName = this.selectedType === 'release' ? 'ReleaseDate' : 'EndDate';
-
-            return {
-                additionalFields: [
-                    {
-                        xtype: 'rallydatefield',
-                        allowBlank: false,
-                        emptyText: 'Select Start Date',
-                        name: startDateFieldName,
-                        paramName: 'startDate'
-                    }, {
-                        xtype: 'rallydatefield',
-                        allowBlank: false,
-                        emptyText: this.selectedType === 'release' ? 'Select Release Date' : 'Select End Date',
-                        name: endDateFieldName,
-                        paramName: 'endDate'
-                    }
-                ],
-                ignoredRequiredFields: ['GrossEstimateConversionRatio', 'Name', 'Project', 'State', startDateFieldName, endDateFieldName],
-                listeners: {
-                    beforecreate: function(addNew, record) {
-                        record.set('State', 'Planning');
-                    }
-                }
-            };
         },
 
         _getStartDateFieldName: function () {

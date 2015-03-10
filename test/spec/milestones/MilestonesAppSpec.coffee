@@ -72,24 +72,6 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
       @createAppWithData(TargetProject: '').then =>
         expect(@getFirstDataRow().down('.targetproject').getHTML()).toContain 'Project Permissions Required'
 
-  describe 'add new', ->
-    describe 'fields', ->
-      beforeEach ->
-        @createAppWithData().then =>
-          @addNew = @app.down 'rallyaddnew'
-
-      it 'includes a field for target date', ->
-        targetDateField = @addNew.additionalFields[0]
-        expect(targetDateField.xtype).toBe 'rallydatefield'
-        expect(targetDateField.emptyText).toBe 'Select Date'
-        expect(targetDateField.name).toBe 'TargetDate'
-
-      it 'includes a field for target project', ->
-        targetDateField = @addNew.additionalFields[1]
-        expect(targetDateField.xtype).toBe 'rallymilestoneprojectcombobox'
-        expect(targetDateField.name).toBe 'TargetProject'
-        expect(targetDateField.value).toBe @app.getContext().getProjectRef()
-
   describe 'store config', ->
     it 'should have project scoping filters', ->
       @createAppWithNoData().then =>
