@@ -18,7 +18,7 @@
 		requires: [
 			'Rally.apps.chartbuilder.EaselAlmBridge',
 			'Rally.ui.combobox.MilestoneComboBox',
-			"Rally.apps.chartbuilder.StateFieldPicker",
+			'Rally.ui.picker.StateFieldPicker',
 			'Rally.util.Help'
 		],
 		autoScroll: false,
