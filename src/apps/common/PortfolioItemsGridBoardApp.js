@@ -7,6 +7,35 @@
             'Rally.ui.cardboard.plugin.CollapsibleColumns',
             'Rally.ui.cardboard.plugin.FixedHeader'
         ],
+        constructor: function(config){
+            var defaultConfig = {
+                piTypePickerConfig: {
+                    renderInGridHeader: false
+                }
+            };
+            this.callParent([Ext.Object.merge(defaultConfig, config)]);
+        },
+        initComponent: function(){
+            this.callParent(arguments);
+            this.addCls('portfolio-items-grid-board-app');
+        },
+        addGridBoard: function(){
+            if (this.gridboard && this.piTypePicker && this.piTypePicker.rendered) {
+                var parent = this.piTypePicker.up();
+                if(parent && parent.remove){
+                    parent.remove(this.piTypePicker, false);
+                }
+            }
+            this.callParent(arguments);
+            this.addHeader();
+
+        },
+        addHeader: function(){
+            var header = this.gridboard.getHeader();
+            if (header) {
+                header.getRight().add(this.getHeaderControls());
+            }
+        },
 
         launch: function () {
             if (Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
@@ -29,6 +58,10 @@
                 },
                 scope: this
             });
+        },
+
+        getHeaderControls: function () {
+            return (this.config.piTypePickerConfig.renderInGridHeader) ? [this.piTypePicker] : [];
         },
 
         getFilterControlConfig: function () {
@@ -168,15 +201,16 @@
         },
 
         _createPITypePicker: function () {
+            if (this.piTypePicker && this.piTypePicker.destroy) {
+                this.piTypePicker.destroy();
+            }
             var deferred = new Deft.Deferred();
-
-            this.piTypePicker = Ext.create('Rally.ui.combobox.PortfolioItemTypeComboBox', {
+            var piTypePickerConfig = {
                 preferenceName: this.getStateId('typepicker'),
                 fieldLabel: '', // delete this when removing PORTFOLIO_ITEM_TREE_GRID_PAGE_OPT_IN toggle. Can't delete these from PI Combobox right now or GUI tests fail in old PI page
                 labelWidth: 0,  // delete this when removing PORTFOLIO_ITEM_TREE_GRID_PAGE_OPT_IN toggle. Can't delete these from PI Combobox right now or GUI tests fail in old PI page
                 value: this.getSetting('type'),
                 context: this.getContext(),
-                renderTo: Ext.query('#content .titlebar .dashboard-timebox-container')[0],
                 listeners: {
                     change: this._onTypeChange,
                     ready: {
@@ -187,8 +221,11 @@
                     },
                     scope: this
                 }
-            });
-
+            };
+            if(!this.config.piTypePickerConfig.renderInGridHeader){
+                piTypePickerConfig.renderTo = Ext.query('#content .titlebar .dashboard-timebox-container')[0];
+            }
+            this.piTypePicker = Ext.create('Rally.ui.combobox.PortfolioItemTypeComboBox', piTypePickerConfig);
             return deferred.promise;
         },
 
