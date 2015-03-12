@@ -129,7 +129,10 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.iterationprogresscharts.
   describe 'destroy', ->
     it 'should reset chart pointer', ->
       @createChart().then (chart) =>
-        resetSpy = @spy chart.down('rallychart').getChart().pointer, 'reset'
-        chart.destroy()
-        expect(resetSpy.callCount).toBe 1
+        @once(
+          condition: => chart.down('rallychart') && chart.down('rallychart').getChart()
+        ).then =>
+          resetSpy = @spy chart.down('rallychart').getChart().pointer, 'reset'
+          chart.destroy()
+          expect(resetSpy.callCount).toBe 1
 
