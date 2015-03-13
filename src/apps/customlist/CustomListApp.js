@@ -12,6 +12,7 @@
         ],
 
         statePrefix: 'customlist',
+        disallowedAddNewTypes: ['user', 'userprofile', 'useriterationcapacity', 'testcaseresult', 'task', 'scmrepository', 'project', 'changeset', 'change', 'builddefinition', 'build'],
 
         initComponent: function () {
             this.defaultSettings = {
@@ -41,6 +42,7 @@
                     this.publishComponentReady();
                 }, 1, this);
             } else {
+                this.enableAddNew = this._shouldEnableAddNew();
                 this.callParent(arguments);
             }
         },
@@ -71,6 +73,13 @@
             }, this.appContainer.pagesize ? { pageSize: this.appContainer.pagesize } : {});
         },
 
+        getAddNewConfig: function () {
+            return _.merge(this.callParent(arguments), {
+                minWidth: 700,
+                openEditorAfterAddFailure: false
+            });
+        },
+
         getFieldPickerConfig: function () {
             return _.merge(this.callParent(arguments), {
                 buttonConfig: {
@@ -82,6 +91,10 @@
         getPermanentFilters: function () {
             var query = this.getSetting('query');
             return query ? [ Rally.data.wsapi.Filter.fromQueryString(query) ] : [];
+        },
+
+        _shouldEnableAddNew: function() {
+            return !_.contains(this.disallowedAddNewTypes, this.getSetting('type').toLowerCase());
         },
 
         _setColumnNames: function (columnNames) {

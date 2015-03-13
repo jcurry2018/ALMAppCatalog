@@ -129,3 +129,15 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         @createApp(settings: @ext4AppScopedSettings, appContainer: isEditable: false).then =>
           @getGrid().fireEvent 'beforestatesave', @getGrid(), columns: ['Name', 'Blocked', 'Iteration', 'State']
           expect(@prefUpdateStub).not.toHaveBeenCalled()
+
+  describe 'add new', ->
+    it 'should not show for a disallowed type', ->
+      @createApp(settings: type: 'task').then =>
+        expect(@app.enableAddNew).toBe false
+
+    it 'should show for an allowed type', ->
+      @createApp(settings: type: 'defect').then =>
+        expect(@app.enableAddNew).toBe true
+
+
+
