@@ -44,6 +44,28 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
         @app.piTypePicker.setValue(Rally.util.Ref.getRelativeUri(@piHelper.theme._ref))
         @waitForCallback addGridBoardSpy
 
+    describe 'render location controlled with piTypePickerConfig', ->
+      helpers
+        renderAppWithPiPickerInGridHeader: (renderInGridHeader)->
+          config = {}
+          if renderInGridHeader? then config.piTypePickerConfig = {renderInGridHeader: renderInGridHeader}
+          return @renderApp(config)
+
+      it 'should render to the right in the grid header when configured with \'renderInGridHeader\':true ', ->
+        @renderAppWithPiPickerInGridHeader(true).then =>
+          expect(@app.gridboard.getHeader?().getRight?().contains?(@app.piTypePicker)).toBeTruthy()
+
+      it 'should render to dashboard title when configured with \'renderInGridHeader\':false ', ->
+        @renderAppWithPiPickerInGridHeader(false).then =>
+          expect(@app.gridboard.getHeader?().getRight?().contains?(@app.piTypePicker)).toBeFalsy()
+          expect(Ext.query('#content .titlebar .dashboard-timebox-container')[0].contains(@app.piTypePicker.getEl().dom)).toBeTruthy()
+
+      it 'should render to the dashboard title by default ', ->
+        @renderAppWithPiPickerInGridHeader().then =>
+          expect(@app.gridboard.getHeader?().getRight?().contains?(@app.piTypePicker)).toBeFalsy()
+          expect(Ext.query('#content .titlebar .dashboard-timebox-container')[0].contains(@app.piTypePicker.getEl().dom)).toBeTruthy()
+
+
     _.each ['board', 'grid'], (toggleState) =>
       describe "in #{toggleState} mode", ->
         beforeEach ->
