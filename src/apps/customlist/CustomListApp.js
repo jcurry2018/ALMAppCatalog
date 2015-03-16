@@ -89,7 +89,15 @@
 
         getPermanentFilters: function () {
             var query = this.getSetting('query');
-            return query ? [ Rally.data.wsapi.Filter.fromQueryString(query) ] : [];
+            return this._getTimeboxScopeFilter().concat(query ? [ Rally.data.wsapi.Filter.fromQueryString(query) ] : []);
+        },
+
+        _getTimeboxScopeFilter: function () {
+            var timeboxScope = this.getContext().getTimeboxScope();
+            var hasTimeboxField = timeboxScope && _.any(this.models, function (model) {
+                return model.hasField(Ext.String.capitalize(timeboxScope.getType()));
+            });
+            return hasTimeboxField ? [ timeboxScope.getQueryFilter() ] : [];
         },
 
         _shouldEnableAddNew: function() {
