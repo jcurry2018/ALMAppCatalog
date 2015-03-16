@@ -30,6 +30,7 @@
                     autoSelect: false,
                     shouldRespondToScopeChange: true,
                     context: context,
+                    initialValue: 'HierarchicalRequirement',
                     storeConfig: {
                         model: Ext.identityFn('TypeDefinition'),
                         sorters: [{ property: 'DisplayName' }],
@@ -44,12 +45,6 @@
                     listeners: {
                         select: function (combo) {
                             combo.fireEvent('typeselected', combo.getRecord().get('TypePath'), combo.context);
-                        },
-                        ready: function (combo) {
-                            if (!combo.originalValue) {
-                                combo.setValue('HierarchicalRequirement');
-                                combo.fireEvent('typeselected', combo.getRecord().get('TypePath'), combo.context);
-                            }
                         }
                     },
                     bubbleEvents: ['typeselected'],
