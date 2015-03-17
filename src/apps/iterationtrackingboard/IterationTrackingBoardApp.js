@@ -305,39 +305,10 @@
                 plugins.push({
                     ptype:'rallygridboardfiltering',
                     filterButtonConfig: {
+                        modelNames: this.modelNames,
                         filterPanelConfig: {
                             quickFilterPanelConfig: {
-                                //TODO: configure real filter components
-                                filterConfigs:
-                                [
-                                    {
-                                        xtype: 'textfield',
-                                        itemId: 'search',
-                                        fieldLabel: 'SEARCH',
-                                        //defaults
-                                        labelAlign: 'top',
-                                        labelSeparator: '',
-                                        margin: 5
-                                    },
-                                    {
-                                        xtype: 'textfield',
-                                        itemId: 'owner',
-                                        fieldLabel: 'OWNER',
-                                        //defaults
-                                        labelAlign: 'top',
-                                        labelSeparator: '',
-                                        margin: 5
-                                    },
-                                    {
-                                        xtype: 'textfield',
-                                        itemId: 'type',
-                                        fieldLabel: 'TYPE',
-                                        //defaults
-                                        labelAlign: 'top',
-                                        labelSeparator: '',
-                                        margin: 5
-                                    }
-                                ]
+                                fieldNames: ['Owner', 'ScheduleState']
                             }
                         }
                     }
