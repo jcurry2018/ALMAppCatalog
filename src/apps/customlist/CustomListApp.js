@@ -49,7 +49,6 @@
 
         getGridConfig: function () {
             return _.merge(this.callParent(arguments), {
-                autoAddAllModelFieldsAsColumns: _.isEmpty(this.getColumnCfgs()),
                 listeners: {
                     beforestaterestore: this._onBeforeGridStateRestore,
                     beforestatesave: this._onBeforeGridStateSave,
