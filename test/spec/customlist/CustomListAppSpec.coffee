@@ -140,4 +140,11 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         expect(@app.enableAddNew).toBe true
 
 
+  describe 'timebox filter', ->
+    it 'should reload grid when timebox filter is changed', ->
+      @createApp(settings: type: 'task').then =>
+        loadGridBoardStub = @spy @app, 'loadGridBoard'
+        Rally.environment.getMessageBus().publish(Rally.app.Message.timeboxScopeChange)
+        expect(loadGridBoardStub).toHaveBeenCalledOnce()
+
 

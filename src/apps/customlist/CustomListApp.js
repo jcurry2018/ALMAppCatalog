@@ -21,7 +21,6 @@
                 type: this.appContainer.url,
                 columnNames: (this.appContainer.fetch || '').split(',')
             };
-
             this.callParent(arguments);
         },
 
@@ -90,6 +89,11 @@
         getPermanentFilters: function () {
             var query = this.getSetting('query');
             return this._getTimeboxScopeFilter().concat(query ? [ Rally.data.wsapi.Filter.fromQueryString(query) ] : []);
+        },
+
+        onTimeboxScopeChange: function() {
+            this.callParent(arguments);
+            this.loadGridBoard();
         },
 
         _getTimeboxScopeFilter: function () {
