@@ -147,4 +147,14 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         Rally.environment.getMessageBus().publish(Rally.app.Message.timeboxScopeChange)
         expect(loadGridBoardStub).toHaveBeenCalledOnce()
 
+  describe 'milestone project filter', ->
+    it 'should project scope milestones to global scope when global scope setting is on', ->
+      @createApp(settings: type: 'milestone').then =>
+        targetProjectFilter = _.find(@app.getPermanentFilters(), (filter)-> filter.value.property == "TargetProject" && filter.value.value == null);
+        expect(targetProjectFilter).toBeDefined()
+
+
+
+
+
 
