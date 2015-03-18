@@ -56,6 +56,17 @@
             });
         },
 
+        getFilterControlConfig: function () {
+            return _.merge(this.callParent(arguments), {
+                listeners: {
+                    beforestaterestore: {
+                        fn: this._onBeforeFilterButtonStateRestore,
+                        scope: this
+                    }
+                }
+            });
+        },
+
         getGridStoreConfig: function () {
             var sorters = this._getValidSorters(Rally.data.util.Sorter.sorters(this.getSetting('order')));
 
@@ -129,6 +140,16 @@
             }
 
             this.columnNames = _.compact(columnNames);
+        },
+
+        _onBeforeFilterButtonStateRestore:  function (filterButton, state) {
+            if (state && state.filters && state.filters.length) {
+                var stateFilters = _.map(state.filters, function (filterStr) {
+                    return Rally.data.wsapi.Filter.fromQueryString(filterStr);
+                });
+                var validFilters = Rally.util.Filter.removeNonapplicableTypeSpecificFilters(stateFilters, this.models);
+                state.filters = _.invoke(validFilters, 'toString');
+            }
         },
 
         _onBeforeGridStateRestore: function (grid, state) {

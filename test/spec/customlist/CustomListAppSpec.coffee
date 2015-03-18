@@ -17,6 +17,7 @@ describe 'Rally.apps.customlist.CustomListApp', ->
             subscription: Rally.environment.getContext().getSubscription()
         height: 500
         owner:
+          dashboard: {}
           showSettings: @showSettingsStub
         renderTo: 'testDiv'
       , config
@@ -45,7 +46,8 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       order: 'DefectStatus'
 
     @stub Ext.state.Manager.getProvider(), 'get', (id) =>
-      if id.split('::')[1] is 'customlist-grid' then @gridState
+      if id.split('::')[1] is 'customlist-grid' then return @gridState
+      if id.split('::')[1] is 'customlist-custom-filter-button' then return @filterState
 
   describe 'initial state', ->
     describe 'when only ext2 settings exists', ->
@@ -96,6 +98,23 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       it 'should not create a grid', ->
         expect(@getGrid()).toBeFalsy()
 
+    describe 'when front side filters are present', ->
+      beforeEach ->
+        @filterState =
+          filters: [
+            '(PercentDoneByStoryPlanEstimate = 1)'
+            '(Name contains "yomama")'
+          ]
+        @createApp(settings: @ext4AppScopedSettings)
+
+      it 'should remove invalid filters', ->
+        expect(@artifactRequest.lastCall.args[0].params.query).not.toContain 'PercentDoneByStoryPlanEstimate'
+        expect(_.any(@app.gridboard.down('rallycustomfilterbutton').getState().filters, (filter) -> _.contains(filter, 'PercentDoneByStoryPlanEstimate'))).toBe false
+
+      it 'should retain valid filters', ->
+        expect(@artifactRequest.lastCall.args[0].params.query).toContain '(Name CONTAINS "yomama")'
+        expect(_.any(@app.gridboard.down('rallycustomfilterbutton').getState().filters, (filter) -> _.contains(filter, '(Name CONTAINS "yomama")'))).toBe true
+
   describe 'grid state columns', ->
     it 'should be overridden by app column settings if different', ->
       @gridState = columns: ['CreationDate', 'AcceptedDate']
@@ -120,13 +139,13 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         @prefUpdateStub = @stub Rally.data.PreferenceManager, 'update'
 
       it 'should update app scoped column settings if user has permissions to edit app settings', ->
-        @createApp(settings: @ext4AppScopedSettings, appContainer: isEditable: true).then =>
+        @createApp(settings: @ext4AppScopedSettings, owner: dashboard: arePanelSettingsEditable: true).then =>
           @getGrid().fireEvent 'beforestatesave', @getGrid(), columns: ['Name', 'Blocked', 'Iteration', 'State']
           expect(@prefUpdateStub.lastCall.args[0].settings).toEqual
             columnNames: 'Name,Blocked,Iteration,State'
 
       it 'should NOT update app scoped column settings if user does NOT have permissions to edit app settings', ->
-        @createApp(settings: @ext4AppScopedSettings, appContainer: isEditable: false).then =>
+        @createApp(settings: @ext4AppScopedSettings, owner: dashboard: arePanelSettingsEditable: false).then =>
           @getGrid().fireEvent 'beforestatesave', @getGrid(), columns: ['Name', 'Blocked', 'Iteration', 'State']
           expect(@prefUpdateStub).not.toHaveBeenCalled()
 
@@ -152,9 +171,3 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @createApp(settings: type: 'milestone').then =>
         targetProjectFilter = _.find(@app.getPermanentFilters(), (filter)-> filter.value.property == "TargetProject" && filter.value.value == null);
         expect(targetProjectFilter).toBeDefined()
-
-
-
-
-
-
