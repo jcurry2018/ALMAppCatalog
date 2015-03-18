@@ -197,7 +197,7 @@
         },
 
         getGridStoreConfig: function () {
-            return { models: this.piTypePicker.getAllTypeNames() };
+            return _.merge(this.gridStoreConfig, { models: this.piTypePicker.getAllTypeNames() });
         },
 
         _createPITypePicker: function () {
