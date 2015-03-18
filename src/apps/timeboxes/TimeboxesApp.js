@@ -63,12 +63,6 @@
             });
         },
 
-        getGridConfig: function () {
-            return _.merge(this.callParent(arguments), {
-                enableSummaryRow: false
-            });
-        },
-
         getChartConfig: function () {
             if (this._enableCharts()) {
                 return {
