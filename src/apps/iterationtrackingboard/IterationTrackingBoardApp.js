@@ -20,7 +20,7 @@
             'Rally.ui.gridboard.plugin.GridBoardActionsMenu',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
-            'Rally.ui.gridboard.plugin.GridBoardFiltering',
+            'Rally.ui.gridboard.plugin.GridBoardInlineFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
@@ -303,10 +303,12 @@
 
             if (context.isFeatureEnabled('F7336_ADVANCED_FILTERING')) {
                 plugins.push({
-                    ptype:'rallygridboardfiltering',
-                    filterButtonConfig: {
+                    ptype:'rallygridboardinlinefiltercontrol',
+                    inlineFilterButtonConfig: {
+                        stateful: true,
+                        stateId: context.getScopedStateId('iteration-tracking-inline-filter'),
                         modelNames: this.modelNames,
-                        filterPanelConfig: {
+                        inlineFilterPanelConfig: {
                             quickFilterPanelConfig: {
                                 fieldNames: ['Owner', 'ScheduleState']
                             }

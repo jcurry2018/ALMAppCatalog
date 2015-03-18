@@ -383,7 +383,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then =>
         gridBoard = @app.down 'rallygridboard'
         plugin = _.find gridBoard.plugins, (plugin) ->
-          plugin.ptype == 'rallygridboardfiltering'
+          plugin.ptype == 'rallygridboardinlinefiltercontrol'
         expect(plugin).toBeDefined()
 
   describe 'page sizes', ->
