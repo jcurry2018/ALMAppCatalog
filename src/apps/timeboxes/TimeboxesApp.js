@@ -13,6 +13,7 @@
             'Deft.Deferred',
             'Rally.apps.timeboxes.IterationVelocityA0Chart',
             'Rally.data.PreferenceManager',
+            'Rally.ui.combobox.plugin.PreferenceEnabledComboBox',
             'Rally.ui.gridboard.GridBoardToggle'
         ],
 
@@ -128,10 +129,12 @@
         _createPicker: function () {
             var deferred = new Deft.Deferred();
 
-            this.modelPicker = Ext.create('Rally.ui.combobox.PreferenceEnabledComboBox', {
+            this.modelPicker = Ext.create('Rally.ui.combobox.ComboBox', {
                 context: this.getContext().clone({
                     appID: null
                 }),
+                displayField: 'name',
+                editable: false,
                 listeners: {
                     change: this._onTimeboxTypeChanged,
                     ready: {
@@ -142,10 +145,10 @@
                     },
                     scope: this
                 },
-                editable: false,
-                preferenceName: 'timebox-combobox',
-                displayField: 'name',
-                valueField: 'type',
+                plugins: [{
+                    ptype: 'rallypreferenceenabledcombobox',
+                    preferenceName: 'timebox-combobox'
+                }],
                 queryMode: 'local',
                 renderTo: Ext.query('#content .titlebar .dashboard-timebox-container')[0],
                 storeType: 'Ext.data.Store',
@@ -156,7 +159,8 @@
                         { name: 'Releases', type: 'release' },
                         { name: 'Milestones', type: 'milestone' }
                     ]
-                }
+                },
+                valueField: 'type'
             });
 
             return deferred.promise;

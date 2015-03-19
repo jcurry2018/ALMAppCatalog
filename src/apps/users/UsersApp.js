@@ -4,9 +4,10 @@
     Ext.define('Rally.apps.users.UsersApp', {
         extend: 'Rally.app.GridBoardApp',
         requires: [
-            'Rally.util.Ref',
+            'Rally.apps.users.SubscriptionSeats',
             'Rally.data.wsapi.ModelFactory',
-            'Rally.apps.users.SubscriptionSeats'
+            'Rally.ui.combobox.plugin.PreferenceEnabledComboBox',
+            'Rally.util.Ref'
         ],
 
         cls: 'users-app',
@@ -63,7 +64,7 @@
         _createWorkspacePicker: function () {
             var deferred = new Deft.Deferred();
 
-            this.workspacePicker = Ext.create('Rally.ui.combobox.PreferenceEnabledComboBox', {
+            this.workspacePicker = Ext.create('Rally.ui.combobox.ComboBox', {
                 allowClear: true,
                 autoExpand: true,
                 clearText: '-- Clear Filter --',
@@ -81,8 +82,12 @@
                     },
                     scope: this
                 },
-                preferenceName: this.getScopedStateId('workspace-combobox'),
+                plugins: [{
+                    ptype: 'rallypreferenceenabledcombobox',
+                    preferenceName: this.getScopedStateId('workspace-combobox')
+                }],
                 storeConfig: {
+                    autoLoad: true,
                     filters: [{property: 'State', value: 'Open'}],
                     limit: Infinity,
                     model: Ext.identityFn('Workspace'),
