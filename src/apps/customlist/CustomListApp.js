@@ -183,7 +183,7 @@
         },
 
         _userHasPermissionsToEditPanelSettings: function () {
-            return this.appContainer.isEditable;
+            return this.owner.dashboard.arePanelSettingsEditable;
         },
 
         _getColumnNamesFromState: function (state) {
