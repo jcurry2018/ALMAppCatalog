@@ -34,16 +34,16 @@ describe 'Rally.apps.customlist.CustomListApp', ->
     @artifactRequest = @ajax.whenQuerying('artifact').respondWith();
 
     @ext2AppScopedSettings =
-      url: 'Defect'
       fetch: 'FormattedID,Name,State,Owner'
       order: 'State, Owner'
       query: '(Name contains "a")'
+      url: 'Defect'
 
     @ext4AppScopedSettings =
-      type: 'DefectSuite'
       columnNames: 'Name,DefectStatus,Project,State'
-      query: '(Name !contains "b")'
       order: 'DefectStatus'
+      query: '(Name !contains "b")'
+      type: 'DefectSuite'
 
     @stub Ext.state.Manager.getProvider(), 'get', (id) =>
       if id.split('::')[1] is 'customlist-grid' then return @gridState
@@ -158,7 +158,6 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @createApp(settings: type: 'defect').then =>
         expect(@app.enableAddNew).toBe true
 
-
   describe 'timebox filter', ->
     it 'should reload grid when timebox filter is changed', ->
       @createApp(settings: type: 'task').then =>
@@ -171,3 +170,25 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @createApp(settings: type: 'milestone').then =>
         targetProjectFilter = _.find(@app.getPermanentFilters(), (filter)-> filter.value.property == "TargetProject" && filter.value.value == null);
         expect(targetProjectFilter).toBeDefined()
+
+  describe 'page size', ->
+    helpers
+      createAppWithExt2PageSize: (pageSize) ->
+        @ext2AppScopedSettings.pagesize = pageSize
+        @createApp appContainer: @ext2AppScopedSettings
+
+    it 'should default to 10 when no ext2 setting', ->
+      @createAppWithExt2PageSize().then =>
+        expect(@artifactRequest.lastCall.args[0].params.pagesize).toBe 10
+
+    it 'should use the ext2 setting if is an allowed page size', ->
+      @createAppWithExt2PageSize(25).then =>
+        expect(@artifactRequest.lastCall.args[0].params.pagesize).toBe 25
+
+    it 'should round up the ext2 setting to the nearest allowed page size', ->
+      @createAppWithExt2PageSize(90).then =>
+        expect(@artifactRequest.lastCall.args[0].params.pagesize).toBe 100
+
+    it 'should round down the ext2 setting to 200 when greater than 200', ->
+      @createAppWithExt2PageSize(201).then =>
+        expect(@artifactRequest.lastCall.args[0].params.pagesize).toBe 200

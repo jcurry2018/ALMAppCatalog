@@ -11,8 +11,9 @@
             'Rally.data.wsapi.Filter'
         ],
 
-        statePrefix: 'customlist',
         disallowedAddNewTypes: ['user', 'userprofile', 'useriterationcapacity', 'testcaseresult', 'task', 'scmrepository', 'project', 'changeset', 'change', 'builddefinition', 'build'],
+        orderedAllowedPageSizes: [10, 25, 50, 100, 200],
+        statePrefix: 'customlist',
 
         initComponent: function () {
             this.defaultSettings = {
@@ -52,6 +53,9 @@
                     beforestaterestore: this._onBeforeGridStateRestore,
                     beforestatesave: this._onBeforeGridStateSave,
                     scope: this
+                },
+                pagingToolbarCfg: {
+                    pageSizes: this.orderedAllowedPageSizes
                 }
             });
         },
@@ -77,9 +81,12 @@
                 sorters = Rally.data.util.Sorter.sorters(defaultSort);
             }
 
-            return _.merge({
+            return {
+                pageSize: this.appContainer.pagesize ? _.find(this.orderedAllowedPageSizes, function(pageSize, index, array){
+                    return pageSize >= parseInt(this.appContainer.pagesize, 10) || index === array.length - 1;
+                }, this) : 10,
                 sorters: sorters
-            }, this.appContainer.pagesize ? { pageSize: this.appContainer.pagesize } : {});
+            };
         },
 
         getAddNewConfig: function () {
