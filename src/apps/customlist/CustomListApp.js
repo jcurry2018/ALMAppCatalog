@@ -11,8 +11,9 @@
             'Rally.data.wsapi.Filter'
         ],
 
-        disallowedAddNewTypes: ['user', 'userprofile', 'useriterationcapacity', 'testcaseresult', 'task', 'scmrepository', 'project', 'changeset', 'change', 'builddefinition', 'build'],
+        disallowedAddNewTypes: ['user', 'userprofile', 'useriterationcapacity', 'testcaseresult', 'task', 'scmrepository', 'project', 'changeset', 'change', 'builddefinition', 'build', 'program'],
         orderedAllowedPageSizes: [10, 25, 50, 100, 200],
+        readOnlyGridTypes: ['build', 'change', 'changeset'],
         statePrefix: 'customlist',
 
         initComponent: function () {
@@ -49,6 +50,7 @@
 
         getGridConfig: function () {
             return _.merge(this.callParent(arguments), {
+                enableEditing: !_.contains(this.readOnlyGridTypes, this.getSetting('type').toLowerCase()),
                 listeners: {
                     beforestaterestore: this._onBeforeGridStateRestore,
                     beforestatesave: this._onBeforeGridStateSave,
