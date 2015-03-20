@@ -8,7 +8,8 @@
             'Rally.apps.customlist.Settings',
             'Rally.data.ModelTypes',
             'Rally.data.util.Sorter',
-            'Rally.data.wsapi.Filter'
+            'Rally.data.wsapi.Filter',
+            'Rally.ui.notify.Notifier'
         ],
 
         disallowedAddNewTypes: ['user', 'userprofile', 'useriterationcapacity', 'testcaseresult', 'task', 'scmrepository', 'project', 'changeset', 'change', 'builddefinition', 'build', 'program'],
@@ -107,21 +108,37 @@
         },
 
         getPermanentFilters: function () {
-            var projectFilter = this.getSetting('type').toLowerCase() === 'milestone' ? [
-                Rally.data.wsapi.Filter.or([
-                    { property: 'Projects', operator: 'contains', value: this.getContext().getProjectRef() },
-                    { property: 'TargetProject', operator: '=', value: null }
-                ])
-            ] : null;
-
-            var query = this.getSetting('query');
-            var timeboxScopeFilter = this._getTimeboxScopeFilter().concat(query ? [ Rally.data.wsapi.Filter.fromQueryString(query) ] : []);
-            return projectFilter ? projectFilter.concat(timeboxScopeFilter) : timeboxScopeFilter;
+            return this._getQueryFilter().concat(this._getTimeboxScopeFilter()).concat(this._getProjectFilter());
         },
 
         onTimeboxScopeChange: function() {
             this.callParent(arguments);
             this.loadGridBoard();
+        },
+
+        _getQueryFilter: function () {
+            var query = new Ext.Template(this.getSetting('query')).apply({
+                projectName: this.getContext().getProject().Name,
+                projectOid: this.getContext().getProject().ObjectID,
+                user: this.getContext().getUser()._ref
+            });
+            if (query) {
+                try {
+                    return [ Rally.data.wsapi.Filter.fromQueryString(query) ];
+                } catch(e) {
+                    Rally.ui.notify.Notifier.showError({ message: e.message });
+                }
+            }
+            return [];
+        },
+
+        _getProjectFilter: function () {
+            return this.modelNames[0].toLowerCase() === 'milestone' ? [
+                Rally.data.wsapi.Filter.or([
+                    { property: 'Projects', operator: 'contains', value: this.getContext().getProjectRef() },
+                    { property: 'TargetProject', operator: '=', value: null }
+                ])
+            ] : [];
         },
 
         _getTimeboxScopeFilter: function () {

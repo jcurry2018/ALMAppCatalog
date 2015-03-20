@@ -158,18 +158,36 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @createApp(settings: type: 'defect').then =>
         expect(@app.enableAddNew).toBe true
 
-  describe 'timebox filter', ->
+  describe 'filter', ->
+    helpers
+      createAppWithQuery: (query) ->
+        @createApp
+          settings:
+            type: 'userstory'
+            query: query
+
     it 'should reload grid when timebox filter is changed', ->
       @createApp(settings: type: 'task').then =>
         loadGridBoardStub = @spy @app, 'loadGridBoard'
         Rally.environment.getMessageBus().publish(Rally.app.Message.timeboxScopeChange)
         expect(loadGridBoardStub).toHaveBeenCalledOnce()
 
-  describe 'milestone project filter', ->
     it 'should project scope milestones to global scope when global scope setting is on', ->
       @createApp(settings: type: 'milestone').then =>
         targetProjectFilter = _.find(@app.getPermanentFilters(), (filter)-> filter.value.property == "TargetProject" && filter.value.value == null);
         expect(targetProjectFilter).toBeDefined()
+
+    it 'should convert {user} variable into current user ref', ->
+      @createAppWithQuery('(Owner = {user})').then =>
+        expect(@artifactRequest.lastCall.args[0].params.query).toBe "(Owner = \"#{Rally.environment.getContext().getUser()._ref}\")"
+
+    it 'should convert {projectOid} variable into current project oid', ->
+      @createAppWithQuery('(Project.ObjectID = {projectOid})').then =>
+        expect(@artifactRequest.lastCall.args[0].params.query).toBe "(Project.ObjectID = #{Rally.environment.getContext().getProject().ObjectID})"
+
+    it 'should convert {projectName} variable into current project name', ->
+      @createAppWithQuery('(Name contains "{projectName}")').then =>
+        expect(@artifactRequest.lastCall.args[0].params.query).toBe "(Name CONTAINS \"#{Rally.environment.getContext().getProject().Name}\")"
 
   describe 'page size', ->
     helpers
