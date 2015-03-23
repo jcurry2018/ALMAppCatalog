@@ -8,10 +8,11 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
       config = _.merge(
         context: Ext.create 'Rally.app.Context',
           initialValues:
+            permissions: Rally.environment.getContext().getPermissions()
             project: Rally.environment.getContext().getProject()
-            workspace: Rally.environment.getContext().getWorkspace()
-            user: Rally.environment.getContext().getUser()
             subscription: Rally.environment.getContext().getSubscription()
+            user: Rally.environment.getContext().getUser()
+            workspace: Rally.environment.getContext().getWorkspace()
         height: 500
         renderTo: 'testDiv'
       , config)

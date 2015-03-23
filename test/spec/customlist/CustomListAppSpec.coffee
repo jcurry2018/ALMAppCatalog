@@ -11,10 +11,11 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         appContainer: {}
         context: Ext.create 'Rally.app.Context',
           initialValues:
+            permissions: Rally.environment.getContext().getPermissions()
             project: Rally.environment.getContext().getProject()
-            workspace: Rally.environment.getContext().getWorkspace()
-            user: Rally.environment.getContext().getUser()
             subscription: Rally.environment.getContext().getSubscription()
+            user: Rally.environment.getContext().getUser()
+            workspace: Rally.environment.getContext().getWorkspace()
         height: 500
         owner:
           dashboard: {}

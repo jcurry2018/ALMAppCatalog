@@ -16,10 +16,11 @@ describe 'Rally.apps.milestones.MilestonesApp', ->
 
       context = Ext.create 'Rally.app.Context',
         initialValues:
+          permissions: Rally.environment.getContext().getPermissions()
           project: globalContext.getProject()
-          workspace: globalContext.getWorkspace()
-          user: globalContext.getUser()
           subscription: globalContext.getSubscription()
+          user: globalContext.getUser()
+          workspace: globalContext.getWorkspace()
 
       @app = Ext.create 'Rally.apps.milestones.MilestonesApp',
         getHeight: -> 500
