@@ -16,6 +16,7 @@
         orderedAllowedPageSizes: [10, 25, 50, 100, 200],
         readOnlyGridTypes: ['build', 'change', 'changeset'],
         statePrefix: 'customlist',
+        allowExpansionStateToBeSaved: false,
 
         initComponent: function () {
             this.defaultSettings = {
