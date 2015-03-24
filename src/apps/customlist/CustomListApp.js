@@ -155,18 +155,7 @@
         },
 
         _setColumnNames: function (columnNames) {
-            columnNames = _.isString(columnNames) ? columnNames.split(',') : columnNames;
-
-            // Note: When enableHierarchy is true (artifacts only for now), the FormattedID column is always added
-            // If we include FormattedID in columns names, we get 2 ID columns, which is poopy.
-            // This problem should be fixed for reals in the SDK somewhere eventually.
-            if (Rally.data.ModelTypes.areArtifacts(this.modelNames)) {
-                columnNames = _.reject(columnNames, function (columnName) {
-                    return _.isString(columnName) && columnName.toLowerCase() === 'formattedid';
-                });
-            }
-
-            this.columnNames = _.compact(columnNames);
+            this.columnNames = _.compact(_.isString(columnNames) ? columnNames.split(',') : columnNames);
         },
 
         _onBeforeFilterButtonStateRestore:  function (filterButton, state) {
