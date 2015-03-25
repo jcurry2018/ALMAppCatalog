@@ -229,6 +229,11 @@
                     property: 'TypeDefOid',
                     value: typeDefOid
                 }),
+                hasNoParentTestCase = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'TestCase',
+                    operator: '=',
+                    value: null
+                }),
                 parentRequirementIsScheduled = Ext.create('Rally.data.wsapi.Filter', {
                     property: 'Requirement.Iteration',
                     operator: '!=',
@@ -245,7 +250,7 @@
                     operator: '!='
                 });
 
-            return isADefect.and(parentRequirementIsScheduled.or(hasNoParentRequirement)).or(isNotADefect);
+            return isADefect.and(hasNoParentTestCase.and(parentRequirementIsScheduled.or(hasNoParentRequirement))).or(isNotADefect);
         },
 
         _getBoardConfig: function() {

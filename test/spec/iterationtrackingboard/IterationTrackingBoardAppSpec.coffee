@@ -240,14 +240,20 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
             property: 'TypeDefOid'
             value: defectTypeDefOid
           ).and(Ext.create('Rally.data.wsapi.Filter',
-            property: 'Requirement.Iteration'
-            operator: '!='
-            value: null
-          ).or(Ext.create('Rally.data.wsapi.Filter',
-            property: 'Requirement'
-            operator: '='
-            value: null
-          ))).or(Ext.create('Rally.data.wsapi.Filter',
+              property: 'TestCase'
+              operator: '='
+              value: null
+            ).and(Ext.create('Rally.data.wsapi.Filter',
+                property: 'Requirement.Iteration'
+                operator: '!='
+                value: null
+              ).or(Ext.create('Rally.data.wsapi.Filter',
+                property: 'Requirement'
+                operator: '='
+                value: null
+              )))
+          ).
+          or(Ext.create('Rally.data.wsapi.Filter',
             property: 'TypeDefOid'
             operator: '!='
             value: defectTypeDefOid
