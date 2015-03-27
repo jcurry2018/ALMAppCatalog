@@ -70,23 +70,31 @@
 		 */
 		getChartVersionFromRequest: function() {
 			var parameters = Ext.Object.fromQueryString(this.getUrlSearchString());
-			return (parameters.chartVersion || 'releases/current');
+			return (parameters.chartVersion || '0.2.0');
 		},
 		/**
 		 * Builds an iframe in the panel, using the version from getChartVersionFromRequest
-		 * to build the path /analytics/chart/$version/almchart.min.html or
+		 * to build the path /assets/burro/queso/$version/almchart.min.html or
 		 * if isDebugMode returns true, then almchart.html
 		 */
 		constructIFrame: function() {
 			var filename = this.isDebugMode() ? 'almchart.html' : 'almchart.min.html';
 			var version = this.getChartVersionFromRequest();
-			var url = '/analytics/chart/' + version + '/' + filename + '?_gen=' + this._getCacheGeneration();
+			var url = this._getQuesoUrl() + '/' + version + '/' + filename;
 			var ifr = '<iframe frameborder="0" style="overflow:hidden;" scrolling="no" width="100%" height="100%" src="' + url + '"></iframe>';
 			this.down("#mrcontainer").el.dom.innerHTML = ifr;
 		},
 
 		_chartTypeFromSlug: function(slug) {
 			return slug.substring(slug.lastIndexOf('/') + 1);
+		},
+
+		_getQuesoUrl: function() {
+			if (window.burroUrl) {
+				return window.burroUrl + '/queso';
+			} else {
+				return '/analytics/chart/releases';
+			}
 		},
 		/**
 		 *	Rally.util.Help is not dynamic.  But if we add a panel definition
@@ -140,10 +148,6 @@
 			return this.appContainer.slug;
 		},
 
-		_getCacheGeneration : function(theDate) {
-			theDate = theDate || new Date();
-			return Ext.Date.format(theDate, 'YmdH');
-		},
 		/**
 		 * Conditionally constructs the help component in the header.
 		 */
