@@ -307,6 +307,7 @@
                     inlineFilterButtonConfig: {
                         stateful: true,
                         stateId: context.getScopedStateId('iteration-tracking-inline-filter'),
+                        filterChildren: true,
                         modelNames: this.modelNames,
                         inlineFilterPanelConfig: {
                             quickFilterPanelConfig: {
