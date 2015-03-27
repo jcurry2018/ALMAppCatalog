@@ -19,6 +19,7 @@
         allowExpansionStateToBeSaved: false,
 
         initComponent: function () {
+            this.appName = 'CustomList-' + this.getAppId();
             this.defaultSettings = {
                 query: this.appContainer.query,
                 order: this.appContainer.order,
