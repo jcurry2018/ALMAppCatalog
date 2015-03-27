@@ -14,6 +14,7 @@
         launch: function() {
             Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
                 defaultToLowest: true,
+                requester: this,
                 success: function (piTypeDef) {
                     this._buildGridBoard(piTypeDef.get('TypePath'));
                 },
@@ -99,6 +100,7 @@
 
         _onLoad: function() {
             this._publishContentUpdated();
+            this.recordComponentReady();
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
             }
