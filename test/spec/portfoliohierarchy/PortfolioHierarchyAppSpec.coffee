@@ -155,16 +155,3 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
       destroyTooltip = @spy @app.tooltip, 'destroy'
       @app.destroy()
       expect(destroyTooltip.callCount).toBe 1
-
-  describe 'should add boolean indicating if should call plan service for use in appsdk components lame lame lame', ->
-    it 'should not retrieve data from plan service', ->
-      @_createApp().then =>
-        tree = @app.down('rallytree')
-        expect(tree.shouldRetrievePlanData).toBe false
-
-    it 'should retrieve data from plan service', ->
-      stub = @stub Rally.env.Context::, 'isFeatureEnabled'
-      stub.withArgs("ROADMAP_PLANNING_PAGE").returns(true)
-      @_createApp().then =>
-        tree = @app.down('rallytree')
-        expect(tree.shouldRetrievePlanData).toBe true

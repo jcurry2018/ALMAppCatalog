@@ -29,8 +29,6 @@
             'Rally.ui.gridboard.plugin.GridBoardCustomView',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
-            'Rally.ui.filter.view.OwnerPillFilter',
-            'Rally.ui.filter.view.TagPillFilter',
             'Rally.app.Message',
             'Rally.apps.iterationtrackingboard.StatsBannerField',
             'Rally.apps.iterationtrackingboard.statsbanner.IterationProgressDialog',
