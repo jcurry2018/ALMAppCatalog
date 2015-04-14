@@ -315,6 +315,14 @@
                         inlineFilterPanelConfig: {
                             quickFilterPanelConfig: {
                                 fieldNames: ['Owner', 'ScheduleState']
+                            },
+                            advancedFilterPanelConfig: {
+                                advancedFilterRowsConfig: {
+                                    propertyFieldConfig: {
+                                        blackListFields: ['Iteration', 'PortfolioItem'],
+                                        whiteListFields: ['Milestones']
+                                    }
+                                }
                             }
                         }
                     }
