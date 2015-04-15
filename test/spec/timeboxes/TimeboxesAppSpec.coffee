@@ -72,6 +72,9 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
     it 'should have an xml export button', ->
       expect(@app.xmlExportEnabled()).toBe true
 
+    it 'should not allow editing of the Name field', ->
+      expect(_.find(@app.gridboard.getGridOrBoard().columns, (column) -> column.dataIndex =='Name').tdCls).not.toContain 'editable'
+
   describe 'releases', ->
     beforeEach ->
       @createApp 'release'
@@ -87,6 +90,9 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
 
     it 'should have an xml export button', ->
       expect(@app.xmlExportEnabled()).toBe true
+
+    it 'should not allow editing of the Name field', ->
+      expect(_.find(@app.gridboard.getGridOrBoard().columns, (column) -> column.dataIndex =='Name').tdCls).not.toContain 'editable'
 
   describe 'on type change', ->
     beforeEach ->
