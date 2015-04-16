@@ -11,6 +11,7 @@
         extend: 'Rally.app.TimeboxScopedApp',
         requires: [
             'Rally.data.Ranker',
+            'Rally.data.wsapi.Filter',
             'Rally.data.wsapi.ModelFactory',
             'Rally.data.wsapi.TreeStoreBuilder',
             'Rally.ui.dialog.CsvImportDialog',
@@ -314,7 +315,11 @@
                         modelNames: this.modelNames,
                         inlineFilterPanelConfig: {
                             quickFilterPanelConfig: {
-                                fieldNames: ['Owner', 'ScheduleState']
+                                fields: [
+                                    'ArtifactSearch',
+                                    'Owner',
+                                    'ScheduleState'
+                                ]
                             },
                             advancedFilterPanelConfig: {
                                 advancedFilterRowsConfig: {
