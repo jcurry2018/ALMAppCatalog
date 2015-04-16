@@ -50,29 +50,24 @@
         },
 
         getSettingsFields: function () {
-            var fields = [];
-
-            if (this.getContext().isFeatureEnabled('S79575_ADD_SWIMLANES_TO_PI_KANBAN')) {
-                fields.push({
-                    name: 'groupHorizontallyByField',
-                    xtype: 'rowsettingsfield',
-                    fieldLabel: 'Swimlanes',
-                    margin: '10 0 10 0',
-                    mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
-                    readyEvent: 'ready',
-                    whiteListFields: ['Parent'],
-                    modelNames: this.piTypePicker.getAllTypeNames(),
-                    isAllowedFieldFn: function (field) {
-                        var attr = field.attributeDefinition;
-                        return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string') ||
-                            attr.Constrained || _.contains(['boolean'], attr.AttributeType.toLowerCase())) &&
-                            !_.contains(['web_link', 'text', 'date'], attr.AttributeType.toLowerCase()) &&
-                            !_.contains(['Archived', 'Portfolio Item Type', 'State'], attr.Name);
-                    }
-                });
-            }
-
-            fields.push({
+            return [{
+                name: 'groupHorizontallyByField',
+                xtype: 'rowsettingsfield',
+                fieldLabel: 'Swimlanes',
+                margin: '10 0 10 0',
+                mapsToMultiplePreferenceKeys: ['showRows', 'rowsField'],
+                readyEvent: 'ready',
+                whiteListFields: ['Parent'],
+                modelNames: this.piTypePicker.getAllTypeNames(),
+                isAllowedFieldFn: function (field) {
+                    var attr = field.attributeDefinition;
+                    return (attr.Custom && (attr.Constrained || attr.AttributeType.toLowerCase() !== 'string') ||
+                        attr.Constrained || _.contains(['boolean'], attr.AttributeType.toLowerCase())) &&
+                        !_.contains(['web_link', 'text', 'date'], attr.AttributeType.toLowerCase()) &&
+                        !_.contains(['Archived', 'Portfolio Item Type', 'State'], attr.Name);
+                }
+            },
+            {
                 type: 'query',
                 config: {
                     plugins: [
@@ -83,10 +78,7 @@
                         'rallyfieldvalidationui'
                     ]
                 }
-            });
-
-
-            return fields;
+            }];
         },
 
         _createFilterItem: function(typeName, config) {
@@ -136,8 +128,7 @@
                 loadDescription: 'Portfolio Kanban'
             });
 
-            if (this.getSetting('showRows') && this.getSetting('rowsField') &&
-                this.getContext().isFeatureEnabled('S79575_ADD_SWIMLANES_TO_PI_KANBAN')) {
+            if (this.getSetting('showRows') && this.getSetting('rowsField')) {
                 Ext.apply(config, {
                     rowConfig: {
                         field: this.getSetting('rowsField'),

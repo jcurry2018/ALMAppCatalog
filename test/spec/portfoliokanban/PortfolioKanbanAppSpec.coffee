@@ -222,34 +222,17 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       @_createApp().then =>
         expect(@app.gridboard.getGridOrBoard().getContext()).toBe @app.getContext()
 
-    it 'should NOT have the rowSettings field', ->
-      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], false)
-      @_createApp().then =>
-        expect(_.find(@app.getSettingsFields(), {xtype: 'rowsettingsfield'})).not.toBeDefined()
-
     it 'should have the rowSettings field', ->
-      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], true)
       @_createApp().then =>
         expect(_.find(@app.getSettingsFields(), {xtype: 'rowsettingsfield'})).toBeDefined()
 
     it 'adds the rowConfig property to the boardConfig', ->
-      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], true)
       @_createApp(
         settings:
           showRows: true
           rowsField: 'Owner'
       ).then =>
         expect(@app.gridboard.getGridOrBoard().config.rowConfig.field).toBe 'Owner'
-
-    it 'does NOT add the rowConfig property to the boardConfig', ->
-      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], false)
-      @_createApp(
-        settings:
-          showRows: true
-          rowsField: 'Owner'
-      ).then =>
-        expect(@app.gridboard.getGridOrBoard().config.rowConfig).toBeNull()
-
     helpers
       getAppStore: ->
         @app.gridboard.getGridOrBoard().getColumns()[0].store
