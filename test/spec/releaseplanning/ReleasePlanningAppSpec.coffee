@@ -26,8 +26,7 @@ describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
 
     @featureData = @mom.getData 'portfolioitem/feature',
       values:
-        Release:
-          _ref: @releaseData[0]._ref
+        Release: @releaseData[0]
         PreliminaryEstimate:
           Value: 12
 
