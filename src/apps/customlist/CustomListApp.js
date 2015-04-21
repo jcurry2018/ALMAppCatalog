@@ -21,10 +21,11 @@
         initComponent: function () {
             this.appName = 'CustomList-' + this.getAppId();
             this.defaultSettings = {
-                query: this.appContainer.query,
+                columnNames: (this.appContainer.fetch || '').split(','),
                 order: this.appContainer.order,
-                type: this.appContainer.url,
-                columnNames: (this.appContainer.fetch || '').split(',')
+                query: this.appContainer.query,
+                showControls: true,
+                type: this.appContainer.url
             };
             this.callParent(arguments);
         },
@@ -37,6 +38,14 @@
             this.modelNames = _.compact([this.getSetting('type')]);
             this._setColumnNames(this.getSetting('columnNames'));
             return Deft.Promise.when(this.modelNames);
+        },
+
+        addGridBoard: function () {
+            this.callParent(arguments);
+
+            if (!this.getSetting('showControls')) {
+                this.gridboard.getHeader().hide();
+            }
         },
 
         loadGridBoard: function () {
@@ -60,6 +69,7 @@
                     scope: this
                 },
                 pagingToolbarCfg: {
+                    hidden: !this.getSetting('showControls'),
                     pageSizes: this.orderedAllowedPageSizes
                 }
             });
@@ -74,6 +84,14 @@
                     }
                 }
             });
+        },
+
+        onTreeGridReady: function (grid) {
+            if (grid.store.getTotalCount() > 10) {
+                this.gridboard.down('#pagingToolbar').show();
+            }
+
+            this.callParent(arguments);
         },
 
         getGridStoreConfig: function () {

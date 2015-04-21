@@ -18,7 +18,8 @@
         singleton: true,
         requires: [
             'Rally.ui.combobox.FieldComboBox',
-            'Rally.ui.combobox.ComboBox'
+            'Rally.ui.combobox.ComboBox',
+            'Rally.ui.CheckboxField'
         ],
 
         getFields: function (context) {
@@ -56,6 +57,11 @@
                     }
                 },
                 { type: 'query' },
+                {
+                    name: 'showControls',
+                    xtype: 'rallycheckboxfield',
+                    fieldLabel: 'Show Control Bar'
+                },
                 getHiddenFieldConfig('columnNames'),
                 getHiddenFieldConfig('order')
             ];

@@ -211,3 +211,27 @@ describe 'Rally.apps.customlist.CustomListApp', ->
     it 'should round down the ext2 setting to 200 when greater than 200', ->
       @createAppWithExt2PageSize(201).then =>
         expect(@artifactRequest.lastCall.args[0].params.pagesize).toBe 200
+
+  describe 'header control toolbar', ->
+    it 'should be visible if showControls setting is true', ->
+      @createApp(settings: { type: 'hierarchicalrequirement', showControls: true }).then =>
+        expect(@app.gridboard.getHeader()).toBeVisible()
+
+    it 'should not be visible if showControls setting is false', ->
+      @createApp(settings: { type: 'hierarchicalrequirement', showControls: false }).then =>
+        expect(@app.gridboard.getHeader()).not.toBeVisible()
+
+  describe 'paging toolbar', ->
+    it 'should be visible if showControls setting is true', ->
+      @createApp(settings: { type: 'hierarchicalrequirement', showControls: true }).then =>
+        expect(@app.gridboard.down('#pagingToolbar')).toBeVisible()
+
+    it 'should be visible if showControls is false but more than 10 records are available', ->
+      @artifactRequest = @ajax.whenQuerying('artifact').respondWith(@mom.getData 'hierarchicalrequirement', count: 25);
+      @createApp(settings: { type: 'hierarchicalrequirement', showControls: false }).then =>
+        expect(@app.gridboard.down('#pagingToolbar')).toBeVisible()
+
+    it 'should not be visible if showControls is false and there are 10 or less records available', ->
+      @artifactRequest = @ajax.whenQuerying('artifact').respondWith(@mom.getData 'hierarchicalrequirement', count: 10);
+      @createApp(settings: { type: 'hierarchicalrequirement', showControls: false }).then =>
+        expect(@app.gridboard.down('#pagingToolbar')).not.toBeVisible()
