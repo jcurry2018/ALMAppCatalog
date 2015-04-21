@@ -4,6 +4,12 @@ Ext.require [
 ], ->
 describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
   helpers
+    getExtContext: () ->
+      Ext.create 'Rally.app.Context',
+                  initialValues:
+                    project: Rally.environment.getContext().getProject()
+                    workspace: Rally.environment.getContext().getWorkspace()
+                    user: Rally.environment.getContext().getUser()
     createApp: (config = {}) ->
       Ext.create 'Ext.Container',
         id: 'content'
@@ -18,11 +24,7 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
 
       Ext.create 'Rally.apps.common.PortfolioItemsGridBoardApp',
         Ext.apply
-          context: Ext.create 'Rally.app.Context',
-            initialValues:
-              project: Rally.environment.getContext().getProject()
-              workspace: Rally.environment.getContext().getWorkspace()
-              user: Rally.environment.getContext().getUser()
+          context: @getExtContext()
           renderTo: 'testDiv'
         , config
 
@@ -36,6 +38,16 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
 
   afterEach ->
     @app?.destroy()
+
+  describe 'PI App', ->
+    it 'should not modify gridStoreConfig', ->
+      @renderApp({}).then =>
+        secondInstance = Ext.create('Rally.app.GridBoardApp', {
+          modelNames: ['User']
+          context: @getExtContext()
+          renderTo: 'testDiv'
+        })
+        expect(secondInstance.gridStoreConfig).toEqual({})
 
   describe 'PI type picker ', ->
     helpers
