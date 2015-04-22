@@ -114,6 +114,7 @@
 
         getAddNewConfig: function () {
             return _.merge(this.callParent(arguments), {
+                disableAddButton: this.appContainer.slug === 'incompletestories',
                 minWidth: 700,
                 openEditorAfterAddFailure: false
             });
