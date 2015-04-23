@@ -29,6 +29,18 @@
             ];
         },
 
+        getGridConfig: function () {
+            return _.merge(this.callParent(arguments), {
+                inlineAddConfig: {
+                    listeners: {
+                        beforeeditorshow: function (addNewCmp, params) {
+                            params.Iteration = 'u'; // explicitly set iteration to unscheduled so it doesn't default to current iteration on TPS editor.
+                        }
+                    }
+                }
+            });
+        },
+
         getGridStoreConfig: function () {
             return {
                 enableHierarchy: false

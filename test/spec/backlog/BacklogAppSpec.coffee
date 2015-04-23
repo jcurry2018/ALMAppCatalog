@@ -12,7 +12,8 @@ describe 'Rally.apps.backlog.BacklogApp', ->
         renderTo: options.renderTo || 'testDiv'
         height: 400
 
-      @once(condition: => @app.down('rallygridboard'))
+      @once(condition: => @app.down('rallygridboard')).then =>
+        @grid = @app.gridboard.getGridOrBoard()
 
     _getContext: (context) ->
       Ext.create('Rally.app.Context',
@@ -26,6 +27,9 @@ describe 'Rally.apps.backlog.BacklogApp', ->
         , context)
       )
 
+  beforeEach ->
+    @ajax.whenQuerying('artifact').respondWith(@mom.getData('hierarchicalrequirement', count: 5))
+
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'backlogapp'
 
@@ -34,3 +38,12 @@ describe 'Rally.apps.backlog.BacklogApp', ->
       customFilterPluginConfig = _.find(@app.getGridBoardPlugins(), { ptype:'rallygridboardcustomfiltercontrol'})
       expect(customFilterPluginConfig.showIdFilter).toBe true
       expect(customFilterPluginConfig.showOwnerFilter).toBe false
+
+  it 'should set unscheduled Iteration on inline add new', ->
+    createStub = @stub()
+    Rally.environment.getMessageBus().subscribe Rally.nav.Message.create, createStub
+    @createApp().then =>
+      @grid.view.fireEvent('inlineadd', @grid.view, @grid.store.getRootNode().childNodes[0], {action: 'inlineaddpeer'})
+      @once(condition: => Ext.ComponentQuery.query('rallyinlineaddnew')[0]).then (inlineAddNew) =>
+        @click(inlineAddNew.down('#addWithDetails').el.dom).then =>
+          expect(createStub.lastCall.args[1].Iteration).toBe 'u'
