@@ -159,6 +159,15 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @createApp(settings: type: 'defect').then =>
         expect(@app.enableAddNew).toBe true
 
+  describe 'ranking', ->
+    it 'should not show for a disallowed artifact type', ->
+      @createApp(settings: type: 'task').then =>
+        expect(@app.enableRanking).toBe false
+
+    it 'should show for an allowed artifact type', ->
+      @createApp(settings: type: 'defect').then =>
+        expect(@app.enableRanking).toBe true
+
   describe 'filter', ->
     helpers
       createAppWithQuery: (query) ->

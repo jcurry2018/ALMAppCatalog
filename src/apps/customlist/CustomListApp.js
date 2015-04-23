@@ -56,6 +56,7 @@
                 }, 1, this);
             } else {
                 this.enableAddNew = this._shouldEnableAddNew();
+                this.enableRanking = this._shouldEnableRanking();
                 this.callParent(arguments);
             }
         },
@@ -172,6 +173,10 @@
 
         _shouldEnableAddNew: function() {
             return !_.contains(this.disallowedAddNewTypes, this.getSetting('type').toLowerCase());
+        },
+
+        _shouldEnableRanking: function(){
+            return this.getSetting('type').toLowerCase() !== 'task';
         },
 
         _setColumnNames: function (columnNames) {
