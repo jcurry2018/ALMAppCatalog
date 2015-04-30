@@ -36,6 +36,8 @@ describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
       context: Ext.create 'Rally.app.Context',
         initialValues:
           project:
+            Children:
+              Count: 0
             _ref: @releaseData[0].Project._ref
           subscription: Rally.environment.getContext().getSubscription()
           workspace: Rally.environment.getContext().getWorkspace()
@@ -55,7 +57,7 @@ describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
 
   it 'should order the release columns based on end date', ->
     sortedReleaseNames = _.pluck _.sortBy(@releaseData, (release) -> new Date(release.ReleaseDate)), 'Name'
-    expect(_.map(@getTimeboxColumns(), (column) -> column.getTimeboxRecords()[0].get('Name'))).toEqual sortedReleaseNames
+    expect(_.map(@getTimeboxColumns(), (column) -> column.getTimeboxRecord().get('Name'))).toEqual sortedReleaseNames
 
   it 'should use rallygridboard custom filter control', ->
     gridBoard = @app.down 'rallygridboard'
