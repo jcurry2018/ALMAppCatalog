@@ -168,7 +168,7 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @createApp(settings: type: 'defect').then =>
         expect(@app.enableRanking).toBe true
 
-  describe 'filter', ->
+  describe 'query', ->
     helpers
       createAppWithQuery: (query) ->
         @createApp
@@ -198,6 +198,19 @@ describe 'Rally.apps.customlist.CustomListApp', ->
     it 'should convert {projectName} variable into current project name', ->
       @createAppWithQuery('(Name contains "{projectName}")').then =>
         expect(@artifactRequest.lastCall.args[0].params.query).toBe "(Name CONTAINS \"#{Rally.environment.getContext().getProject().Name}\")"
+
+    describe 'contains invalid field names', ->
+      beforeEach ->
+        @createAppWithQuery '(((Turd.Name = "Poopy McPoop") OR (Project.ObjectID = 123)) AND ((PoopBoolean = false) OR (TargetDate = 01/01/01)) OR (Name contains "poop"))'
+      it 'should not make a request to WSAPI', ->
+        expect(@artifactRequest.callCount).toBe 0
+
+      it 'should show a blank slate with super hot detailed error messages', ->
+        expect(_.pluck(@app.getEl().query('.no-data-container .secondary-message div'), 'textContent')).toContainOnly [
+          'Could not find the attribute "Turd" on type "User Story" in the query segment "(Turd.Name = "Poopy McPoop")"'
+          'Could not find the attribute "PoopBoolean" on type "User Story" in the query segment "(PoopBoolean = false)"'
+          'Could not find the attribute "TargetDate" on type "User Story" in the query segment "(TargetDate = "01/01/01")"'
+        ]
 
   describe 'page size', ->
     helpers

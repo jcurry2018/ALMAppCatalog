@@ -62,7 +62,7 @@
         },
 
         getGridConfig: function () {
-            return _.merge(this.callParent(arguments), {
+            var config = _.merge(this.callParent(arguments), {
                 enableEditing: !_.contains(this.readOnlyGridTypes, this.getSetting('type').toLowerCase()),
                 listeners: {
                     beforestaterestore: this._onBeforeGridStateRestore,
@@ -74,6 +74,22 @@
                     pageSizes: this.orderedAllowedPageSizes
                 }
             });
+
+            var invalidQueryFilters = Rally.util.Filter.findInvalidSubFilters(this._getQueryFilter(), this.models);
+            if (invalidQueryFilters.length) {
+                config.store.on('beforeload', function (store) {
+                    Ext.defer(function () {
+                        store.fireEvent('load', store, store.getRootNode(), [], true);
+                    }, 1);
+                    return false;
+                });
+                config.noDataPrimaryText = 'Invalid Query';
+                config.noDataSecondaryText = _.map(invalidQueryFilters, function (filter) {
+                    return '<div>Could not find the attribute "'+ filter.property.split('.')[0] +'" on type "'+ this.models[0].displayName +'" in the query segment "'+ filter.toString() +'"</div>';
+                }, this).join('');
+            }
+
+            return config;
         },
 
         getFilterControlConfig: function () {
