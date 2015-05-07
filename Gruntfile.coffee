@@ -171,9 +171,10 @@ module.exports = (grunt) ->
 
     'curl-dir':
       downloadfiles:
-        src: [
-          "http://selenium-release.storage.googleapis.com/#{seleniumMajorVersion}/selenium-server-standalone-#{seleniumMajorVersion}.#{seleniumMinorVersion}.jar"
-        ],
+        src: (->
+          jarName = "selenium-server-standalone-#{seleniumMajorVersion}.#{seleniumMinorVersion}.jar";
+          if grunt.file.exists("lib/" + jarName) then [] else ["http://selenium-release.storage.googleapis.com/#{seleniumMajorVersion}/" + jarName]
+        )()
         dest: 'lib'
 
     parallel_spec_runner:
