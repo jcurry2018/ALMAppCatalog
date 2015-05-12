@@ -309,6 +309,7 @@
             if (context.isFeatureEnabled('F7336_ADVANCED_FILTERING')) {
                 plugins.push({
                     ptype:'rallygridboardinlinefiltercontrol',
+                    inline: this.isFullPageApp !== false,
                     inlineFilterButtonConfig: {
                         stateful: true,
                         stateId: context.getScopedStateId('iteration-tracking-inline-filter'),

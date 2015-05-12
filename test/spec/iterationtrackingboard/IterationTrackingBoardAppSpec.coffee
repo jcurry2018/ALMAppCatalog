@@ -382,15 +382,26 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         expect(_.contains(filterPlugin.filterControlConfig.whiteListFields, 'Milestones')).toBe true
 
   describe 'filtering panel plugin', ->
+    helpers
+      getPlugin: ->
+        gridBoard = @app.down 'rallygridboard'
+        _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardinlinefiltercontrol'
+
     beforeEach ->
       @stubFeatureToggle ['F7336_ADVANCED_FILTERING'], true
 
     it 'should use rallygridboard filtering plugin', ->
       @createApp().then =>
-        gridBoard = @app.down 'rallygridboard'
-        plugin = _.find gridBoard.plugins, (plugin) ->
-          plugin.ptype == 'rallygridboardinlinefiltercontrol'
-        expect(plugin).toBeDefined()
+        expect(@getPlugin()).toBeDefined()
+
+    it 'should default to inline when a full page app', ->
+      @createApp().then =>
+        expect(@getPlugin().inline).toBe true
+
+    it 'should set inline false when NOT a full page app', ->
+      @createApp(isFullPageApp: false).then =>
+        expect(@getPlugin().inline).toBe false
 
   describe 'page sizes', ->
     beforeEach ->
