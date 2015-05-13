@@ -34,7 +34,8 @@
             'Rally.apps.iterationtrackingboard.StatsBannerField',
             'Rally.apps.iterationtrackingboard.statsbanner.IterationProgressDialog',
             'Rally.clientmetrics.ClientMetricsRecordable',
-            'Rally.apps.common.RowSettingsField'
+            'Rally.apps.common.RowSettingsField',
+            'Rally.ui.grid.GridExport'
         ],
 
         mixins: [
@@ -434,18 +435,7 @@
         },
 
         _exportHandler: function() {
-            var context = this.getContext();
-            var params = {
-                cpoid: context.getProject().ObjectID,
-                projectScopeUp: context.getProjectScopeUp(),
-                projectScopeDown: context.getProjectScopeDown(),
-                iterationKey: this._getIterationOid()
-            };
-
-            window.location = Ext.String.format('{0}/sc/exportCsv.sp?{1}',
-                Rally.environment.getServer().getContextUrl(),
-                Ext.Object.toQueryString(params)
-            );
+            window.location = Rally.ui.grid.GridExport.buildCsvExportUrl(this.gridboard.getGridOrBoard());
         },
 
         _printHandler: function() {
