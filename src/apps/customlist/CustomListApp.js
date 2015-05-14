@@ -9,7 +9,8 @@
             'Rally.data.ModelTypes',
             'Rally.data.util.Sorter',
             'Rally.data.wsapi.Filter',
-            'Rally.ui.notify.Notifier'
+            'Rally.ui.notify.Notifier',
+            'Rally.util.String'
         ],
 
         disallowedAddNewTypes: ['user', 'userprofile', 'useriterationcapacity', 'testcaseresult', 'task', 'scmrepository', 'project', 'changeset', 'change', 'builddefinition', 'build', 'program'],
@@ -83,10 +84,9 @@
                     }, 1);
                     return false;
                 });
-                config.noDataPrimaryText = 'Invalid Query';
-                config.noDataSecondaryText = _.map(invalidQueryFilters, function (filter) {
-                    return '<div>Could not find the attribute "'+ filter.property.split('.')[0] +'" on type "'+ this.models[0].displayName +'" in the query segment "'+ filter.toString() +'"</div>';
-                }, this).join('');
+                this._showInvalidQueryMessage(config, _.map(invalidQueryFilters, function (filter) {
+                    return 'Could not find the attribute "'+ filter.property.split('.')[0] +'" on type "'+ this.models[0].displayName +'" in the query segment "'+ filter.toString() + '"';
+                }, this));
             }
 
             return config;
@@ -122,6 +122,12 @@
             }
 
             return {
+                listeners: {
+                    warning: {
+                        fn: this._onGridStoreWarning,
+                        scope: this
+                    }
+                },
                 pageSize: this.appContainer.pagesize ? _.find(this.orderedAllowedPageSizes, function(pageSize, index, array){
                     return pageSize >= parseInt(this.appContainer.pagesize, 10) || index === array.length - 1;
                 }, this) : 10,
@@ -249,6 +255,23 @@
                     });
                 }
             }
+        },
+
+        _onGridStoreWarning: function(store, warnings, operation) {
+            var couldNotParseWarnings = _.filter(warnings, function(warning){
+                return Rally.util.String.startsWith(warning, 'Could not parse ');
+            });
+            if(couldNotParseWarnings.length) {
+                operation.resultSet.records = [];
+                this._showInvalidQueryMessage(this.gridboard.getGridOrBoard(), couldNotParseWarnings);
+            }
+        },
+
+        _showInvalidQueryMessage: function(gridOrGridConfig, secondaryTextStrings) {
+            gridOrGridConfig.noDataPrimaryText = 'Invalid Query';
+            gridOrGridConfig.noDataSecondaryText = _.map(secondaryTextStrings, function(str){
+                return '<div>' + str + '</div>';
+            }).join('');
         },
 
         _getValidSorters: function (sorters) {

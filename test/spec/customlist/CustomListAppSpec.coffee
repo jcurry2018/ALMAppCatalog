@@ -176,6 +176,10 @@ describe 'Rally.apps.customlist.CustomListApp', ->
             type: 'userstory'
             query: query
 
+      expectBlankSlateShownWithSecondaryMessages: (secondaryMessages) ->
+        expect(@app.getEl().down('.no-data-container .primary-message').getHTML()).toBe 'Invalid Query'
+        expect(_.pluck(@app.getEl().query('.no-data-container .secondary-message div'), 'textContent')).toContainOnly secondaryMessages
+
     it 'should reload grid when timebox filter is changed', ->
       @createApp(settings: type: 'task').then =>
         loadGridBoardStub = @spy @app, 'loadGridBoard'
@@ -199,6 +203,14 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @createAppWithQuery('(Name contains "{projectName}")').then =>
         expect(@artifactRequest.lastCall.args[0].params.query).toBe "(Name CONTAINS \"#{Rally.environment.getContext().getProject().Name}\")"
 
+    it 'should show WSAPI "Could not parse" warnings in blank slate', ->
+      warnings = ['Could not parse "\'Submitted\'"']
+      @ajax.whenQuerying('artifact').respondWith @mom.getData('UserStory'), warnings: warnings
+      @createAppWithQuery("(State = 'Submitted')").then =>
+        @app.gridboard.getGridOrBoard().fireEvent 'storeload'
+
+        @expectBlankSlateShownWithSecondaryMessages warnings
+
     describe 'contains invalid field names', ->
       beforeEach ->
         @createAppWithQuery '(((Turd.Name = "Poopy McPoop") OR (Project.ObjectID = 123)) AND ((PoopBoolean = false) OR (TargetDate = 01/01/01)) OR (Name contains "poop"))'
@@ -206,7 +218,7 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         expect(@artifactRequest.callCount).toBe 0
 
       it 'should show a blank slate with super hot detailed error messages', ->
-        expect(_.pluck(@app.getEl().query('.no-data-container .secondary-message div'), 'textContent')).toContainOnly [
+        @expectBlankSlateShownWithSecondaryMessages [
           'Could not find the attribute "Turd" on type "User Story" in the query segment "(Turd.Name = "Poopy McPoop")"'
           'Could not find the attribute "PoopBoolean" on type "User Story" in the query segment "(PoopBoolean = false)"'
           'Could not find the attribute "TargetDate" on type "User Story" in the query segment "(TargetDate = "01/01/01")"'
