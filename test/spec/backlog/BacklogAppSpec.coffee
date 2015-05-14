@@ -43,7 +43,9 @@ describe 'Rally.apps.backlog.BacklogApp', ->
     createStub = @stub()
     Rally.environment.getMessageBus().subscribe Rally.nav.Message.create, createStub
     @createApp().then =>
-      @grid.view.fireEvent('inlineadd', @grid.view, @grid.store.getRootNode().childNodes[0], {action: 'inlineaddpeer'})
+      peer =  @grid.store.getRootNode().childNodes[0]
+      peer.set('Iteration', undefined);
+      @grid.view.fireEvent('inlineadd', @grid.view, peer, {action: 'inlineaddpeer'})
       @once(condition: => Ext.ComponentQuery.query('rallyinlineaddnew')[0]).then (inlineAddNew) =>
         @click(inlineAddNew.down('#addWithDetails').el.dom).then =>
           expect(createStub.lastCall.args[1].Iteration).toBe 'u'
