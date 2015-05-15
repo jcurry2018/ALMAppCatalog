@@ -90,11 +90,7 @@
 		},
 
 		_getQuesoUrl: function() {
-			if (window.burroUrl) {
-				return window.burroUrl + '/queso';
-			} else {
-				return '/analytics/chart/releases';
-			}
+			return window.burroUrl + '/queso';
 		},
 		/**
 		 *	Rally.util.Help is not dynamic.  But if we add a panel definition

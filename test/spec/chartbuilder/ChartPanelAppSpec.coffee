@@ -70,41 +70,7 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 			iframe = @getIFrame(app)
 			expect(iframe.almBridge.getProject().ObjectID).toBe Rally.environment.getContext().getProject().ObjectID
 
-	describe 'queso url with burroUrl off', ->
-		oldBurroUrl = window.burroUrl
-
-		beforeEach ->
-			window.burroUrl = undefined
-
-		afterEach ->
-			window.burroUrl = oldBurroUrl
-
-		it 'uses default almchart.html as the iframe source', ->
-			@createAppAndWait().then (app) =>
-				iframe = @getIFrame(app)
-				expect(iframe.src).toContain "/analytics/chart/releases/0.2.0/almchart.min.html"
-
-		it 'changes shim location if packtag=false', ->
-			@createAppAndWait({}, { searchString : "?packtag=false" }).then (app) =>
-				iframe = @getIFrame(app)
-				expect(iframe.src).toContain "/analytics/chart/releases/0.2.0/almchart.html"
-
-		it 'keeps minified shim location if packtag != false', ->
-			@createAppAndWait({}, { searchString : "?packtag=true" }).then (app) =>
-				iframe = @getIFrame(app)
-				expect(iframe.src).toContain "/analytics/chart/releases/0.2.0/almchart.min.html"
-
-		it 'returns releases/current if chart version is not specified', ->
-			@createAppAndWait({}, { searchString : "" }).then (app) =>
-				iframe = @getIFrame(app)
-				expect(iframe.src).toContain "/analytics/chart/releases/0.2.0/almchart.min.html"
-
-		it 'uses the appropriate version specified', ->
-			@createAppAndWait({}, { searchString : "?chartVersion=xxx" }).then (app) =>
-				iframe = @getIFrame(app)
-				expect(iframe.src).toContain "/analytics/chart/releases/xxx/almchart.min.html"
-
-	describe 'queso url with burroUrl on', ->
+	describe 'queso url with burroUrl', ->
 		oldBurroUrl = window.burroUrl
 
 		beforeEach ->
@@ -166,4 +132,3 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 		it 'should return false if config does not have a help value',->
 			app = @createApp({})
 			expect(app._hasHelp()).toBe false
-
