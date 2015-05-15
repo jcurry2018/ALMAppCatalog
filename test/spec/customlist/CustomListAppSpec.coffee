@@ -203,14 +203,6 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @createAppWithQuery('(Name contains "{projectName}")').then =>
         expect(@artifactRequest.lastCall.args[0].params.query).toBe "(Name CONTAINS \"#{Rally.environment.getContext().getProject().Name}\")"
 
-    it 'should show WSAPI "Could not parse" warnings in blank slate', ->
-      warnings = ['Could not parse "\'Submitted\'"']
-      @ajax.whenQuerying('artifact').respondWith @mom.getData('UserStory'), warnings: warnings
-      @createAppWithQuery("(State = 'Submitted')").then =>
-        @app.gridboard.getGridOrBoard().fireEvent 'storeload'
-
-        @expectBlankSlateShownWithSecondaryMessages warnings
-
     describe 'contains invalid field names', ->
       beforeEach ->
         @createAppWithQuery '(((Turd.Name = "Poopy McPoop") OR (Project.ObjectID = 123)) AND ((PoopBoolean = false) OR (TargetDate = 01/01/01)) OR (Name contains "poop"))'
@@ -223,6 +215,20 @@ describe 'Rally.apps.customlist.CustomListApp', ->
           'Could not find the attribute "PoopBoolean" on type "User Story" in the query segment "(PoopBoolean = false)"'
           'Could not find the attribute "TargetDate" on type "User Story" in the query segment "(TargetDate = "01/01/01")"'
         ]
+
+    describe 'when WSAPI has "Could not parse" warnings', ->
+      beforeEach ->
+        @warnings = ['Could not parse "\'Submitted\'"', 'Could not parse "\'Fixed\'"']
+        @ajax.whenQuerying('artifact').respondWith @mom.getData('UserStory'), warnings: @warnings
+        @createAppWithQuery "((State = 'Submitted') OR (State = 'Fixed'))"
+
+      it 'should show warnings in blank slate', ->
+        @app.gridboard.getGridOrBoard().fireEvent 'storeload'
+
+        @expectBlankSlateShownWithSecondaryMessages @warnings
+
+      it 'should show grid has no data in paging toolbar', ->
+        expect(@app.gridboard.getGridOrBoard().down('rallytreepagingtoolbar').getEl().down('.range').getHTML()).toBe '0-0'
 
   describe 'page size', ->
     helpers

@@ -262,7 +262,12 @@
                 return Rally.util.String.startsWith(warning, 'Could not parse ');
             });
             if(couldNotParseWarnings.length) {
-                operation.resultSet.records = [];
+                _.assign(operation.resultSet, {
+                    count: 0,
+                    records: [],
+                    total: 0,
+                    totalRecords: 0
+                });
                 this._showInvalidQueryMessage(this.gridboard.getGridOrBoard(), couldNotParseWarnings);
             }
         },
