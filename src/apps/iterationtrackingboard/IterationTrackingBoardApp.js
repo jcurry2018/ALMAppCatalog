@@ -35,7 +35,8 @@
             'Rally.apps.iterationtrackingboard.statsbanner.IterationProgressDialog',
             'Rally.clientmetrics.ClientMetricsRecordable',
             'Rally.apps.common.RowSettingsField',
-            'Rally.ui.grid.GridExport'
+            'Rally.ui.grid.GridExport',
+            'Rally.ui.gridboard.plugin.GridBoardSharedViewControl'
         ],
 
         mixins: [
@@ -414,6 +415,10 @@
                 plugins.push(this._getCustomViewConfig());
             }
 
+            if(context.isFeatureEnabled('F6028_ISP_SHARED_VIEWS')){
+                plugins.push(this._getSharedViewConfig());
+            }
+
             return plugins;
         },
 
@@ -465,6 +470,12 @@
             if (this.gridboard) {
                 this.gridboard.setHeight(this._getAvailableGridBoardHeight());
             }
+        },
+
+        _getSharedViewConfig: function() {
+            return {
+                ptype: 'rallygridboardsharedviewcontrol'
+            };
         },
 
         _getCustomViewConfig: function() {

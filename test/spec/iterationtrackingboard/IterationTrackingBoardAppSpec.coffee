@@ -403,6 +403,17 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp(isFullPageApp: false).then =>
         expect(@getPlugin().inline).toBe false
 
+  describe 'shared view plugin', ->
+    beforeEach ->
+      @stubFeatureToggle ['F6028_ISP_SHARED_VIEWS'], true
+
+    it 'should use rallygridboard shared view plugin', ->
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        expect(plugin).toBeDefined()
+
   describe 'page sizes', ->
     beforeEach ->
       @_isIE = Ext.isIE
