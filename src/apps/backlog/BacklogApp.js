@@ -9,23 +9,30 @@
         modelNames: ['hierarchicalrequirement', 'defect', 'defectsuite'],
         statePrefix: 'backlog',
 
-        getPermanentFilters: function () {
+        getPermanentFilters: function (types) {
+            types = (types === undefined ? ['hierarchicalrequirement', 'defect', 'defectSuite'] : types);
+
+            var typeCriteria = [];
+            if (_.contains(types, 'defect')) {
+                typeCriteria.push(Rally.data.wsapi.Filter.and([
+                    { property: 'State', operator: '!=', value: 'Closed' },
+                    { property: 'TypeDefOid', operator: '=', value: this._getModelFor('defect').typeDefOid }
+                ]));
+            }
+            if (_.contains(types, 'hierarchicalrequirement')) {
+                typeCriteria.push(Rally.data.wsapi.Filter.and([
+                    { property: 'DirectChildrenCount', operator: '=', value: 0 },
+                    { property: 'TypeDefOid', operator: '=', value: this._getModelFor('hierarchicalrequirement').typeDefOid }
+                ]));
+            }
+
             var defectSuiteModel = this._getModelFor('defectsuite');
             return [
                 Rally.data.wsapi.Filter.and([
                     { property: 'Release', operator: '=', value: null },
                     { property: 'Iteration', operator: '=', value: null }
                 ]),
-                Rally.data.wsapi.Filter.or([
-                    Rally.data.wsapi.Filter.and([
-                        { property: 'State', operator: '!=', value: 'Closed' },
-                        { property: 'TypeDefOid', operator: '=', value: this._getModelFor('defect').typeDefOid }
-                    ]),
-                    Rally.data.wsapi.Filter.and([
-                        { property: 'DirectChildrenCount', operator: '=', value: 0 },
-                        { property: 'TypeDefOid', operator: '=', value: this._getModelFor('hierarchicalrequirement').typeDefOid }
-                    ])
-                ].concat(defectSuiteModel ? [{ property: 'TypeDefOid', operator: '=', value: defectSuiteModel.typeDefOid }] : []))
+                Rally.data.wsapi.Filter.or(typeCriteria.concat(defectSuiteModel ? [{ property: 'TypeDefOid', operator: '=', value: defectSuiteModel.typeDefOid }] : []))
             ];
         },
 
@@ -66,6 +73,10 @@
 
         _getModelFor: function(type) {
             return _.find(this.models, { typePath: type });
+        },
+
+        onFilterTypesChange: function(types) {
+            this.gridboard.gridConfig.storeConfig.filters = this.getPermanentFilters(types);
         }
     });
 })();

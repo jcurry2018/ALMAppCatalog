@@ -49,3 +49,45 @@ describe 'Rally.apps.backlog.BacklogApp', ->
       @once(condition: => Ext.ComponentQuery.query('rallyinlineaddnew')[0]).then (inlineAddNew) =>
         @click(inlineAddNew.down('#addWithDetails').el.dom).then =>
           expect(createStub.lastCall.args[1].Iteration).toBe 'u'
+
+  describe '#getPermanentFilters', ->
+    helpers
+      expectFiltersForTypes: (types) ->
+        @createApp().then =>
+          filters = @app.getPermanentFilters types
+          expect(filters.length).toEqual 2
+
+          query = filters[1].toString()
+
+          if _.contains(types, 'hierarchicalrequirement')
+            expect(query).toContain('(DirectChildrenCount = 0) AND (TypeDefOid = 12416)')
+
+          if _.contains(types, 'defect')
+            expect(query).toContain('(State != "Closed") AND (TypeDefOid = 12476)')
+
+          if _.contains(types, 'defectSuite')
+            expect(query).toContain('(TypeDefOid = 12481)')
+
+    it 'should return filters for all types if no types are given', ->
+      @expectFiltersForTypes()
+
+    it 'should return filters for all types if all types are given', ->
+      @expectFiltersForTypes ['hierarchicalrequirement', 'defect', 'defectSuite']
+
+    it 'should return filters for just defects', ->
+      @expectFiltersForTypes ['defect']
+
+    it 'should return filters for just defectsuites', ->
+      @expectFiltersForTypes ['defectSuite']
+
+    it 'should return filters for just user stories', ->
+      @expectFiltersForTypes ['hierarchicalrequirement']
+
+    it 'should return filters for defects and user stories', ->
+      @expectFiltersForTypes ['hierarchicalrequirement', 'defect']
+
+    it 'should return filters for defects and defect suites', ->
+      @expectFiltersForTypes ['defect', 'defectSuite']
+
+    it 'should return filters for user stories and defect suites', ->
+      @expectFiltersForTypes ['hierarchicalrequirement', 'defectSuite']
