@@ -64,6 +64,7 @@
 
         getGridConfig: function () {
             var config = _.merge(this.callParent(arguments), {
+                allColumnsStateful: true,
                 enableEditing: !_.contains(this.readOnlyGridTypes, this.getSetting('type').toLowerCase()),
                 listeners: {
                     beforestaterestore: this._onBeforeGridStateRestore,
@@ -90,6 +91,10 @@
             }
 
             return config;
+        },
+
+        getColumnCfgs: function() {
+            return _.union(this.callParent(arguments), _.isEmpty(this.columnNames) && this.enableRanking ? ['DragAndDropRank'] : []);
         },
 
         getFilterControlConfig: function () {
@@ -147,7 +152,8 @@
             return _.merge(this.callParent(arguments), {
                 buttonConfig: {
                     disabled: !this._userHasPermissionsToEditPanelSettings()
-                }
+                },
+                gridAlwaysSelectedValues: function () { return []; }
             });
         },
 

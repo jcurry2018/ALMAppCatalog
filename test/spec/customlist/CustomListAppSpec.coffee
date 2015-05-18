@@ -41,7 +41,7 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       url: 'Defect'
 
     @ext4AppScopedSettings =
-      columnNames: 'Name,DefectStatus,Project,State'
+      columnNames: 'FormattedID,DragAndDropRank,Name,DefectStatus,Project,State'
       order: 'DefectStatus'
       query: '(Name !contains "b")'
       type: 'DefectSuite'
@@ -126,14 +126,17 @@ describe 'Rally.apps.customlist.CustomListApp', ->
 
     it 'should be retained if they contain all of the app column settings', ->
       @gridState = columns: [
+        { dataIndex: 'DragAndDropRank' }
+        { dataIndex: 'FormattedID', flex: 2 }
         { dataIndex: 'Name' }
         { dataIndex: 'State', flex: 2 }
         { dataIndex: 'Project', flex: 3 }
         { dataIndex: 'DefectStatus', flex: 1 }
       ]
       @createApp(settings: @ext4AppScopedSettings).then =>
-        statefulColumns = _(@getGrid().columns).filter((column) -> column.dataIndex ).map((column) -> _.pick(column, ['dataIndex', 'flex'])).value().splice(2)
-        expect(statefulColumns).toEqual @gridState.columns
+        statefulColumns = _(@getGrid().columns).filter((column) -> column.dataIndex).map((column) -> _.pick(column, ['dataIndex', 'flex'])).value()
+        expect(statefulColumns.slice(2)).toEqual @gridState.columns.slice(2)
+        expect(_(statefulColumns).take(2).pluck('dataIndex').value()).toEqual ['DragAndDropRank', 'FormattedID']
 
     describe 'when updated by user', ->
       beforeEach ->
@@ -275,3 +278,8 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @artifactRequest = @ajax.whenQuerying('artifact').respondWith(@mom.getData 'hierarchicalrequirement', count: 10);
       @createApp(settings: { type: 'hierarchicalrequirement', showControls: false }).then =>
         expect(@app.gridboard.down('#pagingToolbar')).not.toBeVisible()
+
+  describe 'field picker', ->
+    it 'should have no always selected values', ->
+      @createApp(settings: { type: 'hierarchicalrequirement' }).then =>
+        expect(_.find(@app.gridboard.plugins, ptype: 'rallygridboardfieldpicker').gridAlwaysSelectedValues).toEqual []
