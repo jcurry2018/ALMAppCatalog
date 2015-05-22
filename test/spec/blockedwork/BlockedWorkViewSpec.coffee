@@ -54,7 +54,7 @@ describe 'Rally.apps.blockedwork.BlockedWorkView', ->
     @createView().then (view) =>
       @assertShowMoreLinkShown(false, view)
 
-  it 'uses profileImageSize config in template', ->
+  xit 'uses profileImageSize config in template', ->
     @createBlockedWorkProducts(1)
     @createView(
       profileImageSize: 100

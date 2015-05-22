@@ -73,8 +73,12 @@ module.exports = (grunt) ->
   specFiles = 'test/spec/**/*Spec.coffee'
   cssFiles = 'src/apps/**/*.{css,less}'
 
-  seleniumMajorVersion = '2.44'
-  seleniumMinorVersion = '0'
+  seleniumMajorVersion = '2.45'
+  seleniumMinorVersion = '0-rally'
+#  seleniumUrl = "http://selenium-release.storage.googleapis.com"
+#  seleniumVersionUrl = "#{seleniumUrl}/#{seleniumMajorVersion}"
+  seleniumUrl = "http://repo-depot.f4tech.com/artifactory/junkyard-local/com/rallydev"
+  seleniumVersionUrl = "#{seleniumUrl}/selenium"
   grunt.option('selenium-jar-path',"lib/selenium-server-standalone-#{seleniumMajorVersion}.#{seleniumMinorVersion}.jar")
 
   specFileArray = [
@@ -173,7 +177,7 @@ module.exports = (grunt) ->
       downloadfiles:
         src: (->
           jarName = "selenium-server-standalone-#{seleniumMajorVersion}.#{seleniumMinorVersion}.jar";
-          if grunt.file.exists("lib/" + jarName) then [] else ["http://selenium-release.storage.googleapis.com/#{seleniumMajorVersion}/" + jarName]
+          if grunt.file.exists("lib/" + jarName) then [] else ["#{seleniumVersionUrl}/" + jarName]
         )()
         dest: 'lib'
 
