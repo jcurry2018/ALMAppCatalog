@@ -413,6 +413,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         plugin = _.find gridBoard.plugins, (plugin) ->
           plugin.ptype == 'rallygridboardsharedviewcontrol'
         expect(plugin).toBeDefined()
+        expect(plugin.sharedViewConfig.stateful).toBe true
+        expect(plugin.sharedViewConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-shared-view')
+        expect(plugin.sharedViewConfig.defaultViews).toEqual [] #TODO: S88456: implement the default views
 
   describe 'page sizes', ->
     beforeEach ->

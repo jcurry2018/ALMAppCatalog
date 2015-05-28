@@ -474,7 +474,15 @@
 
         _getSharedViewConfig: function() {
             return {
-                ptype: 'rallygridboardsharedviewcontrol'
+                ptype: 'rallygridboardsharedviewcontrol',
+                sharedViewConfig: {
+                    stateful: true,
+                    stateId: this.getContext().getScopedStateId('iteration-tracking-shared-view'),
+                    defaultViews: [
+                        //TODO: S88456: implement the views
+                        //{ Name: 'foo', Value: '{ foo:\'bar\'}', identifier: 'foo'},
+                   ]
+                }
             };
         },
 
