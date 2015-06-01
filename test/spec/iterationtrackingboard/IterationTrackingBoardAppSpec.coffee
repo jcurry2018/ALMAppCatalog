@@ -105,6 +105,14 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         header = @app.down('container[cls=header]')
         expect(header == null).toBe true
 
+  it 'sets current view on viewchange', ->
+    @createApp().then =>
+      removeSpy = @spy(@app, 'remove')
+      @app.down('#gridBoard').fireEvent 'viewchange'
+      expect(removeSpy).toHaveBeenCalledOnce()
+      expect(removeSpy).toHaveBeenCalledWith 'gridBoard'
+      expect(@app.down('#gridBoard')).toBeDefined()
+
   it 'resets view on scope change', ->
     @createApp().then =>
       removeSpy = @spy(@app, 'remove')
@@ -415,7 +423,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         expect(plugin).toBeDefined()
         expect(plugin.sharedViewConfig.stateful).toBe true
         expect(plugin.sharedViewConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-shared-view')
-        expect(plugin.sharedViewConfig.defaultViews).toEqual [] #TODO: S88456: implement the default views
+        expect(plugin.sharedViewConfig.defaultViews).toBeDefined()
 
   describe 'page sizes', ->
     beforeEach ->

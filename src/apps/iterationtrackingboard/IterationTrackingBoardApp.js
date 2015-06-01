@@ -184,6 +184,7 @@
                     toggle: this._onToggle,
                     recordupdate: this._publishContentUpdatedNoDashboardLayout,
                     recordcreate: this._publishContentUpdatedNoDashboardLayout,
+                    viewchange: this._onViewChange,
                     scope: this
                 },
                 height: Math.max(this._getAvailableGridBoardHeight(), 150)
@@ -478,12 +479,46 @@
                 sharedViewConfig: {
                     stateful: true,
                     stateId: this.getContext().getScopedStateId('iteration-tracking-shared-view'),
-                    defaultViews: [
-                        //TODO: S88456: implement the views
-                        //{ Name: 'foo', Value: '{ foo:\'bar\'}', identifier: 'foo'},
-                   ]
+                    defaultViews: _.map(this._getDefaultViews(), function(view){
+                        Ext.apply(view, {
+                            identifier: view.Name,
+                            Value: Ext.JSON.encode(view.Value, true)
+                        });
+                        return view;
+                    }, this)
                 }
             };
+        },
+
+        _getDefaultViews: function(){
+            //TODO: S88456: Define Default Views
+            return [
+                {
+                    Name: 'Board',
+                    Value: {
+                        toggleState: 'board',
+                        fields: [
+                            'Name',
+                            'ScheduleState'
+                        ]
+                    }
+                },
+                {
+                    Name: 'Grid',
+                    Value: {
+                        toggleState: 'grid',
+                        columns: [
+                            { dataIndex: 'Name'},
+                            { dataIndex: 'DisplayColor'}
+                        ],
+                        sorters: [{property: "Name", direction: "ASC"}]
+                    }
+                }
+            ];
+        },
+
+        _onViewChange: function(){
+            this.onScopeChange();
         },
 
         _getCustomViewConfig: function() {
