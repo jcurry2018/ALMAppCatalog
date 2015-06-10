@@ -491,27 +491,56 @@
         },
 
         _getDefaultViews: function(){
-            //TODO: S88456: Define Default Views
             return [
                 {
-                    Name: 'Board',
-                    Value: {
-                        toggleState: 'board',
-                        fields: [
-                            'Name',
-                            'ScheduleState'
-                        ]
-                    }
-                },
-                {
-                    Name: 'Grid',
+                    Name: 'Grid View',
                     Value: {
                         toggleState: 'grid',
                         columns: [
                             { dataIndex: 'Name'},
-                            { dataIndex: 'DisplayColor'}
+                            { dataIndex: 'State'},
+                            { dataIndex: 'Discussion'},
+                            { dataIndex: 'Priority'},
+                            { dataIndex: 'Severity'},
+                            { dataIndex: 'FoundInBuild'},
+                            { dataIndex: 'FixedInBuild'},
+                            { dataIndex: 'Owner'}
                         ],
-                        sorters: [{property: "Name", direction: "ASC"}]
+                        sorters:[]
+                    }
+                },
+                {
+                    Name: 'Task Status',
+                    Value: {
+                        toggleState: 'grid',
+                        columns: [
+                            { dataIndex: 'Name'},
+                            { dataIndex: 'State'},
+                            { dataIndex: 'PlanEstimate'},
+                            { dataIndex: 'TaskEstimateTotal'},
+                            { dataIndex: 'TaskActualTotal'},
+                            { dataIndex: 'TaskRemainingTotal'},
+                            { dataIndex: 'Owner'}
+                        ],
+                        sorters:[]
+                    }
+                },
+                {
+                    Name: 'Test Status',
+                    Value: {
+                        toggleState: 'grid',
+                        columns: [
+                            { dataIndex: 'Name'},
+                            { dataIndex: 'State'},
+                            { dataIndex: 'Discussion'},
+                            { dataIndex: 'LastVerdict'},
+                            { dataIndex: 'LastBuild'},
+                            { dataIndex: 'LastRun'},
+                            { dataIndex: 'ActiveDefects'},
+                            { dataIndex: 'Priority'},
+                            { dataIndex: 'Owner'}
+                        ],
+                        sorters:[]
                     }
                 }
             ];
