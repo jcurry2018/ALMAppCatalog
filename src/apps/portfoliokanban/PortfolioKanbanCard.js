@@ -59,9 +59,6 @@
                                     },
                                     {
                                         dataIndex: 'PlanEstimate',
-                                        editor: {
-                                            decimalPrecision: 0
-                                        },
                                         width: 90
                                     },
                                     {
