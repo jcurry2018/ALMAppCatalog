@@ -193,9 +193,7 @@
 
         _getTimeboxScopeFilter: function () {
             var timeboxScope = this.getContext().getTimeboxScope();
-            var hasTimeboxField = timeboxScope && _.any(this.models, function (model) {
-                return model.hasField(Ext.String.capitalize(timeboxScope.getType()));
-            });
+            var hasTimeboxField = timeboxScope && _.any(this.models, timeboxScope.isApplicable, timeboxScope);
             return hasTimeboxField ? [ timeboxScope.getQueryFilter() ] : [];
         },
 

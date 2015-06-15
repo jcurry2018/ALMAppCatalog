@@ -159,7 +159,7 @@
             if (this.getSetting('query')) {
                 queries.push(Rally.data.QueryFilter.fromQueryString(this.getSetting('query')));
             }
-            if (timeboxScope && this.model.hasField(Ext.String.capitalize(timeboxScope.getType()))) {
+            if (timeboxScope && timeboxScope.isApplicable(this.model)) {
                 queries.push(timeboxScope.getQueryFilter());
             }
 
