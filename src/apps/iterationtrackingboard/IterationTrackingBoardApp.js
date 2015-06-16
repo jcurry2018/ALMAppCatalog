@@ -536,7 +536,7 @@
                             { dataIndex: 'LastVerdict'},
                             { dataIndex: 'LastBuild'},
                             { dataIndex: 'LastRun'},
-                            { dataIndex: 'ActiveDefects'},
+                            { dataIndex: 'Defects'},
                             { dataIndex: 'Priority'},
                             { dataIndex: 'Owner'}
                         ],
