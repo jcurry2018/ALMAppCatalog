@@ -35,7 +35,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'nexus:deploy', 'Deploys to nexus', ['build', 'nexus:__createartifact__']
   grunt.registerTask 'nexus:verify', 'Fetches the last build and verifies its integrity', ['clean:nexus', 'version', 'nexus:push:verify']
 
-  grunt.registerTask 'npm:publish', 'Publish to our private npm registry', ['bump-commit', 'npm-publish']
+  grunt.registerTask 'npm:publish', 'Publish to our private npm registry', ['bump:patch', 'npm-publish']
 
   grunt.registerTask 'check', 'Run convention tests on all files', ['regex-check']
   grunt.registerTask 'ci', 'Does a full build, runs tests and deploys to nexus', ['build', 'test:ci', 'nexus:__createartifact__']
