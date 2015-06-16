@@ -21,6 +21,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-parallel-spec-runner'
   grunt.loadNpmTasks 'grunt-text-replace'
   grunt.loadNpmTasks 'grunt-curl'
+  grunt.loadNpmTasks 'grunt-bump'
+  grunt.loadNpmTasks 'grunt-npm'
 
   grunt.loadTasks 'grunt/tasks'
 
@@ -32,6 +34,8 @@ module.exports = (grunt) ->
   grunt.registerTask 'nexus:__createartifact__', 'Internal task to create and publish the nexus artifact', ['version', 'nexus:push:publish', 'clean:target']
   grunt.registerTask 'nexus:deploy', 'Deploys to nexus', ['build', 'nexus:__createartifact__']
   grunt.registerTask 'nexus:verify', 'Fetches the last build and verifies its integrity', ['clean:nexus', 'version', 'nexus:push:verify']
+
+  grunt.registerTask 'npm:publish', 'Publish to our private npm registry', ['bump-commit', 'npm-publish']
 
   grunt.registerTask 'check', 'Run convention tests on all files', ['regex-check']
   grunt.registerTask 'ci', 'Does a full build, runs tests and deploys to nexus', ['build', 'test:ci', 'nexus:__createartifact__']
@@ -89,6 +93,18 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON 'package.json'
 
     buildVersion: version
+
+    bump:
+      options:
+        commitFiles: ['package.json']
+        commitMessage: '[ci npm:publish autobump v%VERSION%]',
+        push: true
+        pushTo: 'origin master'
+
+    'npm-publish':
+      options:
+        # the CI will be producing version files and what-not. they can be safely ignored.
+        abortIfDirty: false
 
     clean:
       build: ['build/', 'src/apps/**/*.html', 'temp/']
