@@ -491,12 +491,17 @@
         },
 
         _getDefaultViews: function(){
+            var  rankColumnDataIndex = this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ?
+                Rally.data.Ranker.RANK_FIELDS.DND : Rally.data.Ranker.RANK_FIELDS.MANUAL;
+
+
             return [
                 {
                     Name: 'Grid View',
                     Value: {
                         toggleState: 'grid',
                         columns: [
+                            { dataIndex: rankColumnDataIndex},
                             { dataIndex: 'Name'},
                             { dataIndex: 'State'},
                             { dataIndex: 'Discussion'},
@@ -506,7 +511,7 @@
                             { dataIndex: 'FixedInBuild'},
                             { dataIndex: 'Owner'}
                         ],
-                        sorters:[]
+                        sorters:[{ property: rankColumnDataIndex, direction: 'ASC'}]
                     }
                 },
                 {
@@ -514,6 +519,7 @@
                     Value: {
                         toggleState: 'grid',
                         columns: [
+                            { dataIndex: rankColumnDataIndex},
                             { dataIndex: 'Name'},
                             { dataIndex: 'State'},
                             { dataIndex: 'PlanEstimate'},
@@ -522,7 +528,7 @@
                             { dataIndex: 'TaskRemainingTotal'},
                             { dataIndex: 'Owner'}
                         ],
-                        sorters:[]
+                        sorters:[{ property: rankColumnDataIndex, direction: 'ASC'}]
                     }
                 },
                 {
@@ -530,6 +536,7 @@
                     Value: {
                         toggleState: 'grid',
                         columns: [
+                            { dataIndex: rankColumnDataIndex},
                             { dataIndex: 'Name'},
                             { dataIndex: 'State'},
                             { dataIndex: 'Discussion'},
@@ -540,7 +547,7 @@
                             { dataIndex: 'Priority'},
                             { dataIndex: 'Owner'}
                         ],
-                        sorters:[]
+                        sorters:[{ property: rankColumnDataIndex, direction: 'ASC'}]
                     }
                 }
             ];

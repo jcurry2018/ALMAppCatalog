@@ -11,7 +11,7 @@ Ext.require [
 describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   helpers
-    createApp: (config) ->
+    createApp: (config = {}, dndRankEnabled = true) ->
       now = new Date(1384305300 * 1000);
       tomorrow = Rally.util.DateTime.add(now, 'day', 1)
       nextDay = Rally.util.DateTime.add(tomorrow, 'day', 1)
@@ -32,7 +32,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
               _ref: @projectRef
             workspace:
               WorkspaceConfiguration:
-                DragDropRankingEnabled: true
+                DragDropRankingEnabled: dndRankEnabled
                 WorkDays: "Monday,Friday"
             subscription: Rally.environment.getContext().getSubscription()
         ),
@@ -260,8 +260,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
                 operator: '='
                 value: null
               )))
-          ).
-          or(Ext.create('Rally.data.wsapi.Filter',
+          ).or(Ext.create('Rally.data.wsapi.Filter',
             property: 'TypeDefOid'
             operator: '!='
             value: defectTypeDefOid
@@ -424,6 +423,22 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         expect(plugin.sharedViewConfig.stateful).toBe true
         expect(plugin.sharedViewConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-shared-view')
         expect(plugin.sharedViewConfig.defaultViews).toBeDefined()
+
+    it 'should add correct rank field when manually ranked', ->
+      @createApp({}, false).then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        defaultViews = plugin.sharedViewConfig.defaultViews
+        expect(Ext.JSON.decode(defaultViews[0].Value, true).columns[0].dataIndex).toBe 'Rank'
+
+    it 'should add correct rank field when dnd ranked', ->
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        defaultViews = plugin.sharedViewConfig.defaultViews
+        expect(Ext.JSON.decode(defaultViews[0].Value, true).columns[0].dataIndex).toBe 'DragAndDropRank'
 
   describe 'page sizes', ->
     beforeEach ->
