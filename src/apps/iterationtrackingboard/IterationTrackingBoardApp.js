@@ -497,7 +497,7 @@
 
             return [
                 {
-                    Name: 'Grid View',
+                    Name: 'Defect Status',
                     Value: {
                         toggleState: 'grid',
                         columns: [
