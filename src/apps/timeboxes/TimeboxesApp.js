@@ -19,6 +19,23 @@
 
         enableGridBoardToggle: true,
 
+        listeners: {
+            gridboardadded: function(gridboard) {
+                if (this.selectedType !== 'milestone') {
+                    gridboard.on('load', function() {
+                        var grid = gridboard.getGridOrBoard();
+                        grid.on('storedatachanged', function(store) {
+                            if (!_.isEmpty(store.getUpdatedRecords())) {
+                                store.suspendEvents();
+                                store.load();
+                                store.resumeEvents();
+                            }
+                        }, this);
+                    });
+                }
+            }
+        },
+
         xmlExportEnabled: function(){
             return this.selectedType !== 'milestone';
         },

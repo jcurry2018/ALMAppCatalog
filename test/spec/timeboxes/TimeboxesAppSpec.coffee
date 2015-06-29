@@ -36,6 +36,13 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
     getHeader: ->
       @app.gridboard.getHeader()
 
+    createStoreStub: ->
+      storeStub =
+        getUpdatedRecords: -> ['test']
+        suspendEvents: @stub()
+        load: @stub()
+        resumeEvents: @stub()
+
   describe 'milestones', ->
     beforeEach ->
       @createApp 'milestone'
@@ -103,6 +110,37 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
     it 'make a request for the new type', ->
       expect(@requestStubs.iteration).not.toHaveBeenCalled()
       expect(@requestStubs.release).toHaveBeenCalledOnce()
+
+  describe 'gridboard store data changed', ->
+    it 're-loads the store when a record is added for iterations', ->
+      @createApp 'iteration'
+      storeStub = @createStoreStub()
+      @waitForComponentReady(@app.gridboard).then =>
+        @app.gridboard.getGridOrBoard().fireEvent('storedatachanged', storeStub)
+
+        expect(storeStub.suspendEvents).toHaveBeenCalledOnce()
+        expect(storeStub.load).toHaveBeenCalledOnce()
+        expect(storeStub.resumeEvents).toHaveBeenCalledOnce()
+
+    it 're-loads the store when a record is added for releases', ->
+      @createApp 'release'
+      storeStub = @createStoreStub()
+      @waitForComponentReady(@app.gridboard).then =>
+        @app.gridboard.getGridOrBoard().fireEvent('storedatachanged', storeStub)
+
+        expect(storeStub.suspendEvents).toHaveBeenCalledOnce()
+        expect(storeStub.load).toHaveBeenCalledOnce()
+        expect(storeStub.resumeEvents).toHaveBeenCalledOnce()
+
+    it 'does not re-load the store when a record is added for milestones', ->
+      @createApp 'milestone'
+      storeStub = @createStoreStub()
+      @waitForComponentReady(@app.gridboard).then =>
+        @app.gridboard.getGridOrBoard().fireEvent('storedatachanged', storeStub)
+
+        expect(storeStub.suspendEvents).not.toHaveBeenCalled()
+        expect(storeStub.load).not.toHaveBeenCalled()
+        expect(storeStub.resumeEvents).not.toHaveBeenCalled()
 
   describe 'in chart mode', ->
     beforeEach ->
