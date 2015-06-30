@@ -35,7 +35,7 @@
             'Rally.apps.iterationtrackingboard.statsbanner.IterationProgressDialog',
             'Rally.clientmetrics.ClientMetricsRecordable',
             'Rally.apps.common.RowSettingsField',
-            'Rally.ui.grid.GridExport',
+            'Rally.ui.gridboard.Export',
             'Rally.ui.gridboard.plugin.GridBoardSharedViewControl'
         ],
 
@@ -442,7 +442,7 @@
         },
 
         _exportHandler: function() {
-            window.location = Rally.ui.grid.GridExport.buildCsvExportUrl(this.gridboard.getGridOrBoard());
+            window.location = Rally.ui.gridboard.Export.buildCsvExportUrl(this.gridboard.getGridOrBoard());
         },
 
         _printHandler: function() {
