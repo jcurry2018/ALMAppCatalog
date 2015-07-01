@@ -82,22 +82,22 @@ describe 'Rally.apps.chartbuilder.ChartPanelApp', ->
 		it 'uses default almchart.html as the iframe source', ->
 			@createAppAndWait().then (app) =>
 				iframe = @getIFrame(app)
-				expect(iframe.src).toContain "/def/leppard/queso/0.2.0/almchart.min.html"
+				expect(iframe.src).toContain "/def/leppard/queso/0.2.9/almchart.min.html"
 
 		it 'changes shim location if packtag=false', ->
 			@createAppAndWait({}, { searchString : "?packtag=false" }).then (app) =>
 				iframe = @getIFrame(app)
-				expect(iframe.src).toContain "/def/leppard/queso/0.2.0/almchart.html"
+				expect(iframe.src).toContain "/def/leppard/queso/0.2.9/almchart.html"
 
 		it 'keeps minified shim location if packtag != false', ->
 			@createAppAndWait({}, { searchString : "?packtag=true" }).then (app) =>
 				iframe = @getIFrame(app)
-				expect(iframe.src).toContain "/def/leppard/queso/0.2.0/almchart.min.html"
+				expect(iframe.src).toContain "/def/leppard/queso/0.2.9/almchart.min.html"
 
-		it 'returns releases/current if chart version is not specified', ->
+		it 'returns default chart version is not specified', ->
 			@createAppAndWait({}, { searchString : "" }).then (app) =>
 				iframe = @getIFrame(app)
-				expect(iframe.src).toContain "/def/leppard/queso/0.2.0/almchart.min.html"
+				expect(iframe.src).toContain "/def/leppard/queso/0.2.9/almchart.min.html"
 
 		it 'uses the appropriate version specified', ->
 			@createAppAndWait({}, { searchString : "?chartVersion=xxx" }).then (app) =>
