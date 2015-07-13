@@ -88,8 +88,11 @@ describe 'Rally.apps.teamboard.TeamBoardCard', ->
         expect(item.model).toBe type
         expect(item.storeConfig).toOnlyHaveFilter [parentFieldName, '=', @record.get('_ref')]
 
+      getPopover: ->
+        Ext.ComponentQuery.query('#teamBoardAssociatedItemsPopover')[0]
+
       getPopoverItem: ->
-        Ext.ComponentQuery.query('#teamBoardAssociatedItemsPopover')[0].items.first()
+        @getPopover().items.first()
 
     beforeEach ->
       @ajax.whenQuerying('userstory').respondWith []
@@ -98,6 +101,9 @@ describe 'Rally.apps.teamboard.TeamBoardCard', ->
       @ajax.whenQuerying('conversationpost').respondWith []
 
       @createCard()
+
+    afterEach ->
+      @getPopover().destroy()
 
     it 'should show associated User Stories', ->
       @click(className: 'AssociatedUserStories').then =>
@@ -114,25 +120,3 @@ describe 'Rally.apps.teamboard.TeamBoardCard', ->
     it 'should show associated Discussion', ->
       @click(className: 'AssociatedDiscussion').then =>
         @assertPopoverShownWithUserItems xtype: 'rallydiscussionrichtextstreamview', parentFieldName: 'User'
-
-    describe 'with an ownerColumn', ->
-      beforeEach ->
-        @card.ownerColumn =
-          getIterationRef: -> '/iteration/123'
-          getValue: -> '/project/123'
-
-      it 'should show items in the owner column project', ->
-        @click(className: 'AssociatedUserStories').then =>
-          expect(@getPopoverItem().storeConfig.context).toEqual
-            project: '/project/123'
-            projectScopeUp: false
-            projectScopeDown: false
-
-      it 'should show items in the scoped iteration', ->
-        @click(className: 'AssociatedUserStories').then =>
-          expect(@getPopoverItem().storeConfig).toOnlyHaveFilters [['Owner', '=', @record.get('_ref')], ['Iteration', '=', '/iteration/123']]
-
-      it 'should show all associated items when not scoped to an iteration', ->
-        @card.ownerColumn.getIterationRef = ->
-        @click(className: 'AssociatedUserStories').then =>
-          @assertPopoverShownWithGridOfUserItems 'HierarchicalRequirement'

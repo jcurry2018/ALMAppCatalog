@@ -50,20 +50,14 @@
         },
 
         _getContext: function() {
-            return this.card.ownerColumn && {
-                project: this.card.ownerColumn.getValue(),
-                projectScopeDown: false,
-                projectScopeUp: false
-            };
+            return {project: null};
+        },
+
+        _onPopoverDestroy: function() {
+            this.card.getEl().removeCls('team-board-associated-popover-shown');
         },
 
         _showAssociatedArtifactsPopover: function(options) {
-            var filters = [{property: 'Owner', value: this.card.getRecord().get('_ref')}];
-            var iterationRef = this.card.ownerColumn && this.card.ownerColumn.getIterationRef();
-            if(iterationRef) {
-                filters.push({property: 'Iteration', value: iterationRef});
-            }
-
             this._showAssociatedPopover({
                 items: [{
                     xtype: 'rallygrid',
@@ -71,7 +65,7 @@
                     model: Ext.identityFn(options.type),
                     storeConfig: {
                         context: this._getContext(),
-                        filters: filters,
+                        filters: [{property: 'Owner', value: this.card.getRecord().get('_ref')}],
                         sorters: [{property: 'LastUpdateDate', direction: 'DESC'}]
                     }
                 }],
@@ -83,10 +77,15 @@
         },
 
         _showAssociatedPopover: function(popoverConfig) {
-            this.popover = Ext.create('Rally.ui.popover.Popover', Ext.apply({
+            this.card.getEl().addCls('team-board-associated-popover-shown');
+            this.popover = Ext.create('Rally.ui.popover.Popover', _.merge({
                 itemId: 'teamBoardAssociatedItemsPopover',
+                listeners: {
+                    destroy: this._onPopoverDestroy,
+                    scope: this
+                },
                 offsetFromTarget: [{x:0, y:-8}, {x:15, y:0}, {x:5, y:15}, {x:-15, y:0}],
-                width: 700
+                width: 900
             }, popoverConfig));
         }
     });

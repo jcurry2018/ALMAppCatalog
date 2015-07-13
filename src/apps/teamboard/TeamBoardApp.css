@@ -34,6 +34,12 @@
 
 .team-board-app .rui-card .rui-card-content .status-content {
     border-top: 1px dotted #CCC;
+    display: none;
+}
+
+.team-board-app .rui-card:hover .rui-card-content .status-content,
+.team-board-app .rui-card.team-board-associated-popover-shown .rui-card-content .status-content {
+    display: block;
 }
 
 .team-board-app .rui-card .rui-card-content .associated-artifacts-icon {
