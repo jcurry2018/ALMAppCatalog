@@ -322,7 +322,20 @@
                                 fields: [
                                     'ArtifactSearch',
                                     'Owner',
-                                    'ScheduleState'
+                                    {
+                                        name: 'ScheduleState',
+                                        multiSelect: true,
+                                        allowClear: false,
+                                        getFilter: function() {
+                                            return Rally.data.wsapi.Filter.or(_.map(this.lastValue, function(value) {
+                                                return {
+                                                    property: 'ScheduleState',
+                                                    operator: '=',
+                                                    value: value
+                                                };
+                                            }, this));
+                                        }
+                                    }
                                 ]
                             },
                             advancedFilterPanelConfig: {

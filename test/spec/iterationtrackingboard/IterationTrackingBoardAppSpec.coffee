@@ -410,6 +410,35 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp(isFullPageApp: false).then =>
         expect(@getPlugin().inline).toBe false
 
+    describe 'quick filters', ->
+
+      it 'should add filters for search, owner and schedulestate', ->
+        @createApp().then =>
+          config = @getPlugin().inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig
+          expect(config.fields[0]).toBe 'ArtifactSearch'
+          expect(config.fields[1]).toBe 'Owner'
+          expect(config.fields[2].name).toBe 'ScheduleState'
+
+      it 'schedulestate should be multiselect', ->
+        @createApp().then =>
+          config = @getPlugin().inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig
+          expect(config.fields[2].multiSelect).toBe true
+          expect(config.fields[2].allowClear).toBe false
+
+      it 'should return an empty schedulestate filter', ->
+        @createApp().then =>
+          config = @getPlugin().inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig
+          cmp = config.fields[2]
+          cmp.lastValue = []
+          expect(cmp.getFilter()).toBeNull()
+
+      it 'should return an or\'ed schedulestate filter', ->
+        @createApp().then =>
+          config = @getPlugin().inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig
+          cmp = config.fields[2]
+          cmp.lastValue = ['In-Progress', 'Completed']
+          expect(cmp.getFilter().toString()).toBe '((ScheduleState = "In-Progress") OR (ScheduleState = "Completed"))'
+
   describe 'shared view plugin', ->
     it 'should use rallygridboard shared view plugin', ->
       @stubFeatureToggle ['F6028_ISP_SHARED_VIEWS'], true
