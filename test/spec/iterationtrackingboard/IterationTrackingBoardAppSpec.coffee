@@ -487,6 +487,26 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
           plugin.ptype == 'rallygridboardsharedviewcontrol'
         expect(plugin.enableGridEditing).toBe false
 
+    it 'should enableUrlSharing when isFullPageApp is true', ->
+      @stubFeatureToggle ['F6028_ISP_SHARED_VIEWS', 'S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE'], true
+      @createApp(
+        isFullPageApp: true
+      ).then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        expect(plugin.sharedViewConfig.enableUrlSharing).toBe true
+
+    it 'should NOT enableUrlSharing when isFullPageApp is false', ->
+      @stubFeatureToggle ['F6028_ISP_SHARED_VIEWS', 'S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE'], true
+      @createApp(
+        isFullPageApp: false
+      ).then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        expect(plugin.sharedViewConfig.enableUrlSharing).toBe false
+
   describe 'page sizes', ->
     beforeEach ->
       @_isIE = Ext.isIE

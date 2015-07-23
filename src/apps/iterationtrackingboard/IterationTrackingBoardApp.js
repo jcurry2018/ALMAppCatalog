@@ -494,11 +494,11 @@
                     stateId: this.getContext().getScopedStateId('iteration-tracking-shared-view'),
                     defaultViews: _.map(this._getDefaultViews(), function(view){
                         Ext.apply(view, {
-                            identifier: view.Name,
                             Value: Ext.JSON.encode(view.Value, true)
                         });
                         return view;
-                    }, this)
+                    }, this),
+                    enableUrlSharing: this.isFullPageApp !== false
                 },
                 enableGridEditing: this.getContext().isFeatureEnabled('S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE')
             };
@@ -512,6 +512,7 @@
             return [
                 {
                     Name: 'Defect Status',
+                    identifier: 1,
                     Value: {
                         toggleState: 'grid',
                         columns: [
@@ -530,6 +531,7 @@
                 },
                 {
                     Name: 'Task Status',
+                    identifier: 2,
                     Value: {
                         toggleState: 'grid',
                         columns: [
@@ -547,6 +549,7 @@
                 },
                 {
                     Name: 'Test Status',
+                    identifier: 3,
                     Value: {
                         toggleState: 'grid',
                         columns: [
