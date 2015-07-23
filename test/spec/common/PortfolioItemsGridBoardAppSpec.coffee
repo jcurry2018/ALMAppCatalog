@@ -63,9 +63,9 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
           if renderInGridHeader? then config.piTypePickerConfig = {renderInGridHeader: renderInGridHeader}
           return @renderApp(config)
 
-      it 'should render to the right in the grid header when configured with \'renderInGridHeader\':true ', ->
+      it 'should render to the left in the grid header when configured with \'renderInGridHeader\':true ', ->
         @renderAppWithPiPickerInGridHeader(true).then =>
-          expect(@app.gridboard.getHeader?().getRight?().contains?(@app.piTypePicker)).toBeTruthy()
+          expect(@app.gridboard.getHeader?().getLeft?().contains?(@app.piTypePicker)).toBeTruthy()
 
       it 'should render to dashboard title when configured with \'renderInGridHeader\':false ', ->
         @renderAppWithPiPickerInGridHeader(false).then =>

@@ -46,6 +46,7 @@
 
         constructor: function(config) {
             config.settingsScope = config.isFullPageApp ? 'project' : 'app';
+            config.piTypePickerConfig = { renderInGridHeader: !config.isFullPageApp };
             this.callParent([config]);
         },
 

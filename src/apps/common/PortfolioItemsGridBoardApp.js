@@ -3,22 +3,27 @@
 
     Ext.define('Rally.apps.common.PortfolioItemsGridBoardApp', {
         extend: 'Rally.app.GridBoardApp',
+
         requires: [
             'Rally.ui.cardboard.plugin.CollapsibleColumns',
             'Rally.ui.cardboard.plugin.FixedHeader'
         ],
+
         constructor: function(config){
             var defaultConfig = {
                 piTypePickerConfig: {
                     renderInGridHeader: false
                 }
             };
+
             this.callParent([Ext.Object.merge(defaultConfig, config)]);
         },
+
         initComponent: function(){
             this.callParent(arguments);
             this.addCls('portfolio-items-grid-board-app');
         },
+
         addGridBoard: function(){
             if (this.gridboard && this.piTypePicker && this.piTypePicker.rendered) {
                 var parent = this.piTypePicker.up();
@@ -27,14 +32,6 @@
                 }
             }
             this.callParent(arguments);
-            this.addHeader();
-
-        },
-        addHeader: function(){
-            var header = this.gridboard.getHeader();
-            if (header) {
-                header.getRight().add(this.getHeaderControls());
-            }
         },
 
         launch: function () {
@@ -58,10 +55,6 @@
                 },
                 scope: this
             });
-        },
-
-        getHeaderControls: function () {
-            return (this.config.piTypePickerConfig.renderInGridHeader) ? [this.piTypePicker] : [];
         },
 
         getFilterControlConfig: function () {
@@ -222,10 +215,20 @@
                     scope: this
                 }
             };
+
             if(!this.config.piTypePickerConfig.renderInGridHeader){
                 piTypePickerConfig.renderTo = Ext.query('#content .titlebar .dashboard-timebox-container')[0];
             }
+
             this.piTypePicker = Ext.create('Rally.ui.combobox.PortfolioItemTypeComboBox', piTypePickerConfig);
+
+            if(this.config.piTypePickerConfig.renderInGridHeader){
+              this.on('gridboardadded', function() {
+                var headerContainer = this.gridboard.getHeader().getLeft();
+                headerContainer.add(this.piTypePicker);
+              });
+            }
+
             return deferred.promise;
         },
 
