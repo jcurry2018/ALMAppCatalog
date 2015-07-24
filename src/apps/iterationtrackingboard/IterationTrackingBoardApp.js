@@ -672,7 +672,7 @@
             var context = this.getContext(),
                 stateString = 'iteration-tracking-treegrid',
                 stateId = context.getScopedStateId(stateString),
-                useFixedHeightRows = Ext.isIE && context.isFeatureEnabled('S78815_ITERATON_TREE_GRID_APP_FIXED_ROW_HEIGHT');
+                useFixedHeightRows = Ext.isIE;
 
             var gridConfig = {
                 bufferedRenderer: true,
