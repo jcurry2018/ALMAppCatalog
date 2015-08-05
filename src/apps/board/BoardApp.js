@@ -133,11 +133,21 @@
                     }
                 });
             }
+            if (this._shouldDisableRanking()) {
+                boardConfig.enableRanking = false;
+                boardConfig.enableCrossColumnRanking = false;
+                boardConfig.cardConfig.showRankMenuItems = false;
+            }
             return boardConfig;
         },
 
         getSettingsFields: function() {
             return Rally.apps.board.Settings.getFields(this.getContext());
+        },
+
+        _shouldDisableRanking: function() {
+            return this.getSetting('type').toLowerCase() === 'task' && (!this.getSetting('showRows') || this.getSetting('showRows')
+                && this.getSetting('rowsField').toLowerCase() !== 'workproduct');
         },
 
         _addBoard: function() {
