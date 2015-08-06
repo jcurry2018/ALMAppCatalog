@@ -46,6 +46,8 @@ describe 'Rally.apps.kanban.Settings', ->
             AttributeType: 'BOOLEAN'
             Constrained: false
             Custom: false
+          isMultiValueCustom: () ->
+            false
         , config
         expect(@isAllowedFieldFn(field)).toBe true
 
@@ -55,7 +57,10 @@ describe 'Rally.apps.kanban.Settings', ->
             AttributeType: 'BOOLEAN'
             Constrained: false
             Custom: false
+          isMultiValueCustom: () ->
+            true
         , config
+
         expect(@isAllowedFieldFn(field)).toBe false
 
     beforeEach ->
