@@ -225,16 +225,24 @@
             }
 
             if (state.columns) {
-                var appScopedColumnNames = this.getColumnCfgs();
-                var userScopedColumnNames = this._getColumnNamesFromState(state);
+                var appScopedColumnNames = this._getValidUuids(grid, this.getColumnCfgs());
+                var userScopedColumnNames = this._getValidUuids(grid, state.columns);
 
-                if(_.difference(appScopedColumnNames, userScopedColumnNames).length > 0) {
-                    state.columns = appScopedColumnNames;
-                } else {
-                    state.columns = _.filter(state.columns, function (column) {
-                        return _.contains(appScopedColumnNames, _.isObject(column) ? column.dataIndex : column);
-                    });
+                // Get the columns that are present in the app scope and not in the user scope
+                var differingColumns = _.difference(appScopedColumnNames, userScopedColumnNames);
+
+                // If there are columns in the app scope that are not in the
+                // user scope, append them to the user scope to preserve
+                // user scope column order
+                if(differingColumns.length > 0) {
+                    state.columns = state.columns.concat(differingColumns);
                 }
+
+                // Filter out any columns that are in the user scope that are not in the
+                // app scope
+                state.columns = _.filter(state.columns, function (column) {
+                    return _.contains(appScopedColumnNames, _.isObject(column) ? column.dataIndex : column);
+                }, this);
             }
 
             if (state.sorters) {
@@ -243,6 +251,27 @@
                     delete state.sorters;
                 }
             }
+        },
+
+        _getValidUuids: function(grid, columns) {
+            return _.reduce(columns, function(result, column) {
+                var dataIndex =  this._getColumnDataIndex(column);
+                var field = this._getModelField(grid, dataIndex);
+
+                if (field) {
+                    result.push(dataIndex);
+                }
+
+                return result;
+            }, [], this);
+        },
+
+        _getModelField: function(grid, dataIndex) {
+            return grid.getModels()[0].getField(dataIndex);
+        },
+
+        _getColumnDataIndex: function(column) {
+            return _.isObject(column) ? column.dataIndex : column;
         },
 
         _onBeforeGridStateSave: function (grid, state) {
