@@ -518,7 +518,7 @@
                         columns: [
                             { dataIndex: rankColumnDataIndex},
                             { dataIndex: 'Name'},
-                            { dataIndex: 'State'},
+                            { dataIndex: 'ScheduleState'},
                             { dataIndex: 'Discussion'},
                             { dataIndex: 'Priority'},
                             { dataIndex: 'Severity'},
@@ -537,7 +537,7 @@
                         columns: [
                             { dataIndex: rankColumnDataIndex},
                             { dataIndex: 'Name'},
-                            { dataIndex: 'State'},
+                            { dataIndex: 'ScheduleState'},
                             { dataIndex: 'PlanEstimate'},
                             { dataIndex: 'TaskEstimateTotal'},
                             { dataIndex: 'TaskActualTotal'},
@@ -555,7 +555,7 @@
                         columns: [
                             { dataIndex: rankColumnDataIndex},
                             { dataIndex: 'Name'},
-                            { dataIndex: 'State'},
+                            { dataIndex: 'ScheduleState'},
                             { dataIndex: 'Discussion'},
                             { dataIndex: 'LastVerdict'},
                             { dataIndex: 'LastBuild'},
