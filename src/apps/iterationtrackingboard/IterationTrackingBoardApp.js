@@ -196,7 +196,7 @@
                 timeboxFilter = timeboxScope.getQueryFilter(),
                 filters = [timeboxFilter];
 
-            if (!timeboxScope.getRecord() && this.getContext().getSubscription().StoryHierarchyEnabled) {
+            if (!timeboxScope.isScheduled() && this.getContext().getSubscription().StoryHierarchyEnabled) {
                 filters.push(this._createLeafStoriesOnlyFilter(model));
                 filters.push(this._createUnassociatedDefectsOnlyFilter(model));
             }
@@ -236,13 +236,13 @@
                     operator: '=',
                     value: null
                 }),
-                parentRequirementIsScheduled = Ext.create('Rally.data.wsapi.Filter', {
-                    property: 'Requirement.Iteration',
-                    operator: '!=',
-                    value: null
-                }),
                 hasNoParentRequirement = Ext.create('Rally.data.wsapi.Filter', {
                     property: 'Requirement',
+                    operator: '=',
+                    value: null
+                }),
+                hasNoParentDefectSuite = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'DefectSuites.ObjectID',
                     operator: '=',
                     value: null
                 }),
@@ -252,7 +252,7 @@
                     operator: '!='
                 });
 
-            return isADefect.and(hasNoParentTestCase.and(parentRequirementIsScheduled.or(hasNoParentRequirement))).or(isNotADefect);
+            return isADefect.and(hasNoParentTestCase.and(hasNoParentRequirement.and(hasNoParentDefectSuite))).or(isNotADefect);
         },
 
         _getBoardConfig: function() {
