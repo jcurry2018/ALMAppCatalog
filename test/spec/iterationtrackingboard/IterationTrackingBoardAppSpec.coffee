@@ -252,14 +252,14 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
               operator: '='
               value: null
             ).and(Ext.create('Rally.data.wsapi.Filter',
+                property: 'Requirement.Iteration'
+                operator: '!='
+                value: null
+              ).or(Ext.create('Rally.data.wsapi.Filter',
                 property: 'Requirement'
                 operator: '='
                 value: null
-              ).and(Ext.create('Rally.data.wsapi.Filter', {
-                  property: 'DefectSuites.ObjectID',
-                  operator: '=',
-                  value: null
-                })))
+              )))
           ).or(Ext.create('Rally.data.wsapi.Filter',
             property: 'TypeDefOid'
             operator: '!='
@@ -267,15 +267,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
           ))
 
       describe 'stories', ->
-        it 'should exclude epic stories from the grid with unscheduled timebox', ->
-          requestStub = @stubRequests()
-          iterationRecord = @mom.getRecord('iteration', values: {_ref:'/iteration/-1'})
-          @createApp(iterationRecord: iterationRecord).then =>
-            @toggleToGrid()
-            expect(requestStub).toBeWsapiRequestWith
-              filters: [@createLeafStoriesOnlyFilter()]
-
-        it 'should exclude epic stories from the grid with null timebox', ->
+        it 'should exclude epic stories from the grid', ->
           requestStub = @stubRequests()
           @createApp(iterationRecord: null).then =>
             @toggleToGrid()
