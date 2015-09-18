@@ -172,7 +172,7 @@ describe 'Rally.apps.board.BoardApp', ->
           expect(plugin).toBeDefined()
           expect(plugin.headerPosition).toBe 'left'
           expect(plugin.modelNames).toEqual [@app.getSetting('type')]
-          expect(plugin.boardFieldDefaults).toEqual @app.getSetting('fields').split(',')
+          expect(@_getBoard().columnConfig.fields).toEqual @app.getSetting('fields').split(',')
 
   helpers
     createApp: (settings = {}, options = {}) ->

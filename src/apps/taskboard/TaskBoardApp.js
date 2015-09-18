@@ -142,7 +142,6 @@
                         ptype: 'rallygridboardfieldpicker',
                         headerPosition: 'left',
                         modelNames: modelNames,
-                        boardFieldDefaults: ['Estimate', 'ToDo'],
                         boardFieldBlackList: ['State', 'TaskIndex']
                     }
                 ],
@@ -246,7 +245,10 @@
                     enableCrossRowDragging: false
                 },
                 margin: '10px 0 0 0',
-                plugins: [{ptype:'rallyfixedheadercardboard'}]
+                plugins: [{ptype:'rallyfixedheadercardboard'}],
+                columnConfig: {
+                    fields: ['Estimate', 'ToDo']
+                }
             };
         },
 

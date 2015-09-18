@@ -41,7 +41,8 @@
                     columnConfig: {
                         columnStatusConfig: {
                             pointField: 'PreliminaryEstimate.Value'
-                        }
+                        },
+                        fields: this._getDefaultFields()
                     },
                     listeners: {
                         filter: this._onBoardFilter,
@@ -89,7 +90,6 @@
                     {
                         ptype: 'rallygridboardfieldpicker',
                         boardFieldBlackList: boardFieldBlacklist,
-                        boardFieldDefaults: this._getDefaultFields(),
                         headerPosition: 'left'
                     }
                 ],

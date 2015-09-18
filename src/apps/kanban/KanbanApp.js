@@ -158,8 +158,7 @@
                         ptype: 'rallygridboardfieldpicker',
                         headerPosition: 'left',
                         boardFieldBlackList: blacklist,
-                        modelNames: modelNames,
-                        boardFieldDefaults: this.getSetting('cardFields').split(',')
+                        modelNames: modelNames
                     },
                     {
                         ptype: 'rallyboardpolicydisplayable',
@@ -252,7 +251,8 @@
                 },
                 columnConfig: {
                     xtype: 'rallycardboardcolumn',
-                    enableWipLimit: true
+                    enableWipLimit: true,
+                    fields: this.getSetting('cardFields').split(',')
                 },
                 cardConfig: {
                     editable: true,

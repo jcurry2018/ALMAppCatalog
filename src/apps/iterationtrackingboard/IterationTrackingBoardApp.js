@@ -266,7 +266,9 @@
                         ptype: 'rallycolumnpolicy',
                         app: this
                     }],
-                    requiresModelSpecificFilters: false
+                    requiresModelSpecificFilters: false,
+                    fields: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
+                        ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']
                 },
                 cardConfig: {
                     showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
@@ -393,9 +395,7 @@
                         'Successors',
                         'Predecessors'
                     ],
-                    modelNames: this.modelNames,
-                    boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
-                        ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']
+                    modelNames: this.modelNames
                 },
                 this._getSharedViewConfig()
             ];

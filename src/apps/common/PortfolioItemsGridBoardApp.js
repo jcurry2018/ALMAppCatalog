@@ -66,7 +66,6 @@
 
         getFieldPickerConfig: function () {
             return _.merge(this.callParent(arguments), {
-                boardFieldDefaults: (this.getSetting('fields') || '').split(','),
                 boardFieldBlackList: ['Predecessors', 'Successors'],
                 margin: '3 9 14 0'
             });
@@ -172,7 +171,8 @@
                 }, this.getCardConfig()),
                 columnConfig: {
                     xtype: 'rallycardboardcolumn',
-                    enableWipLimit: true
+                    enableWipLimit: true,
+                    fields: (this.getSetting('fields') || '').split(',')
                 },
                 columns: options.columns,
                 ddGroup: currentTypePath,

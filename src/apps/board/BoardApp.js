@@ -79,9 +79,7 @@
                             ptype: 'rallygridboardfieldpicker',
                             headerPosition: 'left',
                             boardFieldBlackList: ['Successors', 'Predecessors', 'DisplayColor'],
-                            modelNames: modelNames,
-                            boardFieldDefaults: (this.getSetting('fields') &&
-                                this.getSetting('fields').split(',')) || []
+                            modelNames: modelNames
                         }
                     ],
                     context: context,
@@ -123,6 +121,10 @@
                 plugins: [{ptype:'rallyfixedheadercardboard'}],
                 storeConfig: {
                     sorters: Rally.data.util.Sorter.sorters(this.getSetting('order'))
+                },
+                columnConfig: {
+                    fields: (this.getSetting('fields') &&
+                        this.getSetting('fields').split(',')) || []
                 }
             };
             if (this.getSetting('showRows')) {
