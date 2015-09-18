@@ -27,7 +27,6 @@
             'Rally.ui.gridboard.plugin.GridBoardToggleable',
             'Rally.ui.grid.plugin.TreeGridExpandedRowPersistence',
             'Rally.ui.grid.plugin.TreeGridChildPager',
-            'Rally.ui.gridboard.plugin.GridBoardCustomView',
             'Rally.ui.filter.view.ModelFilter',
             'Rally.ui.filter.view.OwnerFilter',
             'Rally.app.Message',
@@ -300,7 +299,7 @@
 
         _getGridBoardPlugins: function() {
             var context = this.getContext();
-            var plugins = [
+            return [
                 {
                     ptype: 'rallygridboardaddnew',
                     addNewControlConfig: {
@@ -348,73 +347,58 @@
                         }
                     }
                 },
-                'rallygridboardtoggleable'
-            ];
-
-            var actionsMenuItems = [
-            {
-                text: 'Import User Stories...',
-                handler: this._importHandler({
-                    type: 'HierarchicalRequirement',
-                    title: 'Import User Stories'
-                })
-            }, {
-                text: 'Import Tasks...',
-                handler: this._importHandler({
-                    type: 'Task',
-                    title: 'Import Tasks'
-                })
-            }, {
-                text: 'Export...',
-                handler: this._exportHandler,
-                scope: this
-            }];
-
-            actionsMenuItems.push({
-                text: 'Print...',
-                handler: this._printHandler,
-                scope: this
-            });
-
-            plugins.push({
-                ptype: 'rallygridboardactionsmenu',
-                itemId: 'printExportMenuButton',
-                menuItems: actionsMenuItems,
-                buttonConfig: {
-                    iconCls: 'icon-export',
-                    toolTipConfig: {
-                        html: 'Import/Export/Print',
-                        anchor: 'top',
-                        hideDelay: 0
+                'rallygridboardtoggleable',
+                {
+                    ptype: 'rallygridboardactionsmenu',
+                    itemId: 'printExportMenuButton',
+                    menuItems: [
+                        {
+                            text: 'Import User Stories...',
+                            handler: this._importHandler({
+                                type: 'HierarchicalRequirement',
+                                title: 'Import User Stories'
+                            })
+                        }, {
+                            text: 'Import Tasks...',
+                            handler: this._importHandler({
+                                type: 'Task',
+                                title: 'Import Tasks'
+                            })
+                        }, {
+                            text: 'Export...',
+                            handler: this._exportHandler,
+                            scope: this
+                        }, {
+                            text: 'Print...',
+                            handler: this._printHandler,
+                            scope: this
+                        }],
+                    buttonConfig: {
+                        iconCls: 'icon-export',
+                        toolTipConfig: {
+                            html: 'Import/Export/Print',
+                            anchor: 'top',
+                            hideDelay: 0
+                        }
                     }
-                }
-            });
-
-            plugins.push({
-                ptype: 'rallygridboardfieldpicker',
-                headerPosition: 'left',
-                gridFieldBlackList: [
-                    'Estimate',
-                    'ToDo'
-                ],
-                boardFieldBlackList: [
-                    'Successors',
-                    'Predecessors'
-                ],
-                modelNames: this.modelNames,
-                boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
-                    ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']
-            });
-
-            if (context.isFeatureEnabled('ITERATION_TRACKING_CUSTOM_VIEWS')) {
-                plugins.push(this._getCustomViewConfig());
-            }
-
-            if(context.isFeatureEnabled('F6028_ISP_SHARED_VIEWS')){
-                plugins.push(this._getSharedViewConfig());
-            }
-
-            return plugins;
+                },
+                {
+                    ptype: 'rallygridboardfieldpicker',
+                    headerPosition: 'left',
+                    gridFieldBlackList: [
+                        'Estimate',
+                        'ToDo'
+                    ],
+                    boardFieldBlackList: [
+                        'Successors',
+                        'Predecessors'
+                    ],
+                    modelNames: this.modelNames,
+                    boardFieldDefaults: (this.getSetting('cardFields') && this.getSetting('cardFields').split(',')) ||
+                        ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate', 'Iteration']
+                },
+                this._getSharedViewConfig()
+            ];
         },
 
         setSize: function() {
@@ -553,103 +537,6 @@
 
         _onViewChange: function(){
             this.onScopeChange();
-        },
-
-        _getCustomViewConfig: function() {
-            var customViewConfig = {
-                ptype: 'rallygridboardcustomview',
-                stateId: 'iteration-tracking-board-app',
-
-                defaultGridViews: [{
-                    model: ['UserStory', 'Defect', 'DefectSuite', 'TestSet'],
-                    name: 'Defect Status',
-                    state: {
-                        cmpState: {
-                            expandAfterApply: true,
-                            columns: [
-                                'Name',
-                                'State',
-                                'Discussion',
-                                'Priority',
-                                'Severity',
-                                'FoundIn',
-                                'FixedIn',
-                                'Owner'
-                            ]
-                        },
-                        filterState: {
-                            filter: {
-                                defectstatusview: {
-                                    isActiveFilter: false,
-                                    itemId: 'defectstatusview',
-                                    queryString: '((Defects.ObjectID != null) OR (Priority != null))'
-                                }
-                            }
-                        }
-                    }
-                }, {
-                    model: ['UserStory', 'Defect', 'TestSet', 'DefectSuite'],
-                    name: 'Task Status',
-                    state: {
-                        cmpState: {
-                            expandAfterApply: true,
-                            columns: [
-                                'Name',
-                                'State',
-                                'PlanEstimate',
-                                'TaskEstimate',
-                                'ToDo',
-                                'Discussions',
-                                'Owner'
-                            ]
-                        },
-                        filterState: {
-                            filter: {
-                                taskstatusview: {
-                                    isActiveFilter: false,
-                                    itemId: 'taskstatusview',
-                                    queryString: '(Tasks.ObjectID != null)'
-                                }
-                            }
-                        }
-                    }
-                }, {
-                    model: ['UserStory', 'Defect', 'TestSet'],
-                    name: 'Test Status',
-                    state: {
-                        cmpState: {
-                            expandAfterApply: true,
-                            columns: [
-                                'Name',
-                                'State',
-                                'Discussions',
-                                'LastVerdict',
-                                'LastBuild',
-                                'LastRun',
-                                'ActiveDefects',
-                                'Priority',
-                                'Owner'
-                            ]
-                        },
-                        filterState: {
-                            filter: {
-                                teststatusview: {
-                                    isActiveFilter: false,
-                                    itemId: 'teststatusview',
-                                    queryString: '(TestCases.ObjectID != null)'
-                                }
-                            }
-                        }
-                    }
-                }]
-            };
-
-            customViewConfig.defaultBoardViews = _.cloneDeep(customViewConfig.defaultGridViews);
-            _.each(customViewConfig.defaultBoardViews, function(view) {
-                delete view.state.cmpState;
-            });
-
-            return customViewConfig;
         },
 
         _getGridConfig: function (gridStore) {
