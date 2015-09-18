@@ -371,31 +371,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @waitForCallback(setHeightSpy).then =>
           expect(gridBoard.getHeight()).toBe currentHeight + 10
 
-  describe 'custom filter popover', ->
-    it 'should add common storeConfig to gridboard', ->
-      @createApp().then =>
-        gridBoard = @app.down 'rallygridboard'
-        expect(gridBoard.storeConfig.filters.length).toBe 1
-        expect(gridBoard.storeConfig.filters[0].toString()).toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
-
-    it 'should use rallygridboard custom filter control', ->
-      @createApp().then =>
-        gridBoard = @app.down 'rallygridboard'
-        plugin = _.find gridBoard.plugins, (plugin) ->
-          plugin.ptype == 'rallygridboardcustomfiltercontrol'
-        expect(plugin).toBeDefined()
-        expect(plugin.filterControlConfig.stateful).toBe true
-        expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-custom-filter-button')
-
-        expect(plugin.showOwnerFilter).toBe true
-        expect(plugin.ownerFilterControlConfig.stateful).toBe true
-        expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-owner-filter')
-
-    it 'should include the Milestones field in the available Fields', ->
-      @createApp().then =>
-        filterPlugin = _.find(@app.gridboard.plugins, ptype: 'rallygridboardcustomfiltercontrol')
-        expect(_.contains(filterPlugin.filterControlConfig.whiteListFields, 'Milestones')).toBe true
-
   describe 'filtering panel plugin', ->
     helpers
       getPlugin: ->
@@ -403,8 +378,11 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         _.find gridBoard.plugins, (plugin) ->
           plugin.ptype == 'rallygridboardinlinefiltercontrol'
 
-    beforeEach ->
-      @stubFeatureToggle ['F7336_ADVANCED_FILTERING'], true
+    it 'should add common storeConfig to gridboard', ->
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        expect(gridBoard.storeConfig.filters.length).toBe 1
+        expect(gridBoard.storeConfig.filters[0].toString()).toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
     it 'should use rallygridboard filtering plugin', ->
       @createApp().then =>

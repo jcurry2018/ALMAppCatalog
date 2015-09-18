@@ -300,16 +300,15 @@
 
         _getGridBoardPlugins: function() {
             var context = this.getContext();
-            var plugins = [{
-                ptype: 'rallygridboardaddnew',
-                addNewControlConfig: {
-                    stateful: true,
-                    stateId: context.getScopedStateId('iteration-tracking-add-new')
-                }
-            }];
-
-            if (context.isFeatureEnabled('F7336_ADVANCED_FILTERING')) {
-                plugins.push({
+            var plugins = [
+                {
+                    ptype: 'rallygridboardaddnew',
+                    addNewControlConfig: {
+                        stateful: true,
+                        stateId: context.getScopedStateId('iteration-tracking-add-new')
+                    }
+                },
+                {
                     ptype:'rallygridboardinlinefiltercontrol',
                     inline: this.isFullPageApp !== false,
                     inlineFilterButtonConfig: {
@@ -348,27 +347,9 @@
                             }
                         }
                     }
-                });
-            } else {
-                plugins.push({
-                    ptype: 'rallygridboardcustomfiltercontrol',
-                    filterChildren: true,
-                    filterControlConfig: {
-                        blackListFields: ['Iteration', 'PortfolioItem'],
-                        whiteListFields: ['Milestones'],
-                        modelNames: this.modelNames,
-                        stateful: true,
-                        stateId: context.getScopedStateId('iteration-tracking-custom-filter-button')
-                    },
-                    showOwnerFilter: true,
-                    ownerFilterControlConfig: {
-                        stateful: true,
-                        stateId: context.getScopedStateId('iteration-tracking-owner-filter')
-                    }
-                });
-            }
-
-            plugins.push('rallygridboardtoggleable');
+                },
+                'rallygridboardtoggleable'
+            ];
 
             var actionsMenuItems = [
             {
