@@ -388,9 +388,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then =>
         expect(@getPlugin()).toBeDefined()
 
-    it 'should default to inline when a full page app', ->
+    it 'should set inline false when a full page app', ->
       @createApp().then =>
-        expect(@getPlugin().inline).toBe true
+        expect(@getPlugin().inline).toBe false
 
     it 'should set inline false when NOT a full page app', ->
       @createApp(isFullPageApp: false).then =>

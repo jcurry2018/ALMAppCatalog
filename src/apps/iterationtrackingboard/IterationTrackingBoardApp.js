@@ -311,7 +311,7 @@
                 },
                 {
                     ptype:'rallygridboardinlinefiltercontrol',
-                    inline: this.isFullPageApp !== false,
+                    inline: false,
                     inlineFilterButtonConfig: {
                         stateful: true,
                         stateId: context.getScopedStateId('iteration-tracking-inline-filter'),
