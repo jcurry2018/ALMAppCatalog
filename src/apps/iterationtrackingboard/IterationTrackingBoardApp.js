@@ -329,14 +329,14 @@
                                     'ModelType'
                                 ],
                                 addQuickFilterConfig: {
-                                    blackListFields: ['Iteration', 'PortfolioItem', 'ObjectUUID'],
+                                    blackListFields: ['Iteration', 'PortfolioItem'],
                                     whiteListFields: ['Milestones', 'Tags']
                                 }
                             },
                             advancedFilterPanelConfig: {
                                 advancedFilterRowsConfig: {
                                     propertyFieldConfig: {
-                                        blackListFields: ['Iteration', 'PortfolioItem', 'ObjectUUID'],
+                                        blackListFields: ['Iteration', 'PortfolioItem'],
                                         whiteListFields: ['Milestones', 'Tags']
                                     }
                                 }
