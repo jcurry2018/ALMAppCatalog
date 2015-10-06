@@ -47,8 +47,8 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       [
         { property: 'Iteration.Name', operator: '=', value: iteration.Name }
-        { property: "Iteration.StartDate", operator: '=', value: Rally.util.DateTime.toIsoString(iteration.StartDate) }
-        { property: "Iteration.EndDate", operator: '=', value: Rally.util.DateTime.toIsoString(iteration.EndDate) }
+        { property: "Iteration.StartDate", operator: '=', value: Rally.util.DateTime.toUtcIsoString(iteration.StartDate) }
+        { property: "Iteration.EndDate", operator: '=', value: Rally.util.DateTime.toUtcIsoString(iteration.EndDate) }
       ]
 
     stubRequests: ->
