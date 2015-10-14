@@ -283,3 +283,11 @@ describe 'Rally.apps.customlist.CustomListApp', ->
     it 'should have no always selected values', ->
       @createApp(settings: { type: 'hierarchicalrequirement' }).then =>
         expect(_.find(@app.gridboard.plugins, ptype: 'rallygridboardfieldpicker').gridAlwaysSelectedValues).toEqual []
+
+    it 'should have rank in blacklist for task', ->
+      @createApp(settings: { type: 'task' }).then =>
+        expect(_.find(@app.gridboard.plugins, ptype: 'rallygridboardfieldpicker').gridFieldBlackList).toContain('Rank')
+
+    it 'should not have rank in blacklist for user story', ->
+      @createApp(settings: { type: 'hierarchicalrequirement' }).then =>
+        expect(_.find(@app.gridboard.plugins, ptype: 'rallygridboardfieldpicker').gridFieldBlackList).not.toContain('Rank')
