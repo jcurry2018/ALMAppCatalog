@@ -153,7 +153,8 @@
                 buttonConfig: {
                     disabled: !this._userHasPermissionsToEditPanelSettings()
                 },
-                gridAlwaysSelectedValues: function () { return []; }
+                gridAlwaysSelectedValues: function () { return []; },
+                gridFieldBlackList: this.getSetting('type').toLowerCase() === 'task' ? ['Rank'] : []
             });
         },
 
