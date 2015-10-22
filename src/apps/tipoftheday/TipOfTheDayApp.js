@@ -27,7 +27,7 @@
             tips.push('If you find all your stories have similar acceptance criteria, maybe you need to move those to your Definition of Done.');
             tips.push('If you find yourself splitting stories a lot at the end of the iteration, maybe it\'s time to think about breaking them down into smaller stories during iteration planning (or earlier).');
             tips.push('If you didn\'t meet your commitments in the last iteration, don\'t plan for the same velocity in the next iteration.');
-            tips.push('Just because Rally can send an email notification doesn\'t mean you should stop talking to each other.');
+            tips.push('Just because we can send an email notification doesn\'t mean you should stop talking to each other.');
             tips.push('Yes, a daily standup is supposed to take place daily. :)');
             tips.push('You should still have your daily standup even if your product owner or scrummaster is out or unavailable.');
             tips.push('QA needs to be present in your iteration planning meetings so that they can discuss and contribute to the acceptance criteria that they will be testing.');
@@ -39,8 +39,8 @@
             tips.push('A user story should take just a couple of days complete. If your stories are taking more than a week, consider breaking them down into smaller stories.');
             tips.push('Custom grids on your dashboard can show you pretty much anything you could ever want to see. Have fun!');
             tips.push('Entered a defect but meant for it to be a user story? Convert it!');
-            tips.push('Save time with in-place edit. Most grids in Rally can be edited by double-clicking.');
-            tips.push('Have an idea to extend or customize Rally? Go to developer.rallydev.com.');
+            tips.push('Save time with in-place edit. Most grids can be edited by double-clicking.');
+            tips.push('Have an idea to extend or customize our product? Go to developer.rallydev.com.');
             tips.push('Stories should be accepted *before* the demo - only demo accepted stories.');
             tips.push('The Velocity Chart can make visible that stories are being accepted *after* the sprint ends, and whether the team is achieving a steady (predictable) velocity.');
             tips.push('Rank tasks in order to indicate sequencing.');
@@ -52,7 +52,7 @@
             tips.push('Have you considered adding your Definition of Done to a shared dashboard?');
             tips.push('Don\'t be afraid to ask your teammate whether they need help. Sometimes it\'s tough to realize when you\'re 20 feet deep in a deep, dark rathole.');
             tips.push('Yes, it\'s cliche, but quality really is everyone\'s job. Developers should work with QA before the code is complete and Product Owners should jump in to help test when QA is busy.');
-            tips.push('Think of a "project" in Rally as a persistent team, rather than a project with an end date.');
+            tips.push('Think of a "project" as a persistent team, rather than a project with an end date.');
             tips.push('If you have multiple teams working in the same codebase, consider holding a "scrum of scrums (SOS)" meeting in addition to your daily standup to report on dependencies. ');
             tips.push('A typical retrospective meeting will ask: What\'s working well? What could be improved? Action items will be created and assigned.');
             tips.push('In Scrum, "velocity" is how many story points you accepted in an iteration. In Continuous Flow (Kanban), "throughput" is the count of stories that are accepted over a given timeframe.');
@@ -60,16 +60,16 @@
             tips.push('Product owners should be accessible to the team to answer questions as they arise; between 4 and 8 hours of availability a day is recommended.');
             tips.push('Product owners spend a lot of time in meetings, but they\'re not always busy. Don\'t hesitate to interrupt them with a text.');
             tips.push('Doing Continuous Flow (Kanban) does not mean that you don\'t have to plan anymore.');
-            tips.push('Did you know that Rally has a Kanban board?');
+            tips.push('Did you know that we have a Kanban board?');
             tips.push('Did you know that you can change your default project on your profile?');
             tips.push('Did you know that you can change your default landing page on your profile?');
-            tips.push('Rally\'s estimation board app can help your team visualize the relative sizes of user stories and estimate more quickly.');
+            tips.push('The estimation board app can help your team visualize the relative sizes of user stories and estimate more quickly.');
             tips.push('You can use a short name for a user story but in the description, use the format "As a *type of user*, I want *some activity* so that *some goal*."');
             tips.push('In order for a retrospective meeting to be valuable, all team members must feel safe enough to voice their opinions. Consider excluding leaders if it will help the team be more candid.');
             tips.push('Team members do not have a capacity of 8 hours a day. Meetings, lunch, bathroom breaks - you\'re looking at 4-6 hours if you\'re lucky. ');
             tips.push('Estimated ideal hours are not the same as work hours. Most developers complete about 15 estimated hours worth of tasks in a normal 40-hour work week.');
             tips.push('The field "Planned Velocity" on an iteration and release represents the number of points that you expect to get done based on your historical velocity.');
-            tips.push('Try to synchronize iterations across multiple teams to take advantage of Rally\'s roll-up reporting.');
+            tips.push('Try to synchronize iterations across multiple teams to take advantage of our roll-up reporting.');
             tips.push('If team members feel "unsafe" during a retrospective meeting, try writing thoughts down anonymously on sticky notes.');
             tips.push('In Continuous Flow (Kanban), a low Work in Progress (WIP) limit ensures that you\'re not killing your productivity by multi-tasking too much. You can apply that same discipline within Scrum.');
             tips.push('Do you know your "Definition of Done"? Are all defects closed? Are tests passing? Are all acceptance criteria met? Has the product owner reviewed the feature? What else?');
@@ -85,7 +85,7 @@
             tips.push('When editing values in a custom grid apps, you can hit Return/Enter to start editing the next row.');
             tips.push('Custom grids have extremely powerful filtering capabilities.');
             tips.push('Charts added to your dashboard often have more configuration options than those on the Reports tab.');
-            tips.push('Use Workspaces in Rally with care because there no roll-ups across workspaces. (Enterprise Edition or higher)');
+            tips.push('Use Workspaces with care because there no roll-ups across workspaces. (Enterprise Edition or higher)');
             tips.push('The Product Owner is responsible for creating and prioritizing the backlog of user stories and defects.');
             tips.push('As a product owner, being available to your team is critical. Consider providing your cell phone number and encourage the team to text with questions when you have to be in meetings.');
             tips.push('Consider implementing pair programming practices or a rule of "two sets of eyes" on all code prior to checking it in.');
@@ -122,16 +122,16 @@
             tips.push('Don\'t be afraid to ask questions!');
             tips.push('Organize patch defects in defect suites. (Enterprise Edition or higher)');
             tips.push('Don\'t like our fields or need one just for your company? Create a custom field.');
-            tips.push('Rally has tons of integrations to other tools. Search "integration" in Help to learn more.');
+            tips.push('We have tons of integrations to other tools. Search "integration" in Help to learn more.');
             tips.push('Use the Iteration Summary app to see a quick status of the iteration in terms of % accepted, open defects, and test case results.');
             tips.push('Testers are good at thinking of acceptance criteria nobody else will remember. Make sure they\'re talking during iteration planning.');
             tips.push('Focus on just one or two action items out a retrospective so you can actually get them done quickly.');
-            tips.push('You can use Rally\'s Kanban board even if you\'re doing Scrum - the policies provide a handy place to post your Definition of Done.');
+            tips.push('You can use our Kanban board even if you\'re doing Scrum - the policies provide a handy place to post your Definition of Done.');
             tips.push('Use velocity to predict how much a team will get done in the future. Use throughput and cycle time to measure productivity and effectiveness.');
 
             var randomNumber = Math.floor(Math.random()*(tips.length-1));
             var template = new Ext.Template([
-                '<div class="tipheader">Rally Tip #' + randomNumber + '</div>',
+                '<div class="tipheader">Tip #' + randomNumber + '</div>',
                 '<div class="tipcontent">' + tips[randomNumber] + '</div>'
             ]);
 
