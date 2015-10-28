@@ -489,6 +489,22 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
           plugin.ptype == 'rallygridboardsharedviewcontrol'
         expect(plugin.sharedViewConfig.enableUrlSharing).toBe false
 
+    it 'should enableReadingUserPref when S83433_THE_PREFERENCE and DE25285_RETURN_OF_THE_PREFERENCE is true', ->
+      @stubFeatureToggle ['S83433_THE_PREFERENCE', 'DE25285_RETURN_OF_THE_PREFERENCE'], true
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        expect(plugin.sharedViewConfig.enableReadingUserPref).toBe true
+
+    it 'should NOT enableReadingUserPref when S83433_THE_PREFERENCE and DE25285_RETURN_OF_THE_PREFERENCE is false', ->
+      @stubFeatureToggle ['S83433_THE_PREFERENCE', 'DE25285_RETURN_OF_THE_PREFERENCE'], false
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        expect(plugin.sharedViewConfig.enableReadingUserPref).toBe false
+
   describe 'page sizes', ->
     beforeEach ->
       @_isIE = Ext.isIE
