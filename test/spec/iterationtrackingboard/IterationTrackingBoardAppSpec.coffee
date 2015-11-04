@@ -388,13 +388,19 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then =>
         expect(@getPlugin()).toBeDefined()
 
-    it 'should set inline false when a full page app', ->
-      @createApp().then =>
-        expect(@getPlugin().inline).toBe false
+    [false, true].forEach (toggleStatus) ->
+      describe 'skinny filter toggled ' + (if toggleStatus then 'on' else 'off'), ->
+        beforeEach ->
+          @skinny = toggleStatus
+          @stubFeatureToggle ['F10466_INLINE_FILTER_UI_ENHANCEMENTS'], toggleStatus
 
-    it 'should set inline false when NOT a full page app', ->
-      @createApp(isFullPageApp: false).then =>
-        expect(@getPlugin().inline).toBe false
+        it 'should set inline ' + @skinny + ' when a full page app', ->
+          @createApp().then =>
+            expect(@getPlugin().inline).toBe @skinny
+
+        it 'should set inline ' + @skinny + ' when NOT a full page app', ->
+          @createApp(isFullPageApp: false).then =>
+            expect(@getPlugin().inline).toBe @skinny
 
     describe 'quick filters', ->
 
