@@ -232,7 +232,11 @@
             var config = {
                 xtype: 'rallycardboard',
                 plugins: [
-                    {ptype: 'rallycardboardprinting', pluginId: 'print'},
+                    {
+                        ptype: 'rallycardboardprinting',
+                        pluginId: 'print',
+                        newBranding: this.context.isFeatureEnabled('F9646_CA_BRANDING')
+                    },
                     {
                         ptype: 'rallyscrollablecardboard',
                         containerEl: this.getEl()

@@ -430,7 +430,8 @@
                 grid: this.gridboard.getGridOrBoard(),
                 treeGridPrinterConfig: {
                     largeHeaderText: 'Iteration Summary',
-                    smallHeaderText: timeboxScope.getRecord() ? timeboxScope.getRecord().get('Name') : 'Unscheduled'
+                    smallHeaderText: timeboxScope.getRecord() ? timeboxScope.getRecord().get('Name') : 'Unscheduled',
+                    newBranding: this.getContext().isFeatureEnabled('F9646_CA_BRANDING')
                 }
             });
         },
