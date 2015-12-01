@@ -47,7 +47,7 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
           context: @getExtContext()
           renderTo: 'testDiv'
         })
-        expect(secondInstance.gridStoreConfig).toEqual({})
+        expect(secondInstance.getGridStoreConfig()).toEqual({})
 
   describe 'PI type picker ', ->
     helpers
