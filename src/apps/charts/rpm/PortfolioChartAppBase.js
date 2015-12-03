@@ -347,11 +347,11 @@
             );
 
             if (portfolioItem && portfolioItem.PlannedStartDate) {
-                plannedStartDate = this._formatDate(portfolioItem.PlannedStartDate);
+                plannedStartDate = Rally.util.DateTime.formatWithDefault(portfolioItem.PlannedStartDate, this.getContext());
             }
 
             if (portfolioItem && portfolioItem.PlannedEndDate) {
-                plannedEndDate = this._formatDate(portfolioItem.PlannedEndDate);
+                plannedEndDate = Rally.util.DateTime.formatWithDefault(portfolioItem.PlannedEndDate, this.getContext());
             }
 
             var formattedTitle = template.apply({
