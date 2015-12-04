@@ -322,30 +322,22 @@
                         modelNames: this.modelNames,
                         inlineFilterPanelConfig: {
                             quickFilterPanelConfig: {
-                                fields: [
+                                defaultFields: [
                                     'ArtifactSearch',
                                     'Owner',
-                                    {
-                                        name: 'ScheduleState',
-                                        multiSelect: true,
-                                        allowClear: false,
-                                        getFilter: function() {
-                                            return Rally.data.wsapi.Filter.or(_.map(this.lastValue, function(value) {
-                                                return {
-                                                    property: 'ScheduleState',
-                                                    operator: '=',
-                                                    value: value
-                                                };
-                                            }, this));
-                                        }
-                                    }
-                                ]
+                                    'ScheduleState',
+                                    'ModelType'
+                                ],
+                                addQuickFilterConfig: {
+                                    blackListFields: ['Iteration', 'PortfolioItem', 'ObjectUUID', 'Milestones', 'Tags'],
+                                    whiteListFields: []
+                                }
                             },
                             advancedFilterPanelConfig: {
                                 advancedFilterRowsConfig: {
                                     propertyFieldConfig: {
-                                        blackListFields: ['Iteration', 'PortfolioItem'],
-                                        whiteListFields: ['Milestones']
+                                        blackListFields: ['Iteration', 'PortfolioItem', 'ObjectUUID'],
+                                        whiteListFields: ['Milestones', 'Tags']
                                     }
                                 }
                             }
