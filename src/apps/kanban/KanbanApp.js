@@ -234,8 +234,7 @@
                 plugins: [
                     {
                         ptype: 'rallycardboardprinting',
-                        pluginId: 'print',
-                        newBranding: this.context.isFeatureEnabled('F9646_CA_BRANDING')
+                        pluginId: 'print'
                     },
                     {
                         ptype: 'rallyscrollablecardboard',
