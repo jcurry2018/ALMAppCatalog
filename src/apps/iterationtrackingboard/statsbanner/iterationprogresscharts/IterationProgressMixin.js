@@ -30,7 +30,7 @@
             }
             return element.text;
         },
-        
+
         _getStringValues: function (elements) {
             var i;
             var strings = [];
@@ -40,12 +40,20 @@
             return strings;
         },
 
+        _transformStringToNumber: function (element) {
+          return element.replace(',', '') * 1;
+        },
+
+        _getNumberFromXMLString: function (element) {
+          return this._transformStringToNumber(element.split(' ')[0]);
+        },
+
         _getNumberValues: function (elements) {
             var i;
             var numbers = [];
             for (i = 0; i < elements.length; i++) {
                 if(this._getElementValue(elements[i])) {
-                    numbers.push(this._getElementValue(elements[i]).split(' ')[0] * 1);
+                    numbers.push(this._getNumberFromXMLString(this._getElementValue(elements[i])));
                 } else {
                     numbers.push(0);
                 }
