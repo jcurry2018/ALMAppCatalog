@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sed -i "s/appsdk-src:tgz:.*\",/appsdk-src:tgz:${APPSDK_SRC_VERSION}\",/" js_dependencies.json
+sed -i "s/appsdk-src:tgz:[^\"]*\",/appsdk-src:tgz:${APPSDK_SRC_VERSION}\",/" js_dependencies.json
 
 git add js_dependencies.json
 git config user.name Hudson
