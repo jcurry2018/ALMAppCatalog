@@ -209,7 +209,7 @@
             // find the last <text element with orientation="vertical_down" attribute, that's the max y-axis 2 setting
             for (i = 0; i < texts.length; i++) {
                 if (texts[i].getAttribute("orientation") === "vertical_down") {
-                    this.chartComponentConfig.chartConfig.yAxis[1].max = (this._getElementValue(texts[i]) * 1);
+                    this.chartComponentConfig.chartConfig.yAxis[1].max = (this._getNumberFromXMLString(this._getElementValue(texts[i])));
                 }
             }
             this._configureYAxisIntervals();
