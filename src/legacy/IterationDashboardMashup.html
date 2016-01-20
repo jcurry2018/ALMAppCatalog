@@ -1017,7 +1017,7 @@ RALLY.Mashup.SuperCustomizableChart = function(batchToolkit, timeboxOidList, tim
             var xhrFn = dojo.xhrGet;
 
             xhrFn({
-                url: "/slm/charts/itsc.sp?sid=&iterationOid=" + iterationOid + "&cpoid=" + projectOid,
+                url: "/slm/charts/itsc.sp?sid=&iterationOid=" + iterationOid + "&cpoid=" + projectOid + '&projectScopeUp=__PROJECT_SCOPING_UP__&projectScopeDown=__PROJECT_SCOPING_DOWN__',
                 handleAs: "xml",
                 load: function(xmlDoc) {
                     _createBurndownChartDatafromXML(xmlDoc);
