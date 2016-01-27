@@ -300,8 +300,7 @@
         },
 
         _getGridBoardPlugins: function() {
-            var context = this.getContext(),
-                skinnyFilter = !!context.isFeatureEnabled('F10466_INLINE_FILTER_UI_ENHANCEMENTS');
+            var context = this.getContext();
 
             return [
                 {
@@ -313,8 +312,6 @@
                 },
                 {
                     ptype:'rallygridboardinlinefiltercontrol',
-                    inline: skinnyFilter,
-                    skinny: skinnyFilter,
                     inlineFilterButtonConfig: {
                         stateful: true,
                         stateId: context.getScopedStateId('iteration-tracking-inline-filter'),
