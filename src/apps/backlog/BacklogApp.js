@@ -157,7 +157,7 @@
                         columns: _.flatten([
                             { dataIndex: rankColumnDataIndex },
                             _.map(this.columnNames, function(columnName) {
-                                return { dataIndex: columnName }
+                                return { dataIndex: columnName };
                             })
                         ]),
                         sorters:[{ property: rankColumnDataIndex, direction: 'ASC' }]
