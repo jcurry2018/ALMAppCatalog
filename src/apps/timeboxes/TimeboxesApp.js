@@ -11,10 +11,14 @@
         extend: 'Rally.app.GridBoardApp',
         requires: [
             'Deft.Deferred',
+            'Rally.data.Ranker',
             'Rally.apps.timeboxes.IterationVelocityA0Chart',
             'Rally.data.PreferenceManager',
             'Rally.ui.combobox.plugin.PreferenceEnabledComboBox',
-            'Rally.ui.gridboard.GridBoardToggle'
+            'Rally.ui.gridboard.plugin.GridBoardInlineFilterControl',
+            'Rally.ui.gridboard.GridBoardToggle',
+            'Rally.ui.gridboard.plugin.GridBoardSharedViewControl',
+            'Rally.ui.notify.Notifier'
         ],
 
         enableGridBoardToggle: true,
@@ -47,20 +51,43 @@
                 this._createPicker().then({
                     success: function (selectedType) {
                         this.changeModelType(selectedType);
+                        if(this._isNewestFilteringComponentEnabled()){
+                            this.loadSettingsAndLaunch();
+                        }
                     },
                     scope: this
                 });
             }
         },
 
+        _isNewestFilteringComponentEnabled: function(){
+            return this.getContext().isFeatureEnabled('S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES');
+        },
+
+        _getAppId: function(newType){
+            return this._isNewestFilteringComponentEnabled() ? -200034 : appIDMap[newType];
+        },
+
         changeModelType: function (newType) {
             this.context = this.getContext().clone({
-                appID: appIDMap[newType]
+                appID: this._getAppId(newType)
             });
             this.selectedType = newType;
             this.modelNames = [newType];
             this.statePrefix = newType;
-            this.loadSettingsAndLaunch();
+            if(!this._isNewestFilteringComponentEnabled()){
+                this.loadSettingsAndLaunch();
+            }
+        },
+
+        getGridBoardConfig: function () {
+            return _.merge(this.callParent(arguments), {
+                listeners: {
+                    viewchange: this._onViewChange,
+                    scope: this
+                },
+                sharedViewAdditionalCmps: [this.modelPicker]
+            });
         },
 
         getGridBoardTogglePluginConfig: function () {
@@ -71,6 +98,146 @@
                     showChartToggle: this._enableCharts() ? true : Rally.ui.gridboard.GridBoardToggle.BUTTON_DISABLED
                 }
             });
+        },
+
+        getGridBoardCustomFilterControlConfig: function () {
+            var context = this.getContext();
+            if (this._isNewestFilteringComponentEnabled()) {
+                return {
+                    ptype: 'rallygridboardinlinefiltercontrol',
+                    showInChartMode: false,
+                    inlineFilterButtonConfig: {
+                        stateful: true,
+                        stateId: context.getScopedStateId('timeboxes-inline-filter'),
+                        filterChildren: true,
+                        modelNames: this.modelNames,
+                        inlineFilterPanelConfig: {
+                            quickFilterPanelConfig: {
+                                defaultFields: [
+                                    'ArtifactSearch'
+                                ],
+                                addQuickFilterConfig: {
+                                    blackListFields: ['PortfolioItemType', 'ModelType', 'ChildrenPlannedVelocity'],
+                                    whiteListFields: ['Milestones', 'Tags']
+                                }
+                            },
+                            advancedFilterPanelConfig: {
+                                advancedFilterRowsConfig: {
+                                    propertyFieldConfig: {
+                                        blackListFields: ['PortfolioItemType', 'ChildrenPlannedVelocity'],
+                                        whiteListFields: ['Milestones', 'Tags']
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+
+            return {
+                blackListFields: ['PortfolioItemType'],
+                whiteListFields: ['Milestones']
+            };
+        },
+
+        getSharedViewConfig: function() {
+            var context = this.getContext();
+            if (this._isNewestFilteringComponentEnabled()) {
+                return {
+                    ptype: 'rallygridboardsharedviewcontrol',
+                    showInChartMode: false,
+                    sharedViewConfig: {
+                        stateful: true,
+                        stateId: context.getScopedStateId('timeboxes-shared-view'),
+                        defaultViews: _.map(this._getDefaultViews(), function (view) {
+                            Ext.apply(view, {
+                                Value: Ext.JSON.encode(view.Value, true)
+                            });
+                            return view;
+                        }, this),
+                        enableUrlSharing: this.isFullPageApp !== false,
+                        suppressViewNotFoundNotification: this._suppressViewNotFoundNotification
+                    },
+                    enableGridEditing: context.isFeatureEnabled('S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE'),
+                    additionalFilters: [{
+                        property: 'Value',
+                        operator: 'contains',
+                        value: '"timeboxTypePicker":"' + this.modelPicker.getRecord().get('type') + '"'
+                    }]
+                };
+            }
+
+            return {};
+        },
+
+        _getDefaultViews: function() {
+            var defaultViews = [];
+            if (this.toggleState === 'grid'){
+                var modelType = this.modelPicker.getValue();
+                if (modelType === 'iteration') {
+                    defaultViews.push( {
+                        Name: 'Iterations Default',
+                        identifier: 1,
+                        Value: {
+                            toggleState: 'grid',
+                            columns: [
+                                {dataIndex: "Name"},
+                                {dataIndex: "Theme"},
+                                {dataIndex: "StartDate"},
+                                {dataIndex: "EndDate"},
+                                {dataIndex: "Project"},
+                                {dataIndex: "PlannedVelocity"},
+                                {dataIndex: "PlanEstimate"},
+                                {dataIndex: "TaskEstimateTotal"},
+                                {dataIndex: "TaskRemainingTotal"},
+                                {dataIndex: "TaskActualTotal"},
+                                {dataIndex: "State"}
+                            ],
+                            sorters:[{ property: 'EndDate', direction: 'DESC'}]
+                        }
+                    });
+                } else if (modelType === 'milestone'){
+                    defaultViews.push( {
+                        Name: 'Milestones Default',
+                        identifier: 2,
+                        Value: {
+                            toggleState: 'grid',
+                            columns: [
+                                {dataIndex: "FormattedID"},
+                                {dataIndex: "DisplayColor"},
+                                {dataIndex: "Name"},
+                                {dataIndex: "TargetDate"},
+                                {dataIndex: "TotalArtifactCount"},
+                                {dataIndex: "TargetProject"}
+                            ],
+                            sorters:[{ property: 'TargetDate', direction: 'DESC'}]
+                        }
+                    });
+                } else if (modelType === 'release'){
+                    defaultViews.push( {
+                        Name: 'Releases Default',
+                        identifier: 3,
+                        Value: {
+                            toggleState: 'grid',
+                            columns: [
+                                {dataIndex: "Name"},
+                                {dataIndex: "Theme"},
+                                {dataIndex: "ReleaseStartDate"},
+                                {dataIndex: "ReleaseDate"},
+                                {dataIndex: "Project"},
+                                {dataIndex: "PlannedVelocity"},
+                                {dataIndex: "PlanEstimate"},
+                                {dataIndex: "TaskEstimateTotal"},
+                                {dataIndex: "TaskRemainingTotal"},
+                                {dataIndex: "TaskActualTotal"},
+                                {dataIndex: "State"}
+                            ],
+                            sorters:[{ property: 'ReleaseDate', direction: 'DESC'}]
+                        }
+                    });
+                }
+            }
+            return defaultViews;
         },
 
         getChartConfig: function () {
@@ -95,7 +262,6 @@
                     gridAlwaysSelectedValues: ['TargetDate', 'TotalArtifactCount', 'TargetProject']
                 });
             }
-
             return config;
         },
 
@@ -160,24 +326,63 @@
                 }],
                 queryMode: 'local',
                 renderTo: Ext.query('#content .titlebar .dashboard-timebox-container')[0],
-                storeType: 'Ext.data.Store',
-                storeConfig: {
-                    fields: ['name', 'type'],
+                store: {
+                    fields: ['name', 'type', 'TypePath'],
                     data: [
-                        { name: 'Iterations', type: 'iteration' },
-                        { name: 'Releases', type: 'release' },
-                        { name: 'Milestones', type: 'milestone' }
+                        { name: 'Iterations', type: 'iteration', TypePath: 'Iteration'},
+                        { name: 'Releases', type: 'release', TypePath: 'Release' },
+                        { name: 'Milestones', type: 'milestone', TypePath: 'Milestone' }
                     ]
                 },
-                valueField: 'type'
+                valueField: 'type',
+                getCurrentView: function () {
+                    return {timeboxTypePicker: this.getRecord().get('type')};
+                }
             });
 
             return deferred.promise;
         },
 
-        _onTimeboxTypeChanged: function () {
-            if (this.modelPicker) {
-                this.changeModelType(this.modelPicker.getValue());
+        _suppressViewNotFoundNotificationWhenTypeChanges: function() {
+            var plugin = _.find(this.gridboard.plugins, {ptype: 'rallygridboardsharedviewcontrol'});
+            if (plugin && plugin.controlCmp && plugin.controlCmp.getSharedViewParam()){
+                this._suppressViewNotFoundNotification = true;
+            }
+        },
+
+        _onViewChange: function() {
+            Rally.ui.notify.Notifier.hide();
+            this.loadGridBoard();
+        },
+
+        _pickerTypeChanged: function(picker){
+            var newType = picker.getValue();
+            return newType && this.selectedType && newType !== this.selectedType;
+        },
+
+        _onTimeboxTypeChanged: function (picker) {
+            Rally.ui.notify.Notifier.hide();
+            if (this._pickerTypeChanged(picker)) {
+                this._suppressViewNotFoundNotificationWhenTypeChanges();
+                this.changeModelType(picker.getValue());
+
+                if(this._isNewestFilteringComponentEnabled()){
+                    var selectedRecord = this.modelPicker.getRecord();
+
+                    if (!this._enableCharts()) {
+                        this.toggleState = 'grid';
+                    }
+
+                    this.gridboard.fireEvent('modeltypeschange', this.gridboard, [selectedRecord]);
+                }
+            }
+        },
+
+        onDestroy: function() {
+            this.callParent(arguments);
+            if(this.modelPicker) {
+                this.modelPicker.destroy();
+                delete this.modelPicker;
             }
         }
     });

@@ -1,7 +1,8 @@
 Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.data.util.PortfolioItemHelper'
-], ->
+  'Rally.app.Context'
+]
 describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
   helpers
     getExtContext: () ->

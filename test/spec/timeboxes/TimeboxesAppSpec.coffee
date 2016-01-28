@@ -1,6 +1,9 @@
 Ext = window.Ext4 || window.Ext
 
-Ext.require 'Rally.data.PreferenceManager'
+Ext.require [
+  'Rally.data.PreferenceManager'
+  'Rally.app.Context'
+]
 
 describe 'Rally.apps.timeboxes.TimeboxesApp', ->
   helpers
@@ -42,6 +45,17 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
         suspendEvents: @stub()
         load: @stub()
         resumeEvents: @stub()
+
+    changeType: (type = 'iteration') ->
+      addGridBoardSpy = @spy @app, 'addGridBoard'
+
+      @app.modelPicker.setValue(type)
+      @waitForCallback addGridBoardSpy
+
+    stubFeatureToggle: (toggles, value = true) ->
+      stub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled');
+      stub.withArgs(toggle).returns(value) for toggle in toggles
+      stub
 
   describe 'milestones', ->
     beforeEach ->
@@ -99,6 +113,7 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
 
   describe 'on type change', ->
     beforeEach ->
+
       @createApp('iteration').then =>
         expect(@requestStubs.iteration).toHaveBeenCalledOnce()
         expect(@requestStubs.release).not.toHaveBeenCalled()
@@ -144,14 +159,115 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
 
   describe 'in chart mode', ->
     beforeEach ->
+      @stubFeatureToggle ['S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
       @createApp 'iteration', toggleState: 'chart'
 
     it 'should disable non-applicable header controls', ->
-      expect(@getHeader().down('rallyaddnew').disabled).toBe true
-      expect(@getHeader().down('rallycustomfilterbutton').disabled).toBe true
-      expect(@getHeader().down('#fieldpickerbtn').disabled).toBe true
-      expect(@getHeader().down('#actions-menu-button').disabled).toBe true
+      expect(@getHeader().down('rallyaddnew').hidden).toBe true
+      expect(@getHeader().down('rallyinlinefiltercontrol').hidden).toBe true
+      expect(@getHeader().down('#fieldpickerbtn').hidden).toBe true
+      expect(@getHeader().down('#actions-menu-button').hidden).toBe true
 
-    it 'should not disable applicable header controls', ->
+    it 'should not disable or hide applicable header controls', ->
       expect(@getHeader().down('#grid').disabled).toBe false
       expect(@getHeader().down('#chart').disabled).toBe false
+      expect(@getHeader().down('#grid').hidden).toBe false
+      expect(@getHeader().down('#chart').hidden).toBe false
+
+  describe 'filtering panel plugin', ->
+    helpers
+      getPlugin: (filterptype='rallygridboardinlinefiltercontrol') ->
+        gridBoard = @app.down 'rallygridboard'
+        _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == filterptype
+
+    it 'should have the old filter component by default', ->
+      @createApp().then =>
+        expect(@getPlugin('rallygridboardcustomfiltercontrol')).toBeDefined()
+
+    it 'should use rallygridboard filtering plugin', ->
+      @stubFeatureToggle ['S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+      @createApp().then =>
+        expect(@getPlugin()).toBeDefined()
+
+    describe 'quick filters', ->
+      it 'should add filters for search', ->
+        @stubFeatureToggle ['S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+        @createApp().then =>
+          config = @getPlugin().inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig
+          expect(config.defaultFields[0]).toBe 'ArtifactSearch'
+          expect(config.defaultFields.length).toBe 1
+
+
+  describe 'shared view plugin', ->
+    helpers
+      getPlugin: ->
+        gridBoard = @app.down 'rallygridboard'
+        _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+
+    it 'should not have shared view plugin if the toggle is off', ->
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        expect(@getPlugin()).not.toBeDefined()
+
+    it 'should configure gridboard with sharedViewAdditionalCmps', ->
+      @stubFeatureToggle ['S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+      @createApp().then =>
+        expect(@app.gridboard.sharedViewAdditionalCmps.length).toBe 1
+        expect(@app.gridboard.sharedViewAdditionalCmps[0]).toBe @app.modelPicker
+
+    it 'should use rallygridboard shared view plugin if toggled on', ->
+      @stubFeatureToggle ['S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+      @createApp().then =>
+        plugin = @getPlugin()
+        expect(plugin).toBeDefined()
+        expect(plugin.sharedViewConfig.stateful).toBe true
+        expect(plugin.sharedViewConfig.stateId).toBe @app.getContext().getScopedStateId('timeboxes-shared-view')
+        expect(plugin.sharedViewConfig.defaultViews).toBeDefined()
+        expect(plugin.sharedViewConfig.suppressViewNotFoundNotification).not.toBeDefined()
+
+    it 'should load gridboard with suppressViewNotFoundNotification set to true after PI type change', ->
+      @stubFeatureToggle ['S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+      @createApp().then =>
+        @stub(@getPlugin().controlCmp, 'getSharedViewParam').returns true
+        @changeType('release')
+        @once
+          condition: => @getPlugin().sharedViewConfig.suppressViewNotFoundNotification
+
+    it 'sets current view on viewchange', ->
+      @stubFeatureToggle ['S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+      @createApp().then =>
+        loadSpy = @spy(@app, 'loadGridBoard')
+        @app.gridboard.fireEvent 'viewchange'
+        expect(loadSpy).toHaveBeenCalledOnce()
+        expect(@app.down('#gridBoard')).toBeDefined()
+
+    it 'should enableGridEditing when S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE is true', ->
+      @stubFeatureToggle ['S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE', 'S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+      @createApp().then =>
+        expect(@getPlugin().enableGridEditing).toBe true
+
+    it 'should NOT enableGridEditing when S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE is false', ->
+      isFeatureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
+      isFeatureEnabledStub.withArgs('S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE').returns false
+      isFeatureEnabledStub.withArgs('S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN').returns true
+      isFeatureEnabledStub.withArgs('S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES').returns true
+      @createApp().then =>
+        expect(@getPlugin().enableGridEditing).toBe false
+
+    it 'should enableUrlSharing when isFullPageApp is true', ->
+      @stubFeatureToggle ['S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE','S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+      @createApp(
+         null,
+         isFullPageApp: true
+      ).then =>
+        expect(@getPlugin().sharedViewConfig.enableUrlSharing).toBe true
+
+    it 'should NOT enableUrlSharing when isFullPageApp is false', ->
+      @stubFeatureToggle ['S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE','S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+      @createApp(
+         null,
+        isFullPageApp: false
+      ).then =>
+        expect(@getPlugin().sharedViewConfig.enableUrlSharing).toBe false
