@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -el
 
 sed -i "s/appsdk-src:tgz:[^\"]*\",/appsdk-src:tgz:${APPSDK_SRC_VERSION}\",/" js_dependencies.json
 
