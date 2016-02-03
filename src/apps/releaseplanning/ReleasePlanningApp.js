@@ -33,7 +33,7 @@
                 cardBoardConfig: {
                     columnConfig: {
                         columnStatusConfig: {
-                            pointField: 'PreliminaryEstimate.Value'
+                            pointField: 'PreliminaryEstimateValue'
                         },
                         fields: this._getDefaultFields()
                     },
