@@ -6,9 +6,13 @@
         requires: [
             'Deft.Promise',
             'Rally.apps.customlist.Settings',
+            'Rally.data.BulkRecordUpdater',
             'Rally.data.ModelTypes',
+            'Rally.data.PreferenceManager',
             'Rally.data.util.Sorter',
             'Rally.data.wsapi.Filter',
+            'Rally.ui.gridboard.plugin.GridBoardInlineFilterControl',
+            'Rally.ui.gridboard.plugin.GridBoardSharedViewControl',
             'Rally.ui.notify.Notifier',
             'Rally.util.String'
         ],
@@ -32,7 +36,7 @@
         },
 
         getSettingsFields: function() {
-            return Rally.apps.customlist.Settings.getFields(this.getContext());
+            return Rally.apps.customlist.Settings.getFields(this);
         },
 
         loadModelNames: function () {
@@ -108,6 +112,88 @@
             });
         },
 
+        getGridBoardCustomFilterControlConfig: function() {
+            var context = this.getContext();
+            if (context.isFeatureEnabled('F8943_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_MANY_PAGES')) {
+                var isArtifactModel = this.models[0].isArtifact();
+                var blackListFields = isArtifactModel ? ['ModelType', 'PortfolioItemType'] : ['ArtifactSearch', 'ModelType'];
+                var whiteListFields = isArtifactModel ? ['Milestones', 'Tags'] : [];
+
+                if (this.models[0].isProject()) {
+                    blackListFields.push('SchemaVersion');
+                }
+
+                var config = {
+                    ptype: 'rallygridboardinlinefiltercontrol',
+                    inlineFilterButtonConfig: {
+                        stateful: true,
+                        stateId: context.getScopedStateId('custom-list-inline-filter'),
+                        filterChildren: true,
+                        inlineFilterPanelConfig: {
+                            quickFilterPanelConfig: {
+                                defaultFields: isArtifactModel ? ['ArtifactSearch'] : [],
+                                addQuickFilterConfig: {
+                                    blackListFields: blackListFields,
+                                    whiteListFields: whiteListFields
+                                }
+                            },
+                            advancedFilterPanelConfig: {
+                                advancedFilterRowsConfig: {
+                                    propertyFieldConfig: {
+                                        blackListFields: blackListFields,
+                                        whiteListFields: whiteListFields
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                if (isArtifactModel) {
+                    config.inlineFilterButtonConfig.modelNames = this.modelNames;
+                } else {
+                    config.inlineFilterButtonConfig.model = this.models[0];
+                }
+
+                return config;
+            }
+
+            return {};
+        },
+
+        getSharedViewConfig: function() {
+            var context = this.getContext();
+            if (context.isFeatureEnabled('F8943_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_MANY_PAGES')) {
+                return {
+                    ptype: 'rallygridboardsharedviewcontrol',
+                    sharedViewConfig: {
+                        stateful: true,
+                        stateId: context.getScopedStateId('custom-list-shared-view'),
+                        enableUrlSharing: this.isFullPageApp !== false
+                    },
+                    enableGridEditing: context.isFeatureEnabled('S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE')
+                };
+            }
+
+            return {};
+        },
+
+        getGridBoardConfig: function () {
+            var config = this.callParent(arguments);
+            return _.merge(config, {
+                listeners: {
+                    viewchange: function() {
+                        this.loadGridBoard();
+                    },
+                    filterchange: function() {
+                        this.gridboard.getGridOrBoard().noDataPrimaryText = undefined;
+                        this.gridboard.getGridOrBoard().noDataSecondaryText = undefined;
+                    },
+                    scope: this
+                }
+            });
+        },
+
         onTreeGridReady: function (grid) {
             if (grid.store.getTotalCount() > 10) {
                 this.gridboard.down('#pagingToolbar').show();
@@ -141,11 +227,17 @@
         },
 
         getAddNewConfig: function () {
-            return _.merge(this.callParent(arguments), {
+            var config = {
                 disableAddButton: this.appContainer.slug === 'incompletestories',
                 minWidth: 700,
                 openEditorAfterAddFailure: false
-            });
+            };
+
+            if (this.getContext().isFeatureEnabled('F8943_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_MANY_PAGES')) {
+                config.margin = 0;
+            }
+
+            return _.merge(this.callParent(arguments), config);
         },
 
         getFieldPickerConfig: function () {
@@ -165,6 +257,41 @@
         onTimeboxScopeChange: function() {
             this.callParent(arguments);
             this.loadGridBoard();
+        },
+
+        clearFiltersAndSharedViews: function() {
+            var context = this.getContext();
+            if (context.isFeatureEnabled('F8943_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_MANY_PAGES')) {
+                if (this.gridboard) {
+                    this.gridboard.down('rallyinlinefilterpanel').clear();
+                    this.gridboard.down('rallysharedviewcombobox').reset();
+                }
+
+                Ext.create('Rally.data.wsapi.Store', {
+                    model: Ext.identityFn('preference'),
+                    autoLoad: true,
+                    filters: [
+                        {property: 'AppId', value: context.getAppId()},
+                        {property: 'Type', value: 'View'},
+                        {property: 'Workspace', value: context.getWorkspace()._ref}
+                    ],
+                    context: context.getDataContext(),
+                    listeners: {
+                        load: function(store, records) {
+                            if(!_.isEmpty(records)) {
+                                var batchStore = Ext.create('Rally.data.wsapi.batch.Store', {
+                                    requester: this,
+                                    data: records
+                                });
+                                batchStore.removeAll();
+                                batchStore.sync();
+                            }
+                            store.destroyStore();
+                        },
+                        scope: this
+                    }
+                });
+            }
         },
 
         _getQueryFilter: function () {

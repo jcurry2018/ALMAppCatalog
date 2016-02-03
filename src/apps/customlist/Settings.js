@@ -22,7 +22,8 @@
             'Rally.ui.CheckboxField'
         ],
 
-        getFields: function (context) {
+        getFields: function (app) {
+            this.app = app;
             return [
                 {
                     name: 'type',
@@ -30,7 +31,7 @@
                     allowBlank: false,
                     autoSelect: false,
                     shouldRespondToScopeChange: true,
-                    context: context,
+                    context: this.app.getContext(),
                     initialValue: 'HierarchicalRequirement',
                     storeConfig: {
                         model: Ext.identityFn('TypeDefinition'),
@@ -45,8 +46,10 @@
                     valueField: 'TypePath',
                     listeners: {
                         select: function (combo) {
+                            this.app.clearFiltersAndSharedViews();
                             combo.fireEvent('typeselected', combo.getRecord().get('TypePath'), combo.context);
-                        }
+                        },
+                        scope: this
                     },
                     bubbleEvents: ['typeselected'],
                     readyEvent: 'ready',
