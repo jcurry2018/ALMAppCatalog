@@ -45,7 +45,7 @@ describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
           PreliminaryEstimate:
             Value: 12
 
-      @ajax.whenQuerying('portfolioitem/feature').respondWith @featureData
+      @ajax.whenQuerying('portfolioitem/feature').respondWith @featureData,
         sums:
           PreliminaryEstimateValue: 42
 
