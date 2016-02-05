@@ -32,7 +32,7 @@ describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
       @releaseData = Helpers.TimeboxDataCreatorHelper.createTimeboxData
         timeboxCount: 4
         type: 'release'
-        plannedVelocity: 20
+        plannedVelocity: 77
 
       # return the releases out of order. sorting should be done correctly on the client
       @releaseData[1] = @releaseData[3];
@@ -46,6 +46,8 @@ describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
             Value: 12
 
       @ajax.whenQuerying('portfolioitem/feature').respondWith @featureData
+        sums:
+          PreliminaryEstimateValue: 42
 
       @app = Ext.create 'Rally.apps.releaseplanning.ReleasePlanningApp',
         context: Ext.create 'Rally.app.Context',
@@ -69,8 +71,8 @@ describe 'Rally.apps.releaseplanning.ReleasePlanningApp', ->
 
   it 'should show a progress bar based on preliminary estimate and planned velocity', ->
     @createApp().then =>
-      expect(@getProgressBarHtml(1)).toStartWith '12'
-      expect(@getProgressBarHtml(1)).toContain '20'
+      expect(@getProgressBarHtml(1)).toStartWith '42'
+      expect(@getProgressBarHtml(1)).toContain '77'
 
   it 'should order the release columns based on end date', ->
     @createApp().then =>
