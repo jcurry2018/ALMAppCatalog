@@ -33,12 +33,15 @@
         _successHandler: function(response) {
             var responseJson = Ext.JSON.decode(response.responseText);
             var seatsAvailable = responseJson.NumberOfPaidSeats + responseJson.NumberOfUnpaidSeats;
+            var el = this.getEl();
 
-            this.getEl().update(
-                responseJson.HasUnlimitedSeats ?
-                responseJson.NumberOfActiveUsers + ' active user licenses' :
-                (seatsAvailable - responseJson.NumberOfActiveUsers) + ' of ' + seatsAvailable + ' active user licenses remaining'
-            );
+            if (el) {
+                el.update(
+                    responseJson.HasUnlimitedSeats ?
+                    responseJson.NumberOfActiveUsers + ' active user licenses' :
+                    (seatsAvailable - responseJson.NumberOfActiveUsers) + ' of ' + seatsAvailable + ' active user licenses remaining'
+                );
+            }
         }
     });
 })();

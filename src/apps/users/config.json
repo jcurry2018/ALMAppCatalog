@@ -5,6 +5,7 @@
    "sdk": "x",
    "javascript": [
       "SubscriptionSeats.js",
+      "plugins/SubscriptionSeats.js",
       "UsersApp.js"
    ],
    "css": [
