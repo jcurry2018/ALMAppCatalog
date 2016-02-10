@@ -2,5 +2,5 @@
     { "id": "com.rallydev.sencha:sencha-cmd:tgz:4.0.1.45", "path": "bin/sencha", "license": "Sencha Software License Agreement" },
     { "id": "com.rallydev.js:ext-lean:tgz:4.2.2", "path": "lib/ext/4.2.2", "license": "Sencha Software License Agreement" },
     { "id": "com.rallydev.js:webdriver:tgz:2.44.0", "path": "lib/webdriver", "license": "Apache 2.0" },
-    { "id": "com.rallydev.js:appsdk-src:tgz:almci-master-4333-c921208", "path": "lib/sdk", "license": "Rally General Use License" }
+    { "id": "com.rallydev.js:appsdk-src:tgz:almci-master-4334-b500642", "path": "lib/sdk", "license": "Rally General Use License" }
 ]
