@@ -343,6 +343,12 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         plugin = @getPlugin()
         expect(plugin.inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig.addQuickFilterConfig.blackListFields).toEqual ['ArtifactSearch', 'ModelType', 'SchemaVersion']
 
+    it 'should use appropriate release blacklist config', ->
+      @stubFeatureToggle ['F8943_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_MANY_PAGES'], true
+      @createApp(settings: { type: 'release' }).then =>
+        plugin = @getPlugin()
+        expect(plugin.inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig.addQuickFilterConfig.blackListFields).toEqual ['ArtifactSearch', 'ModelType', 'ChildrenPlannedVelocity', 'Version']
+
     it 'should clear primary and secondary no data messages when filterchange is fired', ->
       @stubFeatureToggle ['F8943_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_MANY_PAGES'], true
       @createApp(

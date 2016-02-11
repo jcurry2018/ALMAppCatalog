@@ -121,6 +121,8 @@
 
                 if (this.models[0].isProject()) {
                     blackListFields.push('SchemaVersion');
+                } else if (this.models[0].isRelease()) {
+                    blackListFields.push('ChildrenPlannedVelocity', 'Version');
                 }
 
                 var config = {
