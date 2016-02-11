@@ -6,7 +6,7 @@ gen/
 *.iml
 *.ipr
 *.iws
-bin/sencha/
+/bin
 build/
 target/
 .grunt/
