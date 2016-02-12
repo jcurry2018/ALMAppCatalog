@@ -39,7 +39,7 @@
     "grunt-parallel-spec-runner": "~0.3.7",
     "grunt-regex-check": "0.1.5",
     "grunt-rick": "0.0.3",
-    "grunt-shell": "1.1.2",
+    "grunt-shell": "~1.0.1",
     "grunt-text-replace": "~0.3.6",
     "grunt-webdriver-jasmine-runner": "~0.3.3",
     "rally-app-builder": "~0.7.5",
