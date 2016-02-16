@@ -30,7 +30,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'default', ['build']
   grunt.registerTask 'sanity', ['check', 'jshint']
   grunt.registerTask 'css', ['less', 'copy:images', 'replace:imagepaths']
-  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'nexus:deps', 'shell:link-npm-modules', 'coffee', 'sanity', 'css', 'sencha:buildapps', 'assemble', 'copy:apphtml']
+  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'nexus:deps', 'shell:link-npm-modules', 'coffee', 'sanity', 'css', 'shell:buildapps', 'assemble', 'copy:apphtml']
 
   grunt.registerTask 'nexus:__createartifact__', 'Internal task to create and publish the nexus artifact', ['version', 'nexus:push:publish', 'clean:target']
   grunt.registerTask 'nexus:deploy', 'Deploys to nexus', ['build', 'nexus:__createartifact__']
@@ -85,6 +85,8 @@ module.exports = (grunt) ->
   seleniumUrl = "http://repo-depot.f4tech.com/artifactory/junkyard-local/com/rallydev"
   seleniumVersionUrl = "#{seleniumUrl}/selenium"
   grunt.option('selenium-jar-path',"lib/selenium-server-standalone-#{seleniumMajorVersion}.#{seleniumMinorVersion}.jar")
+
+  senchaCmd = "#{if process.platform is 'darwin' then 'mac' else 'linux'}/sencha"
 
   specFileArray = [
     "test/gen/**/#{spec}Spec.js"
@@ -425,6 +427,33 @@ module.exports = (grunt) ->
         stdout: true
         stderr: true
         failOnError: true
+
+      'buildapps':
+        command: [
+          "bin/sencha/#{senchaCmd}"
+          if debug then '-d' else ''
+          "-s #{ext_path}"
+          'compile'
+          "-classpath=#{appsdk_path}/builds/sdk-dependencies-debug.js,#{appsdk_path}/src,src/apps"
+          'exclude -all and'
+          'include -file src/apps and'
+          'concat build/catalog-all-debug.js and'
+          'concat -compress build/catalog-all.js'
+        ].join(" ")
+
+      'appmanifest':
+        command:[
+          "bin/sencha/#{senchaCmd}"
+          "-s #{ext_path}"
+          'compile'
+          "-classpath=#{appsdk_path}/builds/sdk-dependencies-debug.js,#{appsdk_path}/src,src/apps"
+          'exclude -all and'
+          "union -r -file #{grunt.option('app')}/ and"
+          "exclude -file #{appsdk_path}/builds/sdk-dependencies-debug.js and"
+          "exclude -file #{appsdk_path}/src and"
+          'exclude -namespace Ext and'
+          "metadata -f -t {0} -o temp/#{grunt.option('app')}/appManifest -json -b #{grunt.option('app')}"
+        ].join(" ")
 
       'link-npm-modules':
         options:
