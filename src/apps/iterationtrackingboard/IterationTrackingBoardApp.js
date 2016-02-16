@@ -540,7 +540,6 @@
                 useFixedHeightRows = Ext.isIE;
 
             var gridConfig = {
-                bufferedRenderer: true,
                 columnCfgs: this._getGridColumns(),
                 enableBulkEdit: true,
                 enableInlineAdd: true,
