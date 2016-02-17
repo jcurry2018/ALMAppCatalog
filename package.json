@@ -7,7 +7,8 @@
     "postinstall": "if [ -e ./npm_link_appcatalog_deps.sh ];then ./npm_link_appcatalog_deps.sh;fi"
   },
   "files": [
-    "build"
+    "build",
+    "src"
   ],
   "repository": {
     "type": "git",
