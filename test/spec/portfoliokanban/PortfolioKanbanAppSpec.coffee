@@ -238,6 +238,21 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
         @app.gridboard.getGridOrBoard().getColumns()[0].store
 
     describe 'field picker', ->
+      beforeEach ->
+        @field =
+          attributeDefinition:
+            AttributeType: 'BOOLEAN'
+            Constrained: false
+            Custom: false
+          isMultiValueCustom: () ->
+            false
+        @multiValueCustomField =
+          attributeDefinition:
+              AttributeType: 'BOOLEAN'
+              Constrained: false
+              Custom: false
+            isMultiValueCustom: () ->
+              true
       it 'should show', ->
         @_createApp().then =>
           expect(@app.down('#fieldpickerbtn').isVisible()).toBe true
@@ -245,6 +260,14 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       it 'should have use the legacy field setting if available', ->
         @_createApp(settings: fields: 'Field1,Field2').then =>
           expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['Field1','Field2']
+      it 'should not include multi value fields', ->
+        @_createApp(settings: fields: 'Field1,Field2').then =>
+          fieldsFn = @app.getSettingsFields()[0].isAllowedFieldFn
+          expect(fieldsFn(@field)).toBeTruthy()
+          expect(fieldsFn(@multiValueCustomField)).toBeFalsy()
+
+
+
 
   describe 'sizing', ->
     it 'should set an initial gridboard height', ->
