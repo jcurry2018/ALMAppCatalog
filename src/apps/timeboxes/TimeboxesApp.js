@@ -158,7 +158,6 @@
                         enableUrlSharing: this.isFullPageApp !== false,
                         suppressViewNotFoundNotification: this._suppressViewNotFoundNotification
                     },
-                    enableGridEditing: context.isFeatureEnabled('S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE'),
                     additionalFilters: [{
                         property: 'Value',
                         operator: 'contains',

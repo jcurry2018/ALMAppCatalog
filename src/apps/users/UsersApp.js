@@ -255,8 +255,7 @@
                             });
                             return view;
                         }, this)
-                    },
-                    enableGridEditing: context.isFeatureEnabled('S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE')
+                    }
                 };
             }
 

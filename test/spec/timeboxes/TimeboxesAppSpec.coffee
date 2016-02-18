@@ -243,21 +243,8 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
         expect(loadSpy).toHaveBeenCalledOnce()
         expect(@app.down('#gridBoard')).toBeDefined()
 
-    it 'should enableGridEditing when S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE is true', ->
-      @stubFeatureToggle ['S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE', 'S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
-      @createApp().then =>
-        expect(@getPlugin().enableGridEditing).toBe true
-
-    it 'should NOT enableGridEditing when S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE is false', ->
-      isFeatureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
-      isFeatureEnabledStub.withArgs('S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE').returns false
-      isFeatureEnabledStub.withArgs('S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN').returns true
-      isFeatureEnabledStub.withArgs('S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES').returns true
-      @createApp().then =>
-        expect(@getPlugin().enableGridEditing).toBe false
-
     it 'should enableUrlSharing when isFullPageApp is true', ->
-      @stubFeatureToggle ['S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE','S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+      @stubFeatureToggle ['S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
       @createApp(
          null,
          isFullPageApp: true
@@ -265,7 +252,7 @@ describe 'Rally.apps.timeboxes.TimeboxesApp', ->
         expect(@getPlugin().sharedViewConfig.enableUrlSharing).toBe true
 
     it 'should NOT enableUrlSharing when isFullPageApp is false', ->
-      @stubFeatureToggle ['S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE','S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
+      @stubFeatureToggle ['S108174_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_TIMEBOXES'], true
       @createApp(
          null,
         isFullPageApp: false

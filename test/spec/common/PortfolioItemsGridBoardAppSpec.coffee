@@ -226,27 +226,15 @@ describe 'Rally.apps.common.PortfolioItemsGridBoardApp', ->
         defaultViews =  @getPlugin().sharedViewConfig.defaultViews
         expect(Ext.JSON.decode(defaultViews[0].Value, true).columns[0].dataIndex).toBe 'DragAndDropRank'
 
-    it 'should enableGridEditing when S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE is true', ->
-      @stubFeatureToggle ['S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE', 'S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN'], true
-      @renderApp().then =>
-        expect(@getPlugin().enableGridEditing).toBe true
-
-    it 'should NOT enableGridEditing when S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE is false', ->
-      isFeatureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
-      isFeatureEnabledStub.withArgs('S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE').returns false
-      isFeatureEnabledStub.withArgs('S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN').returns true
-      @renderApp().then =>
-        expect(@getPlugin().enableGridEditing).toBe false
-
     it 'should enableUrlSharing when isFullPageApp is true', ->
-      @stubFeatureToggle ['S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE','S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN'], true
+      @stubFeatureToggle ['S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN'], true
       @renderApp(
         isFullPageApp: true
       ).then =>
         expect(@getPlugin().sharedViewConfig.enableUrlSharing).toBe true
 
     it 'should NOT enableUrlSharing when isFullPageApp is false', ->
-      @stubFeatureToggle ['S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE','S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN'], true
+      @stubFeatureToggle ['S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN'], true
       @renderApp(
         isFullPageApp: false
       ).then =>

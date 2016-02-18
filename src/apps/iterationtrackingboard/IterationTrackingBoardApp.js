@@ -458,8 +458,7 @@
                     }, this),
                     enableUrlSharing: this.isFullPageApp !== false,
                     enableReadingUserPref: context.isFeatureEnabled('S83433_THE_PREFERENCE') && context.isFeatureEnabled('DE25285_RETURN_OF_THE_PREFERENCE')
-                },
-                enableGridEditing: context.isFeatureEnabled('S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE')
+                }
             };
         },
 

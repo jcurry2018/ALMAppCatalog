@@ -172,8 +172,7 @@
                         stateful: true,
                         stateId: context.getScopedStateId('custom-list-shared-view'),
                         enableUrlSharing: this.isFullPageApp !== false
-                    },
-                    enableGridEditing: context.isFeatureEnabled('S91174_ISP_SHARED_VIEWS_MAKE_PREFERENCE_NAMES_UPDATABLE')
+                    }
                 };
             }
 
