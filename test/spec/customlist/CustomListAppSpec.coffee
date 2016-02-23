@@ -324,7 +324,7 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @createApp(settings: { type: 'task' }).then =>
         plugin = @getPlugin()
         expect(plugin.inlineFilterButtonConfig.modelNames).toBeDefined()
-        expect(plugin.inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig.defaultFields).toEqual ['ArtifactSearch']
+        expect(plugin.inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig.defaultFields).toEqual ['ArtifactSearch', 'Owner']
         expect(plugin.inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig.addQuickFilterConfig.blackListFields).toEqual ['ModelType', 'PortfolioItemType']
         expect(plugin.inlineFilterButtonConfig.inlineFilterPanelConfig.quickFilterPanelConfig.addQuickFilterConfig.whiteListFields).toEqual ['Milestones', 'Tags']
 

@@ -130,10 +130,14 @@
                     inlineFilterButtonConfig: {
                         stateful: true,
                         stateId: context.getScopedStateId('custom-list-inline-filter'),
+                        legacyStateIds: [
+                            this.getScopedStateId('owner-filter'),
+                            this.getScopedStateId('custom-filter-button')
+                        ],
                         filterChildren: true,
                         inlineFilterPanelConfig: {
                             quickFilterPanelConfig: {
-                                defaultFields: isArtifactModel ? ['ArtifactSearch'] : [],
+                                defaultFields: isArtifactModel ? ['ArtifactSearch', 'Owner'] : [],
                                 addQuickFilterConfig: {
                                     blackListFields: blackListFields,
                                     whiteListFields: whiteListFields
