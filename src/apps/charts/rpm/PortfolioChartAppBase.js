@@ -125,7 +125,8 @@
 
         _loadSavedPortfolioItem: function () {
             if (!this._validateSettingsChoices()) {
-                return this.owner.showSettings();
+                this.fireEvent('settingsneeded', this);
+                return;
             }
 
             var portfolioItemRef = this.getSetting(this.PI_SETTING);

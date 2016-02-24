@@ -14,7 +14,7 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       @showSettingsStub = @stub()
 
       @app = Ext.create 'Rally.apps.customlist.CustomListApp', _.merge
-        appContainer: {}
+        appContainer: {} #TODO: remove as part of F6971_REACT_DASHBOARD_PANELS
         context: Ext.create 'Rally.app.Context',
           initialValues:
             permissions: Rally.environment.getContext().getPermissions()
@@ -23,10 +23,9 @@ describe 'Rally.apps.customlist.CustomListApp', ->
             user: Rally.environment.getContext().getUser()
             workspace: Rally.environment.getContext().getWorkspace()
         height: 500
-        owner:
-          dashboard: {}
-          showSettings: @showSettingsStub
         renderTo: 'testDiv'
+        listeners:
+          settingsneeded: @showSettingsStub
       , config
 
       @waitForComponentReady @app
@@ -64,7 +63,7 @@ describe 'Rally.apps.customlist.CustomListApp', ->
   describe 'initial state', ->
     describe 'when only ext2 settings exists', ->
       beforeEach ->
-        @createApp(appContainer: @ext2AppScopedSettings)
+        @createApp(defaultSettings: @ext2AppScopedSettings)
 
       it 'should not show the settings panel', ->
         expect(@showSettingsStub).not.toHaveBeenCalled()
@@ -154,13 +153,13 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         @prefUpdateStub = @stub Rally.data.PreferenceManager, 'update'
 
       it 'should update app scoped column settings if user has permissions to edit app settings', ->
-        @createApp(settings: @ext4AppScopedSettings, owner: dashboard: arePanelSettingsEditable: true).then =>
+        @createApp(settings: @ext4AppScopedSettings, isEditable: true).then =>
           @getGrid().fireEvent 'beforestatesave', @getGrid(), columns: ['Name', 'Blocked', 'Iteration', 'State']
           expect(@prefUpdateStub.lastCall.args[0].settings).toEqual
             columnNames: 'Name,Blocked,Iteration,State'
 
       it 'should NOT update app scoped column settings if user does NOT have permissions to edit app settings', ->
-        @createApp(settings: @ext4AppScopedSettings, owner: dashboard: arePanelSettingsEditable: false).then =>
+        @createApp(settings: @ext4AppScopedSettings, isEditable: false).then =>
           @getGrid().fireEvent 'beforestatesave', @getGrid(), columns: ['Name', 'Blocked', 'Iteration', 'State']
           expect(@prefUpdateStub).not.toHaveBeenCalled()
 
@@ -243,28 +242,6 @@ describe 'Rally.apps.customlist.CustomListApp', ->
 
       it 'should show grid has no data in paging toolbar', ->
         expect(@app.gridboard.getGridOrBoard().down('rallytreepagingtoolbar').getEl().down('.range').getHTML()).toBe '0-0'
-
-  describe 'page size', ->
-    helpers
-      createAppWithExt2PageSize: (pageSize) ->
-        @ext2AppScopedSettings.pagesize = pageSize
-        @createApp appContainer: @ext2AppScopedSettings
-
-    it 'should default to 10 when no ext2 setting', ->
-      @createAppWithExt2PageSize().then =>
-        expect(@artifactRequest.lastCall.args[0].params.pagesize).toBe 10
-
-    it 'should use the ext2 setting if is an allowed page size', ->
-      @createAppWithExt2PageSize(25).then =>
-        expect(@artifactRequest.lastCall.args[0].params.pagesize).toBe 25
-
-    it 'should round up the ext2 setting to the nearest allowed page size', ->
-      @createAppWithExt2PageSize(90).then =>
-        expect(@artifactRequest.lastCall.args[0].params.pagesize).toBe 100
-
-    it 'should round down the ext2 setting to 200 when greater than 200', ->
-      @createAppWithExt2PageSize(201).then =>
-        expect(@artifactRequest.lastCall.args[0].params.pagesize).toBe 200
 
   describe 'header control toolbar', ->
     it 'should be visible if showControls setting is true', ->
@@ -446,4 +423,4 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         @createApp(settings: { type: 'user' }).then =>
           removeAllStub = @stub Rally.data.wsapi.batch.Store::, 'removeAll'
           @app.clearFiltersAndSharedViews()
-          @once(condition: => removeAllStub.callCount == 1)
+          @once condition: => removeAllStub.callCount > 0

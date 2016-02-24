@@ -22,16 +22,10 @@
         readOnlyGridTypes: ['build', 'change', 'changeset'],
         statePrefix: 'customlist',
         allowExpansionStateToBeSaved: false,
+        isEditable: true,
 
         initComponent: function () {
             this.appName = 'CustomList-' + this.getAppId();
-            this.defaultSettings = {
-                columnNames: (this.appContainer.fetch || '').split(','),
-                order: this.appContainer.order,
-                query: this.appContainer.query,
-                showControls: true,
-                type: this.appContainer.url
-            };
             this.callParent(arguments);
         },
 
@@ -40,8 +34,8 @@
         },
 
         loadModelNames: function () {
-            this.modelNames = _.compact([this.getSetting('type')]);
-            this._setColumnNames(this.getSetting('columnNames'));
+            this.modelNames = _.compact([this._getTypeSetting()]);
+            this._setColumnNames(this._getColumnNamesSetting());
             return Deft.Promise.when(this.modelNames);
         },
 
@@ -56,7 +50,7 @@
         loadGridBoard: function () {
             if (_.isEmpty(this.modelNames)) {
                 Ext.defer(function () {
-                    this.owner.showSettings();
+                    this.fireEvent('settingsneeded', this);
                     this.publishComponentReady();
                 }, 1, this);
             } else {
@@ -69,7 +63,7 @@
         getGridConfig: function () {
             var config = _.merge(this.callParent(arguments), {
                 allColumnsStateful: true,
-                enableEditing: !_.contains(this.readOnlyGridTypes, this.getSetting('type').toLowerCase()),
+                enableEditing: !_.contains(this.readOnlyGridTypes, this._getTypeSetting().toLowerCase()),
                 listeners: {
                     beforestaterestore: this._onBeforeGridStateRestore,
                     beforestatesave: this._onBeforeGridStateSave,
@@ -224,19 +218,20 @@
                         scope: this
                     }
                 },
-                pageSize: this.appContainer.pagesize ? _.find(this.orderedAllowedPageSizes, function(pageSize, index, array){
-                    return pageSize >= parseInt(this.appContainer.pagesize, 10) || index === array.length - 1;
-                }, this) : 10,
+                pageSize: 10,
                 sorters: sorters
             };
         },
 
         getAddNewConfig: function () {
             var config = {
-                disableAddButton: this.appContainer.slug === 'incompletestories',
                 minWidth: 700,
                 openEditorAfterAddFailure: false
             };
+
+            if(!this.getContext().isFeatureEnabled('F6971_REACT_DASHBOARD_PANELS')) {
+                config.disableAddButton = this.appContainer.slug === 'incompletestories';
+            }
 
             if (this.getContext().isFeatureEnabled('F8943_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_MANY_PAGES')) {
                 config.margin = 0;
@@ -251,7 +246,7 @@
                     disabled: !this._userHasPermissionsToEditPanelSettings()
                 },
                 gridAlwaysSelectedValues: function () { return []; },
-                gridFieldBlackList: this.getSetting('type').toLowerCase() === 'task' ? ['Rank'] : []
+                gridFieldBlackList: this._getTypeSetting().toLowerCase() === 'task' ? ['Rank'] : []
             });
         },
 
@@ -299,6 +294,15 @@
             }
         },
 
+        _getTypeSetting: function() {
+            return this.getSetting('type') || this.getSetting('url');
+        },
+
+        _getColumnNamesSetting: function() {
+            return this.getSetting('columnNames') ||
+              (this.getSetting('fetch') || '').split(',');
+        },
+
         _getQueryFilter: function () {
             var query = new Ext.Template(this.getSetting('query')).apply({
                 projectName: this.getContext().getProject().Name,
@@ -331,11 +335,11 @@
         },
 
         _shouldEnableAddNew: function() {
-            return !_.contains(this.disallowedAddNewTypes, this.getSetting('type').toLowerCase());
+            return !_.contains(this.disallowedAddNewTypes, this._getTypeSetting().toLowerCase());
         },
 
         _shouldEnableRanking: function(){
-            return this.getSetting('type').toLowerCase() !== 'task';
+            return this._getTypeSetting().toLowerCase() !== 'task';
         },
 
         _setColumnNames: function (columnNames) {
@@ -455,7 +459,7 @@
         },
 
         _userHasPermissionsToEditPanelSettings: function () {
-            return this.owner.dashboard.arePanelSettingsEditable;
+            return this.isEditable;
         },
 
         _getColumnNamesFromState: function (state) {
