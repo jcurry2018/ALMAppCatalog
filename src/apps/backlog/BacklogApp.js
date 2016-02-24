@@ -80,6 +80,9 @@
                     inlineFilterButtonConfig: {
                         stateful: true,
                         stateId: context.getScopedStateId('backlog-inline-filter'),
+                        legacyStateIds: [
+                            this.getScopedStateId('custom-filter-button')
+                        ],
                         filterChildren: true,
                         modelNames: this.modelNames,
                         inlineFilterPanelConfig: {
