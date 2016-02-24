@@ -46,6 +46,10 @@
                     inlineFilterButtonConfig: {
                         stateful: true,
                         stateId: context.getScopedStateId('defect-suites-inline-filter'),
+                        legacyStateIds: [
+                            this.getScopedStateId('owner-filter'),
+                            this.getScopedStateId('custom-filter-button')
+                        ],
                         filterChildren: true,
                         modelNames: this.modelNames,
                         inlineFilterPanelConfig: {

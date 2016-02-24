@@ -82,6 +82,10 @@
                     inlineFilterButtonConfig: {
                         stateful: true,
                         stateId: context.getScopedStateId('portfolio-items-inline-filter'),
+                        legacyStateIds: [
+                            this.getScopedStateId('owner-filter'),
+                            this.getScopedStateId('custom-filter-button')
+                        ],
                         filterChildren: true,
                         modelNames: this.modelNames,
                         inlineFilterPanelConfig: {

@@ -108,6 +108,10 @@
                     inlineFilterButtonConfig: {
                         stateful: true,
                         stateId: context.getScopedStateId('release-planning-inline-filter'),
+                        legacyStateIds: [
+                            context.getScopedStateId('release-planning-owner-filter'),
+                            context.getScopedStateId('release-planning-custom-filter-button')
+                        ],
                         filterChildren: false,
                         modelNames: this._getModelNames(),
                         inlineFilterPanelConfig: {
