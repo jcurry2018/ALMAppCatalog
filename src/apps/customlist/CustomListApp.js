@@ -24,6 +24,12 @@
         allowExpansionStateToBeSaved: false,
         isEditable: true,
 
+        config: {
+            defaultSettings: {
+                showControls: true
+            }
+        },
+
         initComponent: function () {
             this.appName = 'CustomList-' + this.getAppId();
             this.callParent(arguments);

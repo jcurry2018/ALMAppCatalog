@@ -12,6 +12,8 @@
 
         appName: 'Tip of the Day',
 
+        projectScopeable: false,
+
         cls: 'tip-of-the-day-app',
 
         launch: function() {

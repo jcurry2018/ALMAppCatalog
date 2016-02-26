@@ -22,6 +22,8 @@
 			'Rally.util.Help'
 		],
 		autoScroll: false,
+		projectScopeable: false,
+
 		initComponent: function() {
 			this.callParent(arguments);
 			this.add([
@@ -35,10 +37,9 @@
 			]);
 		},
 
-		showSettings: function() {
-			// this feels like a hack
-			this.owner.defaultSettings = this.getDefaultSettings();
-			this.owner.showSettings();
+		triggerSettingsMode: function() {
+			this.defaultSettings = this.getDefaultSettings();
+			this.fireEvent('settingsneeded', this);
 		},
 
 		getSettingsFields: function () {
@@ -85,8 +86,12 @@
 			this.down("#mrcontainer").el.dom.innerHTML = ifr;
 		},
 
-		_chartTypeFromSlug: function(slug) {
-			return slug.substring(slug.lastIndexOf('/') + 1);
+		_getChartType: function() {
+			if(!this.getContext().isFeatureEnabled('F6971_REACT_DASHBOARD_PANELS')) {
+				return this.appContainer.slug.split('/').pop();
+			} else {
+				return this.chartType;
+			}
 		},
 
 		_getQuesoUrl: function() {
@@ -140,10 +145,6 @@
 			});
 		},
 
-		_slugValue: function() {
-			return this.appContainer.slug;
-		},
-
 		/**
 		 * Conditionally constructs the help component in the header.
 		 */
@@ -166,10 +167,8 @@
 			// still make use of toggles.?
 			var iframe = this.down('#mrcontainer').el.dom.firstChild;
 
-			var chartToLoad = this._chartTypeFromSlug(this.appContainer.slug);
-
 			this.almBridge = Ext.create('Rally.apps.chartbuilder.EaselAlmBridge', {
-				chartType : chartToLoad,
+				chartType : this._getChartType(),
 				app: this
 			});
 

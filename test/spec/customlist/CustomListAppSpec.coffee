@@ -80,6 +80,9 @@ describe 'Rally.apps.customlist.CustomListApp', ->
       it 'should get the query from the ext2 settings', ->
         expect(@artifactRequest.lastCall.args[0].params.query).toBe '(Name CONTAINS "a")'
 
+      it 'should show controls by default', ->
+        expect(@app.getSetting('showControls')).toBe true
+
     describe 'when ext2 settings and ext4 settings exist', ->
       beforeEach ->
         @createApp(appContainer: @ext2AppScopedSettings, settings: @ext4AppScopedSettings)

@@ -4,6 +4,7 @@
     Ext.define("Rally.apps.charts.rpm.PortfolioChartAppBase", {
         extend: "Rally.app.App",
         settingsScope: "workspace",
+        projectScopeable: false,
 
         requires: [
             'Rally.apps.charts.rpm.ChartSettings',
