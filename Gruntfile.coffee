@@ -30,7 +30,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'default', ['build']
   grunt.registerTask 'sanity', ['check', 'jshint']
   grunt.registerTask 'css', ['less', 'copy:images', 'replace:imagepaths']
-  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'nexus:deps', 'shell:link-npm-modules', 'coffee', 'sanity', 'css', 'shell:buildapps', 'assemble', 'copy:apphtml']
+  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'shell:link-npm-modules', 'coffee', 'sanity', 'css', 'shell:buildapps', 'assemble', 'copy:apphtml']
 
   grunt.registerTask 'nexus:__createartifact__', 'Internal task to create and publish the nexus artifact', ['version', 'nexus:push:publish', 'clean:target']
   grunt.registerTask 'nexus:deploy', 'Deploys to nexus', ['build', 'nexus:__createartifact__']
@@ -47,7 +47,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'test:faster:firefox', 'Run jasmine test in parallel', ['express:inline', 'curl-dir:downloadfiles', 'parallel_spec_runner:appsp:firefox']
 
   grunt.registerTask 'test:fast:firefox', 'Just configs and runs the tests in firefox. Does not do any compiling. grunt && grunt watch should be running.', ['test:__buildjasmineconf__', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:firefox']
-  grunt.registerTask 'test:conf', 'Fetches the deps, compiles coffee and css files, runs jshint and builds the jasmine test config', ['nexus:deps', 'shell:link-npm-modules', 'clean:test', 'coffee', 'css', 'test:__buildjasmineconf__']
+  grunt.registerTask 'test:conf', 'Fetches the deps, compiles coffee and css files, runs jshint and builds the jasmine test config', ['shell:link-npm-modules', 'clean:test', 'coffee', 'css', 'test:__buildjasmineconf__']
   grunt.registerTask 'test:fastconf', 'Just builds the jasmine test config', ['test:__buildjasmineconf__']
   grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:apps']
   grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:chrome']
@@ -57,6 +57,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'test:server', "Starts a Jasmine server at localhost:#{serverPort}, specify a different port with --port=<port>", ['express:server', 'express-keepalive']
   grunt.registerTask 'test:ci', 'Runs the tests in both firefox and chrome', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'webdriver_jasmine_runner:chrome', 'webdriver_jasmine_runner:firefox']
   grunt.registerTask 'test:ci:faster', 'Runs the tests in both firefox and chrome', ['sanity', 'test:conf', 'express:inline', 'curl-dir:downloadfiles', 'parallel_spec_runner:appsp:chrome', 'parallel_spec_runner:appsp:firefox']
+  grunt.registerTask 'nexus:deps', 'place holder until almci is updated', []
 
   _ = grunt.util._
   spec = (grunt.option('spec') || grunt.option('jsspec') || '*').replace(/(Spec|Test)$/, '')
@@ -361,15 +362,6 @@ module.exports = (grunt) ->
       options:
         url: 'http://alm-build.f4tech.com:8080'
         repository: 'thirdparty'
-      deps:
-        options:
-          fetch: (->
-            js_dependencies = grunt.file.readJSON 'js_dependencies.json'
-            sdk_dependency = _.filter(js_dependencies, (dep) -> dep.id.indexOf('com.rallydev.js:appsdk-src') is 0)[0]
-            if sdk_dependency and process.env.APPSDK_SRC_VERSION
-              sdk_dependency.id = sdk_dependency.id.replace(/:[^:]+$/, ":#{process.env.APPSDK_SRC_VERSION}")
-            js_dependencies
-          )()
       push:
         files: [
           { expand: true, src: ['build/**/*'] }
@@ -484,4 +476,3 @@ module.exports = (grunt) ->
   grunt.event.on 'watch', (action, filepath) ->
     changedFiles[filepath] = action
     onChange()
-
