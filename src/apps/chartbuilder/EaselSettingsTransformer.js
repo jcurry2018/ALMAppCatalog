@@ -2,6 +2,9 @@
 	var Ext = window.Ext4 || window.Ext;
 
 	Ext.define("Rally.apps.chartbuilder.EaselSettingsTransformer", {
+		requires: [
+				'Rally.data.wsapi.Filter'
+		],
 
 		settingsFieldTransformers: {
 			'milestone-picker': function(easelSettingsField) {
@@ -12,7 +15,17 @@
 					label: 'Milestone',
 					autoExpand: true,
 					selectOnFocus: true,
-					allowNoEntry: true
+					allowNoEntry: true,
+					storeConfig: {
+						remoteFilter: true,
+						filters: [
+							Ext.create('Rally.data.wsapi.Filter', {
+								property: 'Projects.state',
+								operator: '=',
+								value: "Open"
+							})
+						]
+					}
 				};
 			},
 			'project-picker': function(easelSettingsField) {
