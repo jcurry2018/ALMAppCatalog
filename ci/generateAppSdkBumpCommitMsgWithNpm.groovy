@@ -10,13 +10,12 @@ def prevNpmVersion = prevNpmVersionMatcher[0][1]
 println "Previous NPM Version: ${prevNpmVersion}"
 
 def versionMap = [:]
-def p = "npm dist-tag ls rally-appsdk".execute()
-p.text.splitEachLine("\n",{
-  it.each { x ->
-    y = x.split(": ")
-    versionMap.put(y[1],y[0])
-  }
-})
+def tagFile = new hudson.FilePath(build.workspace, 'appsdk.tags').read()
+tagFile.eachLine() { line ->
+    def (x,y) = line.split(": ")
+    versionMap[y] = x
+}
+
 
 def prevSdkBuildNumberMatcher = versionMap[prevNpmVersion] =~ /-(\d+)-/
 def prevSdkBuildNumber = prevSdkBuildNumberMatcher[0][1] as int
