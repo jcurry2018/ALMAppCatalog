@@ -1,6 +1,6 @@
 #!/bin/bash -el
 
-npm install rally-appsdk@{$APPSDK_SRC_VERSION} --save --save-exact
+npm install rally-appsdk@${APPSDK_SRC_VERSION} --save --save-exact
 
 git add package.json
 git config user.name Hudson
