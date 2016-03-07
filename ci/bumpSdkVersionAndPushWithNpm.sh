@@ -10,7 +10,7 @@ git commit -F appsdk.bump --author="${JOB_NAME} <bogus@rallydev.com>"
 branch_name_only=`echo $GIT_BRANCH | sed -e "s/origin\///g"`
 
 if [ "$SHOULD_PUSH" == "true" ]; then
-    git push -f origin $branch_name_only
+    git push origin HEAD:$branch_name_only
 else
     echo "NOT COMMITING!!"
     git reset --hard
