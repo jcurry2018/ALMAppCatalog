@@ -1,8 +1,11 @@
 #!/bin/bash -el
 
+sed -i "s/appsdk-src:tgz:[^\"]*\",/appsdk-src:tgz:${APPSDK_SRC_VERSION}\",/" js_dependencies.json
 npm install rally-appsdk@${APPSDK_SRC_VERSION} --save --save-exact
 
+git add js_dependencies.json
 git add package.json
+
 git config user.name Hudson
 git config user.email hudson@rallydev.com
 git commit -F appsdk.bump --author="${JOB_NAME} <bogus@rallydev.com>"
