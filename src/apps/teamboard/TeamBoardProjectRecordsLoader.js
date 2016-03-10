@@ -9,29 +9,21 @@
         singleton: true,
 
         load: function(teamOids, callback, scope){
-            var config = {
+            return Ext.create('Rally.data.wsapi.Store', {
                 autoLoad: {
                     callback: callback,
                     scope: scope
                 },
-                model: Ext.identityFn('Project'),
-                sorters: ['Name']
-            };
-
-            if(teamOids){
-                config.filters = Rally.data.wsapi.Filter.or(Ext.Array.map(teamOids.toString().split(','), function(teamOid) {
+                filters: Rally.data.wsapi.Filter.or(Ext.Array.map(teamOids ? teamOids.toString().split(',') : [Rally.environment.getContext().getProject().ObjectID], function(teamOid) {
                     return {
                         property: 'ObjectID',
                         operator: '=',
                         value: teamOid
                     };
-                }));
-            }else{
-                config.pageSize = 10;
-            }
-
-            return Ext.create('Rally.data.wsapi.Store', config);
+                })),
+                model: Ext.identityFn('Project'),
+                sorters: ['Name']
+            });
         }
     });
-
 })();
