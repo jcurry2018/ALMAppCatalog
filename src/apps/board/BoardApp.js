@@ -19,6 +19,7 @@
             'Rally.clientmetrics.ClientMetricsRecordable'
         ],
 
+        helpId: 287,
         cls: 'customboard',
         autoScroll: false,
         layout: 'fit',

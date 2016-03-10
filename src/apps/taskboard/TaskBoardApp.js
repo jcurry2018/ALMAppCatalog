@@ -24,7 +24,7 @@
         scopeType: 'iteration',
         supportsUnscheduled: false,
         autoScroll: false,
-
+        helpId: 286,
         config: {
             defaultSettings: {
                 hideAcceptedWork: false

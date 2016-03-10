@@ -10,6 +10,7 @@
         plugins: [{
             ptype: 'rallyappprinting'
         }],
+        helpId: 242,
         componentCls: 'printcards',
         scopeType: 'iteration',
         autoScroll: false,

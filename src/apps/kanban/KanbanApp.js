@@ -25,6 +25,7 @@
         cls: 'kanban',
         alias: 'widget.kanbanapp',
         appName: 'Kanban',
+        helpId: 238,
 
         settingsScope: 'project',
         autoScroll: false,

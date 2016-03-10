@@ -43,7 +43,7 @@
         ],
         componentCls: 'iterationtrackingboard',
         alias: 'widget.rallyiterationtrackingboard',
-
+        helpId: 270,
         settingsScope: 'project',
         userScopedSettings: true,
         scopeType: 'iteration',

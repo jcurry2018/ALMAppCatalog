@@ -12,6 +12,7 @@
         plugins: [{
             ptype: 'rallyappprinting'
         }],
+        helpId: 247,
         scopeType: 'release',
         supportsUnscheduled: false,
         releaseInfoData: {},

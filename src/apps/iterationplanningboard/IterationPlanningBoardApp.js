@@ -11,7 +11,7 @@
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
         modelNames: ['User Story', 'Defect'],
-
+        helpId: 272,
         config: {
             defaultSettings: {
                 cardFields: 'Parent,Tasks,Defects,Discussion,PlanEstimate'
