@@ -13,6 +13,10 @@
     margin-top: 2px;
 }
 
+.team-board-app .rui-card .rui-card-content {
+    overflow: visible;
+}
+
 .team-board-app .rui-card .rui-card-content .card-header {
     margin-bottom: 3px;
     margin-left: 2px;
