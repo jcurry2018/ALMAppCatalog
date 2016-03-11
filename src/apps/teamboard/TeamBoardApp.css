@@ -3,6 +3,10 @@
     padding: 5px;
 }
 
+.team-board-app .cardboard .column-container .column-header .team-board-iteration-section .rally-iteration-combobox {
+    margin: auto;
+}
+
 .team-board-app .cardboard .column-container .column-header .team-board-iteration-section .wip-container {
     font-size: 14px;
     text-align: left;
