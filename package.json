@@ -1,6 +1,6 @@
 {
   "name": "rally-app-catalog",
-  "version": "0.1.369",
+  "version": "0.1.370",
   "description": "The Rally App Catalog contains apps that extend and customize your Rally subscription.",
   "scripts": {
     "test": "grunt test",
