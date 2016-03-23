@@ -362,6 +362,16 @@
             }
         },
 
+        _hasViewSelected: function() {
+            var sharedViewConfig = this.getSharedViewConfig().sharedViewConfig;
+            if (sharedViewConfig && sharedViewConfig.stateId) {
+                var value = (Ext.state.Manager.get(sharedViewConfig.stateId) || {}).value;
+
+                return !_.isEmpty(value);
+            }
+            return false;
+        },
+
         _onBeforeGridStateRestore: function (grid, state) {
             if (!state) {
                 return;
@@ -371,21 +381,26 @@
                 var appScopedColumnNames = this._getValidUuids(grid, this.getColumnCfgs());
                 var userScopedColumnNames = this._getValidUuids(grid, state.columns);
 
-                // Get the columns that are present in the app scope and not in the user scope
-                var differingColumns = _.difference(appScopedColumnNames, userScopedColumnNames);
+                if (this._hasViewSelected()) {
+                    state.columns = userScopedColumnNames;
+                } else {
 
-                // If there are columns in the app scope that are not in the
-                // user scope, append them to the user scope to preserve
-                // user scope column order
-                if(differingColumns.length > 0) {
-                    state.columns = state.columns.concat(differingColumns);
+                    // Get the columns that are present in the app scope and not in the user scope
+                    var differingColumns = _.difference(appScopedColumnNames, userScopedColumnNames);
+
+                    // If there are columns in the app scope that are not in the
+                    // user scope, append them to the user scope to preserve
+                    // user scope column order
+                    if (differingColumns.length > 0) {
+                        state.columns = state.columns.concat(differingColumns);
+                    }
+
+                    // Filter out any columns that are in the user scope that are not in the
+                    // app scope
+                    state.columns = _.filter(state.columns, function (column) {
+                        return _.contains(appScopedColumnNames, _.isObject(column) ? column.dataIndex : column);
+                    }, this);
                 }
-
-                // Filter out any columns that are in the user scope that are not in the
-                // app scope
-                state.columns = _.filter(state.columns, function (column) {
-                    return _.contains(appScopedColumnNames, _.isObject(column) ? column.dataIndex : column);
-                }, this);
             }
 
             if (state.sorters) {

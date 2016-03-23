@@ -349,6 +349,12 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         _.find gridBoard.plugins, (plugin) ->
           plugin.ptype == filterptype
 
+    beforeEach ->
+      Ext.state.Manager.getProvider().get.restore();
+      @stub Ext.state.Manager.getProvider(), 'get', (id) =>
+        if id.split('::')[1] is 'customlist-grid' then return { columns: ['FirstName']}
+        if id.split('::')[1] is 'custom-list-shared-view' then return { value: "/preference/1234" }
+
     it 'should not have shared view plugin if the toggle is off', ->
       @createApp(settings: { type: 'user' }).then =>
         expect(@getPlugin()).not.toBeDefined()
@@ -368,6 +374,11 @@ describe 'Rally.apps.customlist.CustomListApp', ->
         @app.gridboard.fireEvent 'viewchange'
         expect(loadSpy).toHaveBeenCalledOnce()
         expect(@app.down('#gridBoard')).toBeDefined()
+
+    it 'uses current view when selected', ->
+      @stubFeatureToggle ['F8943_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_MANY_PAGES'], true
+      @createApp(settings: { type: 'user' }).then =>
+        expect(_.compact(@getGridColumnNames())).toEqual(['FirstName'])
 
   describe '#clearFiltersAndSharedViews', ->
     describe 'F8943_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_MANY_PAGES toggled off', ->
