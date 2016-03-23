@@ -6,6 +6,8 @@ if [ ! -z "$APPSDK_SRC_VERSION" ]; then
     npm install rally-appsdk@${APPSDK_SRC_VERSION} --save --save-exact
 fi
 
+grunt build
+
 # grunt clean nexus:deploy
 # 1) ^ this goes away
 # 2) add the SHORT_JOB_NAME to the job
