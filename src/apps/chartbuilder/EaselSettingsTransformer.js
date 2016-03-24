@@ -19,11 +19,10 @@
 					storeConfig: {
 						remoteFilter: true,
 						filters: [
-							Ext.create('Rally.data.wsapi.Filter', {
-								property: 'Projects.state',
-								operator: '=',
-								value: "Open"
-							})
+							Rally.data.wsapi.Filter.or([
+									{ property: 'TargetProject', operator: '=', value: null },
+									{ property: 'Projects.state', operator: '=', value: 'Open' }
+							])
 						]
 					}
 				};

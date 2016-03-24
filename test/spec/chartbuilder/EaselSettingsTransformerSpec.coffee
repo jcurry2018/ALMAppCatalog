@@ -17,10 +17,7 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 			filter: @stub()
 		]
 		@xformer = @createXformer()
-		@stub(Ext, 'create').withArgs('Rally.data.wsapi.Filter').returns(@filter);
-
-	afterEach ->
-		Ext.create.restore()
+		@stub(Rally.data.wsapi.Filter, 'or').returns(@filter)
 
 	it 'properly handles an empty settings fields list', ->
 		settingsFields = []
