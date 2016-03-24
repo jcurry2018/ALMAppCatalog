@@ -1621,10 +1621,20 @@ function initChartTypeButtons() {
     }
 }
 
+function setDeprecationNoticeVisibility() {
+  var showNotice = window.parent.Rally.environment.getContext().context.featureToggles.isEnabled('PROGRAM_MODE_APP_DEPRECATION_NOTICE');
+
+  if (!showNotice) {
+    var notice = document.getElementById('deprecation-notice');
+    notice.style.display = 'none';
+  }
+}
+
 function initPage() {
     BATCH_TOOLKIT = new RALLY.Mashup.BatchToolkit('__WORKSPACE_OID__', '__PROJECT_OID__',
             '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
 
+    setDeprecationNoticeVisibility();
     runScheduleStateQuery();
     RALLY.Mashup.Utilities.showHelpIcon(165);
     RALLY.Mashup.Utilities.showPrintButton();
@@ -1640,6 +1650,7 @@ function initPage() {
 <style type="text/css">
     body {
         background: white;
+        margin: 0;
     }
 
     .lbl {
@@ -1655,6 +1666,29 @@ function initPage() {
     .AxisTickLabel {
         font-size: 10px;
         font-style: normal;
+    }
+
+    #app-container {
+      margin: 8px;
+    }
+
+    #deprecation-notice {
+      background-color: #F8B528;
+      font-size: 14px;
+      line-height: 20px;
+      margin-bottom: 8px;
+      padding: 10px;
+    }
+
+    #deprecation-notice a {
+      color: white;
+      font-weight: bold;
+    }
+
+    #deprecation-notice #warning-icon {
+      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAQAAACRZI9xAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAADdYAAA3WAZBveZwAAAAHdElNRQfgAxkKKhIhZOtRAAAA+0lEQVQoz23RMU5CURAF0PPBhAWQUNGwA+nVioYYenoTK0lYiBWdboCCBVhRaNyAUrAAaiKNMeF//ljwQEDuZJK5b5J7Z97whwwNdxqpPoMKxsI41f9QRUfIhU7iJ8jwJnwLr+esqugLRcr+qU6Gmpkw8mAkzNSOlS4wEEpttIUwSO97jbqFEK5xI4SF+rZXSZ5DTWvUUq41DXfzVNCySmPeopdWX2lt+1U8C7lSmHsxF0q58LTTaSuEUilMPZruWaG9HXdy8B+9ZLTjE+iKFIVwL3Of6hBKXT6FXKFQ2Pjx5ccm8Vz4YCmUe6XjKIVl5tKVzcEx4uiAVe+/A7qCngmy55UAAAAldEVYdGRhdGU6Y3JlYXRlADIwMTYtMDMtMjVUMTA6NDI6MTgtMDQ6MDCK5rZNAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE2LTAzLTI1VDEwOjQyOjE4LTA0OjAw+7sO8QAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAASUVORK5CYII=');
+      background-repeat: no-repeat;
+      background-position-y: 2px;
     }
 </style>
 <style type="text/css">
@@ -1719,131 +1753,146 @@ function initPage() {
 </style>
 </head>
 <body>
-<div style="float:right" id="help"></div>
-<div style="float:left" id="title" class="titlebar">Super Customizable Program Chart</div>
-<table>
+<div id="deprecation-notice">
+  <table>
     <tr>
-        <td style="text-align: left; width: 99%;">
-        <td style="text-align: right; width: 1%;">
-            <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();" onmouseout="hidecbMenu('buttons',event);"
-                 style="vertical-align: middle;"
-                 src="/slm/images/menu_actions.gif"/>
-
-            <div style="position:relative;top:5px" align="left">
-                <div id="buttons" class="do-menu" style="left:0px;"
-                     onmouseover="document.body.style.cursor='pointer';"
-                     onmouseout="document.body.style.cursor='default';hidecbMenu('buttons',event);">
-                    <a id="print" onclick="RALLY.Mashup.Utilities.printPage()">Print...</a>
-                </div>
-            </div>
-        </td>
+      <td id="warning-icon" width="20"></td>
+      <td>
+        <b>DEPRECATION NOTICE </b>
+        <span>Super Customizable Program Chart will be removed from CA Agile Central on May 1, 2016. If you use the app, try </span>
+        <a href="https://help.rallydev.com/getting-started-rally-portfolio-manager" target="_blank">CA Agile Central Portfolio Manager</a>
+        <span> instead.</span>
+      </td>
     </tr>
-</table>
-<div style="clear:both"></div>
+  </table>
+</div>
+<div id="app-container">
+  <div style="float:right" id="help"></div>
+  <div style="float:left" id="title" class="titlebar">Super Customizable Program Chart</div>
+  <table>
+      <tr>
+          <td style="text-align: left; width: 99%;">
+          <td style="text-align: right; width: 1%;">
+              <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();" onmouseout="hidecbMenu('buttons',event);"
+                   style="vertical-align: middle;"
+                   src="/slm/images/menu_actions.gif"/>
 
-<table>
-    <tr>
-        <td id="timeboxLabel" class="lbl">Program Name</td>
-        <td><select id="timeboxList"></select></td>
-    </tr>
-</table>
+              <div style="position:relative;top:5px" align="left">
+                  <div id="buttons" class="do-menu" style="left:0px;"
+                       onmouseover="document.body.style.cursor='pointer';"
+                       onmouseout="document.body.style.cursor='default';hidecbMenu('buttons',event);">
+                      <a id="print" onclick="RALLY.Mashup.Utilities.printPage()">Print...</a>
+                  </div>
+              </div>
+          </td>
+      </tr>
+  </table>
+  <div style="clear:both"></div>
 
-<table cellspacing="10" border="1">
-    <tr>
-        <td valign="top">
+  <table>
+      <tr>
+          <td id="timeboxLabel" class="lbl">Program Name</td>
+          <td><select id="timeboxList"></select></td>
+      </tr>
+  </table>
 
-            <fieldset>
-                <legend>Chart Type</legend>
-                <table>
-                    <tr>
-                        <th width=80 align="left">Stacked Bar</th>
-                        <th width=80 align="left">Bar</th>
-                    </tr>
-                    <tr>
-                        <td width=80>
-                            <span id="span0" class="stackedbar"/>
-                            <input type="radio" class="nodisplay" id="input0" name="ctGroup" checked="checked">
-                        </td>
-                        <td width=80>
-                            <span id="span1" class="bar"/>
-                            <input type="radio" class="nodisplay" id="input1" name="ctGroup">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th width=80 align="left">Line</th>
-                        <th width=80 align="left">Area</th>
-                        <th width=80 align="left">Burndown</th>
-                    </tr>
-                    <tr>
-                        <td width=80>
-                            <span id="span2" class="line"/>
-                            <input type="radio" class="nodisplay" id="input2" name="ctGroup">
-                        </td>
-                        <td width=80>
-                            <span id="span3" class="area"/>
-                            <input type="radio" class="nodisplay" id="input3" name="ctGroup">
-                        </td>
-                        <td width=80>
-                            <span id="span4" class="burndown"/>
-                            <input type="radio" class="nodisplay" id="input4" name="ctGroup">
-                        </td>
-                    </tr>
-                </table>
-            </fieldset>
+  <table cellspacing="10" border="1">
+      <tr>
+          <td valign="top">
 
-            <fieldset>
-                <legend>Data Options</legend>
+              <fieldset>
+                  <legend>Chart Type</legend>
+                  <table>
+                      <tr>
+                          <th width=80 align="left">Stacked Bar</th>
+                          <th width=80 align="left">Bar</th>
+                      </tr>
+                      <tr>
+                          <td width=80>
+                              <span id="span0" class="stackedbar"/>
+                              <input type="radio" class="nodisplay" id="input0" name="ctGroup" checked="checked">
+                          </td>
+                          <td width=80>
+                              <span id="span1" class="bar"/>
+                              <input type="radio" class="nodisplay" id="input1" name="ctGroup">
+                          </td>
+                      </tr>
+                      <tr>
+                          <th width=80 align="left">Line</th>
+                          <th width=80 align="left">Area</th>
+                          <th width=80 align="left">Burndown</th>
+                      </tr>
+                      <tr>
+                          <td width=80>
+                              <span id="span2" class="line"/>
+                              <input type="radio" class="nodisplay" id="input2" name="ctGroup">
+                          </td>
+                          <td width=80>
+                              <span id="span3" class="area"/>
+                              <input type="radio" class="nodisplay" id="input3" name="ctGroup">
+                          </td>
+                          <td width=80>
+                              <span id="span4" class="burndown"/>
+                              <input type="radio" class="nodisplay" id="input4" name="ctGroup">
+                          </td>
+                      </tr>
+                  </table>
+              </fieldset>
 
-                <div id="datasetPanel">
-                </div>
+              <fieldset>
+                  <legend>Data Options</legend>
 
-                <p>
-                <hr>
-                <div id="idealPanel">
-                </div>
-                </p>
+                  <div id="datasetPanel">
+                  </div>
 
-                <p>
-                <hr>
-                Units
-                <input type="radio" name="unit_type_group" id="rbStory" value="story" checked="checked"/>
-                <label for="rbStory">Story</label>
+                  <p>
+                  <hr>
+                  <div id="idealPanel">
+                  </div>
+                  </p>
 
-                <input type="radio" name="unit_type_group" id="rbTask" value="task"/>
-                <label for="rbTask">Task</label>
+                  <p>
+                  <hr>
+                  Units
+                  <input type="radio" name="unit_type_group" id="rbStory" value="story" checked="checked"/>
+                  <label for="rbStory">Story</label>
 
-                <input type="radio" name="unit_type_group" id="rbToDo" value="todo"/>
-                <label for="rbToDo">To Do</label>
-                </p>
+                  <input type="radio" name="unit_type_group" id="rbTask" value="task"/>
+                  <label for="rbTask">Task</label>
 
-                <p>
-                <hr>
-                <input type="checkbox" name="cbTable" id="cbTable"/>
-                <label for="cbTable">Show Data Table</label>
-                <br/>
-                </p>
+                  <input type="radio" name="unit_type_group" id="rbToDo" value="todo"/>
+                  <label for="rbToDo">To Do</label>
+                  </p>
 
-            </fieldset>
+                  <p>
+                  <hr>
+                  <input type="checkbox" name="cbTable" id="cbTable"/>
+                  <label for="cbTable">Show Data Table</label>
+                  <br/>
+                  </p>
 
-        </td>
-        <td>
-            <table>
-                <tr>
-                    <td class="lbl">
-                        <div id="info_msg"></div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div id="chart_div" style="width:600px; height:400px;"></div>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-<br/>
+              </fieldset>
 
-<div id="table_div"></div>
+          </td>
+          <td>
+              <table>
+                  <tr>
+                      <td class="lbl">
+                          <div id="info_msg"></div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <div id="chart_div" style="width:600px; height:400px;"></div>
+                      </td>
+                  </tr>
+              </table>
+          </td>
+      </tr>
+  </table>
+  <br/>
+
+  <div id="table_div"></div>
+</div>
 </body>
 </html>
