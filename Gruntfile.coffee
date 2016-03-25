@@ -349,6 +349,9 @@ module.exports = (grunt) ->
         tasks: ['jshint:apps']
         options:
           spawn: false
+      legacyApps:
+        files: 'src/legacy/**/*'
+        tasks: ['copy:apphtml']
       tasks:
         files: 'grunt/tasks/**/*.js'
         tasks: ['jshint:tasks']
