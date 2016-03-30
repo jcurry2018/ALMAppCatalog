@@ -6,7 +6,7 @@ A collection of extensible apps from Rally's [App Catalog](https://help.rallydev
 
 ## License
 
-Copyright (c) Rally Software Development Corp. 2015 Distributed under the MIT License.
+Copyright (c) 2012-2016 CA, Inc.  Distributed under the MIT License.
 
 ## Contents
 
