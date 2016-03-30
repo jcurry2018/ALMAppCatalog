@@ -14,7 +14,7 @@
 		],
 		"file_exclude_patterns": [
 			"*.iml",
-			"*.sublime-*",
+			"*.sublime-*"
 		]
 	}]
 }

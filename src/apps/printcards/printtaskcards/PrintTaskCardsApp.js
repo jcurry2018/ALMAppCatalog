@@ -10,6 +10,7 @@
         plugins: [{
             ptype: 'rallyappprinting'
         }],
+        helpId: 242,
         componentCls: 'printcards',
         scopeType: 'iteration',
         autoScroll: false,
@@ -29,6 +30,7 @@
 
         _loadTasks: function(scope) {
             Ext.create('Rally.data.wsapi.Store', {
+                context: this.getContext().getDataContext(),
                 model: Ext.identityFn('Task'),
                 autoLoad: true,
                 fetch: ['FormattedID', 'Name', 'Owner', 'Description', 'Estimate', 'WorkProduct'],

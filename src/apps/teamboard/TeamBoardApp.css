@@ -3,6 +3,10 @@
     padding: 5px;
 }
 
+.team-board-app .cardboard .column-container .column-header .team-board-iteration-section .rally-iteration-combobox {
+    margin: auto;
+}
+
 .team-board-app .cardboard .column-container .column-header .team-board-iteration-section .wip-container {
     font-size: 14px;
     text-align: left;
@@ -11,6 +15,10 @@
 .team-board-app .cardboard .column-container .column-header .wip-container .wip-item {
     margin-bottom: 2px;
     margin-top: 2px;
+}
+
+.team-board-app .rui-card .rui-card-content {
+    overflow: visible;
 }
 
 .team-board-app .rui-card .rui-card-content .card-header {
@@ -34,6 +42,12 @@
 
 .team-board-app .rui-card .rui-card-content .status-content {
     border-top: 1px dotted #CCC;
+    display: none;
+}
+
+.team-board-app .rui-card:hover .rui-card-content .status-content,
+.team-board-app .rui-card.team-board-associated-popover-shown .rui-card-content .status-content {
+    display: block;
 }
 
 .team-board-app .rui-card .rui-card-content .associated-artifacts-icon {

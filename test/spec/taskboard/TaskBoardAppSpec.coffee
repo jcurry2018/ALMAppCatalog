@@ -74,7 +74,7 @@ describe 'Rally.apps.taskboard.TaskBoardApp', ->
           expect(plugin).toBeDefined()
           expect(plugin.headerPosition).toBe 'left'
           expect(plugin.modelNames).toEqual ['Task']
-          expect(plugin.boardFieldDefaults).toEqual ['Estimate', 'ToDo']
+          expect(@app.down('rallycardboard').columnConfig.fields).toEqual ['Estimate', 'ToDo']
           expect(plugin.boardFieldBlackList).toContain 'State'
           expect(plugin.boardFieldBlackList).toContain 'TaskIndex'
 

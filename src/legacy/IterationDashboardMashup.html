@@ -24,6 +24,8 @@
 
 <!-- Switch to go from internal to external app: -->
 <script type="text/javascript" src="/slm/js-lib/dojo/rally-1.3.1/dojo/dojo.js"></script>
+<script type="text/javascript" src="/apps/2.0/sdk.js"></script>
+
 <!-- // <script src="https://ajax.googleapis.com/ajax/libs/dojo/1.3.1/dojo/dojo.xd.js"></script> -->
 
 <script type="text/javascript">
@@ -43,6 +45,7 @@
  */
 
 var RALLY = RALLY || {};
+var timeboxCountConfig;
 
 RALLY.Mashup = RALLY.Mashup || {};
 
@@ -1017,7 +1020,7 @@ RALLY.Mashup.SuperCustomizableChart = function(batchToolkit, timeboxOidList, tim
             var xhrFn = dojo.xhrGet;
 
             xhrFn({
-                url: "/slm/charts/itsc.sp?sid=&iterationOid=" + iterationOid + "&cpoid=" + projectOid,
+                url: "/slm/charts/itsc.sp?sid=&iterationOid=" + iterationOid + "&cpoid=" + projectOid + '&projectScopeUp=__PROJECT_SCOPING_UP__&projectScopeDown=__PROJECT_SCOPING_DOWN__',
                 handleAs: "xml",
                 load: function(xmlDoc) {
                     _createBurndownChartDatafromXML(xmlDoc);
@@ -1199,9 +1202,10 @@ function calcWorkDays(start_date, end_date) {
 }
 
 function calculateHealth(startDate, endDate, states, values) {
-
-    //TODO: Do we need to remove special characters from states or has that already been done?
-
+    var start = new Date(DROPDOWN.currentIteration.StartDate);
+    var end = new Date(DROPDOWN.currentIteration.EndDate);
+    
+    var counts = Rally.util.Timebox.getCounts(start, end, timeboxCountConfig.workDays, timeboxCountConfig.tzOffset);
     // color and text for status
     var statusNames = ['Good', 'At Risk', 'Critical', 'Not Started', 'Completed'];
     var statusIndex = 0;
@@ -1230,10 +1234,10 @@ function calculateHealth(startDate, endDate, states, values) {
     var percentWorkComplete = Math.round((acceptedWork / totalWork) * 100);
 
     // get percentTimeboxComplete
-    var workDaysInTimebox = calcWorkDays(timeboxStartDate, timeboxEndDate);
+    var workDaysInTimebox = counts.workdays;
     //don't include today in workDaysCompleted calculation
-    var workDaysCompleted = calcWorkDays(timeboxStartDate, currentDate) - 1;
-    var workDaysRemaining = calcWorkDays(currentDate, timeboxEndDate);
+    var workDaysCompleted = Math.max(counts.workdays - counts.remaining - 1, 0);
+    var workDaysRemaining = counts.remaining;
     var percentTimeboxComplete = Math.round((workDaysCompleted / workDaysInTimebox) * 100);
 
     // work points to release days ratio
@@ -2509,6 +2513,11 @@ RALLY.Mashup.Dropdown = function(toolkit, type, selElem, labelElem, cookiename, 
     function buildDropdownSelection(results) {
         timeboxList = buildTimeboxList(results.timeboxes);
 
+        timeboxCountConfig = {
+            tzOffset: results.schemas.workspace.properties.CreationDate.format.tzOffset / 60,
+            workDays: results.workspace[0].WorkspaceConfiguration.WorkDays
+        };
+
         if (timeboxList.length === 0) {
             selectElement.style.visibility = "hidden";
             labelElement.innerHTML = "No " + dropdownType + " found for " +
@@ -2560,12 +2569,19 @@ RALLY.Mashup.Dropdown = function(toolkit, type, selElem, labelElem, cookiename, 
         configureQuery(queryObject[0]);
 
         if (type === RALLY.Mashup.PROGRAM) {
-            queryObject[1] = {
+            queryObject[queryObject.length] = {
                 key: 'releases',
                 placeholder: "${timeboxes.releases?fetch=ObjectID," +
                         startDateName + "," + endDateName + "&project=null}"
             };
         }
+
+        queryObject[queryObject.length] = {
+            key: 'workspace',
+            type: 'workspace',
+            fetch: 'WorkspaceConfiguration,WorkDays',
+            includeSchema: true
+        };
 
 
         batchAPI.findAll(queryObject, buildDropdownSelection);
@@ -2610,7 +2626,16 @@ RALLY.Mashup.Dropdown = function(toolkit, type, selElem, labelElem, cookiename, 
 
     this.invoke = function(callback_function) {
         addEventListener();
-        callback = callback_function;
+        callback = function(){
+            Ext.Ajax.request({
+                url:'/slm/webservice/v2.x/iteration/' + DROPDOWN.getSelectedOids().split(',')[0], 
+                success:function(response){ 
+                    DROPDOWN.currentIteration = JSON.parse(response.responseText).Iteration;
+                    callback_function();
+                }
+            });
+            
+        };
         runDropdownQuery();
     };
 

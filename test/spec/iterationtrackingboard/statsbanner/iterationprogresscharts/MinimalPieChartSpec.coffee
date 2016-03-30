@@ -2,8 +2,7 @@ Ext = window.Ext4 || window.Ext
 
 Ext.require [
   'Rally.app.TimeboxScope',
-  'Rally.data.wsapi.artifact.Store',
-  'Rally.apps.iterationtrackingboard.statsbanner.IterationProgress'
+  'Rally.data.wsapi.artifact.Store'
 ]
 
 describe 'Rally.apps.iterationtrackingboard.statsbanner.iterationprogresscharts.MinimalPieChart', ->

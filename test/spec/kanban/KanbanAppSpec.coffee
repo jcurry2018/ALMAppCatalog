@@ -169,7 +169,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       columns = @cardboard.getColumns()
       expect(columns.length).toBe 2
       _.each columns, (column) =>
-        expect(column.fields).toEqual @getPlugin('rallygridboardfieldpicker').boardFieldDefaults
+        expect(column.fields).toEqual @app.getSetting('cardFields').split(',')
         expect(column.cardConfig.fields).toBeUndefined()
 
   it 'should contain menu options', ->
@@ -357,7 +357,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
           expect(plugin).toBeDefined()
           expect(plugin.headerPosition).toBe 'left'
           expect(plugin.modelNames).toEqual ['User Story', 'Defect']
-          expect(plugin.boardFieldDefaults).toEqual @app.getSetting('cardFields').split(',')
+          expect(@cardboard.columnConfig.fields).toEqual @app.getSetting('cardFields').split(',')
 
   helpers
     createApp: (settings = {}, options = {}, context = {}) ->

@@ -148,9 +148,10 @@ StoryBoard = function () {
         }
 
         var addWithDetails = function () {
+            var type = dojo.query('#addNewUserStoryAddNewDropdownInnerDiv')[0].value.toLowerCase().replace(' ', '');
             var name = dojo.query('#addNewUserStoryAddNewNameInnerDiv')[0].value;
             var iterationRef = '/iteration/' + dropdown.getSelectedItem().ObjectID;
-            window.parent.Rally.nav.Manager.create('userstory', {Name: name, Iteration: iterationRef});
+            window.parent.Rally.nav.Manager.create(type, {defaultName: name, Iteration: iterationRef});
             return false;
         };
 

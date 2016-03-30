@@ -2054,6 +2054,7 @@ RALLY.Mashup.TimeboxHealth = function(batchToolkit, callback) {
             theFilter = buildTimeboxQueryString(config.timeboxType, config.timeboxStart, config.timeboxEnd, config.timeboxName);
 
             for (artifactCountIndex = 0; artifactCountIndex * 200 < maxCount; artifactCountIndex++) {
+                queryArr = [];
                 if (storyCount > artifactCountIndex * 200) {
                     queryArr.push({
                         key: storyCountKey,

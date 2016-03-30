@@ -4,7 +4,7 @@
     Ext.define("Rally.apps.charts.rpm.cfd.CumulativeFlowChartApp", {
         extend: "Rally.apps.charts.rpm.PortfolioChartAppBase",
         cls: "portfolio-cfd-app",
-        
+
         requires: [
             'Rally.ui.chart.Chart',
             'Rally.apps.charts.Colors',
@@ -33,6 +33,8 @@
                     "_TypeHierarchy": -51038,
                     "Children": null
                 },
+                removeUnauthorizedSnapshots: true,
+                compress: true,
                 fetch: ["ScheduleState", "PlanEstimate"],
                 hydrate: ["ScheduleState"],
                 sort: {

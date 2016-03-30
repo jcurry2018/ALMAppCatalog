@@ -1,0 +1,15 @@
+{
+   "name": "Milestone Cumulative Flow",
+   "className": "Rally.apps.chartbuilder.milestoneburn.MilestoneCfdApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "../EaselSettingsTransformer.js",
+      "../EaselAlmBridge.js",
+      "../ChartPanelApp.js",
+      "MilestoneCfdApp.js"
+   ],
+   "css": [
+      "../ChartPanelApp.less"
+   ]
+}

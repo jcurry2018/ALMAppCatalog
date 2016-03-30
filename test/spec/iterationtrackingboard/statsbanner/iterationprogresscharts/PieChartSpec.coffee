@@ -2,8 +2,7 @@ Ext = window.Ext4 || window.Ext
 
 Ext.require [
   'Rally.app.TimeboxScope',
-  'Rally.data.wsapi.artifact.Store',
-  'Rally.apps.iterationtrackingboard.statsbanner.IterationProgress'
+  'Rally.data.wsapi.artifact.Store'
 ]
 
 describe 'Rally.apps.iterationtrackingboard.statsbanner.iterationprogresscharts.PieChart', ->
@@ -126,3 +125,14 @@ describe 'Rally.apps.iterationtrackingboard.statsbanner.iterationprogresscharts.
         formatter = chartConfig.chartConfig.tooltip.formatter
         result = formatter.call(point: {})
         expect(result).toBeAString()
+
+  describe 'destroy', ->
+    it 'should reset chart pointer', ->
+      @createChart().then (chart) =>
+        @once(
+          condition: => chart.down('rallychart') && chart.down('rallychart').getChart()
+        ).then =>
+          resetSpy = @spy chart.down('rallychart').getChart().pointer, 'reset'
+          chart.destroy()
+          expect(resetSpy.callCount).toBe 1
+

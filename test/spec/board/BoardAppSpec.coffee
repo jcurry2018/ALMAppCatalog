@@ -11,8 +11,12 @@ describe 'Rally.apps.board.BoardApp', ->
       values: [ ScheduleState: 'In-Progress' ]
       createImmediateSubObjects: true
 
+    @ajax.whenQuerying('task').respondWithCount 1,
+      values: [ State: 'In-Progress' ]
+
     @ajax.whenQueryingAllowedValues('hierarchicalrequirement', 'ScheduleState').respondWith ['Defined', 'In-Progress', 'Completed', 'Accepted']
     @ajax.whenQueryingAllowedValues('defect', 'State').respondWith ['Submitted', 'Open', 'Fixed', 'Closed']
+    @ajax.whenQueryingAllowedValues('task', 'State').respondWith ['Submitted', 'Open', 'Fixed', 'Closed']
 
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'boardapp'
@@ -120,6 +124,31 @@ describe 'Rally.apps.board.BoardApp', ->
     @createApp().then =>
       expect(@app.down('rallygridboard').getHeight()).toBe @app.getHeight()
 
+  describe 'ranking', ->
+    it 'should not show for task type with showRows false', ->
+      @createApp(type: 'Task', showRows: false, groupByField: 'State').then =>
+        expect(@_getBoard().enableRanking).toBe false
+        expect(@_getBoard().enableCrossColumnRanking).toBe false
+        expect(@_getBoard().cardConfig.showRankMenuItems).toBe false
+
+    it 'should not show for task type with showRows but swimlane is not work product', ->
+      @createApp(type: 'Task', showRows: true, rowsField: 'Owner', groupByField: 'State').then =>
+        expect(@_getBoard().enableRanking).toBe false
+        expect(@_getBoard().enableCrossColumnRanking).toBe false
+        expect(@_getBoard().cardConfig.showRankMenuItems).toBe false
+
+    it 'should show for task type when swimlane is work product', ->
+      @createApp(type: 'Task', showRows: true, rowsField: 'WorkProduct', groupByField: 'State').then =>
+        expect(@_getBoard().enableRanking).toBe true
+        expect(@_getBoard().enableCrossColumnRanking).toBe true
+        expect(@_getBoard().cardConfig.showRankMenuItems).not.toBeDefined()
+
+    it 'should show for an allowed artifact type', ->
+      @createApp(type: 'Defect', groupByField: 'State').then =>
+        expect(@_getBoard().enableRanking).toBe true
+        expect(@_getBoard().enableCrossColumnRanking).toBe true
+        expect(@_getBoard().cardConfig.showRankMenuItems).not.toBeDefined()
+
   describe 'plugins', ->
 
     describe 'filtering', ->
@@ -143,7 +172,7 @@ describe 'Rally.apps.board.BoardApp', ->
           expect(plugin).toBeDefined()
           expect(plugin.headerPosition).toBe 'left'
           expect(plugin.modelNames).toEqual [@app.getSetting('type')]
-          expect(plugin.boardFieldDefaults).toEqual @app.getSetting('fields').split(',')
+          expect(@_getBoard().columnConfig.fields).toEqual @app.getSetting('fields').split(',')
 
   helpers
     createApp: (settings = {}, options = {}) ->

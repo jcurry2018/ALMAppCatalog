@@ -33,19 +33,10 @@
             };
         },
 
-        _getProjectPicker: function () {
-            return {
-                type: "project",
-                name: "project",
-                label: "Project"
-            };
-        },
-
         getFields: function () {
             return [
                 this._getStatePicker(),
-                this._getTimeFrame(),
-                this._getProjectPicker()
+                this._getTimeFrame()
             ];
         }
     });

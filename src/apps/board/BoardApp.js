@@ -19,6 +19,7 @@
             'Rally.clientmetrics.ClientMetricsRecordable'
         ],
 
+        helpId: 287,
         cls: 'customboard',
         autoScroll: false,
         layout: 'fit',
@@ -53,7 +54,13 @@
                     toggleState: 'board',
                     cardBoardConfig: this._getBoardConfig(),
                     plugins: [
-                        'rallygridboardaddnew',
+                        {
+                            ptype:'rallygridboardaddnew',
+                            addNewControlConfig: {
+                                stateful: true,
+                                stateId: context.getScopedStateId('board-add-new')
+                            }
+                        },
                         {
                             ptype: 'rallygridboardcustomfiltercontrol',
                             filterChildren: false,
@@ -73,9 +80,7 @@
                             ptype: 'rallygridboardfieldpicker',
                             headerPosition: 'left',
                             boardFieldBlackList: ['Successors', 'Predecessors', 'DisplayColor'],
-                            modelNames: modelNames,
-                            boardFieldDefaults: (this.getSetting('fields')
-                                && this.getSetting('fields').split(',')) || []
+                            modelNames: modelNames
                         }
                     ],
                     context: context,
@@ -117,6 +122,10 @@
                 plugins: [{ptype:'rallyfixedheadercardboard'}],
                 storeConfig: {
                     sorters: Rally.data.util.Sorter.sorters(this.getSetting('order'))
+                },
+                columnConfig: {
+                    fields: (this.getSetting('fields') &&
+                        this.getSetting('fields').split(',')) || []
                 }
             };
             if (this.getSetting('showRows')) {
@@ -127,11 +136,21 @@
                     }
                 });
             }
+            if (this._shouldDisableRanking()) {
+                boardConfig.enableRanking = false;
+                boardConfig.enableCrossColumnRanking = false;
+                boardConfig.cardConfig.showRankMenuItems = false;
+            }
             return boardConfig;
         },
 
         getSettingsFields: function() {
             return Rally.apps.board.Settings.getFields(this.getContext());
+        },
+
+        _shouldDisableRanking: function() {
+            return this.getSetting('type').toLowerCase() === 'task' && (!this.getSetting('showRows') || this.getSetting('showRows')
+                && this.getSetting('rowsField').toLowerCase() !== 'workproduct');
         },
 
         _addBoard: function() {
@@ -153,7 +172,7 @@
             if (this.getSetting('query')) {
                 queries.push(Rally.data.QueryFilter.fromQueryString(this.getSetting('query')));
             }
-            if (timeboxScope && this.model.hasField(Ext.String.capitalize(timeboxScope.getType()))) {
+            if (timeboxScope && timeboxScope.isApplicable(this.model)) {
                 queries.push(timeboxScope.getQueryFilter());
             }
 

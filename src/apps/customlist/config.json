@@ -1,0 +1,11 @@
+{
+   "name": "Custom List",
+   "className": "Rally.apps.customlist.CustomListApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "Settings.js",
+      "CustomListApp.js"
+   ],
+   "css": []
+}

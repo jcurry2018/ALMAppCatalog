@@ -28,7 +28,7 @@
             this.callParent(arguments);
 
             this.addEvents('iterationcomboready');
-            this.on('ready', this._addIterationCombo, this);
+            this.on('ready', this._addIterationCombo, this, { single: true });
         },
 
         assign: function(record){
@@ -85,6 +85,7 @@
                         ready: this._onIterationComboReady,
                         scope: this
                     },
+                    maxWidth: this.getMinWidth() - 10,
                     storeConfig: {
                         context: {
                             project: this.getValue(),

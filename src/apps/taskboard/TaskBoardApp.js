@@ -24,7 +24,7 @@
         scopeType: 'iteration',
         supportsUnscheduled: false,
         autoScroll: false,
-
+        helpId: 286,
         config: {
             defaultSettings: {
                 hideAcceptedWork: false
@@ -107,7 +107,22 @@
                 toggleState: 'board',
                 cardBoardConfig: this._getBoardConfig(),
                 plugins: [
-                    'rallygridboardaddnew',
+                    {
+                        ptype:'rallygridboardaddnew',
+                        addNewControlConfig: {
+                            recordTypes: ['Task', 'Defect', 'Defect Suite', 'Test Set', 'User Story'],
+                            additionalFields: [this._createWorkProductComboBox(rowRecords)],
+                            listeners: {
+                                recordtypechange: this._onAddNewRecordTypeChange,
+                                create: this._onAddNewCreate,
+                                scope: this
+                            },
+                            minWidth: 600,
+                            ignoredRequiredFields: ['Name', 'Project', 'WorkProduct', 'State', 'TaskIndex', 'ScheduleState'],
+                            stateful: true,
+                            stateId: context.getScopedStateId('taskboard-add-new')
+                        }
+                    },
                     {
                         ptype: 'rallygridboardcustomfiltercontrol',
                         filterChildren: false,
@@ -127,7 +142,6 @@
                         ptype: 'rallygridboardfieldpicker',
                         headerPosition: 'left',
                         modelNames: modelNames,
-                        boardFieldDefaults: ['Estimate', 'ToDo'],
                         boardFieldBlackList: ['State', 'TaskIndex']
                     }
                 ],
@@ -136,17 +150,6 @@
                 storeConfig: {
                     filters: this._getQueryFilters(false),
                     enableRankFieldParameterAutoMapping: false
-                },
-                addNewPluginConfig: {
-                    recordTypes: ['Task', 'Defect', 'Defect Suite', 'Test Set', 'User Story'],
-                    additionalFields: [this._createWorkProductComboBox(rowRecords)],
-                    listeners: {
-                        recordtypechange: this._onAddNewRecordTypeChange,
-                        create: this._onAddNewCreate,
-                        scope: this
-                    },
-                    minWidth: 600,
-                    ignoredRequiredFields: ['Name', 'Project', 'WorkProduct', 'State', 'TaskIndex', 'ScheduleState']
                 },
                 height: this._getAvailableBoardHeight(),
                 listeners: {
@@ -242,7 +245,10 @@
                     enableCrossRowDragging: false
                 },
                 margin: '10px 0 0 0',
-                plugins: [{ptype:'rallyfixedheadercardboard'}]
+                plugins: [{ptype:'rallyfixedheadercardboard'}],
+                columnConfig: {
+                    fields: ['Estimate', 'ToDo']
+                }
             };
         },
 

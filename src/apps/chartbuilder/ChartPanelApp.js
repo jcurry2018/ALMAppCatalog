@@ -6,41 +6,40 @@
 		extend: 'Rally.app.App',
 		componentCls: 'cbchart-app',
 		config: {
+			height:'100%',
+			width:'100%'
 		},
+		items: [{
+			xtype: 'container',
+			itemId: 'header',
+			cls: 'header'
+		}],
 		/** any xtypes being used by settings (in the chart) need to be put here */
 		requires: [
 			'Rally.apps.chartbuilder.EaselAlmBridge',
 			'Rally.ui.combobox.MilestoneComboBox',
-			"Rally.apps.chartbuilder.StateFieldPicker",
+			'Rally.ui.picker.StateFieldPicker',
 			'Rally.util.Help'
 		],
 		autoScroll: false,
+		projectScopeable: false,
 
-		layout: {
-			type: 'border',
-			align : 'stretch',
-			pack  : 'start'
+		initComponent: function() {
+			this.callParent(arguments);
+			this.add([
+				{
+					xtype: 'container',
+					itemId: 'mrcontainer',
+					cls: 'mrcontainer',
+					width:'100%',
+					height: this._hasHelp() ? '90%' : '99%'
+				}
+			]);
 		},
-		items: [
-			{
-				xtype: 'container',
-				itemId: 'header',
-				cls: 'header',
-				region: 'north'
-			},
-			{
-				xtype: 'container',
-				itemId: 'mrcontainer',
-				cls: 'mrcontainer',
-				region: 'center',
-				layout: 'fit'
-			}
-		],
 
-		showSettings: function() {
-			// this feels like a hack
-			this.owner.defaultSettings = this.getDefaultSettings();
-			this.owner.showSettings();
+		triggerSettingsMode: function() {
+			this.defaultSettings = this.getDefaultSettings();
+			this.fireEvent('settingsneeded', this);
 		},
 
 		getSettingsFields: function () {
@@ -72,23 +71,31 @@
 		 */
 		getChartVersionFromRequest: function() {
 			var parameters = Ext.Object.fromQueryString(this.getUrlSearchString());
-			return (parameters.chartVersion || 'releases/current');
+			return (parameters.chartVersion || '0.3.9');
 		},
 		/**
 		 * Builds an iframe in the panel, using the version from getChartVersionFromRequest
-		 * to build the path /analytics/chart/$version/almchart.min.html or
+		 * to build the path /assets/burro/queso/$version/almchart.min.html or
 		 * if isDebugMode returns true, then almchart.html
 		 */
 		constructIFrame: function() {
 			var filename = this.isDebugMode() ? 'almchart.html' : 'almchart.min.html';
 			var version = this.getChartVersionFromRequest();
-			var url = '/analytics/chart/' + version + '/' + filename + '?_gen=' + this._getCacheGeneration();
-			var ifr = '<iframe frameborder="0" style="overflow:hidden;" width="100%" height="100%" src="' + url + '"></iframe>';
+			var url = this._getQuesoUrl() + '/' + version + '/' + filename;
+			var ifr = '<iframe frameborder="0" style="overflow:hidden;" scrolling="no" width="100%" height="100%" src="' + url + '"></iframe>';
 			this.down("#mrcontainer").el.dom.innerHTML = ifr;
 		},
 
-		_chartTypeFromSlug: function(slug) {
-			return slug.substring(slug.lastIndexOf('/') + 1);
+		_getChartType: function() {
+			if(!this.getContext().isFeatureEnabled('F6971_REACT_DASHBOARD_PANELS')) {
+				return this.appContainer.slug.split('/').pop();
+			} else {
+				return this.chartType;
+			}
+		},
+
+		_getQuesoUrl: function() {
+			return window.burroUrl + '/queso';
 		},
 		/**
 		 *	Rally.util.Help is not dynamic.  But if we add a panel definition
@@ -138,14 +145,6 @@
 			});
 		},
 
-		_slugValue: function() {
-			return this.appContainer.slug;
-		},
-
-		_getCacheGeneration : function(theDate) {
-			theDate = theDate || new Date();
-			return Ext.Date.format(theDate, 'YmdH');
-		},
 		/**
 		 * Conditionally constructs the help component in the header.
 		 */
@@ -158,6 +157,7 @@
 
 		render: function () {
 			this.callParent(arguments);
+
 			this.constructIFrame();
 			// create the bridge that will be passed in (the execution context if you will) to the
 			// chart that's loaded
@@ -167,10 +167,8 @@
 			// still make use of toggles.?
 			var iframe = this.down('#mrcontainer').el.dom.firstChild;
 
-			var chartToLoad = this._chartTypeFromSlug(this.appContainer.slug);
-
 			this.almBridge = Ext.create('Rally.apps.chartbuilder.EaselAlmBridge', {
-				chartType : chartToLoad,
+				chartType : this._getChartType(),
 				app: this
 			});
 

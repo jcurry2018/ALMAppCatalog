@@ -1,0 +1,15 @@
+{
+   "name": "Milestone Burnup",
+   "className": "Rally.apps.chartbuilder.milestoneburn.MilestoneBurnApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "../EaselSettingsTransformer.js",
+      "../EaselAlmBridge.js",
+      "../ChartPanelApp.js",
+      "MilestoneBurnApp.js"
+   ],
+   "css": [
+      "../ChartPanelApp.less"
+   ]
+}

@@ -44,7 +44,7 @@
 		},
 
 		showSettings: function() {
-			this.app.showSettings();
+			this.app.triggerSettingsMode();
 		},
 
 		lbapiBaseUrl: function() {

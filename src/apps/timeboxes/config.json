@@ -1,0 +1,10 @@
+{
+   "name": "Timeboxes",
+   "className": "Rally.apps.timeboxes.TimeboxesApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "IterationVelocityA0Chart.js",
+      "TimeboxesApp.js"
+   ]
+}

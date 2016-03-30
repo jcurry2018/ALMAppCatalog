@@ -1,5 +1,13 @@
 Ext = window.Ext4 || window.Ext
-Ext.require ['Rally.data.util.PortfolioItemHelper']
+Ext.require [
+  'Ext.Array'
+  'Rally.app.Context'
+  'Rally.Message'
+  'Ext.Element'
+  'Rally.util.Ref'
+  'Rally.apps.portfoliokanban.PortfolioKanbanApp'
+  'Rally.data.util.PortfolioItemHelper'
+]
 
 describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
   helpers
@@ -214,39 +222,37 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       @_createApp().then =>
         expect(@app.gridboard.getGridOrBoard().getContext()).toBe @app.getContext()
 
-    it 'should NOT have the rowSettings field', ->
-      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], false)
-      @_createApp().then =>
-        expect(_.find(@app.getSettingsFields(), {xtype: 'rowsettingsfield'})).not.toBeDefined()
-
     it 'should have the rowSettings field', ->
-      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], true)
       @_createApp().then =>
         expect(_.find(@app.getSettingsFields(), {xtype: 'rowsettingsfield'})).toBeDefined()
 
     it 'adds the rowConfig property to the boardConfig', ->
-      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], true)
       @_createApp(
         settings:
           showRows: true
           rowsField: 'Owner'
       ).then =>
         expect(@app.gridboard.getGridOrBoard().config.rowConfig.field).toBe 'Owner'
-
-    it 'does NOT add the rowConfig property to the boardConfig', ->
-      @stubFeatureToggle(['S79575_ADD_SWIMLANES_TO_PI_KANBAN'], false)
-      @_createApp(
-        settings:
-          showRows: true
-          rowsField: 'Owner'
-      ).then =>
-        expect(@app.gridboard.getGridOrBoard().config.rowConfig).toBeNull()
-
     helpers
       getAppStore: ->
         @app.gridboard.getGridOrBoard().getColumns()[0].store
 
     describe 'field picker', ->
+      beforeEach ->
+        @field =
+          attributeDefinition:
+            AttributeType: 'BOOLEAN'
+            Constrained: false
+            Custom: false
+          isMultiValueCustom: () ->
+            false
+        @multiValueCustomField =
+          attributeDefinition:
+              AttributeType: 'BOOLEAN'
+              Constrained: false
+              Custom: false
+            isMultiValueCustom: () ->
+              true
       it 'should show', ->
         @_createApp().then =>
           expect(@app.down('#fieldpickerbtn').isVisible()).toBe true
@@ -254,6 +260,14 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       it 'should have use the legacy field setting if available', ->
         @_createApp(settings: fields: 'Field1,Field2').then =>
           expect(@app.down('rallygridboard').getGridOrBoard().columnConfig.fields).toEqual ['Field1','Field2']
+      it 'should not include multi value fields', ->
+        @_createApp(settings: fields: 'Field1,Field2').then =>
+          fieldsFn = @app.getSettingsFields()[0].isAllowedFieldFn
+          expect(fieldsFn(@field)).toBeTruthy()
+          expect(fieldsFn(@multiValueCustomField)).toBeFalsy()
+
+
+
 
   describe 'sizing', ->
     it 'should set an initial gridboard height', ->

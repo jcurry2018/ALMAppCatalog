@@ -2,6 +2,10 @@
     overflow-y: hidden;
 }
 
+.portfolio-kanban.full-page-app {
+    overflow-x: auto !important;
+}
+
 .portfolio-kanban .no-type-text {
     text-align: center;
 }

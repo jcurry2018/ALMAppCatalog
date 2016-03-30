@@ -1,0 +1,12 @@
+.users-app .subscription-seats {
+    color: #666;
+    float: right;
+    padding-left: 5px;
+    padding-top: 5px;
+}
+
+.users-app .user-workspace-picker {
+    float: left;
+    margin-right: 7px;
+    margin-top: 3px;
+}

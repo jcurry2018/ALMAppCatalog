@@ -187,6 +187,7 @@
         },
 
         _createChartConfig: function(overrides) {
+            var me = this;
             var clickChartHandler = _.isFunction(this.clickHandler) ? this.clickHandler : Ext.emptyFn;
             var height = this.height;
             var pieHeight = this.height * 0.9;
@@ -257,9 +258,11 @@
                             center: ['50%', '45%'],
                             point: {
                                 events: {
-                                    click: function(event) {
-                                        if (this.ref) {
-                                            Rally.nav.Manager.showDetail(this.ref);
+                                    click: function() {
+                                        var ref = this.ref;
+                                        if (ref) {
+                                            me.up('rallydialog').destroy();
+                                            Rally.nav.Manager.showDetail(ref);
                                         }
                                     }
                                 }

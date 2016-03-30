@@ -1,7 +1,8 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-	'Rally.apps.chartbuilder.EaselSettingsTransformer'
+	'Rally.apps.chartbuilder.EaselSettingsTransformer',
+	'Rally.data.wsapi.Filter'
 ]
 
 describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
@@ -11,7 +12,12 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 			return Ext.create 'Rally.apps.chartbuilder.EaselSettingsTransformer'
 
 	beforeEach ->
+		@filter = [
+			config: {},
+			filter: @stub()
+		]
 		@xformer = @createXformer()
+		@stub(Rally.data.wsapi.Filter, 'or').returns(@filter)
 
 	it 'properly handles an empty settings fields list', ->
 		settingsFields = []
@@ -141,6 +147,9 @@ describe 'Rally.apps.chartbuilder.EaselSettingsTransformer', ->
 			autoExpand: true
 			selectOnFocus: true
 			allowNoEntry: true
+			storeConfig:
+				remoteFilter: true
+				filters: [@filter]
 		]
 
 		converted = @xformer.transform(settingsFields)

@@ -11,8 +11,7 @@ Ext.require [
 describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   helpers
-    createApp: (config, stubStatsBannerHeight = true) ->
-      if (stubStatsBannerHeight) then @stub(Rally.apps.iterationtrackingboard.StatsBanner::, 'getHeight').returns 0
+    createApp: (config = {}, dndRankEnabled = true) ->
       now = new Date(1384305300 * 1000);
       tomorrow = Rally.util.DateTime.add(now, 'day', 1)
       nextDay = Rally.util.DateTime.add(tomorrow, 'day', 1)
@@ -33,7 +32,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
               _ref: @projectRef
             workspace:
               WorkspaceConfiguration:
-                DragDropRankingEnabled: true
+                DragDropRankingEnabled: dndRankEnabled
                 WorkDays: "Monday,Friday"
             subscription: Rally.environment.getContext().getSubscription()
         ),
@@ -48,8 +47,8 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       [
         { property: 'Iteration.Name', operator: '=', value: iteration.Name }
-        { property: "Iteration.StartDate", operator: '=', value: Rally.util.DateTime.toIsoString(iteration.StartDate) }
-        { property: "Iteration.EndDate", operator: '=', value: Rally.util.DateTime.toIsoString(iteration.EndDate) }
+        { property: "Iteration.StartDate", operator: '=', value: Rally.util.DateTime.toUtcIsoString(iteration.StartDate) }
+        { property: "Iteration.EndDate", operator: '=', value: Rally.util.DateTime.toUtcIsoString(iteration.EndDate) }
       ]
 
     stubRequests: ->
@@ -106,6 +105,14 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         header = @app.down('container[cls=header]')
         expect(header == null).toBe true
 
+  it 'sets current view on viewchange', ->
+    @createApp().then =>
+      removeSpy = @spy(@app, 'remove')
+      @app.down('#gridBoard').fireEvent 'viewchange'
+      expect(removeSpy).toHaveBeenCalledOnce()
+      expect(removeSpy).toHaveBeenCalledWith 'gridBoard'
+      expect(@app.down('#gridBoard')).toBeDefined()
+
   it 'resets view on scope change', ->
     @createApp().then =>
       removeSpy = @spy(@app, 'remove')
@@ -116,18 +123,14 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       @app.onTimeboxScopeChange newScope
 
-      expect(removeSpy).toHaveBeenCalledTwice()
-      expect(removeSpy).toHaveBeenCalledWith 'statsBanner'
+      expect(removeSpy).toHaveBeenCalledOnce()
       expect(removeSpy).toHaveBeenCalledWith 'gridBoard'
-
       expect(@app.down('#gridBoard')).toBeDefined()
-      expect(@app.down('#statsBanner')).toBeDefined()
 
   it 'fires storecurrentpagereset on scope change', ->
     @createApp().then =>
       treeGrid = Ext.create 'Ext.Component'
       downStub = @stub(@app, 'down').withArgs('rallytreegrid').returns treeGrid
-      downStub.withArgs('#statsBanner').returns(Ext.create('Ext.Component'))
 
       storeCurrentPageResetStub = @stub()
       @app.down('rallytreegrid').on 'storecurrentpagereset', storeCurrentPageResetStub
@@ -141,32 +144,13 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(storeCurrentPageResetStub).toHaveBeenCalledOnce()
 
   describe 'stats banner', ->
-    it 'should add the stats banner by default', ->
-      @createApp().then =>
-        statsBanner = @app.down '#statsBanner'
-        expect(statsBanner).not.toBeNull()
-        expect(statsBanner.getContext()).toBe @app.getContext()
+    it 'should show showStatsBanner settings field when app IS a full page app', ->
+      @createApp(isFullPageApp: true).then =>
+        expect(_.find(@app.getUserSettingsFields(), {xtype: 'rallystatsbannersettingsfield'})).toBeDefined()
 
-    it 'should not add the stats banner when the user sets it to not show', ->
-      @stub(Rally.apps.iterationtrackingboard.IterationTrackingBoardApp::, 'getSetting').withArgs('showStatsBanner').returns(false)
-      @createApp().then =>
-        expect(@app.down('#statsBanner')).toBeNull()
-
-    it 'should add the stats banner when the user sets it to show', ->
-      @stub(Rally.apps.iterationtrackingboard.IterationTrackingBoardApp::, 'getSetting').withArgs('showStatsBanner').returns(true)
-      @createApp().then =>
-        expect(@app.down('#statsBanner')).not.toBeNull()
-
-    it 'should not add the stats banner when includeStatsBanner is set to false', ->
-      @createApp(includeStatsBanner: false).then =>
-        expect(@app.down('#statsBanner')).toBeNull()
-
-    it 'should resize the grid board when stats banner is toggled', ->
-      @createApp().then =>
-        statsBanner = @app.down '#statsBanner'
-        setHeightSpy = @spy @app.down('rallygridboard'), 'setHeight'
-        statsBanner.setHeight 40
-        @waitForCallback(setHeightSpy)
+    it 'should NOT show showStatsBanner settings field when app IS NOT a full page app', ->
+      @createApp(isFullPageApp: false).then =>
+        expect(_.find(@app.getUserSettingsFields(), {xtype: 'rallystatsbannersettingsfield'})).not.toBeDefined()
 
   it 'fires contentupdated event after board load', ->
     contentUpdatedHandlerStub = @stub()
@@ -264,21 +248,34 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
             property: 'TypeDefOid'
             value: defectTypeDefOid
           ).and(Ext.create('Rally.data.wsapi.Filter',
-            property: 'Requirement.Iteration'
-            operator: '!='
-            value: null
+              property: 'TestCase'
+              operator: '='
+              value: null
+            ).and(Ext.create('Rally.data.wsapi.Filter',
+                property: 'Requirement'
+                operator: '='
+                value: null
+              ).and(Ext.create('Rally.data.wsapi.Filter', {
+                  property: 'DefectSuites.ObjectID',
+                  operator: '=',
+                  value: null
+                })))
           ).or(Ext.create('Rally.data.wsapi.Filter',
-            property: 'Requirement'
-            operator: '='
-            value: null
-          ))).or(Ext.create('Rally.data.wsapi.Filter',
             property: 'TypeDefOid'
             operator: '!='
             value: defectTypeDefOid
           ))
 
       describe 'stories', ->
-        it 'should exclude epic stories from the grid', ->
+        it 'should exclude epic stories from the grid with unscheduled timebox', ->
+          requestStub = @stubRequests()
+          iterationRecord = @mom.getRecord('iteration', values: {_ref:'/iteration/-1'})
+          @createApp(iterationRecord: iterationRecord).then =>
+            @toggleToGrid()
+            expect(requestStub).toBeWsapiRequestWith
+              filters: [@createLeafStoriesOnlyFilter()]
+
+        it 'should exclude epic stories from the grid with null timebox', ->
           requestStub = @stubRequests()
           @createApp(iterationRecord: null).then =>
             @toggleToGrid()
@@ -314,11 +311,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp().then =>
         @toggleToGrid()
         expect(@app.down('#gridBoard').getGridOrBoard().initialConfig.columnCfgs).toEqual ['Name', 'ScheduleState', 'Blocked', 'PlanEstimate', 'Tasks', 'TaskEstimateTotal', 'TaskRemainingTotal', 'Owner', 'Defects', 'Discussion']
-
-    it 'enables the summary row on the treegrid when the toggle is on', ->
-      @createApp().then =>
-        @toggleToGrid()
-        expect(@app.down('#gridBoard').getGridOrBoard().summaryColumns.length).toBe 4
 
     it 'should include test sets', ->
       @createApp().then =>
@@ -365,74 +357,10 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @toggleToGrid()
         expect(@app.getEl().dom.className).toContain 'grid-toggled'
 
-  describe "summary units", ->
-    helpers
-      createAppWithWorkspaceConfiguration: (workspaceConfig) ->
-        context = Ext.create('Rally.app.Context',
-          initialValues:
-            timebox: Ext.create 'Rally.app.TimeboxScope', record: @mom.getRecord('iteration')
-            project:
-              _ref: @projectRef
-            workspace:
-              WorkspaceConfiguration: _.defaults(WorkDays: "Monday,Friday", workspaceConfig)
-
-        )
-        @createApp({ context }).then =>
-          @toggleToGrid()
-
-      getSummaryColumns: ->
-        @app.down('rallytreegrid').summaryColumns
-
-    it "should specify the summary columns", ->
-      @createAppWithWorkspaceConfiguration(TaskUnitName: 'dogecoins').then =>
-        summaryColumns = @getSummaryColumns()
-        expect(summaryColumns.length).toBe(4)
-        expect(summaryColumns[0].field).toBe('PlanEstimate')
-        expect(summaryColumns[0].type).toBe('sum')
-        expect(summaryColumns[1].field).toBe('TaskEstimateTotal')
-        expect(summaryColumns[1].type).toBe('sum')
-        expect(summaryColumns[2].field).toBe('TaskRemainingTotal')
-        expect(summaryColumns[2].type).toBe('sum')
-        expect(summaryColumns[3].field).toBe('TaskActualTotal')
-        expect(summaryColumns[3].type).toBe('sum')
-
-    it "should use the workspace's task unit name", ->
-      @createAppWithWorkspaceConfiguration(TaskUnitName: 'dogecoins').then =>
-        summaryColumns = @getSummaryColumns()
-        expect(summaryColumns[1].units).toBe('dogecoins')
-        expect(summaryColumns[2].units).toBe('dogecoins')
-
-    it "should use the workspace's iteration estimate unit name", ->
-      workspaceConfig =
-        IterationEstimateUnitName: 'shebas'
-        ReleaseEstimateUnitName: 'kitties'
-
-      @createAppWithWorkspaceConfiguration(workspaceConfig).then =>
-        summaryColumns = @getSummaryColumns()
-        expect(summaryColumns[0].units).toBe('shebas')
-
   describe 'sizing', ->
     it 'should set an initial gridboard height', ->
       @createApp().then =>
         expect(@app.down('rallygridboard').getHeight()).toBe @app._getAvailableGridBoardHeight()
-
-    it 'should factor in header height and stats banner height when determining gridboard height', ->
-      @createApp({}, false).then =>
-        statsBanner = @app.down('#statsBanner')
-        gridBoard = @app.down('rallygridboard')
-
-        header = @app.add({
-          xtype: 'container',
-          cls: 'header',
-          height: 20
-        });
-
-        setHeightSpy = @spy gridBoard, 'setHeight'
-
-        @app.setHeight(500);
-
-        @waitForCallback(setHeightSpy).then =>
-          expect(gridBoard.getHeight()).toBe(@app.getHeight() - statsBanner.getHeight() - header.getHeight())
 
     it 'should update the grid or board height', ->
       @createApp().then =>
@@ -443,9 +371,12 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         @waitForCallback(setHeightSpy).then =>
           expect(gridBoard.getHeight()).toBe currentHeight + 10
 
-  describe 'custom filter popover', ->
-    beforeEach ->
-      @featureEnabledStub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled')
+  describe 'filtering panel plugin', ->
+    helpers
+      getPlugin: ->
+        gridBoard = @app.down 'rallygridboard'
+        _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardinlinefiltercontrol'
 
     it 'should add common storeConfig to gridboard', ->
       @createApp().then =>
@@ -453,23 +384,87 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         expect(gridBoard.storeConfig.filters.length).toBe 1
         expect(gridBoard.storeConfig.filters[0].toString()).toBe @app.getContext().getTimeboxScope().getQueryFilter().toString()
 
-    it 'should use rallygridboard custom filter control', ->
+    it 'should use rallygridboard filtering plugin', ->
+      @createApp().then =>
+        expect(@getPlugin()).toBeDefined()
+
+  describe 'shared view plugin', ->
+    it 'should use rallygridboard shared view plugin', ->
       @createApp().then =>
         gridBoard = @app.down 'rallygridboard'
         plugin = _.find gridBoard.plugins, (plugin) ->
-          plugin.ptype == 'rallygridboardcustomfiltercontrol'
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
         expect(plugin).toBeDefined()
-        expect(plugin.filterControlConfig.stateful).toBe true
-        expect(plugin.filterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-custom-filter-button')
+        expect(plugin.sharedViewConfig.stateful).toBe true
+        expect(plugin.sharedViewConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-shared-view')
+        expect(plugin.sharedViewConfig.defaultViews).toBeDefined()
 
-        expect(plugin.showOwnerFilter).toBe true
-        expect(plugin.ownerFilterControlConfig.stateful).toBe true
-        expect(plugin.ownerFilterControlConfig.stateId).toBe @app.getContext().getScopedStateId('iteration-tracking-owner-filter')
+    it 'should add correct rank field when manually ranked', ->
+      @createApp({}, false).then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        defaultViews = plugin.sharedViewConfig.defaultViews
+        expect(Ext.JSON.decode(defaultViews[0].Value, true).columns[0].dataIndex).toBe 'Rank'
 
-    it 'should include the Milestones field in the available Fields', ->
+    it 'should add correct rank field when dnd ranked', ->
       @createApp().then =>
-        filterPlugin = _.find(@app.gridboard.plugins, ptype: 'rallygridboardcustomfiltercontrol')
-        expect(_.contains(filterPlugin.filterControlConfig.whiteListFields, 'Milestones')).toBe true
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        defaultViews = plugin.sharedViewConfig.defaultViews
+        expect(Ext.JSON.decode(defaultViews[0].Value, true).columns[0].dataIndex).toBe 'DragAndDropRank'
+
+    it 'should enableUrlSharing when isFullPageApp is true', ->
+      @createApp(
+        isFullPageApp: true
+      ).then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        expect(plugin.sharedViewConfig.enableUrlSharing).toBe true
+
+    it 'should NOT enableUrlSharing when isFullPageApp is false', ->
+      @createApp(
+        isFullPageApp: false
+      ).then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        expect(plugin.sharedViewConfig.enableUrlSharing).toBe false
+
+    it 'should enableReadingUserPref when S83433_THE_PREFERENCE and DE25285_RETURN_OF_THE_PREFERENCE is true', ->
+      @stubFeatureToggle ['S83433_THE_PREFERENCE', 'DE25285_RETURN_OF_THE_PREFERENCE'], true
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        expect(plugin.sharedViewConfig.enableReadingUserPref).toBe true
+
+    it 'should NOT enableReadingUserPref when S83433_THE_PREFERENCE and DE25285_RETURN_OF_THE_PREFERENCE is false', ->
+      @stubFeatureToggle ['S83433_THE_PREFERENCE', 'DE25285_RETURN_OF_THE_PREFERENCE'], false
+      @createApp().then =>
+        gridBoard = @app.down 'rallygridboard'
+        plugin = _.find gridBoard.plugins, (plugin) ->
+          plugin.ptype == 'rallygridboardsharedviewcontrol'
+        expect(plugin.sharedViewConfig.enableReadingUserPref).toBe false
+
+  describe 'page sizes', ->
+    beforeEach ->
+      @_isIE = Ext.isIE
+
+    afterEach ->
+      Ext.isIE = @_isIE
+
+    it 'should give the correct page sizes for non-ie', ->
+      @createApp().then =>
+        Ext.isIE = false
+        expect(@app.getGridPageSizes()).toEqual [10, 25, 50, 100]
+
+    it 'should give the correct page sizes for ie', ->
+      @createApp().then =>
+        Ext.isIE = true
+        expect(@app.getGridPageSizes()).toEqual [10, 25, 50]
 
   describe 'grid configurations', ->
     it 'should create a grid store with the correct page size', ->

@@ -39,13 +39,16 @@ describe 'Rally.apps.charts.settings.StateFieldPicker', ->
           Ext.merge(args,args.requester)
           args.callback([ me.allowedValue("V1"), me.allowedValue("V2") ])
 
+      getType = ->
+        @attributeDefinition.AttributeType.toLowerCase()
+
       # I'm not convinced this is the appropriate way to do this, but it definitely works although it also
       # requires some magic (above)
       @stub Rally.data.wsapi.Model, "getFields", ->
         [
-          { name: "c_KanbanState", displayName: "Kanban State", attributeDefinition: { AttributeType: "STRING", hidden: false, ReadOnly: false, Constrained: true }, getAllowedValueStore}
-          { name: "ScheduleState", displayName: "Schedule State", attributeDefinition: { AttributeType: "STRING", hidden: false, ReadOnly: false, Constrained: true }, getAllowedValueStore}
-          { name: "TaskEstimateTotal", displayName: "Task Estimate Total", attributeDefinition: { AttributeType: "DOUBLE", hidden: false, ReadOnly: true, Constrained: false }, getAllowedValueStore}
+          { name: "c_KanbanState", displayName: "Kanban State", attributeDefinition: { AttributeType: "STRING", hidden: false, ReadOnly: false, Constrained: true }, getAllowedValueStore, getType}
+          { name: "ScheduleState", displayName: "Schedule State", attributeDefinition: { AttributeType: "STRING", hidden: false, ReadOnly: false, Constrained: true }, getAllowedValueStore, getType}
+          { name: "TaskEstimateTotal", displayName: "Task Estimate Total", attributeDefinition: { AttributeType: "DOUBLE", hidden: false, ReadOnly: true, Constrained: false }, getAllowedValueStore, getType}
         ]
 
 

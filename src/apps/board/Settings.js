@@ -102,7 +102,7 @@
                             attr.Constrained || _.contains(['quantity', 'boolean'], attr.AttributeType.toLowerCase()) ||
                             (!attr.Constrained && attr.AttributeType.toLowerCase() === 'object')) &&
                             !_.contains(['web_link', 'text', 'date'], attr.AttributeType.toLowerCase()) &&
-                            !_.contains(['PortfolioItemType'], attr.ElementName);
+                            !_.contains(['PortfolioItemType', 'LastResult'], attr.ElementName);
                     },
                     handlesEvents: {
                         typeselected: function(type, context) {

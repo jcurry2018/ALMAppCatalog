@@ -7,7 +7,7 @@ module.exports = function(grunt) {
         grunt.log.writeln('Verifying manifest for ' + appPath + '...');
         grunt.util.spawn({
             grunt: true,
-            args: ['sencha:appmanifest', '--app=' + appPath]
+            args: ['shell:appmanifest', '--app=' + appPath]
         }, function(err) {
             if (err) {
                 callback(err);
@@ -78,4 +78,3 @@ module.exports = function(grunt) {
         }
     });
 };
-

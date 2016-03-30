@@ -66,10 +66,8 @@
 
         launch: function () {
             if (this._settingsInvalid()) {
-                if (this.owner) {
-                    this.owner.showSettings();
-                    return;
-                }
+                this.fireEvent('settingsneeded', this);
+                return;
             }
             this.customScheduleStates = null;
             this.chartComponentConfig = Ext.create('Rally.apps.charts.burndown.BurnDownChart', this).defaultChartComponentConfig();

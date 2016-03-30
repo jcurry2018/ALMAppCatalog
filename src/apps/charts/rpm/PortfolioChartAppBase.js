@@ -4,6 +4,7 @@
     Ext.define("Rally.apps.charts.rpm.PortfolioChartAppBase", {
         extend: "Rally.app.App",
         settingsScope: "workspace",
+        projectScopeable: false,
 
         requires: [
             'Rally.apps.charts.rpm.ChartSettings',
@@ -125,7 +126,8 @@
 
         _loadSavedPortfolioItem: function () {
             if (!this._validateSettingsChoices()) {
-                return this.owner.showSettings();
+                this.fireEvent('settingsneeded', this);
+                return;
             }
 
             var portfolioItemRef = this.getSetting(this.PI_SETTING);
@@ -347,11 +349,11 @@
             );
 
             if (portfolioItem && portfolioItem.PlannedStartDate) {
-                plannedStartDate = this._formatDate(portfolioItem.PlannedStartDate);
+                plannedStartDate = Rally.util.DateTime.formatWithDefault(portfolioItem.PlannedStartDate, this.getContext());
             }
 
             if (portfolioItem && portfolioItem.PlannedEndDate) {
-                plannedEndDate = this._formatDate(portfolioItem.PlannedEndDate);
+                plannedEndDate = Rally.util.DateTime.formatWithDefault(portfolioItem.PlannedEndDate, this.getContext());
             }
 
             var formattedTitle = template.apply({

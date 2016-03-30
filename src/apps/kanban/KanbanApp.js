@@ -25,6 +25,7 @@
         cls: 'kanban',
         alias: 'widget.kanbanapp',
         appName: 'Kanban',
+        helpId: 238,
 
         settingsScope: 'project',
         autoScroll: false,
@@ -125,7 +126,18 @@
                 toggleState: 'board',
                 cardBoardConfig: cardboardConfig,
                 plugins: [
-                    'rallygridboardaddnew',
+                    {
+                        ptype: 'rallygridboardaddnew',
+                        addNewControlConfig: {
+                            listeners: {
+                                beforecreate: this._onBeforeCreate,
+                                beforeeditorshow: this._onBeforeEditorShow,
+                                scope: this
+                            },
+                            stateful: true,
+                            stateId: context.getScopedStateId('kanban-add-new')
+                        }
+                    },
                     {
                         ptype: 'rallygridboardcustomfiltercontrol',
                         filterChildren: true,
@@ -147,8 +159,7 @@
                         ptype: 'rallygridboardfieldpicker',
                         headerPosition: 'left',
                         boardFieldBlackList: blacklist,
-                        modelNames: modelNames,
-                        boardFieldDefaults: this.getSetting('cardFields').split(',')
+                        modelNames: modelNames
                     },
                     {
                         ptype: 'rallyboardpolicydisplayable',
@@ -160,13 +171,6 @@
                 ],
                 context: context,
                 modelNames: modelNames,
-                addNewPluginConfig: {
-                    listeners: {
-                        beforecreate: this._onBeforeCreate,
-                        beforeeditorshow: this._onBeforeEditorShow,
-                        scope: this
-                    }
-                },
                 storeConfig: {
                     filters: this._getFilters()
                 },
@@ -229,7 +233,10 @@
             var config = {
                 xtype: 'rallycardboard',
                 plugins: [
-                    {ptype: 'rallycardboardprinting', pluginId: 'print'},
+                    {
+                        ptype: 'rallycardboardprinting',
+                        pluginId: 'print'
+                    },
                     {
                         ptype: 'rallyscrollablecardboard',
                         containerEl: this.getEl()
@@ -248,7 +255,8 @@
                 },
                 columnConfig: {
                     xtype: 'rallycardboardcolumn',
-                    enableWipLimit: true
+                    enableWipLimit: true,
+                    fields: this.getSetting('cardFields').split(',')
                 },
                 cardConfig: {
                     editable: true,

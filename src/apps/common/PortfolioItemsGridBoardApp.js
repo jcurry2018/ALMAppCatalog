@@ -3,10 +3,49 @@
 
     Ext.define('Rally.apps.common.PortfolioItemsGridBoardApp', {
         extend: 'Rally.app.GridBoardApp',
+
         requires: [
+            'Rally.data.Ranker',
             'Rally.ui.cardboard.plugin.CollapsibleColumns',
-            'Rally.ui.cardboard.plugin.FixedHeader'
+            'Rally.ui.cardboard.plugin.FixedHeader',
+            'Rally.ui.gridboard.plugin.GridBoardInlineFilterControl',
+            'Rally.ui.gridboard.plugin.GridBoardSharedViewControl',
+            'Rally.ui.notify.Notifier'
         ],
+
+        constructor: function(config){
+            var defaultConfig = {
+                piTypePickerConfig: {
+                    renderInGridHeader: false
+                }
+            };
+
+            this.callParent([Ext.Object.merge(defaultConfig, config)]);
+        },
+
+        initComponent: function(){
+            this.callParent(arguments);
+            this.addCls('portfolio-items-grid-board-app');
+        },
+
+        getAddNewConfig: function () {
+            var config = {};
+            if (this.getContext().isFeatureEnabled('S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN')) {
+                config.margin = 0;
+            }
+
+            return _.merge(this.callParent(arguments), config);
+        },
+
+        addGridBoard: function(){
+            if (this.gridboard && this.piTypePicker && this.piTypePicker.rendered) {
+                var parent = this.piTypePicker.up();
+                if(parent && parent.remove){
+                    parent.remove(this.piTypePicker, false);
+                }
+            }
+            this.callParent(arguments);
+        },
 
         launch: function () {
             if (Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
@@ -31,35 +70,95 @@
             });
         },
 
-        addGridBoard: function () {
-            if (this.gridboard && this.piTypePicker && this.piTypePicker.rendered) {
-                this.piTypePicker.up().remove(this.piTypePicker, false);
+        getGridBoardCustomFilterControlConfig: function () {
+            var context = this.getContext(),
+                skinnyFilter = !!context.isFeatureEnabled('F10466_INLINE_FILTER_UI_ENHANCEMENTS');
+
+            if (context.isFeatureEnabled('S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN')) {
+                return {
+                    ptype: 'rallygridboardinlinefiltercontrol',
+                    inline: skinnyFilter,
+                    skinny: skinnyFilter,
+                    inlineFilterButtonConfig: {
+                        stateful: true,
+                        stateId: context.getScopedStateId('portfolio-items-inline-filter'),
+                        legacyStateIds: [
+                            this.getScopedStateId('owner-filter'),
+                            this.getScopedStateId('custom-filter-button')
+                        ],
+                        filterChildren: true,
+                        modelNames: this.modelNames,
+                        inlineFilterPanelConfig: {
+                            quickFilterPanelConfig: {
+                                defaultFields: [
+                                    'ArtifactSearch',
+                                    'Owner'
+                                ],
+                                addQuickFilterConfig: {
+                                    blackListFields: ['PortfolioItemType', 'ModelType'],
+                                    whiteListFields: ['Milestones', 'Tags']
+                                }
+                            },
+                            advancedFilterPanelConfig: {
+                                advancedFilterRowsConfig: {
+                                    propertyFieldConfig: {
+                                        blackListFields: ['PortfolioItemType'],
+                                        whiteListFields: ['Milestones', 'Tags']
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
             }
-            this.callParent(arguments);
-        },
 
-        getHeaderControls: function () {
-            return this.callParent(arguments).concat(this.piTypePicker);
-        },
-
-        getFilterControlConfig: function () {
             return {
                 blackListFields: ['PortfolioItemType'],
                 whiteListFields: ['Milestones']
             };
         },
 
-        getFieldPickerConfig: function () {
-            var blackListedFields = [];
-
-            if(!this.getContext().isFeatureEnabled('S74502_PI_DEPENDENCIES_ON_EDP')) {
-                blackListedFields.push('PredecessorsAndSuccessors');
+        getSharedViewConfig: function() {
+            var context = this.getContext();
+            if (context.isFeatureEnabled('S105843_UPGRADE_TO_NEWEST_FILTERING_SHARED_VIEWS_ON_PORTFOLIO_ITEMS_AND_KANBAN')) {
+                return {
+                    ptype: 'rallygridboardsharedviewcontrol',
+                    sharedViewConfig: {
+                        stateful: true,
+                        stateId: this.getContext().getScopedStateId('portfolio-items-shared-view'),
+                        defaultViews: _.map(this._getDefaultViews(), function (view) {
+                            Ext.apply(view, {
+                                Value: Ext.JSON.encode(view.Value, true)
+                            });
+                            return view;
+                        }, this),
+                        enableUrlSharing: this.isFullPageApp !== false,
+                        suppressViewNotFoundNotification: this._suppressViewNotFoundNotification
+                    },
+                    additionalFilters: [{
+                        property: 'Value',
+                        operator: 'contains',
+                        value: '"piTypePicker":"' + this.piTypePicker.getRecord().get('_refObjectUUID') + '"'
+                    }]
+                };
             }
+
+            return {};
+        },
+
+        getFieldPickerConfig: function () {
             return _.merge(this.callParent(arguments), {
-                boardFieldDefaults: (this.getSetting('fields') || '').split(','),
-                boardFieldBlackList: ['Predecessors', 'Successors'].concat(blackListedFields),
-                gridFieldBlackList: blackListedFields,
-                margin: '3 9 14 0'
+                boardFieldBlackList: ['Predecessors', 'Successors']
+            });
+        },
+
+        getGridBoardConfig: function () {
+            return _.merge(this.callParent(arguments), {
+                listeners: {
+                    viewchange: this._onViewChange,
+                    scope: this
+                },
+                sharedViewAdditionalCmps: [this.piTypePicker]
             });
         },
 
@@ -134,6 +233,40 @@
             return deferred.promise;
         },
 
+        _getDefaultViews: function() {
+            if (this.toggleState === 'grid'){
+                var rankColumnDataIndex = this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled ?
+                        Rally.data.Ranker.RANK_FIELDS.DND : Rally.data.Ranker.RANK_FIELDS.MANUAL,
+                    defaultViewName = this.piTypePicker.getRawValue() + ' Default',
+                    columns = [
+                        { dataIndex: rankColumnDataIndex},
+                        { dataIndex: 'Name'},
+                        { dataIndex: 'State'},
+                        { dataIndex: 'PercentDoneByStoryCount'},
+                        { dataIndex: 'PlannedStartDate'},
+                        { dataIndex: 'PlannedEndDate'},
+                        { dataIndex: 'Project'}
+                    ],
+                    ordinalValue = this.piTypePicker.getRecord().get('Ordinal') + 1;
+
+                if (ordinalValue === 1) {
+                    columns.push({ dataIndex: 'Release'});
+                }
+
+                return [{
+                    Name: defaultViewName,
+                    identifier: ordinalValue,
+                    Value: {
+                        toggleState: 'grid',
+                        columns: columns,
+                        sorters:[{ property: rankColumnDataIndex, direction: 'ASC'}]
+                    }
+                }];
+            }
+
+            return [];
+        },
+
         getCardBoardColumnPlugins: function (state) {
             return [];
         },
@@ -163,7 +296,8 @@
                 }, this.getCardConfig()),
                 columnConfig: {
                     xtype: 'rallycardboardcolumn',
-                    enableWipLimit: true
+                    enableWipLimit: true,
+                    fields: (this.getSetting('fields') || '').split(',')
                 },
                 columns: options.columns,
                 ddGroup: currentTypePath,
@@ -181,18 +315,18 @@
         },
 
         getGridStoreConfig: function () {
-            return { models: this.piTypePicker.getAllTypeNames() };
+            return _.merge({}, this.gridStoreConfig, { models: this.piTypePicker.getAllTypeNames() });
         },
 
         _createPITypePicker: function () {
-            if (this.piTypePicker) {
+            if (this.piTypePicker && this.piTypePicker.destroy) {
                 this.piTypePicker.destroy();
             }
-
             var deferred = new Deft.Deferred();
-
-            this.piTypePicker = Ext.create('Rally.ui.combobox.PortfolioItemTypeComboBox', {
-                preferenceName: 'portfolioitems' + this.stateName + '-typepicker',
+            var piTypePickerConfig = {
+                preferenceName: this.getStateId('typepicker'),
+                fieldLabel: '', // delete this when removing PORTFOLIO_ITEM_TREE_GRID_PAGE_OPT_IN toggle. Can't delete these from PI Combobox right now or GUI tests fail in old PI page
+                labelWidth: 0,  // delete this when removing PORTFOLIO_ITEM_TREE_GRID_PAGE_OPT_IN toggle. Can't delete these from PI Combobox right now or GUI tests fail in old PI page
                 value: this.getSetting('type'),
                 context: this.getContext(),
                 listeners: {
@@ -205,19 +339,47 @@
                     },
                     scope: this
                 }
-            });
+            };
+
+            if(!this.config.piTypePickerConfig.renderInGridHeader){
+                piTypePickerConfig.renderTo = Ext.query('#content .titlebar .dashboard-timebox-container')[0];
+            }
+
+            this.piTypePicker = Ext.create('Rally.ui.combobox.PortfolioItemTypeComboBox', piTypePickerConfig);
+
+            if(this.config.piTypePickerConfig.renderInGridHeader){
+              this.on('gridboardadded', function() {
+                var headerContainer = this.gridboard.getHeader().getLeft();
+                headerContainer.add(this.piTypePicker);
+              });
+            }
 
             return deferred.promise;
         },
 
         _onTypeChange: function (picker) {
+            Rally.ui.notify.Notifier.hide();
             var newType = picker.getSelectedType();
 
             if (this._pickerTypeChanged(picker)) {
+                this._suppressViewNotFoundNotificationWhenPiTypeChanges();
+
                 this.currentType = newType;
                 this.modelNames = [newType.get('TypePath')];
                 this.gridboard.fireEvent('modeltypeschange', this.gridboard, [newType]);
             }
+        },
+
+        _suppressViewNotFoundNotificationWhenPiTypeChanges: function() {
+            var plugin = _.find(this.gridboard.plugins, {ptype: 'rallygridboardsharedviewcontrol'});
+            if (plugin && plugin.controlCmp && plugin.controlCmp.getSharedViewParam()){
+                this._suppressViewNotFoundNotification = true;
+            }
+        },
+
+        _onViewChange: function() {
+            Rally.ui.notify.Notifier.hide();
+            this.loadGridBoard();
         },
 
         _pickerTypeChanged: function(picker){
@@ -227,6 +389,14 @@
 
         _publishContentUpdatedNoDashboardLayout: function () {
             this.fireEvent('contentupdated', { dashboardLayout: false });
+        },
+
+        onDestroy: function() {
+            this.callParent(arguments);
+            if(this.piTypePicker) {
+                this.piTypePicker.destroy();
+                delete this.piTypePicker;
+            }
         }
     });
 })();
