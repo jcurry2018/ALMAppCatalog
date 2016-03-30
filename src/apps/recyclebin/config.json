@@ -2,7 +2,7 @@
    "name": "RecycleBin",
    "className": "Rally.apps.recyclebin.RecycleBinApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "x",
+   "sdk": "2.1",
    "javascript": [
       "RecycleBinApp.js"
    ]

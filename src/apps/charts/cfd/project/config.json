@@ -2,7 +2,7 @@
    "name": "Project CFD",
    "className": "Rally.apps.charts.cfd.project.ProjectCFDApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0",
+   "sdk": "2.1",
    "javascript": [
       "../../Colors.js",
       "../../IntegrationHeaders.js",

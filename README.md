@@ -2,7 +2,7 @@
 
 A collection of extensible apps from Rally's [App Catalog](https://help.rallydev.com/app-catalog).
 
-2.0 release - [Download](https://github.com/RallyApps/app-catalog/releases/download/2.0/2.0.zip)
+2.1 release - [Download](https://github.com/RallyApps/app-catalog/releases/download/2.1/2.1.zip)
 
 ## License
 
@@ -11,11 +11,11 @@ Copyright (c) Rally Software Development Corp. 2015 Distributed under the MIT Li
 ## Contents
 
 ### SDK 2 Apps
-These apps are built using [App SDK 2.0](https://help.rallydev.com/apps/2.0/doc/).
+These apps are built using [App SDK 2.1](https://help.rallydev.com/apps/2.1/doc/).
 
 * [Blocked Work](https://help.rallydev.com/blocked-work) - [[src](src/apps/blockedwork)]
 * [Custom Board](https://help.rallydev.com/custom-board) - [[src](src/apps/board)]
-* [Custom Grid](https://help.rallydev.com/custom-grid) - [[src](src/apps/grid)]
+* [Custom List](https://help.rallydev.com/custom-grid) - [[src](src/apps/customlist)]
 * [Defect Summary Matrix](https://help.rallydev.com/defect-summary-matrix) - [[src](src/apps/defectsummarymatrix)]
 * [Iteration Planning Board](https://help.rallydev.com/iteration-planning-board) - [[src](src/apps/iterationplanningboard)]
 * [Iteration Summary](https://help.rallydev.com/iteration-summary) - [[src](src/apps/iterationsummary)]
@@ -94,6 +94,6 @@ These apps are built using [App SDK 1](https://help.rallydev.com/app-sdk) and ea
 
 The following links will be helpful when developing apps:
 
-* [Getting Started](https://help.rallydev.com/apps/2.0/doc/#!/guide/getting_started)
-* [Rally App Builder](https://help.rallydev.com/apps/2.0/doc/#!/guide/app_builder)
-* [App SDK 2.0 API Docs](https://help.rallydev.com/apps/2.0/doc/)
+* [Getting Started](https://help.rallydev.com/apps/2.1/doc/#!/guide/getting_started)
+* [Rally App Builder](https://help.rallydev.com/apps/2.1/doc/#!/guide/app_builder)
+* [App SDK 2.1 API Docs](https://help.rallydev.com/apps/2.1/doc/)

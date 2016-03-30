@@ -2,7 +2,7 @@
    "name": "Timeboxes",
    "className": "Rally.apps.timeboxes.TimeboxesApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "x",
+   "sdk": "2.1",
    "javascript": [
       "IterationVelocityA0Chart.js",
       "TimeboxesApp.js"

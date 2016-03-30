@@ -2,7 +2,7 @@
    "name": "Users",
    "className": "Rally.apps.users.UsersApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "x",
+   "sdk": "2.1",
    "javascript": [
       "SubscriptionSeats.js",
       "plugins/SubscriptionSeats.js",
