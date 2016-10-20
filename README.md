@@ -2,7 +2,7 @@
 
 A collection of extensible apps from Rally's [App Catalog](https://help.rallydev.com/app-catalog).
 
-2.1 release - [Download](https://github.com/RallyApps/app-catalog/releases/download/2.1/2.1.zip)
+2.1.1 release - [Download](https://github.com/RallyApps/app-catalog/releases/download/2.1.1/2.1.1.zip)
 
 ## License
 
