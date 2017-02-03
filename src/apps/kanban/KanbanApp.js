@@ -118,8 +118,9 @@
         _getGridboardConfig: function(cardboardConfig) {
             var context = this.getContext(),
                 modelNames = this._getDefaultTypes(),
-                blacklist = ['Successors', 'Predecessors', 'DisplayColor'];
-
+                blackListFields = ['Successors', 'Predecessors', 'DisplayColor'],
+                whiteListFields = ['Milestones', 'Tags'];
+           
             return {
                 xtype: 'rallygridboard',
                 stateful: false,
@@ -139,26 +140,39 @@
                         }
                     },
                     {
-                        ptype: 'rallygridboardcustomfiltercontrol',
-                        filterChildren: true,
-                        filterControlConfig: {
-                            blackListFields: [],
-                            whiteListFields: ['Milestones'],
-                            margin: '3 9 3 30',
+                        ptype: 'rallygridboardinlinefiltercontrol',
+                        inlineFilterButtonConfig: {
+                            stateful: true,
+                            stateId: context.getScopedStateId('kanban-inline-filter'),
                             modelNames: modelNames,
-                            stateful: true,
-                            stateId: context.getScopedStateId('kanban-custom-filter-button')
-                        },
-                        showOwnerFilter: true,
-                        ownerFilterControlConfig: {
-                            stateful: true,
-                            stateId: context.getScopedStateId('kanban-owner-filter')
+                            legacyStateIds: [
+                                context.getScopedStateId('kanban-owner-filter'),
+                                context.getScopedStateId('kanban-custom-filter-button')
+                            ],
+                            filterChildren: true,
+                            inlineFilterPanelConfig: {
+                                quickFilterPanelConfig: {
+                                    defaultFields: ['ArtifactSearch', 'Owner'],
+                                    addQuickFilterConfig: {
+                                        blackListFields: blackListFields,
+                                        whiteListFields: whiteListFields
+                                    }
+                                },
+                                advancedFilterPanelConfig: {
+                                    advancedFilterRowsConfig: {
+                                        propertyFieldConfig: {
+                                            blackListFields: blackListFields,
+                                            whiteListFields: whiteListFields
+                                        }
+                                    }
+                                }
+                            }
                         }
                     },
                     {
                         ptype: 'rallygridboardfieldpicker',
                         headerPosition: 'left',
-                        boardFieldBlackList: blacklist,
+                        boardFieldBlackList: blackListFields,
                         modelNames: modelNames
                     },
                     {
