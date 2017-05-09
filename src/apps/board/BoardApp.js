@@ -9,7 +9,7 @@
             'Rally.ui.cardboard.plugin.FixedHeader',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
-            'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
+            'Rally.ui.gridboard.plugin.GridBoardInlineFilterControl',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.data.util.Sorter',
             'Rally.apps.board.Settings',
@@ -48,6 +48,8 @@
         _getGridBoardConfig: function() {
             var context = this.getContext(),
                 modelNames = [this.getSetting('type')],
+                blackListFields = ['Successors', 'Predecessors', 'DisplayColor'],
+                whiteListFields = ['Milestones', 'Tags'],
                 config = {
                     xtype: 'rallygridboard',
                     stateful: false,
@@ -62,24 +64,39 @@
                             }
                         },
                         {
-                            ptype: 'rallygridboardcustomfiltercontrol',
-                            filterChildren: false,
-                            filterControlConfig: {
-                                margin: '3 9 3 30',
+                            ptype: 'rallygridboardinlinefiltercontrol',
+                            inlineFilterButtonConfig: {
+                                stateful: true,
+                                stateId: context.getScopedStateId('board-inline-filter'),
                                 modelNames: modelNames,
-                                stateful: true,
-                                stateId: context.getScopedStateId('board-custom-filter-button')
-                            },
-                            showOwnerFilter: true,
-                            ownerFilterControlConfig: {
-                                stateful: true,
-                                stateId: context.getScopedStateId('board-owner-filter')
+                                legacyStateIds: [
+                                    context.getScopedStateId('board-owner-filter'),
+                                    context.getScopedStateId('board-custom-filter-button')
+                                ],
+                                filterChildren: true,
+                                inlineFilterPanelConfig: {
+                                    quickFilterPanelConfig: {
+                                        defaultFields: ['ArtifactSearch', 'Owner'],
+                                        addQuickFilterConfig: {
+                                            blackListFields: blackListFields,
+                                            whiteListFields: whiteListFields
+                                        }
+                                    },
+                                    advancedFilterPanelConfig: {
+                                        advancedFilterRowsConfig: {
+                                            propertyFieldConfig: {
+                                                blackListFields: blackListFields,
+                                                whiteListFields: whiteListFields
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         },
                         {
                             ptype: 'rallygridboardfieldpicker',
                             headerPosition: 'left',
-                            boardFieldBlackList: ['Successors', 'Predecessors', 'DisplayColor'],
+                            boardFieldBlackList: blackListFields,
                             modelNames: modelNames
                         }
                     ],
@@ -149,8 +166,9 @@
         },
 
         _shouldDisableRanking: function() {
-            return this.getSetting('type').toLowerCase() === 'task' && (!this.getSetting('showRows') || this.getSetting('showRows')
-                && this.getSetting('rowsField').toLowerCase() !== 'workproduct');
+            return this.getSetting('type').toLowerCase() === 'task' && 
+                (!this.getSetting('showRows') || this.getSetting('showRows') &&
+                this.getSetting('rowsField').toLowerCase() !== 'workproduct');
         },
 
         _addBoard: function() {
